@@ -81,6 +81,7 @@ int bRemoveStatusBarLoadingText = 1;
 int bPlaySoundEndOfLoading = 1;
 int bNoDXSoundCaptureErrorPopup = 0;
 int bNoPreviewWindowAutoFocus = 1;
+int bNoLODMeshMessage = 0;
 
 char filename[MAX_PATH];
 static const char *geckwikiurl = "https://geckwiki.com/index.php/";

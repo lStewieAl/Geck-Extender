@@ -129,6 +129,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	bPlaySoundEndOfLoading = GetPrivateProfileIntA("General", "bPlaySoundEndOfLoading", 1, filename);
 	bNoDXSoundCaptureErrorPopup = GetPrivateProfileIntA("General", "bNoDXSoundCaptureErrorPopup", 0, filename); 
 	bNoPreviewWindowAutoFocus = GetPrivateProfileIntA("General", "bNoPreviewWindowAutoFocus", 1, filename);
+	bNoLODMeshMessage = GetPrivateProfileIntA("General", "bNoLODMeshMessage", 0, filename);
 
 	//	stop geck crash with bUseMultibounds = 0 in exterior cells with multibounds - credit to roy
 	WriteRelCall(0x004CA48F, (UInt32)FixMultiBounds);
@@ -316,6 +317,12 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 
 	SafeWrite32(0x00C1A543 + 4, (UInt32)EditorUI_Log2);
 	SafeWrite32(0x00C1A6DC + 1, (UInt32)EditorUI_Log2);
+
+	if (bNoLODMeshMessage) {
+		// remove the MODELS: LOD Mesh ... messages
+		XUtil::PatchMemoryNop(0x659DC8, 5);
+		XUtil::PatchMemoryNop(0x659E05, 5);
+	}
 
 	//	patch script editor messages - credit to roy
 	WriteRelJump(0x005C57E2, (UInt32)hk_EnableScriptErrorsMsgHook);
