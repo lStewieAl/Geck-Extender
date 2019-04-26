@@ -438,9 +438,33 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	SafeWrite16(0x5A1817, 0x0FEB); // jump over SetFocus(0)
 	SafeWrite16(0x5993EC, 0x0FEB);
 
-	// allow opening of NIFs outside Data\Meshes (provided they don't have non-alphanumerics in their name)
-	WriteRelCall(0x41064C, UInt32(StripFileName));
-	XUtil::PatchMemoryNop(0x410675, 3); // remove add eax, 0xC
+	// speed up responses window by defering dropdown box rendering
+	WriteRelCall(0x56CC12, UInt32(hk_sub_56B270));
+	WriteRelCall(0x56CC52, UInt32(hk_sub_56B270));
+
+	// speed up weapons window
+	WriteRelCall(0x50A046, UInt32(hk_sub_47D910));
+	WriteRelCall(0x67088D, UInt32(hk_sub_47D910));
+
+	// speed up reference batch action window 
+	WriteRelCall(0x47FBF3, UInt32(hk_sub_47D330));
+	WriteRelCall(0x48C0AF, UInt32(hk_sub_47D330));
+	WriteRelCall(0x48C128, UInt32(hk_sub_47D330));
+
+	// speed up packages window
+	SafeWrite32(0xD3B4AC, UInt32(hk_sub_49B260)); // replace the member method in TESDialoguePackageData vftable
+	WriteRelCall(0x498CB4, UInt32(hk_sub_4979F0));
+	WriteRelCall(0x499509, UInt32(hk_sub_4979F0));
+	WriteRelCall(0x49957E, UInt32(hk_sub_4979F0));
+	WriteRelCall(0x4995BC, UInt32(hk_sub_4979F0));
+	WriteRelCall(0x4995FB, UInt32(hk_sub_4979F0));
+	WriteRelCall(0x49963A, UInt32(hk_sub_4979F0));
+	WriteRelCall(0x49966C, UInt32(hk_sub_4979F0));
+	WriteRelCall(0x49A091, UInt32(hk_sub_4979F0));
+
+	// allow opening of NIFs outside Data\Meshes (doesn't work, actually still searches Data\Meshes for the file
+//	WriteRelCall(0x41064C, UInt32(StripFileName));
+//	XUtil::PatchMemoryNop(0x410675, 3); // remove add eax, 0xC - it's to strip the Data\Meshes that would be in the filename
 	
 	//	Create log window - credit to nukem
 	InitCommonControls();

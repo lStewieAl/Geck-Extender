@@ -628,6 +628,13 @@ void __fastcall hk_sub_59C950(char* thiss, void* dummyEDX, int a2, HWND hDlg) {
 //	EndUIDefer();
 }
 
+char *__fastcall hk_sub_56B270(int* thiss, void* dummyEDX, HWND hWnd) {
+	BeginUIDefer();
+	char* res = ((char*(__thiscall *)(int* something, HWND wnd))(0x56B270))(thiss, hWnd);
+	EndUIDefer();
+	return res;
+}
+
 /*
 hook to speed up Select Topic dialog
 */
@@ -637,3 +644,29 @@ void __cdecl hk_sub_595800(HWND hDlg, int a2, int a3) {
 	EndUIDefer();
 }
 
+void __cdecl hk_sub_47D910(HWND hWnd, char a2, char a3, char a4) {
+	BeginUIDefer();
+	((void(_cdecl*)(HWND hWnd, char a2, char a3, char a4))(0x47D910))(hWnd, a2, a3, a4);
+	void __cdecl sub_47D910(HWND hWnd, char a2, char a3, char a4);
+	EndUIDefer();
+}
+
+void __cdecl hk_sub_47D330(HWND hWnd, char a2, char a3) {
+	BeginUIDefer();
+	((void (__cdecl *)(HWND hWnd, char a2, char a3))(0x47D330))(hWnd, a2, a3);
+	EndUIDefer();
+}
+
+BOOL __fastcall hk_sub_49B260(int *thiss, void* dummyEDX, HWND hDlg) {
+	BeginUIDefer();
+	BOOL res = ((BOOL (__thiscall *)(int *thiss, HWND hDlg))(0x49B260))(thiss, hDlg);
+	EndUIDefer();
+	return res;
+}
+
+BOOL __fastcall hk_sub_4979F0(void *thiss, void* dummyEDX, HWND hDlg, int a3) {
+	BeginUIDefer();
+	BOOL res = ((BOOL (__thiscall *)(void *thiss, HWND hDlg, int a3))(0x4979F0))(thiss, hDlg, a3);
+	EndUIDefer();
+	return res;
+}
