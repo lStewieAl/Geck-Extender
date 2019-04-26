@@ -1,0 +1,89 @@
+Version 0.12
+
+Added cell list speed up when scrolling in worldspaces - Nukem
+Added object list speed up - Nukem
+Noped useless calls to _vsprintf and SendMessage for 'Processing topic %s' -  Roy/Nukem
+Patched Navmesh editing to allow placing vertices over existing navmesh - |StewieA|
+Added render window frame rate uncap option - Roy
+Added preview window frame rate uncap option - Roy
+Patched search and replace window to stay open unless explicitly closed - |StewieA|
+Patched zlib to use libdeflate - Nukem/|StewieA|
+Patched GetPrivateProfileString buffer to 1024 bytes - jazzisparis/Roy (sArchive list can now be longer and include TTW and or DLC)
+
+Version 0.11
+
+Refactored code a bit
+
+Version 0.10
+
+Fixed crash in compiler error handling
+
+Version 0.9
+
+Removed specific call to old bhkrigidbody cinfo warning as it's useless because all meshes have the same cinfo property
+log scroll/spell check setting now saved to ini
+fixed EditorWarnings.log
+improved plugin loading speed
+added splash and about dialog custom bitmap
+bIgnoreNAMFiles ini setting to ignore .NAM files
+bFastExit ini setting
+fixed issue with GECKCustom.ini being saved the first time when bFastExit is enabled (credit to jazzisparis)
+fixed crash with one of the message verbosity additions
+general code cleanup and optimization
+
+Version 0.8
+
+Increased frame rate in the render and preview windows (thanks to shademe)
+Windows 8.1/10 collapsed conditions fix  (thanks to nukem)
+512x512 landscape LOD diffuse and normal generation, can be enabled via ini
+ini file to control some settings (thanks to carxt)
+ESM enabled as active file (credit to hlp)
+ESP files as masters (credit to hlp)
+script editor font change now optional in ini
+re-enables 1220 Warning, Error, and General messages
+message/warning/error log window with formid double clicking to jump to (thanks to nukem)
+many messages are now more verbose
+script editor warnings re-enabled
+menu to open log, clear log, set log scrolling (thanks to nukem)
+ini setting to disable some features in version control mode
+fixed crashing with Rock-It Launcher in TTW 3 (thanks to jazzisparis)
+fixed crashing with a few messages
+menu option to enable/disable spell checker
+GECK Power UP is obsoleted by this release, do not use in conjunction with GECK Extender
+
+Version 0.7
+
+internal testing version
+
+Version 0.6
+
+Memory leak (user handles) really really fixed after update using Thread Local Storage (credit to nukem)
+Re-enabled choosing the Big Guns skill in Weapon dialog
+
+Version 0.5
+
+Fixes crashing issues in Windows 10 (thanks ousnius and luthien)
+
+Version 0.4
+
+Fixes dialogue stuck open bug that user handle memory leak fix introduced in previous version
+
+Version 0.3
+
+Fixes user handle memory leak (many thanks to nukem and jazzisparis for this crucial fix)
+Fast Exit added
+Script size limit doubled (many thanks to jazzisparis for this enhancement)
+
+Version 0.2
+
+Made script window use consolas font by default (overrides F11/F12 behavior of NVSE for now)
+Removed user handle memory leak patch until it can be made more robust
+
+Version 0.1
+
+Initial release
+Enables level 2 LOD generation for large worldspaces
+Fixes bUseMultibounds = 0 crashes in cells with multibounds, no need to ever change this setting again
+Fixes user handle memory leak: This cleans up opened windows better when closing them so you can edit for long periods without fear that you won't be able to save your plugin because the GECK can't open any new dialog windows without using the opened windows list to close them.
+Increases scriptlet window sizes
+Help links point to new community wiki

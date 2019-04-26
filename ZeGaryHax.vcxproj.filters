@@ -1,0 +1,164 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="ZeGaryHax.cpp" />
+    <ClCompile Include="nvse\GameAPI.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="nvse\GameBSExtraData.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="nvse\GameData.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="nvse\GameExtraData.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="nvse\GameForms.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="nvse\GameObjects.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="nvse\GameOSDepend.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="nvse\GameProcess.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="nvse\GameRTTI.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="nvse\GameScript.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="nvse\GameSettings.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="nvse\GameTasks.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="nvse\GameTiles.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="nvse\GameTypes.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="nvse\GameUI.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="nvse\Hooks_DirectInput8Create.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="nvse\NiNodes.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="nvse\NiObjects.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="nvse\SafeWrite.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="nvse\Utilities.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor.cpp" />
+    <ClCompile Include="xutil.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ZeGaryHax.h" />
+    <ClInclude Include="nvse\CommandTable.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="nvse\GameAPI.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="nvse\GameBSExtraData.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="nvse\GameData.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="nvse\GameEffects.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="nvse\GameExtraData.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="nvse\GameForms.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="nvse\GameMenus.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="nvse\GameObjects.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="nvse\GameOSDepend.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="nvse\GameProcess.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="nvse\GameRTTI.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="nvse\GameScript.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="nvse\GameSettings.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="nvse\GameTasks.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="nvse\GameTiles.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="nvse\GameTypes.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="nvse\GameUI.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="nvse\Hooks_DirectInput8Create.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="nvse\NiNodes.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="nvse\NiObjects.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="nvse\NiTypes.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="nvse\SafeWrite.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="nvse\Utilities.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="ZeWarningHax.h" />
+    <ClInclude Include="ZeWarningPatches.h" />
+    <ClInclude Include="ZeLogWindow.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="xutil.h" />
+    <ClInclude Include="Editor.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="exports.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="nvse">
+      <UniqueIdentifier>{79efc7aa-28af-4ae9-851d-47eb371006d1}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="bitmap1.bmp" />
+    <Image Include="GECKExtender.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ZeGaryHax.rc" />
+  </ItemGroup>
+</Project>
