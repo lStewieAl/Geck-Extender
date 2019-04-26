@@ -671,3 +671,15 @@ BOOL __fastcall hk_sub_4979F0(void *thiss, void* dummyEDX, HWND hDlg, int a3) {
 	EndUIDefer();
 	return res;
 }
+
+void __fastcall hk_sub_4E3020(int *thiss, void* dummyEDX, HWND hDlg) {
+	BeginUIDefer();
+	((void (__thiscall *)(int *thiss, HWND hDlg))(0x4E3020))(thiss, hDlg);
+	EndUIDefer();
+}
+
+void __fastcall hk_sub_4E8A20(int *thiss, void* dummyEDX, HWND hDlg) {
+	BeginUIDefer();
+	((void (__thiscall *)(int* thiss, HWND hDlg))(0x4E8A20))(thiss, hDlg);
+	EndUIDefer();
+}

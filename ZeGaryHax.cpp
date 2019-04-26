@@ -452,6 +452,13 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	// speed up weapons window
 	WriteRelCall(0x50A046, UInt32(hk_sub_47D910));
 	WriteRelCall(0x67088D, UInt32(hk_sub_47D910));
+	SafeWrite32(0xD42E38, UInt32(hk_sub_4E3020)); // BGSAmmoForm vftable
+	SafeWrite32(0xD7506C, UInt32(hk_sub_4E3020)); // TESObjectWEAP vftable
+	SafeWrite32(0xD43B28, UInt32(hk_sub_4E8A20));
+	SafeWrite32(0xD71530, UInt32(hk_sub_4E8A20));
+	SafeWrite32(0xD71A38, UInt32(hk_sub_4E8A20));
+	SafeWrite32(0xD74FD0, UInt32(hk_sub_4E8A20));
+	
 
 	// speed up reference batch action window 
 	WriteRelCall(0x47FBF3, UInt32(hk_sub_47D330));
