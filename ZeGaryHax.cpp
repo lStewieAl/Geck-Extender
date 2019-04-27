@@ -42,18 +42,11 @@ extern "C"
     }
 }
 
-void PrintCommandTable() {
-	NVSECommandTableInterface* commandInterface = (NVSECommandTableInterface*)savedNVSE->QueryInterface(kInterface_CommandTable);
-	const CommandInfo* ptr = (const CommandInfo*)commandInterface->Start;
-	EditorUI_Log("%s", ptr->longName);
-}
-
 void MessageHandler(NVSEMessagingInterface::Message* msg)
 {
 	switch(msg->type)
 	{
 	case NVSEMessagingInterface::kMessage_PostPostLoad:
-		PrintCommandTable();
 		g_msg->RegisterListener(g_pluginHandle, NULL, MessageHandler);
 		break;
 	default:	// this is hacky bullshit to log ALL messages sent by NVSE (save, load, exit, etc.) and by other plugins (none?)
@@ -71,14 +64,6 @@ _declspec(naked) void EndLoadingHook() {
 		pop esi
 		retn
 	}
-}
-
-const char* StripFileName(char* src, const char* ignore) {
-	EditorUI_Log("%s", src);
-	char* result = strrchr(src, '\\');
-	if (result) result += 1; // add 1 to not include the '\' character, but not if the result was null
-	EditorUI_Log("%s", result);
-	return result;
 }
 
 bool NVSEPlugin_Query(const NVSEInterface * nvse, PluginInfo * info)
@@ -130,6 +115,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	bNoDXSoundCaptureErrorPopup = GetPrivateProfileIntA("General", "bNoDXSoundCaptureErrorPopup", 0, filename); 
 	bNoPreviewWindowAutoFocus = GetPrivateProfileIntA("General", "bNoPreviewWindowAutoFocus", 1, filename);
 	bNoLODMeshMessage = GetPrivateProfileIntA("General", "bNoLODMeshMessage", 0, filename);
+	bSwapRenderCYKeys = GetPrivateProfileIntA("General", "bSwapRenderCYKeys", 0, filename);
 
 	//	stop geck crash with bUseMultibounds = 0 in exterior cells with multibounds - credit to roy
 	WriteRelCall(0x004CA48F, (UInt32)FixMultiBounds);
@@ -459,7 +445,6 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	WriteRelCall(0x48C128, UInt32(hk_sub_47D330));
 
 	// speed up packages window
-	
 	WriteRelCall(0x498CB4, UInt32(hk_sub_4979F0));
 	WriteRelCall(0x499509, UInt32(hk_sub_4979F0));
 	WriteRelCall(0x49957E, UInt32(hk_sub_4979F0));
@@ -467,13 +452,24 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	WriteRelCall(0x4995FB, UInt32(hk_sub_4979F0));
 	WriteRelCall(0x49963A, UInt32(hk_sub_4979F0));
 	WriteRelCall(0x49966C, UInt32(hk_sub_4979F0));
-	WriteRelCall(0x49A091, UInt32(hk_sub_4979F0));
-	
+	WriteRelCall(0x49A091, UInt32(hk_sub_4979F0));	
 
-	// allow opening of NIFs outside Data\Meshes (doesn't work, actually still searches Data\Meshes for the file
-//	WriteRelCall(0x41064C, UInt32(StripFileName));
-//	XUtil::PatchMemoryNop(0x410675, 3); // remove add eax, 0xC - it's to strip the Data\Meshes that would be in the filename
-	
+	// hook Load ESP/ESM window callback
+	SafeWrite32(0x44192A, UInt32(hk_LoadESPESMCallback));
+
+	if (bSwapRenderCYKeys) {
+		// set C as hotkey for restricting movement to Y direction
+		SafeWrite8(0x462D8B, 0x6); // (patch a switch table offset)
+		SafeWrite8(0x462F5B, 0xF); // (patch a switch table offset)
+
+		// remove Y as hotkey for Y movement
+		SafeWrite8(0x462F71, 0x17);
+		SafeWrite8(0x462DA1, 0x8);
+
+		// allow Y as a hotkey in render window preferences
+		SafeWrite8(0x4136C1, 'Z');
+	}
+
 	//	Create log window - credit to nukem
 	InitCommonControls();
 	LoadLibraryA("MSFTEDIT.dll");
@@ -488,3 +484,46 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 
 	return true;
 }
+
+static int konamiStage = 0;
+void doKonami(int key) {
+	switch (konamiStage) {
+	case 0:
+		(key == VK_UP) ? konamiStage++ : konamiStage = 0;
+		break;
+	case 1:
+		(key == VK_UP) ? konamiStage++ : konamiStage = 0;
+		break;
+	case 2:
+		if (key == VK_DOWN) konamiStage++;
+		else if (key != VK_UP) konamiStage = 0;
+		break;
+	case 3:
+		(key == VK_DOWN) ? konamiStage++ : konamiStage = 0;
+		break;
+	case 4:
+		(key == VK_LEFT) ? konamiStage++ : konamiStage = 0;
+		break;
+	case 5:
+		(key == VK_RIGHT) ? konamiStage++ : konamiStage = 0;
+		break;
+	case 6:
+		(key == VK_LEFT) ? konamiStage++ : konamiStage = 0;
+		break;
+	case 7:
+		(key == VK_RIGHT) ? konamiStage++ : konamiStage = 0;
+		break;
+	case 8:
+		(key == 'B') ? konamiStage++ : konamiStage = 0;
+		break;
+	case 9:
+		if (key == 'A') {
+			EditorUI_Log("Konami!");
+		}
+		konamiStage = 0;
+		break;
+	}
+	/* handles the case where up is pressed in the middle of the sequence */
+	if (konamiStage == 0 && key == VK_UP) konamiStage++;
+}
+	

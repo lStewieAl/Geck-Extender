@@ -450,8 +450,8 @@ LRESULT CALLBACK EditorUI_LogWndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPA
 	}
 	return 0;
 
-	}
-	return DefWindowProc(Hwnd, Message, wParam, lParam);
+  }
+  return DefWindowProc(Hwnd, Message, wParam, lParam);
 }
 
 bool EditorUI_CreateLogWindow()

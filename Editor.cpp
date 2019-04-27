@@ -67,7 +67,6 @@ void EndUIDefer()
 				_asm {int 3}
 			}
 //			Assert(hdc);
-
 			for (auto& pair : g_DeferredMenuItems)
 			{
 				auto& display = pair.first;
@@ -185,67 +184,4 @@ void InsertListViewItem(HWND ListViewHandle, void* Parameter, bool UseImage, int
 	}
 
 	ListView_InsertItem(ListViewHandle, &item);
-}
-
-void PatchTemplatedFormIterator()
-{
-	//
-	// Add a callback that sets a global variable indicating UI dropdown menu entries can be
-	// deferred to prevent redrawing/resorting after every new item insert, reducing dialog
-	// initialization time.
-	//
-	// The _templated_ function is designed to iterate over all FORMs of a specific type - this
-	// requires hooking 100-200 separate functions in the EXE as a result. False positives are
-	// a non-issue as long as ctor/dtor calls are balanced.
-	//
-	const char* patternStr = "\xE8\x00\x00\x00\x00\x48\x89\x44\x24\x30\x48\x8B\x44\x24\x30\x48\x89\x44\x24\x38\x48\x8B\x54\x24\x38\x48\x8D\x4C\x24\x28";
-	const char* maskStr = "x????xxxxxxxxxxxxxxxxxxxxxxxxx";
-
-	UInt32 g_CodeBase = 0x401000;
-	UInt32 g_CodeEnd = 0xD22500;
-
-	for (uintptr_t i = g_CodeBase; i < g_CodeEnd;)
-	{
-		uintptr_t addr = XUtil::FindPattern(i, g_CodeEnd - i, (byte*)patternStr, maskStr);
-
-		if (!addr)
-			break;
-
-		i = addr + 1;
-
-		// Make sure the next call points to sub_14102CBEF or it's a nop from ExperimentalPatchEditAndContinue
-		addr += strlen(maskStr) + 11;
-		uintptr_t destination = addr + *(int*)(addr + 1) + 5;
-
-//		if (destination != 0x14102CBEF && *(byte*)addr != 0x0F)
-//			continue;
-
-		// Now look for the matching destructor call
-		uintptr_t end = 0;
-
-		for (int j = 0; j < 2; j++)
-		{
-			const char* endPattern;
-			const char* endMask = "x????xxx????x";
-
-			if (j == 0)
-				endPattern = "\xE8\x00\x00\x00\x00\x48\x81\xC4\x00\x00\x00\x00\xC3";// sub_140FF81CE
-			else
-				endPattern = "\x0F\x00\x00\x00\x00\x48\x81\xC4\x00\x00\x00\x00\xC3";// nopped version
-
-			end = XUtil::FindPattern(addr, std::min<uintptr_t>(g_CodeEnd - addr, 1000), (byte*)endPattern, endMask);
-
-			if (end)
-				break;
-		}
-
-		if (!end)
-			continue;
-
-		// Blacklisted (000000014148C1FF): The "Use Info" dialog which has more than one list view and causes problems
-		// Blacklisted (000000014169DFAD): Adding a new faction to an NPC has more than one list view
-
-		WriteRelCall(addr, UInt32(BeginUIDefer));
-		WriteRelCall(end, UInt32(EndUIDefer));
-	}
 }

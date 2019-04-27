@@ -82,6 +82,7 @@ int bPlaySoundEndOfLoading = 1;
 int bNoDXSoundCaptureErrorPopup = 0;
 int bNoPreviewWindowAutoFocus = 1;
 int bNoLODMeshMessage = 0;
+int bSwapRenderCYKeys = 0;
 
 char filename[MAX_PATH];
 static const char *geckwikiurl = "https://geckwiki.com/index.php/";
@@ -682,4 +683,19 @@ void __fastcall hk_sub_4E8A20(int *thiss, void* dummyEDX, HWND hDlg) {
 	BeginUIDefer();
 	((void (__thiscall *)(int* thiss, HWND hDlg))(0x4E8A20))(thiss, hDlg);
 	EndUIDefer();
+}
+
+void doKonami(int);
+
+/* small konami easter egg */
+BOOL __stdcall hk_LoadESPESMCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
+	if (msg == WM_NOTIFY) {
+		LPNMHDR notification = (LPNMHDR)lParam;
+		if (notification->code == LVN_KEYDOWN) {
+			LPNMLVKEYDOWN pnkd = (LPNMLVKEYDOWN)lParam;
+			doKonami(pnkd->wVKey);
+		}
+	}
+
+	return ((BOOL(__stdcall *)(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam))(0x432A80))(hDlg, msg, wParam, lParam);
 }
