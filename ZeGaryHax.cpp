@@ -443,12 +443,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	// fix arrow keys in dialogue menu making the window become unfocussed, allowing consecutive arrow presses without having to click again
 	SafeWrite16(0x5A1817, 0x0FEB); // jump over SetFocus(0)
 	SafeWrite16(0x5993EC, 0x0FEB);
-	XUtil::PatchMemoryNop(0x57FD62, 7);
-	XUtil::PatchMemoryNop(0x57FC11, 8);
-	XUtil::PatchMemoryNop(0x57FD90, 7);
-	XUtil::PatchMemoryNop(0x5A1966, 7);
-	XUtil::PatchMemoryNop(0x5906F4, 8);
-
+	
 	// speed up responses window by defering dropdown box rendering
 	WriteRelCall(0x56CC12, UInt32(hk_sub_56B270));
 	WriteRelCall(0x56CC52, UInt32(hk_sub_56B270));
