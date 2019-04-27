@@ -421,6 +421,19 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	WriteRelCall(0x59A728, UInt32(hk_sub_59C950));
 	WriteRelCall(0x5A1952, UInt32(hk_sub_59C950));
 
+	WriteRelCall(0x57E673, UInt32(hk_sub_595410));
+	WriteRelCall(0x57E69A, UInt32(hk_sub_595410));
+	WriteRelCall(0x57E6C1, UInt32(hk_sub_595410));
+	WriteRelCall(0x57E6E8, UInt32(hk_sub_595410));
+	WriteRelCall(0x57E70F, UInt32(hk_sub_595410));
+	WriteRelCall(0x57E75D, UInt32(hk_sub_595410));
+	WriteRelCall(0x57E736, UInt32(hk_sub_595410));
+
+	WriteRelCall(0x59CC55, UInt32(hk_sub_47F7A0));
+	WriteRelCall(0x59CC70, UInt32(hk_sub_47F7A0));
+	WriteRelCall(0x59CC8B, UInt32(hk_sub_47F7A0));
+
+			
 	/* speed up select dialog topic */
 	WriteRelCall(0x597312, UInt32(hk_sub_595800));
 	WriteRelCall(0x597504, UInt32(hk_sub_595800));
@@ -430,6 +443,11 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	// fix arrow keys in dialogue menu making the window become unfocussed, allowing consecutive arrow presses without having to click again
 	SafeWrite16(0x5A1817, 0x0FEB); // jump over SetFocus(0)
 	SafeWrite16(0x5993EC, 0x0FEB);
+	XUtil::PatchMemoryNop(0x57FD62, 7);
+	XUtil::PatchMemoryNop(0x57FC11, 8);
+	XUtil::PatchMemoryNop(0x57FD90, 7);
+	XUtil::PatchMemoryNop(0x5A1966, 7);
+	XUtil::PatchMemoryNop(0x5906F4, 8);
 
 	// speed up responses window by defering dropdown box rendering
 	WriteRelCall(0x56CC12, UInt32(hk_sub_56B270));

@@ -630,6 +630,13 @@ void __fastcall hk_sub_59C950(char* thiss, void* dummyEDX, int a2, HWND hDlg) {
 //	EndUIDefer();
 }
 
+int *__cdecl hk_sub_595410(HWND hDlg, int a2, char a3) {
+	BeginUIDefer();
+	int* res = ((int* (__cdecl *)(HWND hDlg, int a2, char a3))(0x595410))(hDlg, a2, a3);
+	EndUIDefer();
+	return res;
+}
+
 char *__fastcall hk_sub_56B270(int* thiss, void* dummyEDX, HWND hWnd) {
 	BeginUIDefer();
 	char* res = ((char*(__thiscall *)(int* something, HWND wnd))(0x56B270))(thiss, hWnd);
@@ -698,4 +705,10 @@ BOOL __stdcall hk_LoadESPESMCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM 
 	}
 
 	return ((BOOL(__stdcall *)(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam))(0x432A80))(hDlg, msg, wParam, lParam);
+}
+
+void __cdecl hk_sub_47F7A0(HWND hWnd, char a2, char a3, char a4, int a5, int a6) {
+	BeginUIDefer();
+	((void (__cdecl *)(HWND, char, char, char, int, int))(0x47F7A0))(hWnd, a2, a3, a4, a5, a6);
+	EndUIDefer();
 }
