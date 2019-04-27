@@ -452,13 +452,6 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	// speed up weapons window
 	WriteRelCall(0x50A046, UInt32(hk_sub_47D910));
 	WriteRelCall(0x67088D, UInt32(hk_sub_47D910));
-	SafeWrite32(0xD42E38, UInt32(hk_sub_4E3020)); // BGSAmmoForm vftable
-	SafeWrite32(0xD7506C, UInt32(hk_sub_4E3020)); // TESObjectWEAP vftable
-	SafeWrite32(0xD43B28, UInt32(hk_sub_4E8A20));
-	SafeWrite32(0xD71530, UInt32(hk_sub_4E8A20));
-	SafeWrite32(0xD71A38, UInt32(hk_sub_4E8A20));
-	SafeWrite32(0xD74FD0, UInt32(hk_sub_4E8A20));
-	
 
 	// speed up reference batch action window 
 	WriteRelCall(0x47FBF3, UInt32(hk_sub_47D330));
@@ -466,7 +459,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	WriteRelCall(0x48C128, UInt32(hk_sub_47D330));
 
 	// speed up packages window
-	SafeWrite32(0xD3B4AC, UInt32(hk_sub_49B260)); // replace the member method in TESDialoguePackageData vftable
+	
 	WriteRelCall(0x498CB4, UInt32(hk_sub_4979F0));
 	WriteRelCall(0x499509, UInt32(hk_sub_4979F0));
 	WriteRelCall(0x49957E, UInt32(hk_sub_4979F0));
@@ -475,6 +468,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	WriteRelCall(0x49963A, UInt32(hk_sub_4979F0));
 	WriteRelCall(0x49966C, UInt32(hk_sub_4979F0));
 	WriteRelCall(0x49A091, UInt32(hk_sub_4979F0));
+	
 
 	// allow opening of NIFs outside Data\Meshes (doesn't work, actually still searches Data\Meshes for the file
 //	WriteRelCall(0x41064C, UInt32(StripFileName));
