@@ -690,4 +690,6 @@ BOOL __stdcall hk_SearchAndReplaceCallback(HWND hDlg, UINT msg, WPARAM wParam, L
 	return ((BOOL(__stdcall *)(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam))(0x47C990))(hDlg, msg, wParam, lParam);
 }
 
+//6017A0 multiple combo boxes
+
 void __fastcall FastExitHook(volatile LONG** thiss);

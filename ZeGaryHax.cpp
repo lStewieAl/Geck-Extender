@@ -434,7 +434,6 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	WriteRelCall(0x59CC70, UInt32(hk_sub_47F7A0));
 	WriteRelCall(0x59CC8B, UInt32(hk_sub_47F7A0));
 
-			
 	/* speed up select dialog topic */
 	WriteRelCall(0x597312, UInt32(hk_sub_595800));
 	WriteRelCall(0x597504, UInt32(hk_sub_595800));
@@ -482,7 +481,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	WriteRelCall(0x4995FB, UInt32(hk_sub_4979F0));
 	WriteRelCall(0x49963A, UInt32(hk_sub_4979F0));
 	WriteRelCall(0x49966C, UInt32(hk_sub_4979F0));
-	WriteRelCall(0x49A091, UInt32(hk_sub_4979F0));	
+	WriteRelCall(0x49D1CA, UInt32(hk_sub_47F7A0));
 
 	// hook Load ESP/ESM window callback
 	SafeWrite32(0x44192A, UInt32(hk_LoadESPESMCallback));
@@ -578,3 +577,25 @@ void __fastcall FastExitHook(volatile LONG** thiss)
 	if (GetINIExists() && bFastExit) TerminateProcess(GetCurrentProcess(), 0);
 	((void(__thiscall *)(volatile LONG **thiss))(0x4CC540))(thiss);
 }
+
+/* TODO 
+Creature + Leveled creature/character windows
+NPC
+GameEffects->BaseEffect
+Items->Ammo
+Items->LeveledItem
+Items->Weapon
+SpecialEffects->Explosion
+WorldObjects->Container
+
+Dirty editors:
+ActorData->Race
+Audio->Media Location
+Audio->Media Set
+Items->ArmorAddon
+Items->Weapon
+
+MultiCombo Boxes
+0x6017A0
+0x49A091
+*/
