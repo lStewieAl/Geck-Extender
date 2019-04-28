@@ -502,6 +502,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	return true;
 }
 
+
 static int konamiStage = 0;
 void doKonami(int key) {
 	switch (konamiStage) {
@@ -546,11 +547,18 @@ void doKonami(int key) {
 	
 void SaveLogWindowPosition() {
 	char buffer[8];
-	LPRECT pos;
-	GetWindowRect(g_ConsoleHwnd, pos);
+	RECT pos;
+	GetWindowRect(g_ConsoleHwnd, &pos);
 
-	WritePrivateProfileString("Log", "iWindowPosX", _itoa(pos->left, buffer, 2), filename);
-	WritePrivateProfileString("Log", "iWindowPosY", _itoa(pos->top, buffer, 2), filename);
-	WritePrivateProfileString("Log", "iWindowPosDX", _itoa(pos->right, buffer, 2), filename);
-	WritePrivateProfileString("Log", "iWindowPosDY", _itoa(pos->bottom, buffer, 2), filename);
+	WritePrivateProfileString("Log", "iWindowPosX", _itoa(pos.left, buffer, 10), filename);
+	WritePrivateProfileString("Log", "iWindowPosY", _itoa(pos.top, buffer, 10), filename);
+	WritePrivateProfileString("Log", "iWindowPosDX", _itoa(pos.right-pos.left, buffer, 10), filename);
+	WritePrivateProfileString("Log", "iWindowPosDY", _itoa(pos.bottom-pos.top, buffer, 10), filename);
+}
+
+void __fastcall FastExitHook(volatile LONG** thiss)
+{
+	SaveLogWindowPosition();
+	if (GetINIExists() && bFastExit) TerminateProcess(GetCurrentProcess(), 0);
+	((void(__thiscall *)(volatile LONG **thiss))(0x4CC540))(thiss);
 }

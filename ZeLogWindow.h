@@ -300,12 +300,6 @@ LRESULT CALLBACK EditorUI_LogWndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPA
 		if (!richEditHwnd)
 			return -1;
 
-		// Set default position
-//		int winW = g_INI.GetInteger("CreationKit_Log", "Width", info->cx);
-//		int winH = g_INI.GetInteger("CreationKit_Log", "Height", info->cy);
-
-//		MoveWindow(Hwnd, info->x, info->y, winW, winH, FALSE);
-
 		// Set a better font
 		CHARFORMAT2W format;
 		memset(&format, 0, sizeof(format));
@@ -464,8 +458,6 @@ LRESULT CALLBACK EditorUI_LogWndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPA
 
 bool EditorUI_CreateLogWindow()
 {
-	const uint32_t width = 1024;
-	const uint32_t height = 768;
 	HINSTANCE instance = (HINSTANCE)GetModuleHandle(nullptr);
 
 	WNDCLASSEX wc;
@@ -484,7 +476,13 @@ bool EditorUI_CreateLogWindow()
 	if (!RegisterClassEx(&wc))
 		return false;
 
-	g_ConsoleHwnd = CreateWindowExA(0, "RTEDITLOG", "Message Log", WS_OVERLAPPEDWINDOW, 64, 64, width, height, nullptr, nullptr, instance, nullptr);
+	// get previous stored position
+	int posX = GetPrivateProfileIntA("Log", "iWindowPosX", 64, filename);
+	int posY = GetPrivateProfileIntA("Log", "iWindowPosY", 64, filename);
+	int width = GetPrivateProfileIntA("Log", "iWindowPosDX", 1024, filename);
+	int height = GetPrivateProfileIntA("Log", "iWindowPosDY", 768, filename);
+
+	g_ConsoleHwnd = CreateWindowExA(0, "RTEDITLOG", "Message Log", WS_OVERLAPPEDWINDOW, posX, posY, width, height, nullptr, nullptr, instance, nullptr);
 
 	if (!g_ConsoleHwnd)
 		return false;

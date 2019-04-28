@@ -190,13 +190,6 @@ bool GetINIExists()
 	return (attr != INVALID_FILE_ATTRIBUTES) && !(attr & FILE_ATTRIBUTE_DIRECTORY);
 }
 
-void __fastcall FastExitHook(volatile LONG** thiss)
-{
-	if (GetINIExists() && bFastExit) TerminateProcess(GetCurrentProcess(), 0);
-	
-	((void(__thiscall *)(volatile LONG **thiss))(0x4CC540))(thiss);
-}
-
 //	patch splash screen - credit to roy and nukem
 static __declspec(naked) void hk_SplashScreen()
 {
@@ -696,3 +689,5 @@ void __cdecl hk_sub_47F7A0(HWND hWnd, char a2, char a3, char a4, int a5, int a6)
 BOOL __stdcall hk_SearchAndReplaceCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
 	return ((BOOL(__stdcall *)(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam))(0x47C990))(hDlg, msg, wParam, lParam);
 }
+
+void __fastcall FastExitHook(volatile LONG** thiss);
