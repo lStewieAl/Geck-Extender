@@ -116,6 +116,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	bNoPreviewWindowAutoFocus = GetPrivateProfileIntA("General", "bNoPreviewWindowAutoFocus", 1, filename);
 	bNoLODMeshMessage = GetPrivateProfileIntA("General", "bNoLODMeshMessage", 0, filename);
 	bSwapRenderCYKeys = GetPrivateProfileIntA("General", "bSwapRenderCYKeys", 0, filename);
+	bShowLoadFilesAtStartup = GetPrivateProfileIntA("General", "bShowLoadFilesAtStartup", 0, filename);
 
 	//	stop geck crash with bUseMultibounds = 0 in exterior cells with multibounds - credit to roy
 	WriteRelCall(0x004CA48F, (UInt32)FixMultiBounds);
@@ -470,6 +471,9 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	// hook Load ESP/ESM window callback
 	SafeWrite32(0x44192A, UInt32(hk_LoadESPESMCallback));
 
+	// hook search and replace window callback
+//	SafeWrite32(0x441180, UInt32(hk_SearchAndReplaceCallback));
+
 	if (bSwapRenderCYKeys) {
 		// set C as hotkey for restricting movement to Y direction
 		SafeWrite8(0x462D8B, 0x6); // (patch a switch table offset)
@@ -540,3 +544,13 @@ void doKonami(int key) {
 	if (konamiStage == 0 && key == VK_UP) konamiStage++;
 }
 	
+void SaveLogWindowPosition() {
+	char buffer[8];
+	LPRECT pos;
+	GetWindowRect(g_ConsoleHwnd, pos);
+
+	WritePrivateProfileString("Log", "iWindowPosX", _itoa(pos->left, buffer, 2), filename);
+	WritePrivateProfileString("Log", "iWindowPosY", _itoa(pos->top, buffer, 2), filename);
+	WritePrivateProfileString("Log", "iWindowPosDX", _itoa(pos->right, buffer, 2), filename);
+	WritePrivateProfileString("Log", "iWindowPosDY", _itoa(pos->bottom, buffer, 2), filename);
+}

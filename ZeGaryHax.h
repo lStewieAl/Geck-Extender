@@ -83,6 +83,7 @@ int bNoDXSoundCaptureErrorPopup = 0;
 int bNoPreviewWindowAutoFocus = 1;
 int bNoLODMeshMessage = 0;
 int bSwapRenderCYKeys = 0;
+int bShowLoadFilesAtStartup = 0;
 
 char filename[MAX_PATH];
 static const char *geckwikiurl = "https://geckwiki.com/index.php/";
@@ -189,27 +190,11 @@ bool GetINIExists()
 	return (attr != INVALID_FILE_ATTRIBUTES) && !(attr & FILE_ATTRIBUTE_DIRECTORY);
 }
 
-__declspec(naked) void FastExitHook()
+void __fastcall FastExitHook(volatile LONG** thiss)
 {
-	static const UInt32 retnAddr = 0x004CC540;
-
-	__asm
-	{
-		call	GetINIExists
-		test	al, al
-		jnz		GGary
-	Gaarrry:
-		mov		ecx, edi
-		jmp		retnAddr
-	GGary:
-		mov		eax, bFastExit
-		test	eax, eax
-		jz		Gaarrry
-		push	0
-		call	GetCurrentProcess
-		push	eax
-		call	TerminateProcess
-	}
+	if (GetINIExists() && bFastExit) TerminateProcess(GetCurrentProcess(), 0);
+	
+	((void(__thiscall *)(volatile LONG **thiss))(0x4CC540))(thiss);
 }
 
 //	patch splash screen - credit to roy and nukem
@@ -696,14 +681,9 @@ void doKonami(int);
 
 /* small konami easter egg */
 BOOL __stdcall hk_LoadESPESMCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
-	if (msg == WM_NOTIFY) {
-		LPNMHDR notification = (LPNMHDR)lParam;
-		if (notification->code == LVN_KEYDOWN) {
-			LPNMLVKEYDOWN pnkd = (LPNMLVKEYDOWN)lParam;
-			doKonami(pnkd->wVKey);
-		}
+	if (msg == WM_NOTIFY && ((LPNMHDR)lParam)->code == LVN_KEYDOWN) {
+		doKonami(((LPNMLVKEYDOWN)lParam)->wVKey);
 	}
-
 	return ((BOOL(__stdcall *)(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam))(0x432A80))(hDlg, msg, wParam, lParam);
 }
 
@@ -711,4 +691,8 @@ void __cdecl hk_sub_47F7A0(HWND hWnd, char a2, char a3, char a4, int a5, int a6)
 	BeginUIDefer();
 	((void (__cdecl *)(HWND, char, char, char, int, int))(0x47F7A0))(hWnd, a2, a3, a4, a5, a6);
 	EndUIDefer();
+}
+
+BOOL __stdcall hk_SearchAndReplaceCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
+	return ((BOOL(__stdcall *)(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam))(0x47C990))(hDlg, msg, wParam, lParam);
 }

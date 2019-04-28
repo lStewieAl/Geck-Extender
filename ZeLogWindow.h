@@ -133,6 +133,12 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_PREVIEW, FALSE, &menuInfo);
 				PostMessageA(g_ConsoleHwnd, UI_EXTMENU_PREVIEW, (WPARAM)true, 0);
 			}
+
+			if (!bShowLoadFilesAtStartup == 0) {
+				// open esm/esp selection window at startup
+				PostMessageA(g_MainHwnd, WM_COMMAND, 0x9CD1, 0);
+			}
+
 		}
 	}
 	else if (Message == WM_COMMAND)
