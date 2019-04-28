@@ -453,6 +453,22 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	WriteRelCall(0x50A046, UInt32(hk_sub_47D910));
 	WriteRelCall(0x67088D, UInt32(hk_sub_47D910));
 
+	// speed up weapon 'mods' window
+	WriteRelCall(0x602157, UInt32(hk_sub_47F7A0));
+	WriteRelCall(0x602401, UInt32(hk_sub_47F7A0));
+	WriteRelCall(0x602451, UInt32(hk_sub_47F7A0));
+	WriteRelCall(0x60247B, UInt32(hk_sub_47F7A0));
+	WriteRelCall(0x6029AE, UInt32(hk_sub_47F7A0));
+	WriteRelCall(0x6029D8, UInt32(hk_sub_47F7A0));
+	WriteRelCall(0x602A02, UInt32(hk_sub_47F7A0));
+	WriteRelCall(0x602A2C, UInt32(hk_sub_47F7A0));
+	WriteRelCall(0x602A56, UInt32(hk_sub_47F7A0));
+	WriteRelCall(0x602A80, UInt32(hk_sub_47F7A0));
+	WriteRelCall(0x602AD4, UInt32(hk_sub_47F7A0));
+	WriteRelCall(0x602AFE, UInt32(hk_sub_47F7A0));
+	WriteRelCall(0x602B28, UInt32(hk_sub_47F7A0));
+	WriteRelCall(0x602AAA, UInt32(hk_sub_47F7A0));
+
 	// speed up reference batch action window 
 	WriteRelCall(0x47FBF3, UInt32(hk_sub_47D330));
 	WriteRelCall(0x48C0AF, UInt32(hk_sub_47D330));
