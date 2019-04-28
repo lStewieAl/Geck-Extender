@@ -63,10 +63,7 @@ void EndUIDefer()
 			HDC hdc = GetDC(control);
 			int boxWidth = 0;
 
-			if (!hdc) {
-				_asm {int 3}
-			}
-//			Assert(hdc);
+			Assert(hdc);
 			for (auto& pair : g_DeferredMenuItems)
 			{
 				auto& display = pair.first;
@@ -112,10 +109,7 @@ void InsertComboBoxItem(HWND ComboBoxHandle, const char* DisplayText, void* Valu
 
 	if (g_UseDeferredDialogInsert)
 	{
-		if (!(!g_DeferredComboBox || g_DeferredComboBox == ComboBoxHandle)) {
-			_asm {int 3}
-		}
-		//		AssertMsg(!g_DeferredComboBox || (g_DeferredComboBox == ComboBoxHandle), "Got handles to different combo boxes? Reset probably wasn't called.");
+		AssertMsg(!g_DeferredComboBox || (g_DeferredComboBox == ComboBoxHandle), "Got handles to different combo boxes? Reset probably wasn't called.");
 
 		g_DeferredComboBox = ComboBoxHandle;
 		g_DeferredStringLength += strlen(DisplayText) + 1;
@@ -172,10 +166,7 @@ void InsertListViewItem(HWND ListViewHandle, void* Parameter, bool UseImage, int
 
 	if (g_UseDeferredDialogInsert)
 	{
-		//		AssertMsg(!g_DeferredListView || (g_DeferredListView == ListViewHandle), "Got handles to different list views? Reset probably wasn't called.");
-		if (!(!g_DeferredListView || g_DeferredListView == ListViewHandle)) {
-			_asm {int 3}
-		}
+		AssertMsg(!g_DeferredListView || (g_DeferredListView == ListViewHandle), "Got handles to different list views? Reset probably wasn't called.");
 		if (!g_DeferredListView)
 		{
 			g_DeferredListView = ListViewHandle;
