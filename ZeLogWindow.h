@@ -136,7 +136,9 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 
 			if (!bShowLoadFilesAtStartup == 0) {
 				// open esm/esp selection window at startup
-				PostMessageA(g_MainHwnd, WM_COMMAND, 0x9CD1, 0);
+				if (*(BYTE*)(0xECFE16) != 1) { // is not NIF mode
+					PostMessageA(g_MainHwnd, WM_COMMAND, 0x9CD1, 0);
+				}
 			}
 
 		}
