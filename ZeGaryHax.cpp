@@ -488,12 +488,16 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 
 	// make flycam mouse rotation grid smaller (1*1 instead of 2*2)
 	// the game was checking if the difference in mouse position was > 1 rather than >= 1
+	
 	SafeWrite8(0x45D3AD, 0x7C);
 	SafeWrite8(0x45D3BD, 0x7F);
 	SafeWrite8(0x45D3D9, 0x7C);
 	SafeWrite8(0x45D3EA, 0x7F);
 	SafeWrite8(0x45D3AC, 0xEC); // decrease speed to compensate for increased sensitivity
 
+	// make holding shift slow down the flycam movement by 80%
+	WriteRelJump(0x455D12, UInt32(FlycamSpeedMultiplierHook));
+	
 	// hook search and replace window callback
 //	SafeWrite32(0x441180, UInt32(hk_SearchAndReplaceCallback));
 

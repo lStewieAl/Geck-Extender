@@ -690,6 +690,22 @@ BOOL __stdcall hk_SearchAndReplaceCallback(HWND hDlg, UINT msg, WPARAM wParam, L
 	return ((BOOL(__stdcall *)(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam))(0x47C990))(hDlg, msg, wParam, lParam);
 }
 
-//6017A0 multiple combo boxes
+// hooks before movement speed is determined for flycam mode
+_declspec(naked) void FlycamSpeedMultiplierHook() {
+	static const UInt32 retnAddr = 0x455D17;
+
+	if (GetAsyncKeyState(VK_SHIFT) < 0) {
+		*(float*)(0xED12C0) = 2.0F; // movement speed multiplier
+	}
+	else {
+		*(float*)(0xED12C0) = 10.0F;
+	}
+	
+	_asm {
+	originalCode:
+		mov     eax, dword ptr ds:[0xF1FBF4]
+		jmp retnAddr
+	}
+}
 
 void __fastcall FastExitHook(volatile LONG** thiss);
