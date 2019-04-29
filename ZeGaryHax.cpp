@@ -493,10 +493,10 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	SafeWrite8(0x45D3BD, 0x7F);
 	SafeWrite8(0x45D3D9, 0x7C);
 	SafeWrite8(0x45D3EA, 0x7F);
-	SafeWrite8(0x45D3AC, 0xEC); // decrease speed to compensate for increased sensitivity
 
 	// make holding shift slow down the flycam movement by 80%
-	WriteRelJump(0x455D12, UInt32(FlycamSpeedMultiplierHook));
+	WriteRelJump(0x455D12, UInt32(FlycamMovementSpeedMultiplierHook));
+	WriteRelJump(0x45D3A3, UInt32(FlycamRotationSpeedMultiplierHook));
 	
 	// hook search and replace window callback
 //	SafeWrite32(0x441180, UInt32(hk_SearchAndReplaceCallback));

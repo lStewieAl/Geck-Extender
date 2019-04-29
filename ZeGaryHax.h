@@ -691,7 +691,7 @@ BOOL __stdcall hk_SearchAndReplaceCallback(HWND hDlg, UINT msg, WPARAM wParam, L
 }
 
 // hooks before movement speed is determined for flycam mode
-_declspec(naked) void FlycamSpeedMultiplierHook() {
+_declspec(naked) void FlycamMovementSpeedMultiplierHook() {
 	static const UInt32 retnAddr = 0x455D17;
 
 	if (GetAsyncKeyState(VK_SHIFT) < 0) {
@@ -707,5 +707,31 @@ _declspec(naked) void FlycamSpeedMultiplierHook() {
 		jmp retnAddr
 	}
 }
+
+// edi       : difference in x pos, 
+// esp+0x324 : difference in y pos
+// Hook to make flycam rotation speed based on x/y position difference rather than 1.0 for any difference
+_declspec(naked) void FlycamRotationSpeedMultiplierHook() {
+	static const UInt32 retnAddr = 0x45D3F8;
+	static const float rotationSpeedMultiplier = -0.1;
+	_asm {
+		mov dword ptr ds : [0x00ED140C], ebx
+		
+		push edi
+		fild dword ptr ss : [esp]
+		add esp, 4
+		
+		fmul rotationSpeedMultiplier
+		fstp dword ptr ss : [esp + 0xF0]
+
+		fild dword ptr ss : [esp+0x324]
+		fmul rotationSpeedMultiplier
+		fstp dword ptr ss : [esp + 0x18]
+		jmp retnAddr
+	}
+}
+
+
+
 
 void __fastcall FastExitHook(volatile LONG** thiss);
