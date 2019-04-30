@@ -117,8 +117,8 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	bNoLODMeshMessage = GetPrivateProfileIntA("General", "bNoLODMeshMessage", 0, filename);
 	bSwapRenderCYKeys = GetPrivateProfileIntA("General", "bSwapRenderCYKeys", 0, filename);
 	bShowLoadFilesAtStartup = GetPrivateProfileIntA("General", "bShowLoadFilesAtStartup", 0, filename);
-	bSmoothFlycamRotation = GetPrivateProfileIntA("General", "bSmoothFlycamRotation", 1, filename);
 
+	bSmoothFlycamRotation = GetPrivateProfileIntA("Flycam", "bSmoothRotation", 1, filename);
 	fFlycamRotationSpeed = GetPrivateProfileIntA("Flycam", "iRotationSpeedPct", 100, filename) * - 0.001F;
 	fFlycamNormalMovementSpeed = GetPrivateProfileIntA("Flycam", "iMovementSpeed", 10, filename) * 1.0F;
 	fFlycamModifiedMovementSpeed = GetPrivateProfileIntA("Flycam", "iModifierMovementSpeed", 2, filename) * 1.0F;
@@ -512,8 +512,8 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		SafeWrite8(0x462F5B, 0xF); // (patch a switch table offset)
 
 		// remove Y as hotkey for Y movement
-		SafeWrite8(0x462F71, 0x17);
 		SafeWrite8(0x462DA1, 0x8);
+		SafeWrite8(0x462F71, 0x17);
 
 		// allow Y as a hotkey in render window preferences
 		SafeWrite8(0x4136C1, 'Z');
