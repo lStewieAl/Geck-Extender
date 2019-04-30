@@ -117,6 +117,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	bNoLODMeshMessage = GetPrivateProfileIntA("General", "bNoLODMeshMessage", 0, filename);
 	bSwapRenderCYKeys = GetPrivateProfileIntA("General", "bSwapRenderCYKeys", 0, filename);
 	bShowLoadFilesAtStartup = GetPrivateProfileIntA("General", "bShowLoadFilesAtStartup", 0, filename);
+	bSmoothFlycamRotation = GetPrivateProfileIntA("General", "bSmoothFlycamRotation", 1, filename);
 
 	fFlycamRotationSpeed = GetPrivateProfileIntA("Flycam", "iRotationSpeedPct", 100, filename) * - 0.001F;
 	fFlycamNormalMovementSpeed = GetPrivateProfileIntA("Flycam", "iMovementSpeed", 10, filename) * 1.0F;
@@ -499,7 +500,11 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 
 	// make holding shift slow down the flycam movement by 80%
 	WriteRelJump(0x455D12, UInt32(FlycamMovementSpeedMultiplierHook));
-	WriteRelJump(0x45D3A3, UInt32(FlycamRotationSpeedMultiplierHook));
+
+	if (bSmoothFlycamRotation) {
+		WriteRelJump(0x45D3A3, UInt32(FlycamRotationSpeedMultiplierHook));
+		WriteRelJump(0x456A9F, 0x456AE6); // skip call to SetCursorPos when changing to flycam mode
+	}
 
 	if (bSwapRenderCYKeys) {
 		// set C as hotkey for restricting movement to Y direction
