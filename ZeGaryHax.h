@@ -84,6 +84,9 @@ int bNoPreviewWindowAutoFocus = 1;
 int bNoLODMeshMessage = 0;
 int bSwapRenderCYKeys = 0;
 int bShowLoadFilesAtStartup = 0;
+float fFlycamRotationSpeed;
+float fFlycamNormalMovementSpeed;
+float fFlycamModifiedMovementSpeed;
 
 char filename[MAX_PATH];
 static const char *geckwikiurl = "https://geckwiki.com/index.php/";
@@ -695,10 +698,10 @@ _declspec(naked) void FlycamMovementSpeedMultiplierHook() {
 	static const UInt32 retnAddr = 0x455D17;
 
 	if (GetAsyncKeyState(VK_SHIFT) < 0) {
-		*(float*)(0xED12C0) = 2.0F; // movement speed multiplier
+		*(float*)(0xED12C0) = fFlycamModifiedMovementSpeed;
 	}
 	else {
-		*(float*)(0xED12C0) = 10.0F;
+		*(float*)(0xED12C0) = fFlycamNormalMovementSpeed;
 	}
 	
 	_asm {
@@ -713,7 +716,6 @@ _declspec(naked) void FlycamMovementSpeedMultiplierHook() {
 // Hook to make flycam rotation speed based on x/y position difference rather than 1.0 for any difference
 _declspec(naked) void FlycamRotationSpeedMultiplierHook() {
 	static const UInt32 retnAddr = 0x45D3F8;
-	static const float rotationSpeedMultiplier = -0.1;
 	_asm {
 		mov dword ptr ds : [0x00ED140C], ebx
 		
@@ -721,17 +723,14 @@ _declspec(naked) void FlycamRotationSpeedMultiplierHook() {
 		fild dword ptr ss : [esp]
 		add esp, 4
 		
-		fmul rotationSpeedMultiplier
+		fmul fFlycamRotationSpeed
 		fstp dword ptr ss : [esp + 0xF0]
 
 		fild dword ptr ss : [esp+0x324]
-		fmul rotationSpeedMultiplier
+		fmul fFlycamRotationSpeed
 		fstp dword ptr ss : [esp + 0x18]
 		jmp retnAddr
 	}
 }
-
-
-
 
 void __fastcall FastExitHook(volatile LONG** thiss);

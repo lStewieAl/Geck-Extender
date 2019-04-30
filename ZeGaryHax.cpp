@@ -118,6 +118,10 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	bSwapRenderCYKeys = GetPrivateProfileIntA("General", "bSwapRenderCYKeys", 0, filename);
 	bShowLoadFilesAtStartup = GetPrivateProfileIntA("General", "bShowLoadFilesAtStartup", 0, filename);
 
+	fFlycamRotationSpeed = GetPrivateProfileIntA("Flycam", "iRotationSpeedPct", 100, filename) * - 0.001F;
+	fFlycamNormalMovementSpeed = GetPrivateProfileIntA("Flycam", "iMovementSpeed", 10, filename) * 1.0F;
+	fFlycamModifiedMovementSpeed = GetPrivateProfileIntA("Flycam", "iModifierMovementSpeed", 2, filename) * 1.0F;
+	
 	//	stop geck crash with bUseMultibounds = 0 in exterior cells with multibounds - credit to roy
 	WriteRelCall(0x004CA48F, (UInt32)FixMultiBounds);
 	XUtil::PatchMemoryNop(0x004CA494, 0x05);
@@ -488,7 +492,6 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 
 	// make flycam mouse rotation grid smaller (1*1 instead of 2*2)
 	// the game was checking if the difference in mouse position was > 1 rather than >= 1
-	
 	SafeWrite8(0x45D3AD, 0x7C);
 	SafeWrite8(0x45D3BD, 0x7F);
 	SafeWrite8(0x45D3D9, 0x7C);
@@ -497,9 +500,6 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	// make holding shift slow down the flycam movement by 80%
 	WriteRelJump(0x455D12, UInt32(FlycamMovementSpeedMultiplierHook));
 	WriteRelJump(0x45D3A3, UInt32(FlycamRotationSpeedMultiplierHook));
-	
-	// hook search and replace window callback
-//	SafeWrite32(0x441180, UInt32(hk_SearchAndReplaceCallback));
 
 	if (bSwapRenderCYKeys) {
 		// set C as hotkey for restricting movement to Y direction
