@@ -103,13 +103,13 @@ static const char *geckwikifunctionsurl = "https://geckwiki.com/index.php/Catego
 static HANDLE	fontHandle;
 static LOGFONT	fontInfo;
 
-static const LOGFONT kConsolas9 =
+static LOGFONT editorFont =
 {
 	13,			// lfHeight
 	0,			// lfWidth
 	0,			// lfEscapement
 	0,			// lfOrientation
-	500,		// lfWeight
+	FW_MEDIUM,		// lfWeight
 	0,			// lfItalic
 	0,			// lfUnderline
 	0,			// lfStrikeOut
@@ -125,11 +125,15 @@ static void DoModScriptWindow(HWND wnd)
 {
 	SendMessage(wnd, EM_EXLIMITTEXT, 0, 0x00FFFFFF);
 
+	GetPrivateProfileStringA("Script", "Font", "Consolas", editorFont.lfFaceName, 31, filename);
+	editorFont.lfHeight = GetPrivateProfileIntA("Script", "FontSize", 13, filename);
+	editorFont.lfWeight = GetPrivateProfileIntA("Script", "FontWeight", FW_MEDIUM, filename);
+
 	// try something nice, otherwise fall back on SYSTEM_FIXED_FONT
-	fontHandle = CreateFontIndirect(&kConsolas9);
+	fontHandle = CreateFontIndirect(&editorFont);
 	if (fontHandle)
 	{
-		fontInfo = kConsolas9;
+		fontInfo = editorFont;
 	}
 	else
 	{
