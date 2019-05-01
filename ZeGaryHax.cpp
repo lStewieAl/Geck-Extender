@@ -66,6 +66,7 @@ _declspec(naked) void EndLoadingHook() {
 	}
 }
 
+
 bool NVSEPlugin_Query(const NVSEInterface * nvse, PluginInfo * info)
 {
 	if(!nvse->isEditor)
@@ -374,6 +375,12 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	WriteRelJump(0x0047CE7F, (UINT32)hk_SearchDestroyHook);
 	SafeWrite8(0x0047CE84, 0x90);
 
+	// Make the "Do" button of "Reference Batch Action" not grayed out if an action is already selected when initialising the dialog
+	WriteRelJump(0x411CCF, UInt32(ReferenceBatchActionDoButtonHook));
+
+	// Remove call to SetFocus(0) when closing Reference Batch Action dialog
+	XUtil::PatchMemoryNop(0x411CFA, 8);
+
 	//	Replace zlib with libinflate - credit to nukem/StewieA
 	WriteRelCall(0x004DFB34, (UInt32)hk_inflateInit);
 	WriteRelCall(0x004DFB9E, (UInt32)hk_inflate);
@@ -487,6 +494,9 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	WriteRelCall(0x49963A, UInt32(hk_sub_4979F0));
 	WriteRelCall(0x49966C, UInt32(hk_sub_4979F0));
 	WriteRelCall(0x49D1CA, UInt32(hk_sub_47F7A0));
+
+	// speed up object palette
+	WriteRelCall(0x40CF05, UInt32(hk_sub_47E0D0));
 
 	// hook Load ESP/ESM window callback
 	SafeWrite32(0x44192A, UInt32(hk_LoadESPESMCallback));

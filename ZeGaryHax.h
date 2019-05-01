@@ -691,6 +691,12 @@ void __cdecl hk_sub_47F7A0(HWND hWnd, char a2, char a3, char a4, int a5, int a6)
 	EndUIDefer();
 }
 
+void __cdecl hk_sub_47E0D0(HWND hWnd, char a2, int a3, char a4) {
+	BeginUIDefer();
+	((void(__cdecl*)(HWND hWnd, char a2, int a3, char a4))(0x47E0D0))(hWnd, a2, a3, a4);
+	EndUIDefer();
+}
+
 BOOL __stdcall hk_SearchAndReplaceCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
 	return ((BOOL(__stdcall *)(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam))(0x47C990))(hDlg, msg, wParam, lParam);
 }
@@ -731,6 +737,16 @@ _declspec(naked) void FlycamRotationSpeedMultiplierHook() {
 		fild dword ptr ss : [esp+0x324]
 		fmul fFlycamRotationSpeed
 		fstp dword ptr ss : [esp + 0x18]
+		jmp retnAddr
+	}
+}
+
+_declspec(naked) void ReferenceBatchActionDoButtonHook() {
+	static const UInt32 retnAddr = 0x411CD4;
+	_asm {
+		push dword ptr ds : [0xECED38] // replaces a 'push 0' with the selected action
+		push 1
+		push esi
 		jmp retnAddr
 	}
 }
