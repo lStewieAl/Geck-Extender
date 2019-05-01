@@ -412,18 +412,24 @@ __declspec(naked) void hk_UnableToFindLeveledObjectMsgHook()
 	}
 }
 
+void DoScriptErrorWarning(char* errorMsg) {
+	EditorUI_Log2(errorMsg);
+	if (bScriptCompileWarningPopup) {
+		MessageBoxExA(NULL, errorMsg, "Script Compile Error", MB_ICONWARNING, NULL);
+	}
+}
+
 __declspec(naked) void hk_EnableScriptErrorsMsgHook()
 {
-	static const UInt32 kEditorLog = (UInt32)EditorUI_Log2;
 	static const UInt32 kRetnAddr = 0x005C57E7;
-
 	__asm
 	{
 		pushad
+
 		push	eax
-		mov		eax, kEditorLog
-		call	eax
+		call	DoScriptErrorWarning
 		add		esp, 4
+		
 		popad
 		mov		dword ptr ss:[esp + 0x0120], 0xFFFFFFFF
 		jmp		kRetnAddr

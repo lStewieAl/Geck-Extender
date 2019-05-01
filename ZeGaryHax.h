@@ -84,8 +84,9 @@ int bNoPreviewWindowAutoFocus = 1;
 int bNoLODMeshMessage = 0;
 int bSwapRenderCYKeys = 0;
 int bShowLoadFilesAtStartup = 0;
-int bSmoothFlycamRotation = 1;
+int bScriptCompileWarningPopup = 0;
 
+int bSmoothFlycamRotation = 1;
 float fFlycamRotationSpeed;
 float fFlycamNormalMovementSpeed;
 float fFlycamModifiedMovementSpeed;
