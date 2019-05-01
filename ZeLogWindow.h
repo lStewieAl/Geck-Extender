@@ -275,7 +275,7 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 	{
 		//	Continue normal execution but with a custom string
 		char customTitle[1024];
-		sprintf_s(customTitle, "%s -= GECK Extender Rev. 0.13 =-", (const char *)lParam);
+		sprintf_s(customTitle, "%s -= GECK Extender Rev. 0.14 =-", (const char *)lParam);
 
 		return CallWindowProc(OldEditorUI_WndProc, Hwnd, Message, wParam, (LPARAM)customTitle);
 	}
@@ -311,9 +311,9 @@ LRESULT CALLBACK EditorUI_LogWndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPA
 		int pointSize = GetPrivateProfileIntA("Log", "FontSize", 10, filename) * 20;
 		format.yHeight = pointSize;
 
-		char fontNameBuf[20];
-		GetPrivateProfileStringA("Log", "Font", "Consolas", fontNameBuf, 20, filename);
-		mbstowcs(format.szFaceName, fontNameBuf, 20);
+		char fontNameBuf[32];
+		GetPrivateProfileStringA("Log", "Font", "Consolas", fontNameBuf, 31, filename);
+		mbstowcs(format.szFaceName, fontNameBuf, 31);
 
 		format.wWeight = (WORD)GetPrivateProfileIntA("Log", "FontWeight", FW_MEDIUM, filename);
         SendMessageA(richEditHwnd, EM_SETCHARFORMAT, SCF_ALL, (LPARAM)&format);
