@@ -756,4 +756,11 @@ _declspec(naked) void ReferenceBatchActionDoButtonHook() {
 	}
 }
 
+BOOL __cdecl ScriptEditCallback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+	if (msg == WM_COMMAND) {
+		//EditorUI_Log("Received command. wParam: %d, lParam: %d", wParam, lParam);
+	}
+	return ((BOOL(__cdecl*)(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam))(0x5C3D40))(hWnd, msg, wParam, lParam);
+}
+
 void __fastcall FastExitHook(volatile LONG** thiss);

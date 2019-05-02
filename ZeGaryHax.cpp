@@ -532,6 +532,13 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		SafeWrite8(0x4136C1, 'Z');
 	}
 
+	/* Hook the Script Editor Window */
+
+	SafeWrite32(0x437892, UInt32(ScriptEditCallback));
+	SafeWrite32(0x441CB0, UInt32(ScriptEditCallback));
+	SafeWrite32(0x509F6B, UInt32(ScriptEditCallback));
+	SafeWrite32(0x5C50C8, UInt32(ScriptEditCallback));
+
 	//	Create log window - credit to nukem
 	InitCommonControls();
 	LoadLibraryA("MSFTEDIT.dll");
