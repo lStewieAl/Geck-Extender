@@ -66,7 +66,6 @@ _declspec(naked) void EndLoadingHook() {
 	}
 }
 
-
 bool NVSEPlugin_Query(const NVSEInterface * nvse, PluginInfo * info)
 {
 	if(!nvse->isEditor)
@@ -119,12 +118,12 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	bSwapRenderCYKeys = GetPrivateProfileIntA("General", "bSwapRenderCYKeys", 0, filename);
 	bShowLoadFilesAtStartup = GetPrivateProfileIntA("General", "bShowLoadFilesAtStartup", 0, filename);
 	bScriptCompileWarningPopup = GetPrivateProfileIntA("General", "bScriptCompileWarningPopup", 0, filename);
-
+	
 	bSmoothFlycamRotation = GetPrivateProfileIntA("Flycam", "bSmoothRotation", 1, filename);
 	fFlycamRotationSpeed = GetPrivateProfileIntA("Flycam", "iRotationSpeedPct", 100, filename) * - 0.001F;
 	fFlycamNormalMovementSpeed = GetPrivateProfileIntA("Flycam", "iMovementSpeed", 10, filename) * 1.0F;
 	fFlycamModifiedMovementSpeed = GetPrivateProfileIntA("Flycam", "iModifierMovementSpeed", 2, filename) * 1.0F;
-	
+
 	//	stop geck crash with bUseMultibounds = 0 in exterior cells with multibounds - credit to roy
 	WriteRelCall(0x004CA48F, (UInt32)FixMultiBounds);
 	XUtil::PatchMemoryNop(0x004CA494, 0x05);
@@ -413,6 +412,9 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		XUtil::PatchMemoryNop(0x4DCC24, 5);
 		XUtil::PatchMemoryNop(0x4DC96F, 5);
 		XUtil::PatchMemoryNop(0x4DDD4F, 5);
+
+		// make the cell loading bar only update every 128 references instead of every ref
+		SafeWriteBuf(0x4BFFA2, "\xF7\xC3\x7F\x00\x00\x00\x74\x3C\xEB\x68", 10);
 	}
 
 	if (bPlaySoundEndOfLoading) {
@@ -501,7 +503,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 
 	// hook Load ESP/ESM window callback
 	SafeWrite32(0x44192A, UInt32(hk_LoadESPESMCallback));
-
+	
 	// make flycam mouse rotation grid smaller (1*1 instead of 2*2)
 	// the game was checking if the difference in mouse position was > 1 rather than >= 1
 	SafeWrite8(0x45D3AD, 0x7C);
@@ -516,7 +518,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		WriteRelJump(0x45D3A3, UInt32(FlycamRotationSpeedMultiplierHook));
 		WriteRelJump(0x456A9F, 0x456AE6); // skip call to SetCursorPos when changing to flycam mode
 	}
-
+	
 	if (bSwapRenderCYKeys) {
 		// set C as hotkey for restricting movement to Y direction
 		SafeWrite8(0x462D8B, 0x6); // (patch a switch table offset)
