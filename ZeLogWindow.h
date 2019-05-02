@@ -13,6 +13,7 @@
 #define UI_EXTMENU_SPELLCHECK	51006
 #define UI_EXTMENU_RENDER		51007
 #define UI_EXTMENU_PREVIEW		51008
+#define UI_EXTMENU_LAUNCHGAME   51009
 
 HWND g_MainHwnd;
 HWND g_ConsoleHwnd;
@@ -98,6 +99,8 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 			g_MainHwnd = Hwnd;
 			EditorUI_CreateExtensionMenu(Hwnd, createInfo->hMenu);
 
+			InsertMenu(createInfo->hMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_LAUNCHGAME, "Launch Game");
+
 			MENUITEMINFO menuInfo;
 			menuInfo.cbSize = sizeof(MENUITEMINFO);
 			menuInfo.fMask = MIIM_STATE;
@@ -140,7 +143,6 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 					PostMessageA(g_MainHwnd, WM_COMMAND, 0x9CD1, 0);
 				}
 			}
-
 		}
 	}
 	else if (Message == WM_COMMAND)
@@ -267,6 +269,19 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 					char buffer[8];
 					WritePrivateProfileString("General", "bPreviewWindowUncap" , _itoa(bPreviewWindowUncap,buffer,2), filename);
 				}
+			}
+
+			case UI_EXTMENU_LAUNCHGAME:
+			{
+				char falloutNVPath[MAX_PATH];
+				strcpy(falloutNVPath, (const char*)0xECFE30); // current dir from command line args
+				strcat(falloutNVPath, "\\");
+
+				char nvExeName[MAX_PATH];
+				GetPrivateProfileStringA("New Vegas", "ExecutableName", "FalloutNV.exe", nvExeName, MAX_PATH, filename);			
+				strcat(falloutNVPath, nvExeName);
+
+				ShellExecuteA(0, 0, falloutNVPath, 0, 0, 1);
 			}
 			return 0;
 		}
