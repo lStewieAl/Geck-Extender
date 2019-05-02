@@ -31,6 +31,10 @@
 
 const NVSEInterface* savedNVSE = NULL;
 
+BOOL __stdcall ScriptEditCallback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+	return ((BOOL(__stdcall*)(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam))(0x5C3D40))(hWnd, msg, wParam, lParam);
+}
+
 extern "C"
 {
 	  BOOL WINAPI DllMain(HANDLE  hDllHandle, DWORD dwReason, LPVOID lpreserved)
@@ -301,81 +305,12 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	WriteRelJump(0x5C497E, UInt32(RecompileAllWarningScriptHook));
 	WriteRelJump(0x4442C7, UInt32(RecompileAllWarningMainHook));
 
-	/* speed up the dialogue views - credit to Nukem */
-	WriteRelJump(0x419BC0, UInt32(InsertComboBoxItem));
-	WriteRelJump(0x41A020, UInt32(InsertListViewItem));
-	WriteRelJump(0x592EAE, UInt32(DialogueListViewBeginUI));
-	WriteRelJump(0x592FB2, UInt32(DialogueListViewEndUI));
-
-	WriteRelCall(0x59CCB3, UInt32(hk_sub_59C7B0)); // combo box item, required to fix multiple insertions tripping the assertion 
-	WriteRelCall(0x409C08, UInt32(hk_sub_59C950));
-	WriteRelCall(0x59957B, UInt32(hk_sub_59C950));
-	WriteRelCall(0x59A728, UInt32(hk_sub_59C950));
-	WriteRelCall(0x5A1952, UInt32(hk_sub_59C950));
-
-	WriteRelCall(0x57E673, UInt32(hk_sub_595410));
-	WriteRelCall(0x57E69A, UInt32(hk_sub_595410));
-	WriteRelCall(0x57E6C1, UInt32(hk_sub_595410));
-	WriteRelCall(0x57E6E8, UInt32(hk_sub_595410));
-	WriteRelCall(0x57E70F, UInt32(hk_sub_595410));
-	WriteRelCall(0x57E75D, UInt32(hk_sub_595410));
-	WriteRelCall(0x57E736, UInt32(hk_sub_595410));
-
-	WriteRelCall(0x59CC55, UInt32(hk_sub_47F7A0));
-	WriteRelCall(0x59CC70, UInt32(hk_sub_47F7A0));
-	WriteRelCall(0x59CC8B, UInt32(hk_sub_47F7A0));
-
-	/* speed up select dialog topic */
-	WriteRelCall(0x597312, UInt32(hk_sub_595800));
-	WriteRelCall(0x597504, UInt32(hk_sub_595800));
-	WriteRelCall(0x59770E, UInt32(hk_sub_595800));
-	WriteRelCall(0x5979EF, UInt32(hk_sub_595800));
-
 	// fix arrow keys in dialogue menu making the window become unfocussed, allowing consecutive arrow presses without having to click again
 	SafeWrite16(0x5A1817, 0x0FEB); // jump over SetFocus(0)
 	SafeWrite16(0x5993EC, 0x0FEB);
-	
-	// speed up responses window by defering dropdown box rendering
-	WriteRelCall(0x56CC12, UInt32(hk_sub_56B270));
-	WriteRelCall(0x56CC52, UInt32(hk_sub_56B270));
 
-	// speed up weapons window
-	WriteRelCall(0x50A046, UInt32(hk_sub_47D910));
-	WriteRelCall(0x67088D, UInt32(hk_sub_47D910));
-
-	// speed up weapon 'mods' window
-	WriteRelCall(0x602157, UInt32(hk_sub_47F7A0));
-	WriteRelCall(0x602401, UInt32(hk_sub_47F7A0));
-	WriteRelCall(0x602451, UInt32(hk_sub_47F7A0));
-	WriteRelCall(0x60247B, UInt32(hk_sub_47F7A0));
-	WriteRelCall(0x6029AE, UInt32(hk_sub_47F7A0));
-	WriteRelCall(0x6029D8, UInt32(hk_sub_47F7A0));
-	WriteRelCall(0x602A02, UInt32(hk_sub_47F7A0));
-	WriteRelCall(0x602A2C, UInt32(hk_sub_47F7A0));
-	WriteRelCall(0x602A56, UInt32(hk_sub_47F7A0));
-	WriteRelCall(0x602A80, UInt32(hk_sub_47F7A0));
-	WriteRelCall(0x602AD4, UInt32(hk_sub_47F7A0));
-	WriteRelCall(0x602AFE, UInt32(hk_sub_47F7A0));
-	WriteRelCall(0x602B28, UInt32(hk_sub_47F7A0));
-	WriteRelCall(0x602AAA, UInt32(hk_sub_47F7A0));
-
-	// speed up reference batch action window 
-	WriteRelCall(0x47FBF3, UInt32(hk_sub_47D330));
-	WriteRelCall(0x48C0AF, UInt32(hk_sub_47D330));
-	WriteRelCall(0x48C128, UInt32(hk_sub_47D330));
-
-	// speed up packages window
-	WriteRelCall(0x498CB4, UInt32(hk_sub_4979F0));
-	WriteRelCall(0x499509, UInt32(hk_sub_4979F0));
-	WriteRelCall(0x49957E, UInt32(hk_sub_4979F0));
-	WriteRelCall(0x4995BC, UInt32(hk_sub_4979F0));
-	WriteRelCall(0x4995FB, UInt32(hk_sub_4979F0));
-	WriteRelCall(0x49963A, UInt32(hk_sub_4979F0));
-	WriteRelCall(0x49966C, UInt32(hk_sub_4979F0));
-	WriteRelCall(0x49D1CA, UInt32(hk_sub_47F7A0));
-
-	// speed up object palette
-	WriteRelCall(0x40CF05, UInt32(hk_sub_47E0D0));
+	// speed up UI
+	WriteUIHooks();
 
 	// hook Load ESP/ESM window callback
 	SafeWrite32(0x44192A, UInt32(hk_LoadESPESMCallback));
@@ -413,6 +348,9 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	SafeWrite32(0x441CB0, UInt32(ScriptEditCallback));
 	SafeWrite32(0x509F6B, UInt32(ScriptEditCallback));
 	SafeWrite32(0x5C50C8, UInt32(ScriptEditCallback));
+
+	/* allow ctrl S to save */
+	WriteRelJump(0x5C3ECD, UInt32(ScriptEditKeypressHook));
 
 	//	Create log window - credit to nukem
 	InitCommonControls();
