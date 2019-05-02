@@ -45,20 +45,6 @@ extern "C"
     }
 }
 
-void MessageHandler(NVSEMessagingInterface::Message* msg)
-{
-	switch(msg->type)
-	{
-	case NVSEMessagingInterface::kMessage_PostPostLoad:
-		g_msg->RegisterListener(g_pluginHandle, NULL, MessageHandler);
-		break;
-	default:	// this is hacky bullshit to log ALL messages sent by NVSE (save, load, exit, etc.) and by other plugins (none?)
-		_DMESSAGE("MSG: [%s] %s %s", msg->sender, !strcmp(msg->sender, "NVSE") ? nvseMSG[msg->type] : std::to_string(msg->type).c_str(),
-			msg->dataLen ? msg->dataLen > 1 ? (char*)msg->data : std::to_string(*(char*)&msg->data).c_str() : "");
-		break;
-	}
-}
-
 bool NVSEPlugin_Query(const NVSEInterface * nvse, PluginInfo * info)
 {
 	if(!nvse->isEditor)

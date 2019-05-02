@@ -34,17 +34,6 @@ std::recursive_mutex g_DialogMutex;
 std::unordered_map<HWND, DialogOverrideData> g_DialogOverrides;
 __declspec(thread) DialogOverrideData *DlgData;
 
-PluginHandle g_pluginHandle = kPluginHandle_Invalid;
-NVSEInterface* g_nvse = NULL;
-DataHandler* g_data = NULL;
-NVSEMessagingInterface* g_msg = NULL;
-NVSECommandTableInterface* g_cmd = NULL;;
-NVSEScriptInterface* g_script = NULL;
-NVSEStringVarInterface* g_string = NULL;
-NVSEArrayVarInterface* g_array = NULL;
-NVSESerializationInterface* g_serial = NULL;
-NVSEConsoleInterface* g_console = NULL;
-
 char* nvseMSG[20] =
 {
 	"PostLoad",
