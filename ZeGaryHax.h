@@ -625,18 +625,8 @@ BOOL __cdecl ScriptEditCallback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
 	return ((BOOL(__cdecl*)(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam))(0x5C3D40))(hWnd, msg, wParam, lParam);
 }
 
-_declspec(naked) void InitRenderWindowHook() {
-	static const UInt32 retnAddr = 0x462C7C;
-	// get previous stored position
-	MoveWindow(*(HWND*)0xECFB40, 
-		GetPrivateProfileIntA("Render Window", "iWindowPosX", 64, filename), 
-		GetPrivateProfileIntA("Render Window", "iWindowPosY", 64, filename),
-		GetPrivateProfileIntA("Render Window", "iWindowPosDX", 1024, filename),
-		GetPrivateProfileIntA("Render Window", "iWindowPosDY", 768, filename),
-		true);
-	_asm {
-		jmp retnAddr
-	}
+void __cdecl SaveWindowPositionToINI(HWND hWnd, char* name) {
+	((void(__cdecl*)(HWND hWnd, char* Src))(0x43E170))(hWnd, name);
 }
 
 void __fastcall FastExitHook(volatile LONG** thiss);

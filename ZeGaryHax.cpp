@@ -408,10 +408,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		SafeWrite8(0x4136C1, 'Z');
 	}
 
-	WriteRelJump(0x459247, UInt32(InitRenderWindowHook));
-
 	/* Hook the Script Editor Window */
-
 	SafeWrite32(0x437892, UInt32(ScriptEditCallback));
 	SafeWrite32(0x441CB0, UInt32(ScriptEditCallback));
 	SafeWrite32(0x509F6B, UInt32(ScriptEditCallback));
@@ -476,6 +473,8 @@ void doKonami(int key) {
 }
 	
 void SaveWindowPositions() {
+	SaveWindowPositionToINI(*(HWND*)(0xECFB40), "Render Window");
+
 	char buffer[8];
 	RECT pos;
 
@@ -484,12 +483,6 @@ void SaveWindowPositions() {
 	WritePrivateProfileString("Log", "iWindowPosY", _itoa(pos.top, buffer, 10), filename);
 	WritePrivateProfileString("Log", "iWindowPosDX", _itoa(pos.right-pos.left, buffer, 10), filename);
 	WritePrivateProfileString("Log", "iWindowPosDY", _itoa(pos.bottom-pos.top, buffer, 10), filename);
-
-	GetWindowRect(*(HWND*)(0xECFB40), &pos); // render window
-	WritePrivateProfileString("Render Window", "iWindowPosX", _itoa(pos.left, buffer, 10), filename);
-	WritePrivateProfileString("Render Window ", "iWindowPosY", _itoa(pos.top, buffer, 10), filename);
-	WritePrivateProfileString("Render Window", "iWindowPosDX", _itoa(pos.right - pos.left, buffer, 10), filename);
-	WritePrivateProfileString("Render Window", "iWindowPosDY", _itoa(pos.bottom - pos.top, buffer, 10), filename);
 }
 
 void __fastcall FastExitHook(volatile LONG** thiss)
