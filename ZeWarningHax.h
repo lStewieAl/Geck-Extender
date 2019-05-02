@@ -435,3 +435,98 @@ __declspec(naked) void hk_EnableScriptErrorsMsgHook()
 		jmp		kRetnAddr
 	}
 }
+
+void WriteErrorMessageHooks() {
+	//	Fix message bugs/change message formatting - credit to roy
+	SafeWrite32(0x00468D13 + 1, (UInt32)messageCreateFileMapping);
+	SafeWrite32(0x00468DD8 + 1, (UInt32)messageCreateFileMapping);
+	SafeWrite32(0x005503A8 + 1, (UInt32)messageCouldNotCheckoutForm);
+	SafeWrite32(0x00547D47 + 1, (UInt32)messageCouldNotCheckoutForm);
+	SafeWrite32(0x005E0F41 + 1, (UInt32)messageCouldNotCheckoutForm);
+	SafeWrite32(0x00547D5B + 1, (UInt32)messageBodyPartDataNotFound);
+	SafeWrite32(0x005503B8 + 1, (UInt32)messageBodyPartDataNotFound);
+	SafeWrite32(0x005E0F51 + 1, (UInt32)messageAmmoNotFound);
+	SafeWrite32(0x005E0F5F + 1, (UInt32)messageAmmoNotFound);
+	SafeWrite32(0x006AB7FA + 1, (UInt32)messageNavmeshTriangleDegenerate);
+	SafeWrite32(0x0065A6C9 + 1, (UInt32)messagePotentiallyInvalidZValue);
+	SafeWrite32(0x0065A882 + 1, (UInt32)messagePotentiallyInvalidXValue);
+	SafeWrite32(0x0065A912 + 1, (UInt32)messagePotentiallyInvalidYValue);
+
+	//	Warnings more verbose - credit to roy and jazzisparis
+	WriteRelJump(0x004B04B5, (UInt32)hk_RemoveEmptyLitWaterMsgHook);
+	SafeWrite8(0x004B04C1, 0x08);
+
+	WriteRelJump(0x004AFDB2, (UInt32)hk_EnableStateParentLoopMsgHook);
+	SafeWrite8(0x004AFDC2, 0x08);
+	SafeWrite8(0x004AFDBF, 0x18);
+	WriteRelJump(0x004B020F, (UInt32)hk_RemoveEmptyActivateParentMsgHook);	//	must be with EnableStateParentLoopMsgHook
+
+	WriteRelJump(0x005004B6, (UInt32)hk_UnableToFindLeveledObjectMsgHook);
+	SafeWrite16(0x005004B4, 0x9090);
+	SafeWrite8(0x005004C2, 0x10);
+
+	WriteRelJump(0x005C36EC, (UInt32)hk_ScriptHasTextButNotCompiledMsgHook);
+	SafeWrite32(0x005C36F1, 0x90909090);
+	SafeWrite8(0x005C36FC, 0x14);
+
+	WriteRelJump(0x00496F37, (UInt32)hk_OnPackageBeginScriptNotCompiledMsgHook);
+	SafeWrite32(0x00496F3C, 0x90909090);
+	SafeWrite8(0x00496F47, 0x14);
+
+	WriteRelJump(0x00496F74, (UInt32)hk_OnPackageChangeScriptNotCompiledMsgHook);
+	SafeWrite32(0x00496F79, 0x90909090);
+	SafeWrite8(0x00496F84, 0x14);
+
+	WriteRelJump(0x00496FAE, (UInt32)hk_OnPackageEndScriptNotCompiledMsgHook);
+	SafeWrite32(0x00496FB3, 0x90909090);
+	SafeWrite8(0x00496FBE, 0x14);
+
+	WriteRelJump(0x0064FF5B, (UInt32)hk_ChunkAbnormallyTerminatedMsgHook);
+	SafeWrite8(0x0064FF8B, 0x18);
+
+	WriteRelJump(0x004AF986, (UInt32)hk_CouldNotFindMediaLocationControllerMsgHook);
+	SafeWrite8(0x004AF98B, 0x90);
+	SafeWrite8(0x004AF993, 0x0C);
+
+	WriteRelJump(0x004AFE75, (UInt32)hk_UnableToFindLinkedReferenceMsgHook);
+	XUtil::PatchMemoryNop(0x004AFE7A, 5);
+	SafeWrite8(0x004AFE86, 0x0C);
+
+	WriteRelJump(0x005C284B, (UInt32)hk_TryingToAccessLocalVariableInScriptMsgHook);
+	SafeWrite16(0x005C2850, 0x9090);
+	SafeWrite8(0x005C2859, 0x10);
+
+	WriteRelJump(0x0049FCD5, (UInt32)hk_UnableToFindPackageLocationMsgHook);
+
+	WriteRelJump(0x004A167C, (UInt32)hk_UnableToFindPackageReferenceMsgHook);
+	SafeWrite8(0x004A168E, 0x10);
+
+	WriteRelJump(0x004AFD4F, (UInt32)hk_UnableToFindEnableStateParentMsgHook);
+	SafeWrite8(0x004AFD60, 0x0C);
+
+	//	patch warning messages - credit to jazzisparis
+	for (UInt32 patchAddr : kPatch_Warnings1)
+		SafeWrite32(patchAddr + 1, (UInt32)EditorUI_Log2);
+
+	for (UInt32 patchAddr : kPatch_Warnings2)
+		SafeWrite32(patchAddr + 6, (UInt32)EditorUI_Log2);
+
+	for (UInt32 patchAddr : kPatch_Warnings3)
+		WriteRelCall(patchAddr, (UInt32)EditorUI_Log2);
+
+	for (UInt32 patchAddr : kPatch_Warnings4)
+		WriteRelCall(patchAddr, (UInt32)EditorUI_Log);
+
+	SafeWrite32(0x00C1A543 + 4, (UInt32)EditorUI_Log2);
+	SafeWrite32(0x00C1A6DC + 1, (UInt32)EditorUI_Log2);
+
+	if (bNoLODMeshMessage) {
+		// remove the MODELS: LOD Mesh ... messages
+		XUtil::PatchMemoryNop(0x659DC8, 5);
+		XUtil::PatchMemoryNop(0x659E05, 5);
+	}
+
+	//	patch script editor messages - credit to roy
+	WriteRelJump(0x005C57E2, (UInt32)hk_EnableScriptErrorsMsgHook);
+	XUtil::PatchMemoryNop(0x005C57E7, 0x06);
+}
