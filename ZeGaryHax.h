@@ -11,6 +11,8 @@ HMODULE ZeGaryHaxHandle;
 
 IDebugLog		gLog("EditorWarnings.log");
 
+void PrintCmdTable();
+
 struct z_stream_s
 {
 	const void *next_in;
@@ -557,6 +559,7 @@ BOOL __stdcall hk_SearchAndReplaceCallback(HWND hDlg, UINT msg, WPARAM wParam, L
 
 _declspec(naked) void EndLoadingHook() {
 	PlaySound("MouseClick", NULL, SND_ASYNC);
+//	PrintCmdTable();
 	_asm {
 	originalCode:
 		add esp, 8
@@ -620,6 +623,20 @@ BOOL __cdecl ScriptEditCallback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
 		//EditorUI_Log("Received command. wParam: %d, lParam: %d", wParam, lParam);
 	}
 	return ((BOOL(__cdecl*)(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam))(0x5C3D40))(hWnd, msg, wParam, lParam);
+}
+
+_declspec(naked) void InitRenderWindowHook() {
+	static const UInt32 retnAddr = 0x462C7C;
+	// get previous stored position
+	MoveWindow(*(HWND*)0xECFB40, 
+		GetPrivateProfileIntA("Render Window", "iWindowPosX", 64, filename), 
+		GetPrivateProfileIntA("Render Window", "iWindowPosY", 64, filename),
+		GetPrivateProfileIntA("Render Window", "iWindowPosDX", 1024, filename),
+		GetPrivateProfileIntA("Render Window", "iWindowPosDY", 768, filename),
+		true);
+	_asm {
+		jmp retnAddr
+	}
 }
 
 void __fastcall FastExitHook(volatile LONG** thiss);

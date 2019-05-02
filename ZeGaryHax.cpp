@@ -408,6 +408,8 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		SafeWrite8(0x4136C1, 'Z');
 	}
 
+	WriteRelJump(0x459247, UInt32(InitRenderWindowHook));
+
 	/* Hook the Script Editor Window */
 
 	SafeWrite32(0x437892, UInt32(ScriptEditCallback));
@@ -473,23 +475,44 @@ void doKonami(int key) {
 	if (konamiStage == 0 && key == VK_UP) konamiStage++;
 }
 	
-void SaveLogWindowPosition() {
+void SaveWindowPositions() {
 	char buffer[8];
 	RECT pos;
-	GetWindowRect(g_ConsoleHwnd, &pos);
 
+	GetWindowRect(g_ConsoleHwnd, &pos);
 	WritePrivateProfileString("Log", "iWindowPosX", _itoa(pos.left, buffer, 10), filename);
 	WritePrivateProfileString("Log", "iWindowPosY", _itoa(pos.top, buffer, 10), filename);
 	WritePrivateProfileString("Log", "iWindowPosDX", _itoa(pos.right-pos.left, buffer, 10), filename);
 	WritePrivateProfileString("Log", "iWindowPosDY", _itoa(pos.bottom-pos.top, buffer, 10), filename);
+
+	GetWindowRect(*(HWND*)(0xECFB40), &pos); // render window
+	WritePrivateProfileString("Render Window", "iWindowPosX", _itoa(pos.left, buffer, 10), filename);
+	WritePrivateProfileString("Render Window ", "iWindowPosY", _itoa(pos.top, buffer, 10), filename);
+	WritePrivateProfileString("Render Window", "iWindowPosDX", _itoa(pos.right - pos.left, buffer, 10), filename);
+	WritePrivateProfileString("Render Window", "iWindowPosDY", _itoa(pos.bottom - pos.top, buffer, 10), filename);
 }
 
 void __fastcall FastExitHook(volatile LONG** thiss)
 {
-	SaveLogWindowPosition();
+	SaveWindowPositions();
 	if (GetINIExists() && bFastExit) TerminateProcess(GetCurrentProcess(), 0);
 	((void(__thiscall *)(volatile LONG **thiss))(0x4CC540))(thiss);
 }
+
+
+void PrintCmdTable()
+{
+	NVSECommandTableInterface* cmdTable = (NVSECommandTableInterface*)savedNVSE->QueryInterface(kInterface_CommandTable);
+	CommandInfo* curr = const_cast<CommandInfo*> (cmdTable->Start());
+	CommandInfo* end = const_cast<CommandInfo*> (cmdTable->End());
+	EditorUI_Log("Commands: ");
+	while (curr < end)
+	{
+		EditorUI_Log("%s", curr->longName);
+		curr++;
+	}
+}
+
 
 /* TODO 
 Creature + Leveled creature/character windows
