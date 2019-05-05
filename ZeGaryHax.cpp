@@ -351,6 +351,9 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 
 	/* allow ctrl S to save */
 	WriteRelJump(0x5C3ECD, UInt32(ScriptEditKeypressHook));
+	
+	/* fix vanilla bug where modified flag was not reset upon successful saving */
+	WriteRelCall(0x5C4974, UInt32(ScriptEdit__Save));
 
 	//	Create log window - credit to nukem
 	InitCommonControls();

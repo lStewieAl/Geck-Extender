@@ -1,5 +1,6 @@
 #pragma once
 #pragma comment(lib, "comctl32.lib")
+#include "GECKUtility.h"
 
 #define UI_CMD_ADDLOGTEXT	(WM_APP + 1)
 #define UI_CMD_CLEARLOGTEXT (WM_APP + 2)
@@ -14,11 +15,17 @@
 #define UI_EXTMENU_RENDER		51007
 #define UI_EXTMENU_PREVIEW		51008
 #define UI_EXTMENU_LAUNCHGAME   51009
+#define UI_EXTMENU_SAVEPOSITION 51010
+#define UI_EXTMENU_LOADPOSITION 51011
+
 
 HWND g_MainHwnd;
 HWND g_ConsoleHwnd;
 HMENU g_ExtensionMenu;
 WNDPROC OldEditorUI_WndProc;
+
+NiPoint3 lastRenderPos;
+NiPoint3 lastRenderDirection;
 
 bool EditorUI_CreateExtensionMenu(HWND MainWindow, HMENU MainMenu)
 {
@@ -26,6 +33,8 @@ bool EditorUI_CreateExtensionMenu(HWND MainWindow, HMENU MainMenu)
 	g_ExtensionMenu = CreateMenu();
 
 	BOOL result = TRUE;
+//	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_SAVEPOSITION, "Save Position");
+//	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_LOADPOSITION, "Load Position");
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_SHOWLOG, "Show Log");
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_CLEARLOG, "Clear Log");
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_AUTOSCROLL, "Autoscroll Log");
@@ -282,6 +291,16 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 				strcat(falloutNVPath, nvExeName);
 
 				ShellExecuteA(0, 0, falloutNVPath, 0, 0, 1);
+			}
+
+			case UI_EXTMENU_SAVEPOSITION:
+			{
+				GetCamera(&lastRenderPos, &lastRenderDirection);
+			}
+
+			case UI_EXTMENU_LOADPOSITION:
+			{
+				SetCamera(&lastRenderPos, &lastRenderDirection);
 			}
 			return 0;
 		}

@@ -646,4 +646,21 @@ _declspec(naked) void ScriptEditKeypressHook(HWND hWnd) {
 	}
 }
 
+bool __fastcall ScriptEdit__Save(byte* thiss, void* dummyEDX, HWND hDlg, char a3, char a4) {
+	bool saveSuccess = ((bool (__thiscall *)(byte* thiss, HWND hDlg, char a3, char a4))(0x5C2F40))(thiss, hDlg, a3, a4);
+	if (saveSuccess) {
+		SendDlgItemMessageA(hDlg, 1166, EM_SETMODIFY, 0, 0);
+		
+		// remove the '*' from the end of the window name
+		char windowName[MAX_PATH];
+		int len = GetWindowTextA(hDlg, windowName, MAX_PATH)-1;
+
+		if (len > 2 && windowName[len] == '*') {
+			windowName[len-1] = '\0'; // strip the '* '
+			SetWindowTextA(hDlg, windowName);
+		}
+	}
+	return saveSuccess;
+}
+
 void __fastcall FastExitHook(volatile LONG** thiss);
