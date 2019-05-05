@@ -355,6 +355,9 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	/* fix vanilla bug where modified flag was not reset upon successful saving */
 	WriteRelCall(0x5C4974, UInt32(ScriptEdit__Save));
 
+	// Fix for crash (invalid parameter termination) when the "Unable to find variable" warning would exceed the buffer size, credits to nukem
+	XUtil::PatchMemory(0xD59DCC, (PBYTE)", Text \"%.240s\"", strlen(", Text \"%.240s\"") + 1);
+
 	//	Create log window - credit to nukem
 	InitCommonControls();
 	LoadLibraryA("MSFTEDIT.dll");
