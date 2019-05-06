@@ -279,6 +279,7 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 					WritePrivateProfileString("General", "bPreviewWindowUncap" , _itoa(bPreviewWindowUncap,buffer,2), filename);
 				}
 			}
+			return 0;
 
 			case UI_EXTMENU_LAUNCHGAME:
 			{
@@ -292,11 +293,13 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 
 				ShellExecuteA(0, 0, falloutNVPath, 0, 0, 1);
 			}
+			return 0;
 
 			case UI_EXTMENU_SAVEPOSITION:
 			{
 				GetCamera(&savedRenderPos, &savedRenderDirection);
 			}
+			return 0;
 
 			case UI_EXTMENU_LOADPOSITION:
 			{
