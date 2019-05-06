@@ -24,8 +24,8 @@ HWND g_ConsoleHwnd;
 HMENU g_ExtensionMenu;
 WNDPROC OldEditorUI_WndProc;
 
-NiPoint3 lastRenderPos;
-NiPoint3 lastRenderDirection;
+NiPoint3 savedRenderPos;
+ViewMatrix savedRenderDirection;
 
 bool EditorUI_CreateExtensionMenu(HWND MainWindow, HMENU MainMenu)
 {
@@ -295,12 +295,12 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 
 			case UI_EXTMENU_SAVEPOSITION:
 			{
-				GetCameraPos(&lastRenderPos);
+				GetCamera(&savedRenderPos, &savedRenderDirection);
 			}
 
 			case UI_EXTMENU_LOADPOSITION:
 			{
-				SetCameraPos(&lastRenderPos);
+				SetCamera(&savedRenderPos, &savedRenderDirection);
 			}
 			return 0;
 		}
