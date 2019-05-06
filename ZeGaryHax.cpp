@@ -91,8 +91,8 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	bIgnoreNAMFiles = GetPrivateProfileIntA("General", "bIgnoreNAMFiles", 0, filename);
 	bVersionControlMode = GetPrivateProfileIntA("General", "bVersionControlMode", 0, filename);
 	bHighResLandscapeLOD = GetPrivateProfileIntA("General", "bHighResLandscapeLOD", 0, filename);
-	bRenderWindowUncap = GetPrivateProfileIntA("General", "bRenderWindowUncap", 0, filename);
-	bPreviewWindowUncap = GetPrivateProfileIntA("General", "bPreviewWindowUncap", 0, filename);
+	bRenderWindowUncap = GetPrivateProfileIntA("General", "bRenderWindowUncap", 1, filename);
+	bPreviewWindowUncap = GetPrivateProfileIntA("General", "bPreviewWindowUncap", 1, filename);
 	bRemoveStatusBarLoadingText = GetPrivateProfileIntA("General", "bRemoveLoadingText", 1, filename);
 	bPlaySoundEndOfLoading = GetPrivateProfileIntA("General", "bPlaySoundEndOfLoading", 1, filename);
 	bNoDXSoundCaptureErrorPopup = GetPrivateProfileIntA("General", "bNoDXSoundCaptureErrorPopup", 0, filename); 
@@ -358,6 +358,13 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 
 	// Fix for crash (invalid parameter termination) when the "Unable to find variable" warning would exceed the buffer size, credits to nukem
 	XUtil::PatchMemory(0xD59DCC, (PBYTE)", Text \"%.240s\"", strlen(", Text \"%.240s\"") + 1);
+
+	// Scroll wheel and pan speed affected by shift/alt
+	WriteRelCall(0x48B8C5, UInt32(hk_DoRenderMousewheelScroll)); // preview window
+	WriteRelCall(0x48B74C, UInt32(hk_DoRenderMousewheelScroll)); // preview window
+	WriteRelCall(0x48B7AC, UInt32(hk_DoRenderMousewheelScroll)); // preview window pan
+	WriteRelCall(0x46040E, UInt32(hk_DoRenderMousewheelScroll)); // render window scroll
+
 
 	//	Create log window - credit to nukem
 	InitCommonControls();

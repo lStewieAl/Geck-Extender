@@ -674,4 +674,14 @@ bool __fastcall ScriptEdit__Save(byte* thiss, void* dummyEDX, HWND hDlg, char a3
 	return saveSuccess;
 }
 
+char __cdecl hk_DoRenderMousewheelScroll(int a1, int a2, float a3) {
+	if (GetAsyncKeyState(VK_SHIFT) < 0) {
+		a3 *= 2;
+	}
+	if (GetAsyncKeyState(VK_MENU) < 0) {
+		a3 *= 0.15;
+	}
+	return ((char(__cdecl*)(int a1, int a2, float a3))(0x464210))(a1, a2, a3);
+}
+
 void __fastcall FastExitHook(volatile LONG** thiss);
