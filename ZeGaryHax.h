@@ -80,7 +80,8 @@ int bScriptCompileWarningPopup = 0;
 int bSmoothFlycamRotation = 1;
 float fFlycamRotationSpeed;
 float fFlycamNormalMovementSpeed;
-float fFlycamModifiedMovementSpeed;
+float fFlycamShiftMovementSpeed;
+float fFlycamAltMovementSpeed;
 
 char filename[MAX_PATH];
 static const char *geckwikiurl = "https://geckwiki.com/index.php/";
@@ -569,15 +570,25 @@ _declspec(naked) void EndLoadingHook() {
 }
 
 // hooks before movement speed is determined for flycam mode
+static int lastFlycamTime = 0;
 _declspec(naked) void FlycamMovementSpeedMultiplierHook() {
 	static const UInt32 retnAddr = 0x455D17;
+	*(float*)(0xED12C0) = fFlycamNormalMovementSpeed;
 
 	if (GetAsyncKeyState(VK_SHIFT) < 0) {
-		*(float*)(0xED12C0) = fFlycamModifiedMovementSpeed;
+		*(float*)(0xED12C0) *= fFlycamShiftMovementSpeed;
 	}
-	else {
-		*(float*)(0xED12C0) = fFlycamNormalMovementSpeed;
+
+	if (GetAsyncKeyState(VK_MENU) < 0) {
+		*(float*)(0xED12C0) *= fFlycamAltMovementSpeed;
 	}
+
+	/* fix flycam speed being dependent on framerate by slowing down movement if framerate is greater than 30fps (33ms/frame)*/
+	if (GetTickCount() - lastFlycamTime < 33) {
+		*(float*)(0xED12C0) *= (GetTickCount() - lastFlycamTime)/33.0;
+	}
+
+	lastFlycamTime = GetTickCount();
 	
 	_asm {
 	originalCode:

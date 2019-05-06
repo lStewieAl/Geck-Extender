@@ -104,8 +104,9 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	
 	bSmoothFlycamRotation = GetPrivateProfileIntA("Flycam", "bSmoothRotation", 1, filename);
 	fFlycamRotationSpeed = GetPrivateProfileIntA("Flycam", "iRotationSpeedPct", 100, filename) * - 0.001F;
-	fFlycamNormalMovementSpeed = GetPrivateProfileIntA("Flycam", "iMovementSpeed", 10, filename) * 1.0F;
-	fFlycamModifiedMovementSpeed = GetPrivateProfileIntA("Flycam", "iModifierMovementSpeed", 2, filename) * 1.0F;
+	fFlycamNormalMovementSpeed = GetPrivateProfileIntA("Flycam", "iMovementSpeed", 10, filename) * 3.0F;
+	fFlycamShiftMovementSpeed = GetPrivateProfileIntA("Flycam", "iRunMovementSpeedPct", 300, filename) * 0.01F;
+	fFlycamAltMovementSpeed = GetPrivateProfileIntA("Flycam", "iWalkMovementSpeedPct", 20, filename) * 0.01F;
 
 	//	stop geck crash with bUseMultibounds = 0 in exterior cells with multibounds - credit to roy
 	WriteRelCall(0x004CA48F, (UInt32)FixMultiBounds);
