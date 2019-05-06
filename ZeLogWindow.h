@@ -33,8 +33,8 @@ bool EditorUI_CreateExtensionMenu(HWND MainWindow, HMENU MainMenu)
 	g_ExtensionMenu = CreateMenu();
 
 	BOOL result = TRUE;
-//	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_SAVEPOSITION, "Save Position");
-//	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_LOADPOSITION, "Load Position");
+	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_SAVEPOSITION, "Save Position");
+	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_LOADPOSITION, "Load Position");
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_SHOWLOG, "Show Log");
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_CLEARLOG, "Clear Log");
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_AUTOSCROLL, "Autoscroll Log");
@@ -295,12 +295,12 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 
 			case UI_EXTMENU_SAVEPOSITION:
 			{
-				GetCamera(&lastRenderPos, &lastRenderDirection);
+				GetCameraPos(&lastRenderPos);
 			}
 
 			case UI_EXTMENU_LOADPOSITION:
 			{
-				SetCamera(&lastRenderPos, &lastRenderDirection);
+				SetCameraPos(&lastRenderPos);
 			}
 			return 0;
 		}
@@ -524,4 +524,3 @@ bool EditorUI_CreateLogWindow()
 	UpdateWindow(g_ConsoleHwnd);
 	return true;
 }
-
