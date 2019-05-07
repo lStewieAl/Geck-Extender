@@ -105,12 +105,14 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	bPreviewWindowUncap = GetPrivateProfileIntA("Render Window", "bPreviewWindowUncap", 1, filename);
 	bSwapRenderCYKeys = GetPrivateProfileIntA("Render Window", "bSwapCandYKeys", 0, filename);
 	bAltShiftMovementMultipliers = GetPrivateProfileIntA("Render Window", "bAltShiftMovementMultipliers", 1, filename);
+	fMovementAltMultiplier = GetPrivateProfileIntA("Render Window", "bAltSpeedPct", 15, filename) / 100.0F;
+	fMovementShiftMultiplier = GetPrivateProfileIntA("Render Window", "bShiftSpeedPct", 200, filename) / 100.0F;
 	
 	bSmoothFlycamRotation = GetPrivateProfileIntA("Flycam", "bSmoothRotation", 1, filename);
 	fFlycamRotationSpeed = GetPrivateProfileIntA("Flycam", "iRotationSpeedPct", 100, filename) * - 0.001F;
 	fFlycamNormalMovementSpeed = GetPrivateProfileIntA("Flycam", "iMovementSpeed", 10, filename) * 3.0F;
-	fFlycamShiftMovementSpeed = GetPrivateProfileIntA("Flycam", "iRunMovementSpeedPct", 300, filename) * 0.01F;
-	fFlycamAltMovementSpeed = GetPrivateProfileIntA("Flycam", "iWalkMovementSpeedPct", 20, filename) * 0.01F;
+	fFlycamShiftMovementSpeed = GetPrivateProfileIntA("Flycam", "iRunMovementSpeedPct", 300, filename) / 100.0F;
+	fFlycamAltMovementSpeed = GetPrivateProfileIntA("Flycam", "iWalkMovementSpeedPct", 20, filename) / 100.0F;
 
 	//	stop geck crash with bUseMultibounds = 0 in exterior cells with multibounds - credit to roy
 	WriteRelCall(0x004CA48F, (UInt32)FixMultiBounds);
@@ -372,6 +374,10 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 
 		// reference movement speed affected by shift/alt
 		WriteRelJump(0x455392, UInt32(RenderWindowReferenceMovementSpeedHook));
+
+		// render window panning, doesn't apply shift multiplier as it conflicts with keybinding
+		WriteRelCall(0x45F7E5, UInt32(hk_DoRenderPan));
+		WriteRelCall(0x45F846, UInt32(hk_DoRenderPan));
 	}
 
 	//	Create log window - credit to nukem
@@ -456,13 +462,13 @@ void __fastcall FastExitHook(volatile LONG** thiss)
 void PrintCmdTable()
 {
 	NVSECommandTableInterface* cmdTable = (NVSECommandTableInterface*)savedNVSE->QueryInterface(kInterface_CommandTable);
+
 	CommandInfo* curr = const_cast<CommandInfo*> (cmdTable->Start());
-	CommandInfo* end = const_cast<CommandInfo*> (cmdTable->End());
-	EditorUI_Log("Commands: ");
-	while (curr < end)
+	CommandInfo* End = const_cast<CommandInfo*> (cmdTable->End());
+	UInt32 CounterTable;
+	while (++curr < End)
 	{
 		EditorUI_Log("%s", curr->longName);
-		curr++;
 	}
 }
 

@@ -76,7 +76,11 @@ int bNoLODMeshMessage = 0;
 int bSwapRenderCYKeys = 0;
 int bShowLoadFilesAtStartup = 0;
 int bScriptCompileWarningPopup = 0;
+
 int bAltShiftMovementMultipliers = 1;
+float fMovementAltMultiplier = 0.15F;
+float fMovementShiftMultiplier = 2.0F;
+
 
 int bSmoothFlycamRotation = 1;
 float fFlycamRotationSpeed;
@@ -678,12 +682,19 @@ bool __fastcall ScriptEdit__Save(byte* thiss, void* dummyEDX, HWND hDlg, char a3
 double GetRefSpeedMultiplier() {
 	double multiplier = 1.0F;
 	if (GetAsyncKeyState(VK_SHIFT) < 0) {
-		multiplier *= 2;
+		multiplier *= fMovementShiftMultiplier;
 	}
 	if (GetAsyncKeyState(VK_MENU) < 0) {
-		multiplier *= 0.15;
+		multiplier *= fMovementAltMultiplier;
 	}
 	return multiplier;
+}
+
+char __cdecl hk_DoRenderPan(int a1, int a2, float a3) {
+	if (GetAsyncKeyState(VK_MENU) < 0) {
+		a3 *= fMovementAltMultiplier;
+	}
+	return ((char(__cdecl*)(int a1, int a2, float a3))(0x464210))(a1, a2, a3);
 }
 
 char __cdecl hk_DoRenderMousewheelScroll(int a1, int a2, float a3) {
