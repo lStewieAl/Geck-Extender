@@ -76,6 +76,7 @@ int bNoLODMeshMessage = 0;
 int bSwapRenderCYKeys = 0;
 int bShowLoadFilesAtStartup = 0;
 int bScriptCompileWarningPopup = 0;
+int bAltShiftMovementMultipliers = 1;
 
 int bSmoothFlycamRotation = 1;
 float fFlycamRotationSpeed;
@@ -674,14 +675,38 @@ bool __fastcall ScriptEdit__Save(byte* thiss, void* dummyEDX, HWND hDlg, char a3
 	return saveSuccess;
 }
 
-char __cdecl hk_DoRenderMousewheelScroll(int a1, int a2, float a3) {
+double GetRefSpeedMultiplier() {
+	double multiplier = 1.0F;
 	if (GetAsyncKeyState(VK_SHIFT) < 0) {
-		a3 *= 2;
+		multiplier *= 2;
 	}
 	if (GetAsyncKeyState(VK_MENU) < 0) {
-		a3 *= 0.15;
+		multiplier *= 0.15;
 	}
-	return ((char(__cdecl*)(int a1, int a2, float a3))(0x464210))(a1, a2, a3);
+	return multiplier;
+}
+
+char __cdecl hk_DoRenderMousewheelScroll(int a1, int a2, float a3) {
+	return ((char(__cdecl*)(int a1, int a2, float a3))(0x464210))(a1, a2, a3 * GetRefSpeedMultiplier());
+}
+
+double __fastcall hk_CalculateVectorMagnitude(float* vector, void* dummyEDX) {
+	return ((double(__thiscall*) (float* thiss))(0x40B3D0))(vector) * GetRefSpeedMultiplier();
+}
+
+/* multiply the reference movement speed dependent */
+_declspec(naked) void RenderWindowReferenceMovementSpeedHook() {
+	static const UInt32 retnAddr = 0x455398;
+	_asm {
+		pushad
+		call GetRefSpeedMultiplier
+		fmul
+		popad
+
+originalCode:
+		fmul dword ptr ds:[0xECFD1C]
+		jmp retnAddr
+	}
 }
 
 void __fastcall FastExitHook(volatile LONG** thiss);

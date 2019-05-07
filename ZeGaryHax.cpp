@@ -101,6 +101,8 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	bSwapRenderCYKeys = GetPrivateProfileIntA("General", "bSwapRenderCYKeys", 0, filename);
 	bShowLoadFilesAtStartup = GetPrivateProfileIntA("General", "bShowLoadFilesAtStartup", 0, filename);
 	bScriptCompileWarningPopup = GetPrivateProfileIntA("General", "bScriptCompileWarningPopup", 0, filename);
+
+	bAltShiftMovementMultipliers = GetPrivateProfileIntA("Render Window", "bAltShiftMovementMultipliers", 1, filename);
 	
 	bSmoothFlycamRotation = GetPrivateProfileIntA("Flycam", "bSmoothRotation", 1, filename);
 	fFlycamRotationSpeed = GetPrivateProfileIntA("Flycam", "iRotationSpeedPct", 100, filename) * - 0.001F;
@@ -359,12 +361,16 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	// Fix for crash (invalid parameter termination) when the "Unable to find variable" warning would exceed the buffer size, credits to nukem
 	XUtil::PatchMemory(0xD59DCC, (PBYTE)", Text \"%.240s\"", strlen(", Text \"%.240s\"") + 1);
 
-	// Scroll wheel and pan speed affected by shift/alt
-	WriteRelCall(0x48B8C5, UInt32(hk_DoRenderMousewheelScroll)); // preview window
-	WriteRelCall(0x48B74C, UInt32(hk_DoRenderMousewheelScroll)); // preview window
-	WriteRelCall(0x48B7AC, UInt32(hk_DoRenderMousewheelScroll)); // preview window pan
-	WriteRelCall(0x46040E, UInt32(hk_DoRenderMousewheelScroll)); // render window scroll
+	if (bAltShiftMovementMultipliers) {
+		// Scroll wheel and pan speed affected by shift/alt
+		WriteRelCall(0x48B8C5, UInt32(hk_DoRenderMousewheelScroll)); // preview window
+		WriteRelCall(0x48B74C, UInt32(hk_DoRenderMousewheelScroll)); // preview window
+		WriteRelCall(0x48B7AC, UInt32(hk_DoRenderMousewheelScroll)); // preview window pan
+		WriteRelCall(0x46040E, UInt32(hk_DoRenderMousewheelScroll)); // render window scroll
 
+		// reference movement speed affected by shift/alt
+		WriteRelJump(0x455392, UInt32(RenderWindowReferenceMovementSpeedHook));
+	}
 
 	//	Create log window - credit to nukem
 	InitCommonControls();
