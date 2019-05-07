@@ -95,6 +95,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	bNoPreviewWindowAutoFocus = GetPrivateProfileIntA("General", "bNoPreviewWindowAutoFocus", 1, filename);
 	bNoLODMeshMessage = GetPrivateProfileIntA("General", "bNoLODMeshMessage", 0, filename);
 	bShowLoadFilesAtStartup = GetPrivateProfileIntA("General", "bShowLoadFilesAtStartup", 0, filename);
+	bNoVersionControlWarning = GetPrivateProfileIntA("General", "bNoVersionControlWarning", 0, filename);
 
 	bPatchScriptEditorFont = GetPrivateProfileIntA("Script", "bPatchEditorFont", 0, filename);
 	bScriptCompileWarningPopup = GetPrivateProfileIntA("Script", "bScriptCompileWarningPopup", 0, filename);
@@ -378,6 +379,11 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		// render window panning, doesn't apply shift multiplier as it conflicts with keybinding
 		WriteRelCall(0x45F7E5, UInt32(hk_DoRenderPan));
 		WriteRelCall(0x45F846, UInt32(hk_DoRenderPan));
+	}
+
+	if (bNoVersionControlWarning) {
+		// Don't show "Version control is currently disabled. Would you like to continue without version control?" prompt
+		SafeWrite8(0x43F854, 0xEB);
 	}
 
 	//	Create log window - credit to nukem
