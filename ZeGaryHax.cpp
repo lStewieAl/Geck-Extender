@@ -84,24 +84,26 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	GetModuleFileNameA(NULL, filename, MAX_PATH);
 	strcpy((char *)(strrchr(filename, '\\') + 1), "Data\\nvse\\plugins\\geckextender.ini");
 	bEnableSpellChecker = GetPrivateProfileIntA("General", "bEnableSpellChecker", 0, filename);
-	bAutoScroll = GetPrivateProfileIntA("General", "bAutoScroll", 0, filename);
-	bPatchScriptEditorFont = GetPrivateProfileIntA("General", "bPatchScriptEditorFont", 0, filename);
 	bFastExit = GetPrivateProfileIntA("General", "bFastExit", 0, filename);
 	bListEditFix = GetPrivateProfileIntA("General", "bListEditFix", 0, filename);
 	bIgnoreNAMFiles = GetPrivateProfileIntA("General", "bIgnoreNAMFiles", 0, filename);
 	bVersionControlMode = GetPrivateProfileIntA("General", "bVersionControlMode", 0, filename);
 	bHighResLandscapeLOD = GetPrivateProfileIntA("General", "bHighResLandscapeLOD", 0, filename);
-	bRenderWindowUncap = GetPrivateProfileIntA("General", "bRenderWindowUncap", 1, filename);
-	bPreviewWindowUncap = GetPrivateProfileIntA("General", "bPreviewWindowUncap", 1, filename);
 	bRemoveStatusBarLoadingText = GetPrivateProfileIntA("General", "bRemoveLoadingText", 1, filename);
 	bPlaySoundEndOfLoading = GetPrivateProfileIntA("General", "bPlaySoundEndOfLoading", 1, filename);
 	bNoDXSoundCaptureErrorPopup = GetPrivateProfileIntA("General", "bNoDXSoundCaptureErrorPopup", 0, filename); 
 	bNoPreviewWindowAutoFocus = GetPrivateProfileIntA("General", "bNoPreviewWindowAutoFocus", 1, filename);
 	bNoLODMeshMessage = GetPrivateProfileIntA("General", "bNoLODMeshMessage", 0, filename);
-	bSwapRenderCYKeys = GetPrivateProfileIntA("General", "bSwapRenderCYKeys", 0, filename);
 	bShowLoadFilesAtStartup = GetPrivateProfileIntA("General", "bShowLoadFilesAtStartup", 0, filename);
-	bScriptCompileWarningPopup = GetPrivateProfileIntA("General", "bScriptCompileWarningPopup", 0, filename);
 
+	bPatchScriptEditorFont = GetPrivateProfileIntA("Script", "bPatchEditorFont", 0, filename);
+	bScriptCompileWarningPopup = GetPrivateProfileIntA("Script", "bScriptCompileWarningPopup", 0, filename);
+
+	bAutoScroll = GetPrivateProfileIntA("Log", "bAutoScroll", 0, filename);
+
+	bRenderWindowUncap = GetPrivateProfileIntA("Render Window", "bRenderWindowUncap", 1, filename);
+	bPreviewWindowUncap = GetPrivateProfileIntA("Render Window", "bPreviewWindowUncap", 1, filename);
+	bSwapRenderCYKeys = GetPrivateProfileIntA("Render Window", "bSwapCandYKeys", 0, filename);
 	bAltShiftMovementMultipliers = GetPrivateProfileIntA("Render Window", "bAltShiftMovementMultipliers", 1, filename);
 	
 	bSmoothFlycamRotation = GetPrivateProfileIntA("Flycam", "bSmoothRotation", 1, filename);

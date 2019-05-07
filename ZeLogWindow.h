@@ -288,7 +288,7 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 				strcat(falloutNVPath, "\\");
 
 				char nvExeName[MAX_PATH];
-				GetPrivateProfileStringA("New Vegas", "ExecutableName", "FalloutNV.exe", nvExeName, MAX_PATH, filename);			
+				GetPrivateProfileStringA("Launch Game", "ExecutableName", "FalloutNV.exe", nvExeName, MAX_PATH, filename);			
 				strcat(falloutNVPath, nvExeName);
 
 				ShellExecuteA(0, 0, falloutNVPath, 0, 0, 1);
@@ -312,7 +312,7 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 	{
 		//	Continue normal execution but with a custom string
 		char customTitle[1024];
-		sprintf_s(customTitle, "%s -= GECK Extender Rev. 0.14 =-", (const char *)lParam);
+		sprintf_s(customTitle, "%s -= GECK Extender Rev. 0.15 =-", (const char *)lParam);
 
 		return CallWindowProc(OldEditorUI_WndProc, Hwnd, Message, wParam, (LPARAM)customTitle);
 	}
@@ -484,7 +484,7 @@ LRESULT CALLBACK EditorUI_LogWndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPA
 	{
 		bAutoScroll = (bool)wParam;
 		char buffer[8];
-		WritePrivateProfileString("General", "bAutoScroll" , _itoa(bAutoScroll,buffer,2), filename);
+		WritePrivateProfileString("Log", "bAutoScroll" , _itoa(bAutoScroll,buffer,2), filename);
 	}
 	return 0;
 
