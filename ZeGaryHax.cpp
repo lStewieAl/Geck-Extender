@@ -105,9 +105,9 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	bRenderWindowUncap = GetPrivateProfileIntA("Render Window", "bRenderWindowUncap", 1, filename);
 	bPreviewWindowUncap = GetPrivateProfileIntA("Render Window", "bPreviewWindowUncap", 1, filename);
 	bSwapRenderCYKeys = GetPrivateProfileIntA("Render Window", "bSwapCandYKeys", 0, filename);
-	bAltShiftMovementMultipliers = GetPrivateProfileIntA("Render Window", "bAltShiftMovementMultipliers", 1, filename);
-	fMovementAltMultiplier = GetPrivateProfileIntA("Render Window", "bAltSpeedPct", 15, filename) / 100.0F;
-	fMovementShiftMultiplier = GetPrivateProfileIntA("Render Window", "bShiftSpeedPct", 200, filename) / 100.0F;
+	bUseAltShiftMultipliers = GetPrivateProfileIntA("Render Window", "bUseAltShiftMultipliers", 1, filename);
+	fMovementAltMultiplier = GetPrivateProfileIntA("Render Window", "iAltSpeedPct", 15, filename) / 100.0F;
+	fMovementShiftMultiplier = GetPrivateProfileIntA("Render Window", "iShiftSpeedPct", 200, filename) / 100.0F;
 	
 	bSmoothFlycamRotation = GetPrivateProfileIntA("Flycam", "bSmoothRotation", 1, filename);
 	fFlycamRotationSpeed = GetPrivateProfileIntA("Flycam", "iRotationSpeedPct", 100, filename) * - 0.001F;
@@ -193,10 +193,10 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		WriteRelCall(0x0076E195, (UInt32)hk_sub_4A1C10);
 	}
 
-	//	ignore .nam Files - credit to roy
+	//	ignore .nam Files - initial credit to roy
 	if (bIgnoreNAMFiles == 1)
 	{
-		SafeWrite8(0x004D8DFE, 0xEB);
+		SafeWriteBuf(0xD412C1, "\x47\x41\x4C", 3); // replace NAM extension with GAL ('Geck Auto-Load')
 	}
 
 	if (bVersionControlMode == 0)
@@ -366,7 +366,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	// Fix for crash (invalid parameter termination) when the "Unable to find variable" warning would exceed the buffer size, credits to nukem
 	XUtil::PatchMemory(0xD59DCC, (PBYTE)", Text \"%.240s\"", strlen(", Text \"%.240s\"") + 1);
 
-	if (bAltShiftMovementMultipliers) {
+	if (bUseAltShiftMultipliers) {
 		// Scroll wheel and pan speed affected by shift/alt
 		
 		WriteRelCall(0x48B8C5, UInt32(hk_DoRenderMousewheelScroll)); // preview window

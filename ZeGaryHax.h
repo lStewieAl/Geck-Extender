@@ -78,7 +78,7 @@ int bShowLoadFilesAtStartup = 0;
 int bScriptCompileWarningPopup = 0;
 int bNoVersionControlWarning = 0;
 
-int bAltShiftMovementMultipliers = 1;
+int bUseAltShiftMultipliers = 1;
 float fMovementAltMultiplier = 0.15F;
 float fMovementShiftMultiplier = 2.0F;
 
