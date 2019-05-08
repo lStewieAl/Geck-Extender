@@ -384,6 +384,9 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		// orthographic zoom 
 		WriteRelJump(0x45F661, UInt32(hk_OrthographicZoom));
 		WriteRelJump(0x4602D8, UInt32(hk_OrthographicZoom2));
+
+		// camera rotation with a selected ref
+		WriteRelJump(0x45F5FB, UInt32(hk_RefCameraRotation));
 	}
 
 	if (bNoVersionControlWarning) {

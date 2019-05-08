@@ -757,4 +757,20 @@ _declspec(naked) void hk_OrthographicZoom2() {
 	}
 }
 
+_declspec(naked) void hk_RefCameraRotation() {
+	static const UInt32 retnAddr = 0x45F601;
+	_asm {
+		fld dword ptr [eax]
+		
+		pushad
+		call GetOrthoSpeedMultiplier
+		fmul
+		popad
+
+		push ecx
+		fstp [esp]
+		jmp retnAddr
+	}
+}
+
 void __fastcall FastExitHook(volatile LONG** thiss);
