@@ -8,6 +8,7 @@
 #define GH_VERSION			0				// set this to 0 to enable log output from _DMESSAGE (useful for debug traces)
 
 HMODULE ZeGaryHaxHandle;
+extern HWND g_trackBarHwnd;
 
 IDebugLog		gLog("EditorWarnings.log");
 
@@ -78,6 +79,7 @@ int bAutoLoadFiles = 0;
 int bShowLoadFilesAtStartup = 0;
 int bScriptCompileWarningPopup = 0;
 int bNoVersionControlWarning = 0;
+int bShowTimeOfDaySlider = 1;
 
 int bUseAltShiftMultipliers = 1;
 float fMovementAltMultiplier = 0.15F;
@@ -853,6 +855,12 @@ _declspec(naked) void RenderWindowFlycamPostTransformMovementHook() {
 		mov ecx, dword ptr ss : [eax+4]
 		jmp retnAddr
 	}
+}
+
+LRESULT __stdcall UpdateTimeOfDayScrollbarHook(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
+	LRESULT scrollPos = SendMessageA(hWnd, Msg, wParam, lParam);
+	SendMessageA(g_trackBarHwnd, TBM_SETPOS, TRUE, scrollPos);
+	return scrollPos;
 }
 
 void __fastcall FastExitHook(volatile LONG** thiss);

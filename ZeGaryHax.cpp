@@ -109,6 +109,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	bUseAltShiftMultipliers = GetPrivateProfileIntA("Render Window", "bUseAltShiftMultipliers", 1, filename);
 	fMovementAltMultiplier = GetPrivateProfileIntA("Render Window", "iAltSpeedPct", 15, filename) / 100.0F;
 	fMovementShiftMultiplier = GetPrivateProfileIntA("Render Window", "iShiftSpeedPct", 200, filename) / 100.0F;
+	bShowTimeOfDaySlider = GetPrivateProfileIntA("Render Window", "bShowTimeOfDaySlider", 1, filename);
 	
 	bSmoothFlycamRotation = GetPrivateProfileIntA("Flycam", "bSmoothRotation", 1, filename);
 	bFlycamUpDownRelativeToWorld = GetPrivateProfileIntA("Flycam", "bFlycamUpDownRelativeToWorld", 1, filename);
@@ -409,6 +410,15 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	else {
 		WriteRelJump(0x455DAB, UInt32(RenderWindowFlycamPreTransformMovementHook));
 	}
+
+	if (bShowTimeOfDaySlider) {
+		// hook for setting main menu scrollbar position when changed in the preferences pane
+		WriteRelCall(0x44DD69, UInt32(UpdateTimeOfDayScrollbarHook));
+		XUtil::PatchMemoryNop(0x44DD69 + 5, 1);
+		WriteRelCall(0x44DDF5, UInt32(UpdateTimeOfDayScrollbarHook));
+		XUtil::PatchMemoryNop(0x44DDF5 + 5, 1);
+	}
+
 	//	Create log window - credit to nukem
 	InitCommonControls();
 	LoadLibraryA("MSFTEDIT.dll");

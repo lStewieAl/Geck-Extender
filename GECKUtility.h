@@ -1,5 +1,8 @@
 #pragma once
 #include "ZeLogWindow.h"
+
+HWND g_trackBarHwnd;
+
 struct NiPoint3
 {
 	float x, y, z;
@@ -80,4 +83,14 @@ void GetCamera(NiPoint3* outPosition, ViewMatrix* outDirection) {
 void SetCamera(NiPoint3* pos, ViewMatrix* direction) {
 	SetCameraPos(pos);
 	SetCameraViewMatrix(direction);
+}
+
+void SetTimeOfDay(float time) {
+	float* unknownStruct = *(float**)(0xECF93C);
+	if (!unknownStruct) return;
+
+	float* timeStruct = *(float**)(unknownStruct+0x1A);
+	if (!timeStruct) return;
+
+	((void(__thiscall*)(float* timeStruct, float newTime))(0x44CD00))(timeStruct, time);
 }

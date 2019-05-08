@@ -17,6 +17,7 @@
 #define UI_EXTMENU_LAUNCHGAME   51009
 #define UI_EXTMENU_SAVEPOSITION 51010
 #define UI_EXTMENU_LOADPOSITION 51011
+#define ID_TRACKBAR				51012
 
 
 HWND g_MainHwnd;
@@ -56,6 +57,25 @@ bool EditorUI_CreateExtensionMenu(HWND MainWindow, HMENU MainMenu)
 	return result ? true : false;
 }
 
+void EditorUI_AddSliderToToolbar(HWND MainWindow, HINSTANCE hInstance) {
+	g_trackBarHwnd = CreateWindowEx(
+		NULL,
+		TRACKBAR_CLASSA,
+		"Trackbar Control",
+		WS_CHILD | WS_VISIBLE | TBS_AUTOTICKS | TBS_ENABLESELRANGE,
+		900, 4, // x, y
+		250, 22, // width, height
+		MainWindow, 
+		(HMENU)ID_TRACKBAR, 
+		hInstance, 
+		NULL
+	);
+	SendMessageA(g_trackBarHwnd, TBM_SETRANGE, TRUE, MAKELONG(0, 24 * 4));
+	SendMessageA(g_trackBarHwnd, TBM_SETTICFREQ, 4, 0);
+	SendMessageA(g_trackBarHwnd, TBM_SETPOS, TRUE, 10 * 4);
+
+}
+
 void EditorUI_LogVa(const char *Format, va_list Va)
 {
 	char buffer[2048];
@@ -69,7 +89,8 @@ void EditorUI_LogVa(const char *Format, va_list Va)
 
 	if (g_ConsoleHwnd)
 		PostMessageA(g_ConsoleHwnd, UI_CMD_ADDLOGTEXT, 0, (LPARAM)_strdup(buffer));
-		_MESSAGE(buffer);
+	
+	_MESSAGE(buffer);
 }
 
 void EditorUI_Log(const char *Format, ...)
@@ -107,6 +128,9 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 			editorUIInit = true;
 			g_MainHwnd = Hwnd;
 			EditorUI_CreateExtensionMenu(Hwnd, createInfo->hMenu);
+
+			if(bShowTimeOfDaySlider)
+				EditorUI_AddSliderToToolbar(Hwnd, createInfo->hInstance);
 
 			InsertMenu(createInfo->hMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_LAUNCHGAME, "Launch Game");
 
@@ -316,7 +340,23 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 
 		return CallWindowProc(OldEditorUI_WndProc, Hwnd, Message, wParam, (LPARAM)customTitle);
 	}
-
+	if (bShowTimeOfDaySlider && Message == WM_HSCROLL)
+	{
+		if ((HWND)lParam == g_trackBarHwnd) 
+		{
+			if ((LOWORD(wParam) == SB_THUMBPOSITION || LOWORD(wParam) == SB_THUMBTRACK)) 
+			{
+				float time = HIWORD(wParam) * 0.25;
+				SetTimeOfDay(time);
+			}
+			else if (LOWORD(wParam) == SB_ENDSCROLL)
+			{
+				float time = SendMessageA(g_trackBarHwnd, TBM_GETPOS, 0, 0) * 0.25;
+				SetTimeOfDay(time);
+			}
+			
+		}
+	}
 	return CallWindowProc(OldEditorUI_WndProc, Hwnd, Message, wParam, lParam);
 }
 
