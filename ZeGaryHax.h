@@ -74,6 +74,7 @@ int bNoDXSoundCaptureErrorPopup = 0;
 int bNoPreviewWindowAutoFocus = 1;
 int bNoLODMeshMessage = 0;
 int bSwapRenderCYKeys = 0;
+int bAutoLoadFiles = 0;
 int bShowLoadFilesAtStartup = 0;
 int bScriptCompileWarningPopup = 0;
 int bNoVersionControlWarning = 0;
@@ -770,6 +771,21 @@ _declspec(naked) void hk_RefCameraRotation() {
 		push ecx
 		fstp [esp]
 		jmp retnAddr
+	}
+}
+
+bool isFirstInit = true;
+_declspec(naked) void hk_LoadFilesInit() {
+	static const UInt32 autoLoadAddr = 0x432D77;
+	static const UInt32 noLoadAddr = 0x432E64;
+
+	_asm {
+		cmp byte ptr ds:[isFirstInit], 0
+		je notFirst
+		mov byte ptr ds:[isFirstInit], 0
+		jmp autoLoadAddr
+	notFirst:
+		jmp noLoadAddr
 	}
 }
 

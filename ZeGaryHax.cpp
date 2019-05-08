@@ -94,7 +94,8 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	bNoDXSoundCaptureErrorPopup = GetPrivateProfileIntA("General", "bNoDXSoundCaptureErrorPopup", 0, filename); 
 	bNoPreviewWindowAutoFocus = GetPrivateProfileIntA("General", "bNoPreviewWindowAutoFocus", 1, filename);
 	bNoLODMeshMessage = GetPrivateProfileIntA("General", "bNoLODMeshMessage", 0, filename);
-	bShowLoadFilesAtStartup = GetPrivateProfileIntA("General", "bShowLoadFilesAtStartup", 0, filename);
+	bAutoLoadFiles = GetPrivateProfileIntA("General", "bAutoLoadFiles", 0, filename);
+	bShowLoadFilesAtStartup = GetPrivateProfileIntA("General", "bShowLoadFilesAtStartup", 0, filename) | bAutoLoadFiles;
 	bNoVersionControlWarning = GetPrivateProfileIntA("General", "bNoVersionControlWarning", 0, filename);
 
 	bPatchScriptEditorFont = GetPrivateProfileIntA("Script", "bPatchEditorFont", 0, filename);
@@ -392,6 +393,11 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	if (bNoVersionControlWarning) {
 		// Don't show "Version control is currently disabled. Would you like to continue without version control?" prompt
 		SafeWrite8(0x43F854, 0xEB);
+	}
+
+	if (bAutoLoadFiles) {
+		// makes the load files prompt jump to OK if it's the first time it's opened
+		WriteRelJump(0x432CC2, UInt32(hk_LoadFilesInit));
 	}
 
 	//	Create log window - credit to nukem
