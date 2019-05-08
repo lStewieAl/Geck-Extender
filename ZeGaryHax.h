@@ -715,9 +715,45 @@ _declspec(naked) void RenderWindowReferenceMovementSpeedHook() {
 		fmul
 		popad
 
-originalCode:
+	originalCode:
 		fmul dword ptr ds:[0xECFD1C]
 		jmp retnAddr
+	}
+}
+
+float GetOrthoSpeedMultiplier() {
+	if (GetAsyncKeyState(VK_MENU) < 0) {
+		return fMovementAltMultiplier;
+	}
+	return 1.0F;
+}
+
+_declspec(naked) void hk_OrthographicZoom() {
+	static const UInt32 retnAddr = 0x45F667;
+	_asm {
+		pushad
+		call GetOrthoSpeedMultiplier
+		fmul
+		popad
+
+	originalCode:
+		fmul    dword ptr ds : [0xD2E0D0]
+		jmp retnAddr
+	}
+}
+
+_declspec(naked) void hk_OrthographicZoom2() {
+	static const UInt32 retnAddr = 0x4602DE;
+	_asm {
+		fild dword ptr ss:[esp+0x24]
+		fmul dword ptr ds:[eax]
+
+		pushad
+		call GetOrthoSpeedMultiplier
+		fmul
+		popad
+
+		jmp retnAddr 
 	}
 }
 

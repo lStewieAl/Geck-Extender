@@ -368,6 +368,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 
 	if (bAltShiftMovementMultipliers) {
 		// Scroll wheel and pan speed affected by shift/alt
+		
 		WriteRelCall(0x48B8C5, UInt32(hk_DoRenderMousewheelScroll)); // preview window
 		WriteRelCall(0x48B74C, UInt32(hk_DoRenderMousewheelScroll)); // preview window
 		WriteRelCall(0x48B7AC, UInt32(hk_DoRenderMousewheelScroll)); // preview window pan
@@ -379,6 +380,10 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		// render window panning, doesn't apply shift multiplier as it conflicts with keybinding
 		WriteRelCall(0x45F7E5, UInt32(hk_DoRenderPan));
 		WriteRelCall(0x45F846, UInt32(hk_DoRenderPan));
+
+		// orthographic zoom 
+		WriteRelJump(0x45F661, UInt32(hk_OrthographicZoom));
+		WriteRelJump(0x4602D8, UInt32(hk_OrthographicZoom2));
 	}
 
 	if (bNoVersionControlWarning) {
