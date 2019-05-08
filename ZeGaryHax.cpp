@@ -111,6 +111,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	fMovementShiftMultiplier = GetPrivateProfileIntA("Render Window", "iShiftSpeedPct", 200, filename) / 100.0F;
 	
 	bSmoothFlycamRotation = GetPrivateProfileIntA("Flycam", "bSmoothRotation", 1, filename);
+	bFlycamUpDownRelativeToWorld = GetPrivateProfileIntA("Flycam", "bFlycamUpDownRelativeToWorld", 1, filename);
 	fFlycamRotationSpeed = GetPrivateProfileIntA("Flycam", "iRotationSpeedPct", 100, filename) * - 0.001F;
 	fFlycamNormalMovementSpeed = GetPrivateProfileIntA("Flycam", "iMovementSpeed", 10, filename) * 3.0F;
 	fFlycamShiftMovementSpeed = GetPrivateProfileIntA("Flycam", "iRunMovementSpeedPct", 300, filename) / 100.0F;
@@ -401,8 +402,13 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	}
 
 	// add Q/E keys for up/down movement in flycam mode for render window
-	WriteRelJump(0x455DAB, UInt32(RenderWindowMovementHook));
-
+	// if the movment is applied Post transform, it will be relative to the world
+	if (bFlycamUpDownRelativeToWorld) {
+		WriteRelJump(0x455DC9, UInt32(RenderWindowFlycamPostTransformMovementHook));
+	}
+	else {
+		WriteRelJump(0x455DAB, UInt32(RenderWindowFlycamPreTransformMovementHook));
+	}
 	//	Create log window - credit to nukem
 	InitCommonControls();
 	LoadLibraryA("MSFTEDIT.dll");

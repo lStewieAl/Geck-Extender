@@ -83,8 +83,8 @@ int bUseAltShiftMultipliers = 1;
 float fMovementAltMultiplier = 0.15F;
 float fMovementShiftMultiplier = 2.0F;
 
-
 int bSmoothFlycamRotation = 1;
+int bFlycamUpDownRelativeToWorld = 0;
 float fFlycamRotationSpeed;
 float fFlycamNormalMovementSpeed;
 float fFlycamShiftMovementSpeed;
@@ -790,7 +790,7 @@ _declspec(naked) void hk_LoadFilesInit() {
 }
 
 /* check if Q or E are pressed and modify the Z movement speed (stored in esp+0x2C) before it is passed to the view transform */
-_declspec(naked) void RenderWindowMovementHook() {
+_declspec(naked) void RenderWindowFlycamPreTransformMovementHook() {
 	static const UInt32 retnAddr = 0x455DB1;
 	_asm {
 		push 'Q'
@@ -798,6 +798,7 @@ _declspec(naked) void RenderWindowMovementHook() {
 		movzx eax, ax
 		test eax, 0x8000
 		jz noQ
+
 		fld  dword ptr ss:[esp+0x2C]
 		fsub dword ptr ds:[0xED12C0]
 		fstp dword ptr ss:[esp+0x2C]
@@ -807,11 +808,49 @@ _declspec(naked) void RenderWindowMovementHook() {
 		movzx eax, ax
 		test eax, 0x8000
 		jz noE
+
 		fld dword ptr ss:[esp + 0x2C]
 		fadd dword ptr ds : [0xED12C0]
 		fstp dword ptr ss:[esp + 0x2C]
 	noE:
 		mov esi, dword ptr ds:[0xED116C]
+		jmp retnAddr
+	}
+}
+
+_declspec(naked) void RenderWindowFlycamPostTransformMovementHook() {
+	static const UInt32 retnAddr = 0x455DCE;
+	_asm {
+		push eax
+		push 'Q'
+		call dword ptr ds:[0xD234D8] // GetAsyncKeyState
+		movzx eax, ax
+		test eax, 0x8000
+		jz noQ
+
+		pop eax
+		fld  dword ptr ss : [eax + 8]
+		fsub dword ptr ds : [0xED12C0]
+		fstp dword ptr ss : [eax + 8]
+		push eax
+
+	noQ :
+		push 'E'
+		call dword ptr ds : [0xD234D8] // GetAsyncKeyState
+		movzx eax, ax
+		test eax, 0x8000
+		jz noE
+
+		pop eax
+		fld  dword ptr ss : [eax + 8]
+		fadd dword ptr ds : [0xED12C0]
+		fstp dword ptr ss : [eax + 8]
+		push eax
+
+	noE:
+		pop eax
+		mov edx, dword ptr ss:[eax]
+		mov ecx, dword ptr ss : [eax+4]
 		jmp retnAddr
 	}
 }
