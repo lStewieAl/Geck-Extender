@@ -789,4 +789,31 @@ _declspec(naked) void hk_LoadFilesInit() {
 	}
 }
 
+/* check if Q or E are pressed and modify the Z movement speed (stored in esp+0x2C) before it is passed to the view transform */
+_declspec(naked) void RenderWindowMovementHook() {
+	static const UInt32 retnAddr = 0x455DB1;
+	_asm {
+		push 'Q'
+		call esi
+		movzx eax, ax
+		test eax, 0x8000
+		jz noQ
+		fld  dword ptr ss:[esp+0x2C]
+		fsub dword ptr ds:[0xED12C0]
+		fstp dword ptr ss:[esp+0x2C]
+	noQ:
+		push 'E'
+		call esi
+		movzx eax, ax
+		test eax, 0x8000
+		jz noE
+		fld dword ptr ss:[esp + 0x2C]
+		fadd dword ptr ds : [0xED12C0]
+		fstp dword ptr ss:[esp + 0x2C]
+	noE:
+		mov esi, dword ptr ds:[0xED116C]
+		jmp retnAddr
+	}
+}
+
 void __fastcall FastExitHook(volatile LONG** thiss);

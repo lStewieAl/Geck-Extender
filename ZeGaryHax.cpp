@@ -400,6 +400,9 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		WriteRelJump(0x432CC2, UInt32(hk_LoadFilesInit));
 	}
 
+	// add Q/E keys for up/down movement in flycam mode for render window
+	WriteRelJump(0x455DAB, UInt32(RenderWindowMovementHook));
+
 	//	Create log window - credit to nukem
 	InitCommonControls();
 	LoadLibraryA("MSFTEDIT.dll");
