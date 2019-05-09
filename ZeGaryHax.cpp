@@ -421,6 +421,9 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		XUtil::PatchMemoryNop(0x44D04B + 5, 1);
 	}
 
+	// remove broken "Textures" pane from Scene Info Window
+	XUtil::PatchMemoryNop(0x4156A8, 5);
+
 	//	Create log window - credit to nukem
 	InitCommonControls();
 	LoadLibraryA("MSFTEDIT.dll");
