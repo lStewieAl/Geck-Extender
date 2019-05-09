@@ -2,6 +2,7 @@
 #include "ZeLogWindow.h"
 
 HWND g_trackBarHwnd;
+HWND g_timeOfDayTextHwnd;
 
 struct NiPoint3
 {
