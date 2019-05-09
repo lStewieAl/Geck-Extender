@@ -424,6 +424,9 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	// remove broken "Textures" pane from Scene Info Window
 	XUtil::PatchMemoryNop(0x4156A8, 5);
 
+	// fix bug where disabling orthogonal mode would cause a shader to be applied to the camera
+	XUtil::PatchMemoryNop(0x456BD6, 4);
+
 	//	Create log window - credit to nukem
 	InitCommonControls();
 	LoadLibraryA("MSFTEDIT.dll");
