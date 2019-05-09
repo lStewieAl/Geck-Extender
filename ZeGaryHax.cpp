@@ -417,6 +417,8 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		XUtil::PatchMemoryNop(0x44DD69 + 5, 1);
 		WriteRelCall(0x44DDF5, UInt32(UpdateTimeOfDayScrollbarHook));
 		XUtil::PatchMemoryNop(0x44DDF5 + 5, 1);
+		WriteRelCall(0x44D04B, UInt32(UpdateTimeOfDayInputBoxHook));
+		XUtil::PatchMemoryNop(0x44D04B + 5, 1);
 	}
 
 	//	Create log window - credit to nukem

@@ -863,4 +863,9 @@ LRESULT __stdcall UpdateTimeOfDayScrollbarHook(HWND hWnd, UINT Msg, WPARAM wPara
 	return scrollPos;
 }
 
+void __stdcall UpdateTimeOfDayInputBoxHook(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
+	SendMessageA(hWnd, Msg, wParam, lParam);
+	SendMessageA(g_trackBarHwnd, TBM_SETPOS, TRUE, lParam);
+}
+
 void __fastcall FastExitHook(volatile LONG** thiss);
