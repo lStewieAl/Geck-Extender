@@ -80,6 +80,7 @@ int bShowLoadFilesAtStartup = 0;
 int bScriptCompileWarningPopup = 0;
 int bNoVersionControlWarning = 0;
 int bShowTimeOfDaySlider = 1;
+int bSkipVanillaLipGen = 0;
 
 int bUseAltShiftMultipliers = 1;
 float fMovementAltMultiplier = 0.15F;
@@ -866,6 +867,40 @@ LRESULT __stdcall UpdateTimeOfDayScrollbarHook(HWND hWnd, UINT Msg, WPARAM wPara
 void __stdcall UpdateTimeOfDayInputBoxHook(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
 	SendMessageA(hWnd, Msg, wParam, lParam);
 	SendMessageA(g_trackBarHwnd, TBM_SETPOS, TRUE, lParam);
+}
+
+/* skip the topic if its modIndex is less than 5 */
+_declspec(naked) void LipGenLoopHook() {
+	static const UInt32 retnAddr = 0x41EA83;
+	static const UInt32 skipAddr = 0x41EE65;
+	_asm {
+		cmp byte ptr [ecx+0xF], 5
+		jl skip
+
+		mov eax, [ecx]
+		mov edx, [eax+0xFC]
+		jmp retnAddr
+		
+	skip:
+		jmp skipAddr
+	}
+}
+
+/* don't increase the counter if the topic's modIndex is less than 5 */
+_declspec(naked) void LipGenCountTopicsHook() {
+	static const UInt32 retnAddr = 0x41EA35;
+	_asm {
+		mov esi, dword ptr ss:[eax]
+		test esi, esi
+		jz done
+		cmp byte ptr [esi+0xF], 5
+		jl done
+
+		inc ecx
+	done:
+		jmp retnAddr
+	}
+
 }
 
 void __fastcall FastExitHook(volatile LONG** thiss);

@@ -97,6 +97,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	bAutoLoadFiles = GetPrivateProfileIntA("General", "bAutoLoadFiles", 0, filename);
 	bShowLoadFilesAtStartup = GetPrivateProfileIntA("General", "bShowLoadFilesAtStartup", 0, filename) | bAutoLoadFiles;
 	bNoVersionControlWarning = GetPrivateProfileIntA("General", "bNoVersionControlWarning", 0, filename);
+	bSkipVanillaLipGen = GetPrivateProfileIntA("General", "bSkipVanillaLipGen", 0, filename);
 
 	bPatchScriptEditorFont = GetPrivateProfileIntA("Script", "bPatchEditorFont", 0, filename);
 	bScriptCompileWarningPopup = GetPrivateProfileIntA("Script", "bScriptCompileWarningPopup", 0, filename);
@@ -426,6 +427,14 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 
 	// fix bug where disabling orthogonal mode would cause a shader to be applied to the camera
 	XUtil::PatchMemoryNop(0x456BD6, 4);
+
+	if (bSkipVanillaLipGen) {
+		// skip topics whose mod index is less than 5 (there are 5 vanilla esms)
+		WriteRelJump(0x41EA7B, UInt32(LipGenLoopHook));
+
+		// don't include topics whose mod index is less than 5 for the progress bar counter
+		WriteRelJump(0x41EA30, UInt32(LipGenCountTopicsHook));
+	}
 
 	//	Create log window - credit to nukem
 	InitCommonControls();
