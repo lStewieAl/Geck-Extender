@@ -63,9 +63,9 @@ void EditorUI_AddSliderToToolbar(HWND MainWindow, HINSTANCE hInstance) {
 		NULL,
 		TRACKBAR_CLASSA,
 		"Trackbar Control",
-		(WS_CHILD | WS_VISIBLE | TBS_AUTOTICKS | TBS_ENABLESELRANGE),
-		900, 4, // x, y
-		250, 22, // width, height
+		(WS_CHILD | WS_VISIBLE | TBS_NOTICKS),
+		898, 2, // x, y
+		200, 24, // width, height
 		MainWindow, 
 		(HMENU)ID_TRACKBAR, 
 		hInstance, 
@@ -79,20 +79,31 @@ void EditorUI_AddSliderToToolbar(HWND MainWindow, HINSTANCE hInstance) {
 
 void EditorUI_AddTimeOfDayTextToToolbar(HWND MainWindow, HINSTANCE hInstance) {
 	g_timeOfDayTextHwnd = CreateWindowEx(
-		NULL,
-		RICHEDIT_CLASSA,
-		"Time",
+		WS_EX_CLIENTEDGE,
+		"Edit",
+		"10.00",
 		(WS_CHILD | WS_VISIBLE | ES_LEFT),
-		1155, 5, // x, y
+		1105, 5, // x, y
 		75, 20, // width, height
 		MainWindow,
 		(HMENU)ID_TIMEOFDAYTEXT,
 		hInstance,
 		NULL
 	);
-	SendMessageA(g_timeOfDayTextHwnd, EM_SETMARGINS, 10, EC_LEFTMARGIN);
+
+	// try something nice, otherwise fall back on SYSTEM_FIXED_FONT
+	fontHandle = CreateFontIndirect(&editorFont);
+	if (fontHandle)
+	{
+		fontInfo = editorFont;
+	}
+	else
+	{
+		fontHandle = GetStockObject(SYSTEM_FIXED_FONT);
+		GetObject(fontHandle, sizeof(fontInfo), &fontInfo);
+	}
 	SendMessageA(g_timeOfDayTextHwnd, WM_SETFONT, (WPARAM)fontHandle, 1);
-	SendMessageA(g_timeOfDayTextHwnd, EM_SETEVENTMASK, 0, ENM_CHANGE);
+	SendMessageA(g_timeOfDayTextHwnd, EM_LIMITTEXT, 8, 0);
 }
 
 void EditorUI_LogVa(const char *Format, va_list Va)
@@ -351,6 +362,35 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 				SetCamera(&savedRenderPos, &savedRenderDirection);
 			}
 			return 0;
+
+			case ID_TIMEOFDAYTEXT:
+			{
+				int msg = HIWORD(wParam);
+				
+				/* since EN_UPDATE is called even if the user didn't input text, need to check whether the textbox is focussed 
+				   and do nothing if it's not - keep track of whether the textbox is focused from SetFocus and KillFocus messages */
+				static bool isFocussed;
+				if (msg == EN_SETFOCUS)
+				{
+					isFocussed = true;
+					break;
+				}
+				if (msg == EN_KILLFOCUS)
+				{
+					isFocussed = false;
+					break;
+				}
+				if (!isFocussed || msg == EN_MAXTEXT) break;
+
+				char text[16];
+				int len = SendMessageA((HWND)lParam, EM_GETLINE, 0, (LPARAM)text);
+				text[len] = '\0'; // null terminate the line since EM_GETLINE does not
+
+				float time = atof(text);
+				SetTimeOfDay(time);
+				SendMessageA(g_trackBarHwnd, TBM_SETPOS, TRUE, time*4); // update scrollbar
+			}
+
 		}
 	}
 	else if (Message == WM_SETTEXT && Hwnd == g_MainHwnd)
@@ -384,10 +424,6 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 			}
 			return 0;
 		}
-	}
-	else if (Message == EN_CHANGE && bShowTimeOfDaySlider)
-	{
-	EditorUI_Log("True: %d, %d", LOWORD(wParam), HIWORD(wParam));
 	}
 	return CallWindowProc(OldEditorUI_WndProc, Hwnd, Message, wParam, lParam);
 }
