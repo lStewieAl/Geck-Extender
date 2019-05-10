@@ -18,6 +18,7 @@
 #define UI_EXTMENU_SAVEPOSITION 51010
 #define UI_EXTMENU_LOADPOSITION 51011
 #define ID_TRACKBAR				51012
+#define ID_TIMEOFDAYTEXT		51013
 
 
 HWND g_MainHwnd;
@@ -62,9 +63,9 @@ void EditorUI_AddSliderToToolbar(HWND MainWindow, HINSTANCE hInstance) {
 		NULL,
 		TRACKBAR_CLASSA,
 		"Trackbar Control",
-		WS_CHILD | WS_VISIBLE | TBS_AUTOTICKS | TBS_ENABLESELRANGE,
-		900, 4, // x, y
-		250, 22, // width, height
+		(WS_CHILD | WS_VISIBLE | TBS_NOTICKS),
+		898, 2, // x, y
+		200, 24, // width, height
 		MainWindow, 
 		(HMENU)ID_TRACKBAR, 
 		hInstance, 
@@ -74,6 +75,35 @@ void EditorUI_AddSliderToToolbar(HWND MainWindow, HINSTANCE hInstance) {
 	SendMessageA(g_trackBarHwnd, TBM_SETTICFREQ, 4, 0);
 	SendMessageA(g_trackBarHwnd, TBM_SETPOS, TRUE, 10 * 4);
 
+}
+
+void EditorUI_AddTimeOfDayTextToToolbar(HWND MainWindow, HINSTANCE hInstance) {
+	g_timeOfDayTextHwnd = CreateWindowEx(
+		WS_EX_CLIENTEDGE,
+		"Edit",
+		"10.00",
+		(WS_CHILD | WS_VISIBLE | ES_LEFT),
+		1105, 5, // x, y
+		75, 20, // width, height
+		MainWindow,
+		(HMENU)ID_TIMEOFDAYTEXT,
+		hInstance,
+		NULL
+	);
+
+	// try something nice, otherwise fall back on SYSTEM_FIXED_FONT
+	fontHandle = CreateFontIndirect(&editorFont);
+	if (fontHandle)
+	{
+		fontInfo = editorFont;
+	}
+	else
+	{
+		fontHandle = GetStockObject(SYSTEM_FIXED_FONT);
+		GetObject(fontHandle, sizeof(fontInfo), &fontInfo);
+	}
+	SendMessageA(g_timeOfDayTextHwnd, WM_SETFONT, (WPARAM)fontHandle, 1);
+	SendMessageA(g_timeOfDayTextHwnd, EM_LIMITTEXT, 8, 0);
 }
 
 void EditorUI_LogVa(const char *Format, va_list Va)
@@ -129,8 +159,10 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 			g_MainHwnd = Hwnd;
 			EditorUI_CreateExtensionMenu(Hwnd, createInfo->hMenu);
 
-			if(bShowTimeOfDaySlider)
+			if (bShowTimeOfDaySlider) {
 				EditorUI_AddSliderToToolbar(Hwnd, createInfo->hInstance);
+				EditorUI_AddTimeOfDayTextToToolbar(Hwnd, createInfo->hInstance);
+			}
 
 			InsertMenu(createInfo->hMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_LAUNCHGAME, "Launch Game");
 
@@ -330,31 +362,67 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 				SetCamera(&savedRenderPos, &savedRenderDirection);
 			}
 			return 0;
+
+			case ID_TIMEOFDAYTEXT:
+			{
+				int msg = HIWORD(wParam);
+				
+				/* since EN_UPDATE is called even if the user didn't input text, need to check whether the textbox is focussed 
+				   and do nothing if it's not - keep track of whether the textbox is focused from SetFocus and KillFocus messages */
+				static bool isFocussed;
+				if (msg == EN_SETFOCUS)
+				{
+					isFocussed = true;
+					break;
+				}
+				if (msg == EN_KILLFOCUS)
+				{
+					isFocussed = false;
+					break;
+				}
+				if (!isFocussed || msg == EN_MAXTEXT) break;
+
+				char text[16];
+				int len = SendMessageA((HWND)lParam, EM_GETLINE, 0, (LPARAM)text);
+				text[len] = '\0'; // null terminate the line since EM_GETLINE does not
+
+				float time = atof(text);
+				SetTimeOfDay(time);
+				SendMessageA(g_trackBarHwnd, TBM_SETPOS, TRUE, time*4); // update scrollbar
+			}
+
 		}
 	}
 	else if (Message == WM_SETTEXT && Hwnd == g_MainHwnd)
 	{
 		//	Continue normal execution but with a custom string
-		char customTitle[1024];
-		sprintf_s(customTitle, "%s -= GECK Extender Rev. 0.15 =-", (const char *)lParam);
+		char customTitle[256];
+		sprintf_s(customTitle, "%s -= GECK Extender Rev. 0.16 =-", (const char *)lParam);
 
 		return CallWindowProc(OldEditorUI_WndProc, Hwnd, Message, wParam, (LPARAM)customTitle);
 	}
-	if (bShowTimeOfDaySlider && Message == WM_HSCROLL)
+	else if (Message == WM_HSCROLL && bShowTimeOfDaySlider)
 	{
 		if ((HWND)lParam == g_trackBarHwnd) 
 		{
+			char timeBuf[100];
 			if ((LOWORD(wParam) == SB_THUMBPOSITION || LOWORD(wParam) == SB_THUMBTRACK)) 
 			{
 				float time = HIWORD(wParam) * 0.25;
 				SetTimeOfDay(time);
+
+				sprintf(timeBuf, "%.2f", time);
+				SetWindowTextA(g_timeOfDayTextHwnd, timeBuf);
 			}
 			else if (LOWORD(wParam) == SB_ENDSCROLL)
 			{
 				float time = SendMessageA(g_trackBarHwnd, TBM_GETPOS, 0, 0) * 0.25;
 				SetTimeOfDay(time);
+
+				sprintf(timeBuf, "%.2f", time);
+				SetWindowTextA(g_timeOfDayTextHwnd, timeBuf);
 			}
-			
+			return 0;
 		}
 	}
 	return CallWindowProc(OldEditorUI_WndProc, Hwnd, Message, wParam, lParam);

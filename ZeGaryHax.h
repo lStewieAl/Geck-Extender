@@ -9,6 +9,7 @@
 
 HMODULE ZeGaryHaxHandle;
 extern HWND g_trackBarHwnd;
+extern HWND g_timeOfDayTextHwnd;
 
 IDebugLog		gLog("EditorWarnings.log");
 
@@ -861,12 +862,21 @@ _declspec(naked) void RenderWindowFlycamPostTransformMovementHook() {
 LRESULT __stdcall UpdateTimeOfDayScrollbarHook(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
 	LRESULT scrollPos = SendMessageA(hWnd, Msg, wParam, lParam);
 	SendMessageA(g_trackBarHwnd, TBM_SETPOS, TRUE, scrollPos);
+	
+	char timeBuf[100];
+	sprintf(timeBuf, "%.2f", scrollPos / 4.0F);
+	SetWindowTextA(g_timeOfDayTextHwnd, timeBuf);
+	
 	return scrollPos;
 }
 
 void __stdcall UpdateTimeOfDayInputBoxHook(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
 	SendMessageA(hWnd, Msg, wParam, lParam);
 	SendMessageA(g_trackBarHwnd, TBM_SETPOS, TRUE, lParam);
+	
+	char timeBuf[100];
+	sprintf(timeBuf, "%.2f", lParam / 4.0F);
+	SetWindowTextA(g_timeOfDayTextHwnd, timeBuf);
 }
 
 /* skip the topic if its modIndex is less than 5 */
