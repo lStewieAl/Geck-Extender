@@ -112,16 +112,19 @@ void EditorUI_AddAllowRenderWindowCellLoadsCheckbox(HWND MainWindow, HINSTANCE h
 		NULL,
 		"BUTTON",
 		"Allow Render Window Cell Loads",
-		BS_CHECKBOX | WS_CHILD | WS_VISIBLE | BS_NOTIFY,
-		1165, 5, // x, y
-		250, 20, // width, height
+		BS_PUSHLIKE | BS_CHECKBOX | WS_CHILD | WS_VISIBLE | BS_NOTIFY | BS_BITMAP,
+		1160, 4, // x, y
+		24, 21, // width, height
 		MainWindow,
 		(HMENU)ID_RENDERWINDOWCELLLOADS_CHECKBOX,
 		hInstance,
 		NULL
 	);
-	SendMessageA(g_allowCellWindowLoadsButtonHwnd, WM_SETFONT, (WPARAM)fontHandle, 1);
+//	SendMessageA(g_allowCellWindowLoadsButtonHwnd, WM_SETFONT, (WPARAM)fontHandle, 1);
 	SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_SETCHECK, GetIsRenderWindowAllowCellLoads(), NULL);
+
+	HBITMAP hBitmap = (HBITMAP)LoadImage(ZeGaryHaxHandle, MAKEINTRESOURCE(IDB_RENDERCELLSICON), IMAGE_BITMAP, NULL, NULL, NULL);
+	SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
 }
 
 void EditorUI_LogVa(const char *Format, va_list Va)

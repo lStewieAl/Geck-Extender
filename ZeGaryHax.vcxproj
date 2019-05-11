@@ -180,7 +180,9 @@ C:\Modding\MO2\ModOrganizer.exe "moshortcut://Tale of Two Wastelands:x32dbg GECK
   </ItemGroup>
   <ItemGroup>
     <Image Include="bitmap1.bmp" />
+    <Image Include="bitmap2.bmp" />
     <Image Include="GECKExtender.bmp" />
+    <Image Include="RenderWindowCellLoadsIcon.bmp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ZeGaryHax.rc" />
