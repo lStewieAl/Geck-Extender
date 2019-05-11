@@ -365,23 +365,10 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 
 			case ID_TIMEOFDAYTEXT:
 			{
-				int msg = HIWORD(wParam);
-				
-				/* since EN_UPDATE is called even if the user didn't input text, need to check whether the textbox is focussed 
-				   and do nothing if it's not - keep track of whether the textbox is focused from SetFocus and KillFocus messages */
-				static bool isFocussed;
-				if (msg == EN_SETFOCUS)
-				{
-					isFocussed = true;
-					break;
-				}
-				if (msg == EN_KILLFOCUS)
-				{
-					isFocussed = false;
-					break;
-				}
-				if (!isFocussed || msg == EN_MAXTEXT) break;
+				if (GetFocus() != (HWND)lParam) break;
 
+				if (HIWORD(wParam) == EN_MAXTEXT) break;
+				
 				char text[16];
 				int len = SendMessageA((HWND)lParam, EM_GETLINE, 0, (LPARAM)text);
 				text[len] = '\0'; // null terminate the line since EM_GETLINE does not
