@@ -84,7 +84,7 @@ void EditorUI_AddTimeOfDayTextToToolbar(HWND MainWindow, HINSTANCE hInstance) {
 		"10.00",
 		(WS_CHILD | WS_VISIBLE | ES_LEFT),
 		1105, 5, // x, y
-		75, 20, // width, height
+		45, 20, // width, height
 		MainWindow,
 		(HMENU)ID_TIMEOFDAYTEXT,
 		hInstance,
