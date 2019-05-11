@@ -10,6 +10,7 @@
 HMODULE ZeGaryHaxHandle;
 extern HWND g_trackBarHwnd;
 extern HWND g_timeOfDayTextHwnd;
+extern HWND g_allowCellWindowLoadsButtonHwnd;
 
 IDebugLog		gLog("EditorWarnings.log");
 
@@ -82,6 +83,7 @@ int bScriptCompileWarningPopup = 0;
 int bNoVersionControlWarning = 0;
 int bShowTimeOfDaySlider = 1;
 int bSkipVanillaLipGen = 0;
+int bShowRenderCellLoadsButton = 0;
 
 int bUseAltShiftMultipliers = 1;
 float fMovementAltMultiplier = 0.15F;
@@ -912,5 +914,16 @@ _declspec(naked) void LipGenCountTopicsHook() {
 	}
 
 }
+
+bool GetIsRenderWindowAllowCellLoads2() {
+	return (*(byte*)(0xECFCEC) >> 2) & 1;
+}
+
+void __fastcall PreferencesWindowApplyButtonHook(int* thiss, void* dummyEDX, int a2) {
+	((int(__thiscall*)(int* thiss, int a2))(0x855B30))(thiss, a2);
+	SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_SETCHECK, GetIsRenderWindowAllowCellLoads2(), NULL);
+}
+
+
 
 void __fastcall FastExitHook(volatile LONG** thiss);

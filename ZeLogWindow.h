@@ -19,6 +19,7 @@
 #define UI_EXTMENU_LOADPOSITION 51011
 #define ID_TRACKBAR				51012
 #define ID_TIMEOFDAYTEXT		51013
+#define ID_RENDERWINDOWCELLLOADS_CHECKBOX 51014
 
 
 HWND g_MainHwnd;
@@ -106,6 +107,23 @@ void EditorUI_AddTimeOfDayTextToToolbar(HWND MainWindow, HINSTANCE hInstance) {
 	SendMessageA(g_timeOfDayTextHwnd, EM_LIMITTEXT, 8, 0);
 }
 
+void EditorUI_AddAllowRenderWindowCellLoadsCheckbox(HWND MainWindow, HINSTANCE hInstance) {
+	g_allowCellWindowLoadsButtonHwnd = CreateWindowEx(
+		NULL,
+		"BUTTON",
+		"Allow Render Window Cell Loads",
+		BS_CHECKBOX | WS_CHILD | WS_VISIBLE | BS_NOTIFY,
+		1165, 5, // x, y
+		250, 20, // width, height
+		MainWindow,
+		(HMENU)ID_RENDERWINDOWCELLLOADS_CHECKBOX,
+		hInstance,
+		NULL
+	);
+	SendMessageA(g_allowCellWindowLoadsButtonHwnd, WM_SETFONT, (WPARAM)fontHandle, 1);
+	SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_SETCHECK, GetIsRenderWindowAllowCellLoads(), NULL);
+}
+
 void EditorUI_LogVa(const char *Format, va_list Va)
 {
 	char buffer[2048];
@@ -162,6 +180,10 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 			if (bShowTimeOfDaySlider) {
 				EditorUI_AddSliderToToolbar(Hwnd, createInfo->hInstance);
 				EditorUI_AddTimeOfDayTextToToolbar(Hwnd, createInfo->hInstance);
+			}
+			
+			if (bShowRenderCellLoadsButton) {
+				EditorUI_AddAllowRenderWindowCellLoadsCheckbox(Hwnd, createInfo->hInstance);
 			}
 
 			InsertMenu(createInfo->hMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_LAUNCHGAME, "Launch Game");
@@ -376,6 +398,16 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 				float time = atof(text);
 				SetTimeOfDay(time);
 				SendMessageA(g_trackBarHwnd, TBM_SETPOS, TRUE, time*4); // update scrollbar
+			}
+
+			case ID_RENDERWINDOWCELLLOADS_CHECKBOX:
+			{
+				if (HIWORD(wParam) == BN_CLICKED && bShowRenderCellLoadsButton)
+				{
+					bool newButtonState = !SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_GETCHECK, 0, 0);
+					SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_SETCHECK, newButtonState, 0);
+					ToggleRenderWindowAllowCellLoads(newButtonState);
+				}
 			}
 
 		}

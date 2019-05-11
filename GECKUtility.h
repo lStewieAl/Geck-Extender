@@ -3,6 +3,7 @@
 
 HWND g_trackBarHwnd;
 HWND g_timeOfDayTextHwnd;
+HWND g_allowCellWindowLoadsButtonHwnd;
 
 struct NiPoint3
 {
@@ -94,4 +95,20 @@ void SetTimeOfDay(float time) {
 	if (!timeStruct) return;
 
 	((void(__thiscall*)(float* timeStruct, float newTime))(0x44CD00))(timeStruct, time);
+}
+
+void ToggleRenderWindowAllowCellLoads(bool toggle) {
+	/* toggle the third bit */
+	if (toggle)
+	{
+		*(byte*)(0xECFCEC) |= (1 << 2);
+	}
+	else 
+	{
+		*(byte*)(0xECFCEC) &= ~(1 << 2);
+	}
+}
+
+bool GetIsRenderWindowAllowCellLoads() {
+	return (*(byte*)(0xECFCEC) >> 2) & 1;
 }
