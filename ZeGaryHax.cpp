@@ -307,7 +307,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		XUtil::PatchMemoryNop(0x4DDD4F, 5);
 
 		// make the cell loading bar only update every 128 references instead of every ref
-		SafeWriteBuf(0x4BFFA2, "\xF7\xC3\x7F\x00\x00\x00\x74\x3C\xEB\x68", 10);
+		SafeWriteBuf(0x4BFFA2, "\xF7\xC3\x7F\x00\x00\x00\x74\x3C\xEB\x68", 10); // replaces a test ebx, ebx with test ebx, 0x7F
 	}
 
 	if (bPlaySoundEndOfLoading) {
@@ -424,7 +424,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	}
 
 	if (bShowRenderCellLoadsButton) {
-		// hook apply button for allow render window cell loads button
+		// hook preferences window apply button to update the "allow render window cell loads" toolbar button
 		WriteRelCall(0x44EA74, UInt32(PreferencesWindowApplyButtonHook));
 	}
 
@@ -504,13 +504,13 @@ void SaveWindowPositions() {
 	SaveWindowPositionToINI(*(HWND*)(0xECFB40), "Render Window");
 
 	char buffer[8];
-	RECT pos;
-
-	GetWindowRect(g_ConsoleHwnd, &pos);
-	WritePrivateProfileString("Log", "iWindowPosX", _itoa(pos.left, buffer, 10), filename);
-	WritePrivateProfileString("Log", "iWindowPosY", _itoa(pos.top, buffer, 10), filename);
-	WritePrivateProfileString("Log", "iWindowPosDX", _itoa(pos.right-pos.left, buffer, 10), filename);
-	WritePrivateProfileString("Log", "iWindowPosDY", _itoa(pos.bottom-pos.top, buffer, 10), filename);
+	
+	WINDOWPLACEMENT pos;
+	GetWindowPlacement(g_ConsoleHwnd, &pos);
+	WritePrivateProfileString("Log", "iWindowPosX", _itoa(pos.rcNormalPosition.left, buffer, 10), filename);
+	WritePrivateProfileString("Log", "iWindowPosY", _itoa(pos.rcNormalPosition.top, buffer, 10), filename);
+	WritePrivateProfileString("Log", "iWindowPosDX", _itoa(pos.rcNormalPosition.right-pos.rcNormalPosition.left, buffer, 10), filename);
+	WritePrivateProfileString("Log", "iWindowPosDY", _itoa(pos.rcNormalPosition.bottom-pos.rcNormalPosition.top, buffer, 10), filename);
 }
 
 void __fastcall FastExitHook(volatile LONG** thiss)
