@@ -782,7 +782,7 @@ _declspec(naked) void hk_RefCameraRotation() {
 
 bool isFirstInit = true;
 _declspec(naked) void hk_LoadFilesInit() {
-	static const UInt32 autoLoadAddr = 0x432D77;
+	static const UInt32 autoLoadAddr = 0x432D7D;
 	static const UInt32 noLoadAddr = 0x432E64;
 
 	_asm {
