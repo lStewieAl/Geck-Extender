@@ -881,12 +881,34 @@ void __stdcall UpdateTimeOfDayInputBoxHook(HWND hWnd, UINT Msg, WPARAM wParam, L
 	SetWindowTextA(g_timeOfDayTextHwnd, timeBuf);
 }
 
+/*
+UInt16 modIndex = -1;
+bool __fastcall CheckIsValidTopic(TESTopic* topic) {
+	tList<TESTopic::Info> infos = topic->infos;
+
+	for (tList<TESTopic::Info>::Iterator iter = infos.Begin(); !iter.End(); ++iter) {
+		TopicInfoArray topicInfos = iter->infoArray;
+		UInt16 count = topicInfos.firstFreeEntry;
+		TESTopicInfo* data = *topicInfos.data;
+		for (int i = 0, n = topicInfos.firstFreeEntry; i < n; ++i) {
+			TESTopicInfo* topicInfo = (TESTopicInfo*)data + i;
+			if (topicInfo && topicInfo->GetModIndex() < 5) {
+				modIndex = topicInfo->GetModIndex();
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+*/
+
 /* skip the topic if its modIndex is less than 5 */
 _declspec(naked) void LipGenLoopHook() {
 	static const UInt32 retnAddr = 0x41EA83;
 	static const UInt32 skipAddr = 0x41EE65;
 	_asm {
-		cmp byte ptr [ecx+0xF], 5
+		cmp byte ptr[ecx + 0xF], 5
 		jl skip
 
 		mov eax, [ecx]
@@ -924,6 +946,13 @@ void __fastcall PreferencesWindowApplyButtonHook(int* thiss, void* dummyEDX, int
 	SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_SETCHECK, GetIsRenderWindowAllowCellLoads2(), NULL);
 }
 
-
+/*
+void __cdecl CreateMainMenuToolbar(HWND hwnd) {
+	// adjust toolbar creation flags
+	SafeWrite32(0x465A06, 0x54000000 | CCS_TOP | TBSTYLE_TOOLTIPS /* custom flags: *//* | CCS_ADJUSTABLE | TBSTYLE_WRAPABLE);
+	((void(__cdecl*)(HWND hwnd))(0x4659E0))(hwnd);
+	HWND g_MainWindowToolbar = (HWND)0xECFC14;
+}
+*/
 
 void __fastcall FastExitHook(volatile LONG** thiss);

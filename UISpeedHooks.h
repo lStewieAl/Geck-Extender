@@ -54,7 +54,6 @@ void __stdcall hk_sub_59C7B0(HWND hWnd) {
 	EndUIDefer();
 }
 
-
 /*
 It would be a lot faster with the BeginUIDefer calls, however it causes dirty edits in PNAM - Previous INFO and ANAM - Speaker
 */
@@ -214,6 +213,7 @@ void WriteUIHooks() {
 	WriteRelCall(0x48C0AF, UInt32(hk_sub_47D330));
 	WriteRelCall(0x48C128, UInt32(hk_sub_47D330));
 
+	
 	// speed up packages window
 	WriteRelCall(0x498CB4, UInt32(hk_sub_4979F0));
 	WriteRelCall(0x499509, UInt32(hk_sub_4979F0));
@@ -221,8 +221,8 @@ void WriteUIHooks() {
 	WriteRelCall(0x4995BC, UInt32(hk_sub_4979F0));
 	WriteRelCall(0x4995FB, UInt32(hk_sub_4979F0));
 	WriteRelCall(0x49963A, UInt32(hk_sub_4979F0));
-	WriteRelCall(0x49966C, UInt32(hk_sub_4979F0));
 	WriteRelCall(0x49D1CA, UInt32(hk_sub_47F7A0));
+	//WriteRelCall(0x49966C, UInt32(hk_sub_4979F0)); Use Weapon multi-combo box
 
 	// speed up object palette
 	WriteRelCall(0x40CF05, UInt32(hk_sub_47E0D0));

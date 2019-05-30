@@ -20,11 +20,17 @@
 #define ID_TRACKBAR				51012
 #define ID_TIMEOFDAYTEXT		51013
 #define ID_RENDERWINDOWCELLLOADS_CHECKBOX 51014
+#define ID_RENDERWINDOW_SHOWWATER_CHECKBOX	51015
+#define ID_RENDERWINDOW_SHOWPORTALS_CHECKBOX	51016
 
+
+// unused button in vanilla menu
+#define VIEW_RENDER_WINDOW 0x9D06
 
 HWND g_MainHwnd;
 HWND g_ConsoleHwnd;
 HMENU g_ExtensionMenu;
+HMENU g_MainMenu;
 WNDPROC OldEditorUI_WndProc;
 
 NiPoint3 savedRenderPos;
@@ -120,12 +126,50 @@ void EditorUI_AddAllowRenderWindowCellLoadsCheckbox(HWND MainWindow, HINSTANCE h
 		hInstance,
 		NULL
 	);
-//	SendMessageA(g_allowCellWindowLoadsButtonHwnd, WM_SETFONT, (WPARAM)fontHandle, 1);
 	SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_SETCHECK, GetIsRenderWindowAllowCellLoads(), NULL);
 
-	HBITMAP hBitmap = (HBITMAP)LoadImage(ZeGaryHaxHandle, MAKEINTRESOURCE(IDB_RENDERCELLSICON), IMAGE_BITMAP, NULL, NULL, NULL);
+	HBITMAP hBitmap = (HBITMAP)LoadImage(ZeGaryHaxHandle, MAKEINTRESOURCE(IDB_ALLOW_CELL_LOADS_ICON), IMAGE_BITMAP, NULL, NULL, NULL);
 	SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
 }
+
+void EditorUI_AddRenderWindowShowPortalsCheckbox(HWND MainWindow, HINSTANCE hInstance) {
+	g_renderWindowShowPortalsButtonHwnd = CreateWindowEx(
+		NULL,
+		"BUTTON",
+		"Render Window Show Portals",
+		BS_PUSHLIKE | BS_CHECKBOX | WS_CHILD | WS_VISIBLE | BS_NOTIFY | BS_BITMAP,
+		1185, 4, // x, y
+		24, 21, // width, height
+		MainWindow,
+		(HMENU)ID_RENDERWINDOW_SHOWPORTALS_CHECKBOX,
+		hInstance,
+		NULL
+	);
+	SendMessageA(g_renderWindowShowPortalsButtonHwnd, BM_SETCHECK, GetIsShowPortalsAndRooms(), NULL);
+
+	HBITMAP hBitmap = (HBITMAP)LoadImage(ZeGaryHaxHandle, MAKEINTRESOURCE(IDB_SHOW_PORTALS_ICON), IMAGE_BITMAP, NULL, NULL, NULL);
+	SendMessageA(g_renderWindowShowPortalsButtonHwnd, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
+}
+
+void EditorUI_AddRenderWindowShowWaterCheckbox(HWND MainWindow, HINSTANCE hInstance) {
+	g_renderWindowShowWaterButtonHwnd = CreateWindowEx(
+		NULL,
+		"BUTTON",
+		"Render Window Show Water",
+		BS_PUSHLIKE | BS_CHECKBOX | WS_CHILD | WS_VISIBLE | BS_NOTIFY | BS_BITMAP,
+		1210, 4, // x, y
+		24, 21, // width, height
+		MainWindow,
+		(HMENU)ID_RENDERWINDOW_SHOWWATER_CHECKBOX,
+		hInstance,
+		NULL
+	);
+	SendMessageA(g_renderWindowShowWaterButtonHwnd, BM_SETCHECK, GetIsShowWater(), NULL);
+
+	HBITMAP hBitmap = (HBITMAP)LoadImage(ZeGaryHaxHandle, MAKEINTRESOURCE(IDB_SHOW_WATER_ICON), IMAGE_BITMAP, NULL, NULL, NULL);
+	SendMessageA(g_renderWindowShowWaterButtonHwnd, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
+}
+
 
 void EditorUI_LogVa(const char *Format, va_list Va)
 {
@@ -178,6 +222,7 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 
 			editorUIInit = true;
 			g_MainHwnd = Hwnd;
+			
 			EditorUI_CreateExtensionMenu(Hwnd, createInfo->hMenu);
 
 			if (bShowTimeOfDaySlider) {
@@ -187,9 +232,14 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 			
 			if (bShowRenderCellLoadsButton) {
 				EditorUI_AddAllowRenderWindowCellLoadsCheckbox(Hwnd, createInfo->hInstance);
+				EditorUI_AddRenderWindowShowWaterCheckbox(Hwnd, createInfo->hInstance);
+				EditorUI_AddRenderWindowShowPortalsCheckbox(Hwnd, createInfo->hInstance);
 			}
 
 			InsertMenu(createInfo->hMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_LAUNCHGAME, "Launch Game");
+
+			g_MainMenu = createInfo->hMenu;
+			EnableMenuItem(g_MainMenu, VIEW_RENDER_WINDOW, MF_DISABLED | MF_GRAYED);
 
 			MENUITEMINFO menuInfo;
 			menuInfo.cbSize = sizeof(MENUITEMINFO);
@@ -402,6 +452,7 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 				SetTimeOfDay(time);
 				SendMessageA(g_trackBarHwnd, TBM_SETPOS, TRUE, time*4); // update scrollbar
 			}
+			return 0;
 
 			case ID_RENDERWINDOWCELLLOADS_CHECKBOX:
 			{
@@ -412,14 +463,59 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 					ToggleRenderWindowAllowCellLoads(newButtonState);
 				}
 			}
+			return 0;
 
+			case ID_RENDERWINDOW_SHOWWATER_CHECKBOX:
+			{
+				if (HIWORD(wParam) == BN_CLICKED && bShowRenderCellLoadsButton)
+				{
+					bool newButtonState = !SendMessageA(g_renderWindowShowWaterButtonHwnd, BM_GETCHECK, 0, 0);
+					SendMessageA(g_renderWindowShowWaterButtonHwnd, BM_SETCHECK, newButtonState, 0);
+					SetIsShowWater(newButtonState);
+				}
+			}
+			return 0;
+
+			case ID_RENDERWINDOW_SHOWPORTALS_CHECKBOX:
+			{
+				if (HIWORD(wParam) == BN_CLICKED && bShowRenderCellLoadsButton)
+				{
+					bool newButtonState = !SendMessageA(g_renderWindowShowPortalsButtonHwnd, BM_GETCHECK, 0, 0);
+					SendMessageA(g_renderWindowShowPortalsButtonHwnd, BM_SETCHECK, newButtonState, 0);
+					SetIsShowPortalsAndRooms(newButtonState);
+				}
+			}
+			return 0;
+
+			case VIEW_RENDER_WINDOW:
+			{
+				MENUITEMINFO menuInfo;
+				menuInfo.cbSize = sizeof(MENUITEMINFO);
+				menuInfo.fMask = MIIM_STATE;
+				GetMenuItemInfo(g_MainMenu, VIEW_RENDER_WINDOW, FALSE, &menuInfo);
+
+				if (menuInfo.fState == MFS_CHECKED)
+				{
+					//	Hide window
+					menuInfo.fState = MFS_UNCHECKED;
+					SetMenuItemInfo(g_MainMenu, VIEW_RENDER_WINDOW, FALSE, &menuInfo);
+				}
+				else
+				{
+					//	Show window
+					menuInfo.fState = MFS_CHECKED;
+					SetMenuItemInfo(g_MainMenu, VIEW_RENDER_WINDOW, FALSE, &menuInfo);
+					ShowWindow(g_renderWindowHwnd, 1);
+				}
+			}
+			return 0;
 		}
 	}
 	else if (Message == WM_SETTEXT && Hwnd == g_MainHwnd)
 	{
 		//	Continue normal execution but with a custom string
 		char customTitle[256];
-		sprintf_s(customTitle, "%s -= GECK Extender Rev. 0.16 =-", (const char *)lParam);
+		sprintf_s(customTitle, "%s -= GECK Extender Rev. 0.18 =-", (const char *)lParam);
 
 		return CallWindowProc(OldEditorUI_WndProc, Hwnd, Message, wParam, (LPARAM)customTitle);
 	}

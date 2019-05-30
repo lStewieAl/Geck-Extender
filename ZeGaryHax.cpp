@@ -373,7 +373,6 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 
 	if (bUseAltShiftMultipliers) {
 		// Scroll wheel and pan speed affected by shift/alt
-		
 		WriteRelCall(0x48B8C5, UInt32(hk_DoRenderMousewheelScroll)); // preview window
 		WriteRelCall(0x48B74C, UInt32(hk_DoRenderMousewheelScroll)); // preview window
 		WriteRelCall(0x48B7AC, UInt32(hk_DoRenderMousewheelScroll)); // preview window pan
@@ -441,6 +440,8 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		// don't include topics whose mod index is less than 5 for the progress bar counter
 		WriteRelJump(0x41EA30, UInt32(LipGenCountTopicsHook));
 	}
+
+//	WriteRelCall(0x440869, UInt32(CreateMainMenuToolbar));
 
 	//	Create log window - credit to nukem
 	InitCommonControls();

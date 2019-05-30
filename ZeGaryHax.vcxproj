@@ -138,6 +138,7 @@ C:\Modding\MO2\ModOrganizer.exe "moshortcut://Tale of Two Wastelands:x32dbg GECK
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.h" />
+    <ClInclude Include="GECKUtility.h" />
     <ClInclude Include="nvse\CommandTable.h" />
     <ClInclude Include="nvse\GameAPI.h" />
     <ClInclude Include="nvse\GameBSExtraData.h" />
@@ -163,6 +164,7 @@ C:\Modding\MO2\ModOrganizer.exe "moshortcut://Tale of Two Wastelands:x32dbg GECK
     <ClInclude Include="nvse\SafeWrite.h" />
     <ClInclude Include="nvse\Utilities.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="UISpeedHooks.h" />
     <ClInclude Include="xutil.h" />
     <ClInclude Include="ZeGaryHax.h" />
     <ClInclude Include="ZeLogWindow.h" />
@@ -179,10 +181,13 @@ C:\Modding\MO2\ModOrganizer.exe "moshortcut://Tale of Two Wastelands:x32dbg GECK
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="Allow_Cell_Loads_Toggle_Geck_Icon.bmp" />
     <Image Include="bitmap1.bmp" />
     <Image Include="bitmap2.bmp" />
     <Image Include="GECKExtender.bmp" />
     <Image Include="RenderWindowCellLoadsIcon.bmp" />
+    <Image Include="Rooms_Portals_Toggle_Geck_Icon.bmp" />
+    <Image Include="Water_Toggle_Geck_Icon.bmp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ZeGaryHax.rc" />

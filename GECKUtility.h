@@ -4,6 +4,8 @@
 HWND g_trackBarHwnd;
 HWND g_timeOfDayTextHwnd;
 HWND g_allowCellWindowLoadsButtonHwnd;
+HWND g_renderWindowShowWaterButtonHwnd;
+HWND g_renderWindowShowPortalsButtonHwnd;
 
 struct NiPoint3
 {
@@ -112,3 +114,36 @@ void ToggleRenderWindowAllowCellLoads(bool toggle) {
 bool GetIsRenderWindowAllowCellLoads() {
 	return (*(byte*)(0xECFCEC) >> 2) & 1;
 }
+
+void SetIsShowWater(bool state) {
+	(*(byte*)(0xECEED4)) = state;
+	((void(*)(void))(0x4164D0))();
+}
+
+bool GetIsShowWater() {
+	return (*(byte*)(0xECEED4));
+}
+
+bool GetIsShowPortalsAndRooms() {
+	return (*(byte*)(0xECEEF8));
+}
+
+void SetIsShowPortalsAndRooms(bool state) {
+	(*(byte*)(0xECEEF8)) = state;
+	((void(*)(void))(0x416590))();
+}
+
+long GetPreviousRenderWindowSize() {
+	return (*(long*)(0xED1444));
+}
+
+int GetPreviousRenderWindowWidth() {
+	return (*(int*)(0xED1444));
+}
+
+int GetPreviousRenderWindowHeight() {
+	return (*(int*)(0xED1448));
+}
+
+HWND g_renderWindowHwnd = (HWND)0xE0C1AA;
+HWND g_mainWindowToolbar = (HWND)0xECFC14;

@@ -145,6 +145,8 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="xutil.h" />
     <ClInclude Include="Editor.h" />
+    <ClInclude Include="UISpeedHooks.h" />
+    <ClInclude Include="GECKUtility.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
@@ -159,6 +161,9 @@
     <Image Include="GECKExtender.bmp" />
     <Image Include="RenderWindowCellLoadsIcon.bmp" />
     <Image Include="bitmap2.bmp" />
+    <Image Include="Allow_Cell_Loads_Toggle_Geck_Icon.bmp" />
+    <Image Include="Rooms_Portals_Toggle_Geck_Icon.bmp" />
+    <Image Include="Water_Toggle_Geck_Icon.bmp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ZeGaryHax.rc" />
