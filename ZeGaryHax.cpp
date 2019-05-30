@@ -98,7 +98,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	bShowLoadFilesAtStartup = GetPrivateProfileIntA("General", "bShowLoadFilesAtStartup", 0, filename) | bAutoLoadFiles;
 	bNoVersionControlWarning = GetPrivateProfileIntA("General", "bNoVersionControlWarning", 0, filename);
 	bSkipVanillaLipGen = GetPrivateProfileIntA("General", "bSkipVanillaLipGen", 0, filename);
-	bShowRenderCellLoadsButton = GetPrivateProfileIntA("General", "bShowRenderCellLoadsButton", 0, filename);
+	bShowAdditionalToolbarButtons = GetPrivateProfileIntA("General", "bShowAdditionalToolbarButtons", 0, filename);
 
 	bPatchScriptEditorFont = GetPrivateProfileIntA("Script", "bPatchEditorFont", 0, filename);
 	bScriptCompileWarningPopup = GetPrivateProfileIntA("Script", "bScriptCompileWarningPopup", 0, filename);
@@ -422,7 +422,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		XUtil::PatchMemoryNop(0x44D04B + 5, 1);
 	}
 
-	if (bShowRenderCellLoadsButton) {
+	if (bShowAdditionalToolbarButtons) {
 		// hook preferences window apply button to update the "allow render window cell loads" toolbar button
 		WriteRelCall(0x44EA74, UInt32(PreferencesWindowApplyButtonHook));
 	}

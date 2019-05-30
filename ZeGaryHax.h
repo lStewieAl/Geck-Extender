@@ -83,7 +83,7 @@ int bScriptCompileWarningPopup = 0;
 int bNoVersionControlWarning = 0;
 int bShowTimeOfDaySlider = 1;
 int bSkipVanillaLipGen = 0;
-int bShowRenderCellLoadsButton = 0;
+int bShowAdditionalToolbarButtons = 0;
 
 int bUseAltShiftMultipliers = 1;
 float fMovementAltMultiplier = 0.15F;

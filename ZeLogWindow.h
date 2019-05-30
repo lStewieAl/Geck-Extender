@@ -230,7 +230,7 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 				EditorUI_AddTimeOfDayTextToToolbar(Hwnd, createInfo->hInstance);
 			}
 			
-			if (bShowRenderCellLoadsButton) {
+			if (bShowAdditionalToolbarButtons) {
 				EditorUI_AddAllowRenderWindowCellLoadsCheckbox(Hwnd, createInfo->hInstance);
 				EditorUI_AddRenderWindowShowWaterCheckbox(Hwnd, createInfo->hInstance);
 				EditorUI_AddRenderWindowShowPortalsCheckbox(Hwnd, createInfo->hInstance);
@@ -456,7 +456,7 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 
 			case ID_RENDERWINDOWCELLLOADS_CHECKBOX:
 			{
-				if (HIWORD(wParam) == BN_CLICKED && bShowRenderCellLoadsButton)
+				if (HIWORD(wParam) == BN_CLICKED && bShowAdditionalToolbarButtons)
 				{
 					bool newButtonState = !SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_GETCHECK, 0, 0);
 					SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_SETCHECK, newButtonState, 0);
@@ -467,7 +467,7 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 
 			case ID_RENDERWINDOW_SHOWWATER_CHECKBOX:
 			{
-				if (HIWORD(wParam) == BN_CLICKED && bShowRenderCellLoadsButton)
+				if (HIWORD(wParam) == BN_CLICKED && bShowAdditionalToolbarButtons)
 				{
 					bool newButtonState = !SendMessageA(g_renderWindowShowWaterButtonHwnd, BM_GETCHECK, 0, 0);
 					SendMessageA(g_renderWindowShowWaterButtonHwnd, BM_SETCHECK, newButtonState, 0);
@@ -478,7 +478,7 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 
 			case ID_RENDERWINDOW_SHOWPORTALS_CHECKBOX:
 			{
-				if (HIWORD(wParam) == BN_CLICKED && bShowRenderCellLoadsButton)
+				if (HIWORD(wParam) == BN_CLICKED && bShowAdditionalToolbarButtons)
 				{
 					bool newButtonState = !SendMessageA(g_renderWindowShowPortalsButtonHwnd, BM_GETCHECK, 0, 0);
 					SendMessageA(g_renderWindowShowPortalsButtonHwnd, BM_SETCHECK, newButtonState, 0);
