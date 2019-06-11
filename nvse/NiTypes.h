@@ -115,8 +115,8 @@ struct NiPlane
 template <typename T>
 struct NiTArray
 {
-	void	** _vtbl;		// 00
-	T		* data;			// 04
+	void** _vtbl;		// 00
+	T* data;			// 04
 	UInt16	capacity;		// 08 - init'd to size of preallocation
 	UInt16	firstFreeEntry;	// 0A - index of the first free entry in the block of free entries at the end of the array (or numObjs if full)
 	UInt16	numObjs;		// 0C - init'd to 0
@@ -134,6 +134,7 @@ struct NiTArray
 	void AddAtIndex(UInt32 index, T* item);	// no bounds checking
 	void SetCapacity(UInt16 newCapacity);	// grow and copy data if needed
 };
+
 
 #if RUNTIME
 

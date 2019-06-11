@@ -571,14 +571,14 @@ LRESULT CALLBACK EditorUI_LogWndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPA
 		format.dwMask = CFM_FACE | CFM_SIZE | CFM_WEIGHT;
 
 		// Convert Twips to points (1 point = 20 Twips)
-		int pointSize = GetPrivateProfileIntA("Log", "FontSize", 10, filename) * 20;
+		int pointSize = GetOrCreateINIInt("Log", "FontSize", 10, filename) * 20;
 		format.yHeight = pointSize;
 
 		char fontNameBuf[32];
 		GetPrivateProfileStringA("Log", "Font", "Consolas", fontNameBuf, 31, filename);
 		mbstowcs(format.szFaceName, fontNameBuf, 31);
 
-		format.wWeight = (WORD)GetPrivateProfileIntA("Log", "FontWeight", FW_MEDIUM, filename);
+		format.wWeight = (WORD)GetOrCreateINIInt("Log", "FontWeight", FW_MEDIUM, filename);
         SendMessageA(richEditHwnd, EM_SETCHARFORMAT, SCF_ALL, (LPARAM)&format);
 
 		//	Subscribe to EN_MSGFILTER and EN_SELCHANGE

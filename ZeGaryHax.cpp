@@ -83,42 +83,44 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	//	ini thing - credit to carxt
 	GetModuleFileNameA(NULL, filename, MAX_PATH);
 	strcpy((char *)(strrchr(filename, '\\') + 1), "Data\\nvse\\plugins\\geckextender.ini");
-	bEnableSpellChecker = GetPrivateProfileIntA("General", "bEnableSpellChecker", 0, filename);
-	bFastExit = GetPrivateProfileIntA("General", "bFastExit", 0, filename);
-	bListEditFix = GetPrivateProfileIntA("General", "bListEditFix", 0, filename);
-	bIgnoreNAMFiles = GetPrivateProfileIntA("General", "bIgnoreNAMFiles", 0, filename);
-	bVersionControlMode = GetPrivateProfileIntA("General", "bVersionControlMode", 0, filename);
-	bHighResLandscapeLOD = GetPrivateProfileIntA("General", "bHighResLandscapeLOD", 0, filename);
-	bRemoveStatusBarLoadingText = GetPrivateProfileIntA("General", "bRemoveLoadingText", 1, filename);
-	bPlaySoundEndOfLoading = GetPrivateProfileIntA("General", "bPlaySoundEndOfLoading", 1, filename);
-	bNoDXSoundCaptureErrorPopup = GetPrivateProfileIntA("General", "bNoDXSoundCaptureErrorPopup", 0, filename); 
-	bNoPreviewWindowAutoFocus = GetPrivateProfileIntA("General", "bNoPreviewWindowAutoFocus", 1, filename);
-	bNoLODMeshMessage = GetPrivateProfileIntA("General", "bNoLODMeshMessage", 0, filename);
-	bAutoLoadFiles = GetPrivateProfileIntA("General", "bAutoLoadFiles", 0, filename);
-	bShowLoadFilesAtStartup = GetPrivateProfileIntA("General", "bShowLoadFilesAtStartup", 0, filename) | bAutoLoadFiles;
-	bNoVersionControlWarning = GetPrivateProfileIntA("General", "bNoVersionControlWarning", 0, filename);
-	bSkipVanillaLipGen = GetPrivateProfileIntA("General", "bSkipVanillaLipGen", 0, filename);
-	bShowAdditionalToolbarButtons = GetPrivateProfileIntA("General", "bShowAdditionalToolbarButtons", 0, filename);
+	bEnableSpellChecker = GetOrCreateINIInt("General", "bEnableSpellChecker", 0, filename);
+	bFastExit = GetOrCreateINIInt("General", "bFastExit", 0, filename);
+	bListEditFix = GetOrCreateINIInt("General", "bListEditFix", 0, filename);
+	bIgnoreNAMFiles = GetOrCreateINIInt("General", "bIgnoreNAMFiles", 0, filename);
+	bVersionControlMode = GetOrCreateINIInt("General", "bVersionControlMode", 0, filename);
+	bHighResLandscapeLOD = GetOrCreateINIInt("General", "bHighResLandscapeLOD", 0, filename);
+	bRemoveStatusBarLoadingText = GetOrCreateINIInt("General", "bRemoveLoadingText", 1, filename);
+	bPlaySoundEndOfLoading = GetOrCreateINIInt("General", "bPlaySoundEndOfLoading", 1, filename);
+	bNoDXSoundCaptureErrorPopup = GetOrCreateINIInt("General", "bNoDXSoundCaptureErrorPopup", 0, filename); 
+	bNoPreviewWindowAutoFocus = GetOrCreateINIInt("General", "bNoPreviewWindowAutoFocus", 1, filename);
+	bNoLODMeshMessage = GetOrCreateINIInt("General", "bNoLODMeshMessage", 0, filename);
+	bAutoLoadFiles = GetOrCreateINIInt("General", "bAutoLoadFiles", 0, filename);
+	bShowLoadFilesAtStartup = GetOrCreateINIInt("General", "bShowLoadFilesAtStartup", 0, filename) | bAutoLoadFiles;
+	bNoVersionControlWarning = GetOrCreateINIInt("General", "bNoVersionControlWarning", 0, filename);
+	bSkipVanillaLipGen = GetOrCreateINIInt("General", "bSkipVanillaLipGen", 0, filename);
+	bShowAdditionalToolbarButtons = GetOrCreateINIInt("General", "bShowAdditionalToolbarButtons", 0, filename);
+	bAllowMultipleSearchAndReplace = GetOrCreateINIInt("General", "bAllowMultipleSearchAndReplace", 0, filename);
 
-	bPatchScriptEditorFont = GetPrivateProfileIntA("Script", "bPatchEditorFont", 0, filename);
-	bScriptCompileWarningPopup = GetPrivateProfileIntA("Script", "bScriptCompileWarningPopup", 0, filename);
 
-	bAutoScroll = GetPrivateProfileIntA("Log", "bAutoScroll", 0, filename);
+	bPatchScriptEditorFont = GetOrCreateINIInt("Script", "bPatchEditorFont", 0, filename);
+	bScriptCompileWarningPopup = GetOrCreateINIInt("Script", "bScriptCompileWarningPopup", 0, filename);
 
-	bRenderWindowUncap = GetPrivateProfileIntA("Render Window", "bRenderWindowUncap", 1, filename);
-	bPreviewWindowUncap = GetPrivateProfileIntA("Render Window", "bPreviewWindowUncap", 1, filename);
-	bSwapRenderCYKeys = GetPrivateProfileIntA("Render Window", "bSwapCandYKeys", 0, filename);
-	bUseAltShiftMultipliers = GetPrivateProfileIntA("Render Window", "bUseAltShiftMultipliers", 1, filename);
-	fMovementAltMultiplier = GetPrivateProfileIntA("Render Window", "iAltSpeedPct", 15, filename) / 100.0F;
-	fMovementShiftMultiplier = GetPrivateProfileIntA("Render Window", "iShiftSpeedPct", 200, filename) / 100.0F;
-	bShowTimeOfDaySlider = GetPrivateProfileIntA("Render Window", "bShowTimeOfDaySlider", 1, filename);
+	bAutoScroll = GetOrCreateINIInt("Log", "bAutoScroll", 0, filename);
+
+	bRenderWindowUncap = GetOrCreateINIInt("Render Window", "bRenderWindowUncap", 1, filename);
+	bPreviewWindowUncap = GetOrCreateINIInt("Render Window", "bPreviewWindowUncap", 1, filename);
+	bSwapRenderCYKeys = GetOrCreateINIInt("Render Window", "bSwapCandYKeys", 0, filename);
+	bUseAltShiftMultipliers = GetOrCreateINIInt("Render Window", "bUseAltShiftMultipliers", 1, filename);
+	fMovementAltMultiplier = GetOrCreateINIInt("Render Window", "iAltSpeedPct", 15, filename) / 100.0F;
+	fMovementShiftMultiplier = GetOrCreateINIInt("Render Window", "iShiftSpeedPct", 200, filename) / 100.0F;
+	bShowTimeOfDaySlider = GetOrCreateINIInt("Render Window", "bShowTimeOfDaySlider", 1, filename);
 	
-	bSmoothFlycamRotation = GetPrivateProfileIntA("Flycam", "bSmoothRotation", 1, filename);
-	bFlycamUpDownRelativeToWorld = GetPrivateProfileIntA("Flycam", "bFlycamUpDownRelativeToWorld", 1, filename);
-	fFlycamRotationSpeed = GetPrivateProfileIntA("Flycam", "iRotationSpeedPct", 100, filename) * - 0.001F;
-	fFlycamNormalMovementSpeed = GetPrivateProfileIntA("Flycam", "iMovementSpeed", 10, filename) * 3.0F;
-	fFlycamShiftMovementSpeed = GetPrivateProfileIntA("Flycam", "iRunMovementSpeedPct", 300, filename) / 100.0F;
-	fFlycamAltMovementSpeed = GetPrivateProfileIntA("Flycam", "iWalkMovementSpeedPct", 20, filename) / 100.0F;
+	bSmoothFlycamRotation = GetOrCreateINIInt("Flycam", "bSmoothRotation", 1, filename);
+	bFlycamUpDownRelativeToWorld = GetOrCreateINIInt("Flycam", "bFlycamUpDownRelativeToWorld", 1, filename);
+	fFlycamRotationSpeed = GetOrCreateINIInt("Flycam", "iRotationSpeedPct", 100, filename) * - 0.001F;
+	fFlycamNormalMovementSpeed = GetOrCreateINIInt("Flycam", "iMovementSpeed", 10, filename) * 3.0F;
+	fFlycamShiftMovementSpeed = GetOrCreateINIInt("Flycam", "iRunMovementSpeedPct", 300, filename) / 100.0F;
+	fFlycamAltMovementSpeed = GetOrCreateINIInt("Flycam", "iWalkMovementSpeedPct", 20, filename) / 100.0F;
 
 	//	stop geck crash with bUseMultibounds = 0 in exterior cells with multibounds - credit to roy
 	WriteRelCall(0x004CA48F, (UInt32)FixMultiBounds);
@@ -265,8 +267,10 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	SafeWriteBuf(0x592F4A, "\x10\x90\x90\x90", 4); // above removes pushed args, so need to change mov offset and nop the add esp
 
 	//	Make search and replace window stay open unless explicitly close - credit to StewieA
-	WriteRelJump(0x0047CE7F, (UINT32)hk_SearchDestroyHook);
-	SafeWrite8(0x0047CE84, 0x90);
+	if (bAllowMultipleSearchAndReplace) {
+		WriteRelJump(0x0047CE7F, (UINT32)hk_SearchDestroyHook);
+		SafeWrite8(0x0047CE84, 0x90);
+	}
 
 	// Make the "Do" button of "Reference Batch Action" not grayed out if an action is already selected when initialising the dialog
 	WriteRelJump(0x411CCF, UInt32(ReferenceBatchActionDoButtonHook));

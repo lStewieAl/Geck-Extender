@@ -84,6 +84,7 @@ int bNoVersionControlWarning = 0;
 int bShowTimeOfDaySlider = 1;
 int bSkipVanillaLipGen = 0;
 int bShowAdditionalToolbarButtons = 0;
+int bAllowMultipleSearchAndReplace = 0;
 
 int bUseAltShiftMultipliers = 1;
 float fMovementAltMultiplier = 0.15F;
@@ -126,13 +127,26 @@ static LOGFONT editorFont =
 	"Consolas"	// lfFaceName[LF_FACESIZE]
 };
 
+#define INI_SETTING_NOT_FOUND -1
+int GetOrCreateINIInt(char* sectionName, char* keyName, int defaultValue, char* filename) {
+	int settingValue = GetPrivateProfileIntA(sectionName, keyName, INI_SETTING_NOT_FOUND, filename);
+	if (settingValue == INI_SETTING_NOT_FOUND) {
+		char arr[11];
+		WritePrivateProfileString(sectionName, keyName, itoa(defaultValue, arr, 10), filename);
+		settingValue = defaultValue;
+	}
+	return settingValue;
+}
+#undef INI_SETTING_NOT_FOUND
+
+
 static void DoModScriptWindow(HWND wnd)
 {
 	SendMessage(wnd, EM_EXLIMITTEXT, 0, 0x00FFFFFF);
 
 	GetPrivateProfileStringA("Script", "Font", "Consolas", editorFont.lfFaceName, 31, filename);
-	editorFont.lfHeight = GetPrivateProfileIntA("Script", "FontSize", 13, filename);
-	editorFont.lfWeight = GetPrivateProfileIntA("Script", "FontWeight", FW_MEDIUM, filename);
+	editorFont.lfHeight = GetOrCreateINIInt("Script", "FontSize", 13, filename);
+	editorFont.lfWeight = GetOrCreateINIInt("Script", "FontWeight", FW_MEDIUM, filename);
 
 	// try something nice, otherwise fall back on SYSTEM_FIXED_FONT
 	fontHandle = CreateFontIndirect(&editorFont);
