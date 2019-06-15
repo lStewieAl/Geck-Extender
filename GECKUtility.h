@@ -148,5 +148,13 @@ void SetIsShowLightMarkers(bool state) {
 	((void(*)(void))(0x416490))();
 }
 
+void SetFlycamMode(int state) {
+	((void(__cdecl*)(int state))(0x451EF0))(state);
+}
+
+int GetFlycamMode() {
+	return (*(int*)(0xED11BC));
+}
+
 HWND g_renderWindowHwnd = (HWND)0xE0C1AA;
 HWND g_mainWindowToolbar = (HWND)0xECFC14;

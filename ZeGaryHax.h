@@ -954,6 +954,7 @@ _declspec(naked) void LipGenCountTopicsHook() {
 extern bool GetIsRenderWindowAllowCellLoads();
 extern void SetIsShowLightMarkers(bool);
 extern bool GetIsShowLightMarkers();
+extern void SetFlycamMode(int);
 
 void __fastcall PreferencesWindowApplyButtonHook(int* thiss, void* dummyEDX, int a2) {
 	((int(__thiscall*)(int* thiss, int a2))(0x855B30))(thiss, a2);
@@ -963,11 +964,16 @@ void __fastcall PreferencesWindowApplyButtonHook(int* thiss, void* dummyEDX, int
 BOOL __stdcall RenderWindowCallbackHook(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	if (msg == WM_KEYDOWN) {
 		switch (wParam) {
-		case 'O':
+		case 'I':
 			SetIsShowLightMarkers(!GetIsShowLightMarkers());
 		}
 	}
+	else if (msg == WM_RBUTTONDOWN) {
+		SetFlycamMode(0);
+	}
 	return ((BOOL(__stdcall*)(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam))(0x455AA0))(hWnd, msg, wParam, lParam);
 }
+
+
 
 void __fastcall FastExitHook(volatile LONG** thiss);
