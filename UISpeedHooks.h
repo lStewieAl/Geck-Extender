@@ -147,6 +147,12 @@ int __fastcall hk_sub_56CB50(int* thiss, void* dummyEDX, HWND hWnd) {
 	EndUIDefer();
 	return res;
 }
+
+void __fastcall hk_sub_666C10(int thiss, void* dummyEDX, HWND hWnd, int a3) {
+	BeginUIDefer();
+	((void(__thiscall*)(int thiss, HWND hWnd, int a3))(0x666C10))(thiss, hWnd, a3);
+	EndUIDefer();
+}
 void WriteUIHooks() {
 	//	Fix list view lag when changing cells in the render window - credit to nukem
 	WriteRelCall(0x0042F5A4, (UInt32)hk_UpdateCellViewListView);
@@ -236,4 +242,7 @@ void WriteUIHooks() {
 	// speed up Edit Response
 	WriteRelCall(0x58E77A, UInt32(hk_sub_56CB50));
 	WriteRelCall(0x58E7A6, UInt32(hk_sub_56CB50));
+
+	// speed up worldspace list view
+	WriteRelCall(0x47A652, UInt32(hk_sub_666C10));
 }
