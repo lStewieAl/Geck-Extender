@@ -951,22 +951,23 @@ _declspec(naked) void LipGenCountTopicsHook() {
 
 }
 
-bool GetIsRenderWindowAllowCellLoads2() {
-	return (*(byte*)(0xECFCEC) >> 2) & 1;
-}
+extern bool GetIsRenderWindowAllowCellLoads();
+extern void SetIsShowLightMarkers(bool);
+extern bool GetIsShowLightMarkers();
 
 void __fastcall PreferencesWindowApplyButtonHook(int* thiss, void* dummyEDX, int a2) {
 	((int(__thiscall*)(int* thiss, int a2))(0x855B30))(thiss, a2);
-	SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_SETCHECK, GetIsRenderWindowAllowCellLoads2(), NULL);
+	SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_SETCHECK, GetIsRenderWindowAllowCellLoads(), NULL);
 }
 
-/*
-void __cdecl CreateMainMenuToolbar(HWND hwnd) {
-	// adjust toolbar creation flags
-	SafeWrite32(0x465A06, 0x54000000 | CCS_TOP | TBSTYLE_TOOLTIPS /* custom flags: *//* | CCS_ADJUSTABLE | TBSTYLE_WRAPABLE);
-	((void(__cdecl*)(HWND hwnd))(0x4659E0))(hwnd);
-	HWND g_MainWindowToolbar = (HWND)0xECFC14;
+BOOL __stdcall RenderWindowCallbackHook(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+	if (msg == WM_KEYDOWN) {
+		switch (wParam) {
+		case 'O':
+			SetIsShowLightMarkers(!GetIsShowLightMarkers());
+		}
+	}
+	return ((BOOL(__stdcall*)(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam))(0x455AA0))(hWnd, msg, wParam, lParam);
 }
-*/
 
 void __fastcall FastExitHook(volatile LONG** thiss);

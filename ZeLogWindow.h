@@ -36,6 +36,12 @@ WNDPROC OldEditorUI_WndProc;
 NiPoint3 savedRenderPos;
 ViewMatrix savedRenderDirection;
 
+HWND g_trackBarHwnd;
+HWND g_timeOfDayTextHwnd;
+HWND g_allowCellWindowLoadsButtonHwnd;
+HWND g_renderWindowShowWaterButtonHwnd;
+HWND g_renderWindowShowPortalsButtonHwnd;
+
 bool EditorUI_CreateExtensionMenu(HWND MainWindow, HMENU MainMenu)
 {
 	//	Create extended menu options

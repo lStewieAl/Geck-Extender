@@ -445,7 +445,9 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		WriteRelJump(0x41EA30, UInt32(LipGenCountTopicsHook));
 	}
 
-//	WriteRelCall(0x440869, UInt32(CreateMainMenuToolbar));
+//	WriteRelJump(..., UInt32(PopupMenuDisableFlycamHook);
+
+	SafeWrite32(0x4411A1, UInt32(RenderWindowCallbackHook));
 
 	//	Create log window - credit to nukem
 	InitCommonControls();
@@ -532,7 +534,6 @@ void PrintCmdTable()
 
 	CommandInfo* curr = const_cast<CommandInfo*> (cmdTable->Start());
 	CommandInfo* End = const_cast<CommandInfo*> (cmdTable->End());
-	UInt32 CounterTable;
 	while (++curr < End)
 	{
 		EditorUI_Log("%s", curr->longName);
