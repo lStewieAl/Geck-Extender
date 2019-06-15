@@ -955,6 +955,9 @@ extern bool GetIsRenderWindowAllowCellLoads();
 extern void SetIsShowLightMarkers(bool);
 extern bool GetIsShowLightMarkers();
 extern void SetFlycamMode(int);
+extern int GetFlycamMode();
+extern void SetIsShowSoundMarkers(bool);
+extern bool GetIsShowSoundMarkers(void);
 
 void __fastcall PreferencesWindowApplyButtonHook(int* thiss, void* dummyEDX, int a2) {
 	((int(__thiscall*)(int* thiss, int a2))(0x855B30))(thiss, a2);
@@ -964,14 +967,19 @@ void __fastcall PreferencesWindowApplyButtonHook(int* thiss, void* dummyEDX, int
 BOOL __stdcall RenderWindowCallbackHook(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	if (msg == WM_KEYDOWN) {
 		switch (wParam) {
-		case 'I':
-			SetIsShowLightMarkers(!GetIsShowLightMarkers());
-			break;
-
 		case VK_ESCAPE:
 		case VK_LWIN:
 			SetFlycamMode(0);
 			break;
+
+		case 'I':
+			SetIsShowLightMarkers(!GetIsShowLightMarkers());
+			break;
+
+		case 'S':
+			if (GetFlycamMode() == 0) {
+				SetIsShowSoundMarkers(!GetIsShowSoundMarkers());
+			}
 		}
 	}
 	else if (msg == WM_RBUTTONDOWN) {

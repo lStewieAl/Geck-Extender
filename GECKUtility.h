@@ -148,6 +148,16 @@ void SetIsShowLightMarkers(bool state) {
 	((void(*)(void))(0x416490))();
 }
 
+bool GetIsShowSoundMarkers() {
+	return (*(byte*)(0xECEEA4));
+}
+
+void SetIsShowSoundMarkers(bool state) {
+	(*(byte*)(0xECEEA4)) = state;
+	((void(*)(void))(0x4165B0))();
+}
+
+
 void SetFlycamMode(int state) {
 	((void(__cdecl*)(int state))(0x451EF0))(state);
 }
