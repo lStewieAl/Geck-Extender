@@ -966,6 +966,12 @@ BOOL __stdcall RenderWindowCallbackHook(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 		switch (wParam) {
 		case 'I':
 			SetIsShowLightMarkers(!GetIsShowLightMarkers());
+			break;
+
+		case VK_ESCAPE:
+		case VK_LWIN:
+			SetFlycamMode(0);
+			break;
 		}
 	}
 	else if (msg == WM_RBUTTONDOWN) {
