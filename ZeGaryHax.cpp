@@ -84,9 +84,9 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	GetModuleFileNameA(NULL, filename, MAX_PATH);
 	strcpy((char *)(strrchr(filename, '\\') + 1), "Data\\nvse\\plugins\\geckextender.ini");
 	bEnableSpellChecker = GetOrCreateINIInt("General", "bEnableSpellChecker", 0, filename);
-	bFastExit = GetOrCreateINIInt("General", "bFastExit", 0, filename);
-	bListEditFix = GetOrCreateINIInt("General", "bListEditFix", 0, filename);
-	bIgnoreNAMFiles = GetOrCreateINIInt("General", "bIgnoreNAMFiles", 0, filename);
+	bFastExit = GetOrCreateINIInt("General", "bFastExit", 1, filename);
+	bListEditFix = GetOrCreateINIInt("General", "bListEditFix", 1, filename);
+	bIgnoreNAMFiles = GetOrCreateINIInt("General", "bIgnoreNAMFiles", 1, filename);
 	bVersionControlMode = GetOrCreateINIInt("General", "bVersionControlMode", 0, filename);
 	bHighResLandscapeLOD = GetOrCreateINIInt("General", "bHighResLandscapeLOD", 0, filename);
 	bRemoveStatusBarLoadingText = GetOrCreateINIInt("General", "bRemoveLoadingText", 1, filename);
@@ -97,15 +97,15 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	bAutoLoadFiles = GetOrCreateINIInt("General", "bAutoLoadFiles", 0, filename);
 	bShowLoadFilesAtStartup = GetOrCreateINIInt("General", "bShowLoadFilesAtStartup", 0, filename) | bAutoLoadFiles;
 	bNoVersionControlWarning = GetOrCreateINIInt("General", "bNoVersionControlWarning", 0, filename);
-	bSkipVanillaLipGen = GetOrCreateINIInt("General", "bSkipVanillaLipGen", 0, filename);
+	bSkipVanillaLipGen = GetPrivateProfileIntA("General", "bSkipVanillaLipGen", 0, filename);
 	bShowAdditionalToolbarButtons = GetOrCreateINIInt("General", "bShowAdditionalToolbarButtons", 0, filename);
 	bAllowMultipleSearchAndReplace = GetOrCreateINIInt("General", "bAllowMultipleSearchAndReplace", 0, filename);
 
 
-	bPatchScriptEditorFont = GetOrCreateINIInt("Script", "bPatchEditorFont", 0, filename);
+	bPatchScriptEditorFont = GetOrCreateINIInt("Script", "bPatchEditorFont", 1, filename);
 	bScriptCompileWarningPopup = GetOrCreateINIInt("Script", "bScriptCompileWarningPopup", 0, filename);
 
-	bAutoScroll = GetOrCreateINIInt("Log", "bAutoScroll", 0, filename);
+	bAutoScroll = GetOrCreateINIInt("Log", "bAutoScroll", 1, filename);
 
 	bRenderWindowUncap = GetOrCreateINIInt("Render Window", "bRenderWindowUncap", 1, filename);
 	bPreviewWindowUncap = GetOrCreateINIInt("Render Window", "bPreviewWindowUncap", 1, filename);
@@ -437,6 +437,9 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	// fix bug where disabling orthogonal mode would cause a shader to be applied to the camera
 	XUtil::PatchMemoryNop(0x456BD6, 4);
 
+	// fix missing null check in embedded render window when checking a sound form
+	WriteRelJump(0x893576, UInt32(EmbeddedRenderWindowSoundNullCheck));
+
 	if (bSkipVanillaLipGen) {
 		// skip topics whose mod index is less than 5 (there are 5 vanilla esms)
 		WriteRelJump(0x41EA7B, UInt32(LipGenLoopHook));
@@ -444,8 +447,6 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		// don't include topics whose mod index is less than 5 for the progress bar counter
 		WriteRelJump(0x41EA30, UInt32(LipGenCountTopicsHook));
 	}
-
-//	WriteRelJump(..., UInt32(PopupMenuDisableFlycamHook);
 
 	SafeWrite32(0x4411A1, UInt32(RenderWindowCallbackHook));
 

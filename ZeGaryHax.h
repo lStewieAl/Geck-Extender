@@ -948,7 +948,24 @@ _declspec(naked) void LipGenCountTopicsHook() {
 	done:
 		jmp retnAddr
 	}
+}
 
+_declspec(naked) void EmbeddedRenderWindowSoundNullCheck() {
+	static const UInt32 noSoundFileAddr = 0x89357D;
+	static const UInt32 soundFileAddr = 0x8935B5;
+	_asm {
+		test ecx, ecx
+		je noSound
+		
+		movsx edx, byte ptr ds:[ecx]
+		test edx, edx
+		je noSound
+		
+		jmp soundFileAddr
+
+	noSound:
+		jmp noSoundFileAddr
+	}
 }
 
 extern bool GetIsRenderWindowAllowCellLoads();
@@ -975,11 +992,13 @@ BOOL __stdcall RenderWindowCallbackHook(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 		case 'I':
 			SetIsShowLightMarkers(!GetIsShowLightMarkers());
 			break;
-
+/*
 		case 'S':
 			if (GetFlycamMode() == 0) {
 				SetIsShowSoundMarkers(!GetIsShowSoundMarkers());
 			}
+			break;
+			*/
 		}
 	}
 	else if (msg == WM_RBUTTONDOWN) {
@@ -987,7 +1006,5 @@ BOOL __stdcall RenderWindowCallbackHook(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 	}
 	return ((BOOL(__stdcall*)(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam))(0x455AA0))(hWnd, msg, wParam, lParam);
 }
-
-
 
 void __fastcall FastExitHook(volatile LONG** thiss);
