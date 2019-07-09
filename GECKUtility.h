@@ -157,7 +157,6 @@ void SetIsShowSoundMarkers(bool state) {
 	((void(*)(void))(0x4165B0))();
 }
 
-
 void SetFlycamMode(int state) {
 	((void(__cdecl*)(int state))(0x451EF0))(state);
 }

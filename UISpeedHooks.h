@@ -224,7 +224,6 @@ void WriteUIHooks() {
 	WriteRelCall(0x47FBF3, UInt32(hk_sub_47D330));
 	WriteRelCall(0x48C0AF, UInt32(hk_sub_47D330));
 	WriteRelCall(0x48C128, UInt32(hk_sub_47D330));
-
 	
 	// speed up packages window
 	WriteRelCall(0x498CB4, UInt32(hk_sub_4979F0));
