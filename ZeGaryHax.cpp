@@ -100,7 +100,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	bSkipVanillaLipGen = GetPrivateProfileIntA("General", "bSkipVanillaLipGen", 0, filename);
 	bShowAdditionalToolbarButtons = GetOrCreateINIInt("General", "bShowAdditionalToolbarButtons", 0, filename);
 	bAllowMultipleSearchAndReplace = GetOrCreateINIInt("General", "bAllowMultipleSearchAndReplace", 0, filename);
-
+	bNoFactionReactionMessage = GetOrCreateINIInt("General", "bNoFactionReactionMessage", 0, filename);
 
 	bPatchScriptEditorFont = GetOrCreateINIInt("Script", "bPatchEditorFont", 1, filename);
 	bScriptCompileWarningPopup = GetOrCreateINIInt("Script", "bScriptCompileWarningPopup", 0, filename);

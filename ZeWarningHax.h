@@ -526,6 +526,11 @@ void WriteErrorMessageHooks() {
 		XUtil::PatchMemoryNop(0x659E05, 5);
 	}
 
+	if (bNoFactionReactionMessage) {
+		//	DEFAULT: (Faction Reaction Error) Faction '%s' (%08X) is a Friend or Ally of Faction '%s' (%08X), but Faction '%s' (%08X) is not a Friend or Ally of Faction '%s' (%08X). 
+		XUtil::PatchMemoryNop(0x00568979, 5);
+	}
+
 	//	patch script editor messages - credit to roy
 	WriteRelJump(0x005C57E2, (UInt32)hk_EnableScriptErrorsMsgHook);
 	XUtil::PatchMemoryNop(0x005C57E7, 0x06);
