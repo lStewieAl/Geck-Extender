@@ -450,6 +450,9 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 
 	SafeWrite32(0x4411A1, UInt32(RenderWindowCallbackHook));
 
+	// allow toggling of "scroll" in TESObjectBOOK dialog
+	SafeWrite8(0x10CD577, 0x50);
+
 	//	Create log window - credit to nukem
 	InitCommonControls();
 	LoadLibraryA("MSFTEDIT.dll");
