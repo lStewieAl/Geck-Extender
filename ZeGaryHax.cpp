@@ -453,6 +453,9 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	// allow toggling of "scroll" in TESObjectBOOK dialog
 	SafeWrite8(0x10CD577, 0x50);
 
+	// fix crash when sorting by model type in categories with Base Effects
+	SafeWrite16(0x43BA8B, 0x9090);
+
 	//	Create log window - credit to nukem
 	InitCommonControls();
 	LoadLibraryA("MSFTEDIT.dll");
