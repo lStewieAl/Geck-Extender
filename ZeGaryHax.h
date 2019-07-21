@@ -1008,4 +1008,23 @@ BOOL __stdcall RenderWindowCallbackHook(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 	return ((BOOL(__stdcall*)(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam))(0x455AA0))(hWnd, msg, wParam, lParam);
 }
 
+extern HWND g_MainHwnd;
+void ShowSaveFailureError()
+{
+	MessageBoxA(g_MainHwnd, "Save failed. Please close any programs with the file open.", "Save Failed", MB_ICONWARNING);
+}
+
+_declspec(naked) void SaveFailureHook()
+{
+	static const UInt32 retnAddr = 0x4E1DBF;
+	_asm {
+		je noWarn
+		pushad
+		call ShowSaveFailureError
+		popad
+	noWarn:
+		jmp retnAddr
+	}
+}
+
 void __fastcall FastExitHook(volatile LONG** thiss);

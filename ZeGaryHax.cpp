@@ -456,6 +456,9 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	// fix crash when sorting by model type in categories with Base Effects
 	SafeWrite16(0x43BA8B, 0x9090);
 
+	// workaround infinite wait if saving fails bug
+	WriteRelJump(0x4E1DB9, UInt32(SaveFailureHook));
+
 	//	Create log window - credit to nukem
 	InitCommonControls();
 	LoadLibraryA("MSFTEDIT.dll");
