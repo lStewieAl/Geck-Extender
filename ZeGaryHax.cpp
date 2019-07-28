@@ -459,6 +459,9 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	// workaround infinite wait if saving fails bug
 	WriteRelJump(0x4E1DB9, UInt32(SaveFailureHook));
 
+	// wrap objects list callback
+//	SafeWrite32(0x442803, UInt32(ObjectWindowColumnsCallback));
+
 	//	Create log window - credit to nukem
 	InitCommonControls();
 	LoadLibraryA("MSFTEDIT.dll");

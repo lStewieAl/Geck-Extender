@@ -1,5 +1,5 @@
-#include "Editor.h"
 #pragma once
+#include "Editor.h"
 
 //	fix list view lag when changing cells in the render window - credit to nukem
 void hk_UpdateCellViewListView(HWND ControlHandle, void* a2, void* a3)

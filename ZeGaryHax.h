@@ -1027,4 +1027,62 @@ _declspec(naked) void SaveFailureHook()
 	}
 }
 
+_declspec(naked) void ObjectWindowListFilterUneditedHook()
+{
+	static const UInt32 skipAddr = 0x439793;
+	static const UInt32 retnAddr = 0x43973F;
+	_asm {
+		// esi contains TESForm
+		mov eax, [esi+8] // form->flags
+		shr eax, 1
+		test al, 1 // form->flags & kModified
+		jne editedForm
+		jmp skipAddr
+
+	editedForm:
+		mov eax, dword ptr ss : [esp + 0x1C]
+		test eax, eax
+		jmp retnAddr
+	}
+}
+/*
+#define ID_OBJECTWINDOWFILTEREDITED_CHECKBOX 51017
+HWND g_objectWindowFilterEditedHwnd;
+void ObjectWindow_AddFilterEditedCheckbox(HWND MainWindow, HINSTANCE hInstance) {
+	g_objectWindowFilterEditedHwnd = CreateWindowEx(
+		NULL,
+		"BUTTON",
+		"Toggle show only edited",
+		BS_PUSHLIKE | BS_CHECKBOX | WS_CHILD | WS_VISIBLE | BS_NOTIFY | BS_BITMAP,
+		1160, 4, // x, y
+		24, 21, // width, height
+		MainWindow,
+		(HMENU)ID_OBJECTWINDOWFILTEREDITED_CHECKBOX,
+		hInstance,
+		NULL
+	);
+	SendMessageA(g_objectWindowFilterEditedHwnd, BM_SETCHECK, false, NULL);
+
+	HBITMAP hBitmap = (HBITMAP)LoadImage(ZeGaryHaxHandle, MAKEINTRESOURCE(IDB_ALLOW_CELL_LOADS_ICON), IMAGE_BITMAP, NULL, NULL, NULL);
+	SendMessageA(g_objectWindowFilterEditedHwnd, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
+}
+*/
+WNDPROC OldObjectWindowColumnsCallback_WndProc = (WNDPROC)0x449530;
+bool __stdcall ObjectWindowColumnsCallback(HWND hWnd, UInt32 msg, WPARAM wParam, LPARAM lParam)
+{
+	if (msg == WM_CREATE)
+	{
+		const CREATESTRUCT* createInfo = (CREATESTRUCT*)lParam;
+//		ObjectWindow_AddFilterEditedCheckbox(hWnd, createInfo->hInstance);
+	}
+	if (msg == WM_COMMAND)
+	{
+		const uint32_t param = LOWORD(wParam);
+		//		if (param == ID_OBJECTWINDOWFILTEREDITED_CHECKBOX)
+		{
+
+		}
+	}
+	return CallWindowProc(OldObjectWindowColumnsCallback_WndProc, hWnd, msg, wParam, lParam);
+}
 void __fastcall FastExitHook(volatile LONG** thiss);
