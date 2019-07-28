@@ -167,3 +167,4 @@ int GetFlycamMode() {
 
 HWND g_renderWindowHwnd = (HWND)0xE0C1AA;
 HWND g_mainWindowToolbar = (HWND)0xECFC14;
+HWND g_objectWindowHwnd = (HWND)0xECFB70;

@@ -22,7 +22,7 @@
 #define ID_RENDERWINDOWCELLLOADS_CHECKBOX 51014
 #define ID_RENDERWINDOW_SHOWWATER_CHECKBOX	51015
 #define ID_RENDERWINDOW_SHOWPORTALS_CHECKBOX	51016
-
+#define UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED	51017
 
 // unused button in vanilla menu
 #define VIEW_RENDER_WINDOW 0x9D06
@@ -42,6 +42,17 @@ HWND g_allowCellWindowLoadsButtonHwnd;
 HWND g_renderWindowShowWaterButtonHwnd;
 HWND g_renderWindowShowPortalsButtonHwnd;
 
+void ToggleObjectWindowFilterUnedited(bool show)
+{
+	if (show)
+		SafeWriteBuf(0x439739, "\x8B\x44\x24\x1C\x85\xC0", 6);
+	else
+		WriteRelJump(0x439739, UInt32(ObjectWindowListFilterUneditedHook));
+	
+	// refresh object window
+	((bool(__stdcall*)(HWND hWnd, UInt32 msg, WPARAM, LPARAM))(0x449E50))(NULL, 1042, NULL, NULL);	
+}
+
 bool EditorUI_CreateExtensionMenu(HWND MainWindow, HMENU MainMenu)
 {
 	//	Create extended menu options
@@ -57,6 +68,7 @@ bool EditorUI_CreateExtensionMenu(HWND MainWindow, HMENU MainMenu)
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_SPELLCHECK, "Enable Spell Check");
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_RENDER, "Render Window Uncap (requires restart)");
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_PREVIEW, "Preview Window Uncap (requires restart)");
+	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED, "Object Window - Only Show Edited");
 
 	MENUITEMINFO menuInfo;
 	memset(&menuInfo, 0, sizeof(MENUITEMINFO));
@@ -414,6 +426,30 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 					bPreviewWindowUncap = 1;
 					char buffer[8];
 					WritePrivateProfileString("General", "bPreviewWindowUncap" , _itoa(bPreviewWindowUncap,buffer,2), filename);
+				}
+			}
+			return 0;
+
+			case UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED:
+			{
+				MENUITEMINFO menuInfo;
+				menuInfo.cbSize = sizeof(MENUITEMINFO);
+				menuInfo.fMask = MIIM_STATE;
+				GetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED, FALSE, &menuInfo);
+
+				if (menuInfo.fState == MFS_CHECKED)
+				{
+					//	Disable showing unedited
+					menuInfo.fState = MFS_UNCHECKED;
+					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED, FALSE, &menuInfo);
+					ToggleObjectWindowFilterUnedited(true);
+				}
+				else
+				{
+					//	Show unedited only
+					menuInfo.fState = MFS_CHECKED;
+					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED, FALSE, &menuInfo);
+					ToggleObjectWindowFilterUnedited(false);
 				}
 			}
 			return 0;
