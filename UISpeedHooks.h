@@ -141,13 +141,6 @@ void __cdecl hk_sub_47E0D0(HWND hWnd, char a2, int a3, char a4) {
 	EndUIDefer();
 }
 
-int __fastcall hk_sub_56CB50(int* thiss, void* dummyEDX, HWND hWnd) {
-	BeginUIDefer();
-	int res = ((int(__thiscall*)(int* thiss, HWND hWnd))(0x56CB50))(thiss, hWnd);
-	EndUIDefer();
-	return res;
-}
-
 void __fastcall hk_sub_666C10(int thiss, void* dummyEDX, HWND hWnd, int a3) {
 	BeginUIDefer();
 	((void(__thiscall*)(int thiss, HWND hWnd, int a3))(0x666C10))(thiss, hWnd, a3);
@@ -172,6 +165,10 @@ void WriteUIHooks() {
 	WriteRelJump(0x592EAE, UInt32(DialogueListViewBeginUI));
 	WriteRelJump(0x592FB2, UInt32(DialogueListViewEndUI));
 
+	// speed up worldspace list view
+	WriteRelCall(0x47A652, UInt32(hk_sub_666C10));
+
+	
 	WriteRelCall(0x59CCB3, UInt32(hk_sub_59C7B0)); // combo box item, required to fix multiple insertions tripping the assertion 
 	WriteRelCall(0x409C08, UInt32(hk_sub_59C950));
 	WriteRelCall(0x59957B, UInt32(hk_sub_59C950));
@@ -189,7 +186,7 @@ void WriteUIHooks() {
 	WriteRelCall(0x59CC55, UInt32(hk_sub_47F7A0));
 	WriteRelCall(0x59CC70, UInt32(hk_sub_47F7A0));
 	WriteRelCall(0x59CC8B, UInt32(hk_sub_47F7A0));
-
+	
 	/* speed up select dialog topic */
 	WriteRelCall(0x597312, UInt32(hk_sub_595800));
 	WriteRelCall(0x597504, UInt32(hk_sub_595800));
@@ -237,11 +234,4 @@ void WriteUIHooks() {
 
 	// speed up object palette
 	WriteRelCall(0x40CF05, UInt32(hk_sub_47E0D0));
-
-	// speed up Edit Response
-	WriteRelCall(0x58E77A, UInt32(hk_sub_56CB50));
-	WriteRelCall(0x58E7A6, UInt32(hk_sub_56CB50));
-
-	// speed up worldspace list view
-	WriteRelCall(0x47A652, UInt32(hk_sub_666C10));
 }
