@@ -86,6 +86,7 @@ int bSkipVanillaLipGen = 0;
 int bShowAdditionalToolbarButtons = 0;
 int bAllowMultipleSearchAndReplace = 0;
 int bNoFactionReactionMessage = 0;
+int bUISpeedHooks = 1;
 
 int bUseAltShiftMultipliers = 1;
 float fMovementAltMultiplier = 0.15F;

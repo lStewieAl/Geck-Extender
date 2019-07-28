@@ -168,7 +168,8 @@ void WriteUIHooks() {
 	// speed up worldspace list view
 	WriteRelCall(0x47A652, UInt32(hk_sub_666C10));
 
-	
+	if (!bUISpeedHooks) return;
+
 	WriteRelCall(0x59CCB3, UInt32(hk_sub_59C7B0)); // combo box item, required to fix multiple insertions tripping the assertion 
 	WriteRelCall(0x409C08, UInt32(hk_sub_59C950));
 	WriteRelCall(0x59957B, UInt32(hk_sub_59C950));
