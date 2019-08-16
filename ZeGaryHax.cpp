@@ -102,6 +102,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	bAllowMultipleSearchAndReplace = GetOrCreateINIInt("General", "bAllowMultipleSearchAndReplace", 0, filename);
 	bNoFactionReactionMessage = GetOrCreateINIInt("General", "bNoFactionReactionMessage", 0, filename);
 	bUISpeedHooks = GetOrCreateINIInt("General", "bUISpeedHooks", 1, filename);
+	bLibdeflate = GetOrCreateINIInt("General", "bLibdeflate", 0, filename);
 
 	bPatchScriptEditorFont = GetOrCreateINIInt("Script", "bPatchEditorFont", 1, filename);
 	bScriptCompileWarningPopup = GetOrCreateINIInt("Script", "bScriptCompileWarningPopup", 0, filename);
@@ -199,6 +200,10 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		WriteRelCall(0x00765214, (UInt32)hk_sub_4A1C10);
 		WriteRelCall(0x00766A4D, (UInt32)hk_sub_4A1C10);
 		WriteRelCall(0x0076E195, (UInt32)hk_sub_4A1C10);
+
+		// fix FormID column being collapsed
+		WriteRelJump(0x42EFBB, UInt32(CellViewListViewCreateFormIDColumnHook));
+		WriteRelJump(0x44965A, UInt32(ObjectWindowListViewColumnSizeHook));
 	}
 
 	//	ignore .nam Files - initial credit to roy
@@ -280,8 +285,11 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	XUtil::PatchMemoryNop(0x411CFA, 8);
 
 	//	Replace zlib with libinflate - credit to nukem/StewieA
-	WriteRelCall(0x004DFB34, (UInt32)hk_inflateInit);
-	WriteRelCall(0x004DFB9E, (UInt32)hk_inflate);
+	if (bLibdeflate)
+	{
+		WriteRelCall(0x004DFB34, (UInt32)hk_inflateInit);
+		WriteRelCall(0x004DFB9E, (UInt32)hk_inflate);
+	}
 
 	//	Expand ini GetPrivateProfileString buffer to 1024 bytes - credit to jazzisparis
 	SafeWrite8(0x009D3D01, 0x04);

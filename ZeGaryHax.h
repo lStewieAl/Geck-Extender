@@ -87,6 +87,7 @@ int bShowAdditionalToolbarButtons = 0;
 int bAllowMultipleSearchAndReplace = 0;
 int bNoFactionReactionMessage = 0;
 int bUISpeedHooks = 1;
+int bLibdeflate = 0;
 
 int bUseAltShiftMultipliers = 1;
 float fMovementAltMultiplier = 0.15F;
@@ -1087,3 +1088,35 @@ bool __stdcall ObjectWindowColumnsCallback(HWND hWnd, UInt32 msg, WPARAM wParam,
 	return CallWindowProc(OldObjectWindowColumnsCallback_WndProc, hWnd, msg, wParam, lParam);
 }
 void __fastcall FastExitHook(volatile LONG** thiss);
+
+_declspec(naked) void CellViewListViewCreateFormIDColumnHook()
+{
+	static const UInt32 retnAddr = 0x42EFC1;
+	_asm
+	{
+		push 65 // pixels
+		push 1
+		push LVM_SETCOLUMNWIDTH
+		push dword ptr ds : [0xECF548] // g_cellViewRightListHdlg
+		call ebx // SendMessageA
+		mov ecx, dword ptr ds : [0xECF554]
+		jmp retnAddr
+	}
+}
+
+_declspec(naked) void ObjectWindowListViewColumnSizeHook()
+{
+	static const UInt32 retnAddr = 0x449660;
+	_asm
+	{
+		push 65 // pixels
+		push 2
+		push LVM_SETCOLUMNWIDTH
+		push edi // g_objectWindowListHdlg
+		call ebx // SendMessageA
+		
+		mov ecx, dword ptr ss : [esp + 0x54]
+		push 1
+		jmp retnAddr
+	}
+}
