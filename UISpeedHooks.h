@@ -175,20 +175,22 @@ void WriteUIHooks() {
 	WriteRelCall(0x59957B, UInt32(hk_sub_59C950));
 	WriteRelCall(0x59A728, UInt32(hk_sub_59C950));
 	WriteRelCall(0x5A1952, UInt32(hk_sub_59C950));
-
+	
 	WriteRelCall(0x57E673, UInt32(hk_sub_595410));
-	WriteRelCall(0x57E69A, UInt32(hk_sub_595410));
+//	WriteRelCall(0x57E69A, UInt32(hk_sub_595410)); causes conversation next speaker to be blank
 	WriteRelCall(0x57E6C1, UInt32(hk_sub_595410));
+	
 	WriteRelCall(0x57E6E8, UInt32(hk_sub_595410));
 	WriteRelCall(0x57E70F, UInt32(hk_sub_595410));
 	WriteRelCall(0x57E75D, UInt32(hk_sub_595410));
 	WriteRelCall(0x57E736, UInt32(hk_sub_595410));
 
+
 	WriteRelCall(0x59CC55, UInt32(hk_sub_47F7A0));
 	WriteRelCall(0x59CC70, UInt32(hk_sub_47F7A0));
 	WriteRelCall(0x59CC8B, UInt32(hk_sub_47F7A0));
 	
-	/* speed up select dialog topic */
+	// speed up select dialog topic
 	WriteRelCall(0x597312, UInt32(hk_sub_595800));
 	WriteRelCall(0x597504, UInt32(hk_sub_595800));
 	WriteRelCall(0x59770E, UInt32(hk_sub_595800));
