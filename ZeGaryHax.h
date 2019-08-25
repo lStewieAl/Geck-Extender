@@ -88,6 +88,7 @@ int bAllowMultipleSearchAndReplace = 0;
 int bNoFactionReactionMessage = 0;
 int bUISpeedHooks = 1;
 int bLibdeflate = 0;
+int bExpandFormIDColumn = 0;
 
 int bUseAltShiftMultipliers = 1;
 float fMovementAltMultiplier = 0.15F;

@@ -85,7 +85,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	strcpy((char *)(strrchr(filename, '\\') + 1), "Data\\nvse\\plugins\\geckextender.ini");
 	bEnableSpellChecker = GetOrCreateINIInt("General", "bEnableSpellChecker", 0, filename);
 	bFastExit = GetOrCreateINIInt("General", "bFastExit", 1, filename);
-	bListEditFix = GetOrCreateINIInt("General", "bListEditFix", 1, filename);
+	bListEditFix = GetOrCreateINIInt("General", "bListEditFix", 0, filename);
 	bIgnoreNAMFiles = GetOrCreateINIInt("General", "bIgnoreNAMFiles", 1, filename);
 	bVersionControlMode = GetOrCreateINIInt("General", "bVersionControlMode", 0, filename);
 	bHighResLandscapeLOD = GetOrCreateINIInt("General", "bHighResLandscapeLOD", 0, filename);
@@ -102,7 +102,8 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	bAllowMultipleSearchAndReplace = GetOrCreateINIInt("General", "bAllowMultipleSearchAndReplace", 0, filename);
 	bNoFactionReactionMessage = GetOrCreateINIInt("General", "bNoFactionReactionMessage", 0, filename);
 	bUISpeedHooks = GetOrCreateINIInt("General", "bUISpeedHooks", 1, filename);
-	bLibdeflate = GetOrCreateINIInt("General", "bLibdeflate", 0, filename);
+	bLibdeflate = GetOrCreateINIInt("General", "bLibDeflate", 0, filename);
+	bExpandFormIDColumn = GetOrCreateINIInt("General", "bExpandFormIDColumn", 0, filename);
 
 	bPatchScriptEditorFont = GetOrCreateINIInt("Script", "bPatchEditorFont", 1, filename);
 	bScriptCompileWarningPopup = GetOrCreateINIInt("Script", "bScriptCompileWarningPopup", 0, filename);
@@ -200,7 +201,10 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		WriteRelCall(0x00765214, (UInt32)hk_sub_4A1C10);
 		WriteRelCall(0x00766A4D, (UInt32)hk_sub_4A1C10);
 		WriteRelCall(0x0076E195, (UInt32)hk_sub_4A1C10);
+	}
 
+	if (bExpandFormIDColumn)
+	{
 		// fix FormID column being collapsed
 		WriteRelJump(0x42EFBB, UInt32(CellViewListViewCreateFormIDColumnHook));
 		WriteRelJump(0x44965A, UInt32(ObjectWindowListViewColumnSizeHook));
