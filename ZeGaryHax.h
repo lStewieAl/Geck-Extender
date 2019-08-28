@@ -89,6 +89,7 @@ int bNoFactionReactionMessage = 0;
 int bUISpeedHooks = 1;
 int bLibdeflate = 0;
 int bExpandFormIDColumn = 0;
+int bAllowEditLandEdges = 0;
 
 int bUseAltShiftMultipliers = 1;
 float fMovementAltMultiplier = 0.15F;
@@ -1118,6 +1119,26 @@ _declspec(naked) void ObjectWindowListViewColumnSizeHook()
 		
 		mov ecx, dword ptr ss : [esp + 0x54]
 		push 1
+		jmp retnAddr
+	}
+}
+
+void __cdecl InsertListViewHeaderSetSizeHook(HWND hWnd, WPARAM wParam, int a3, int a4, int a5)
+{
+	((LRESULT(_cdecl*)(HWND, WPARAM, int, int, int))(0x419F50))(hWnd, wParam, a3, a4, a5);
+	SendMessageA(hWnd, LVM_SETCOLUMNWIDTH, wParam, 65);
+}
+
+_declspec(naked) void EditLandCheckLandIsNull()
+{
+	static const UInt32 retnAddr = 0x61CA60;
+	_asm
+	{
+		mov dword ptr ss : [esp + 0x4], ebx
+		test eax, eax
+		je done
+		cmp dword ptr ds : [eax], 0
+	done:
 		jmp retnAddr
 	}
 }

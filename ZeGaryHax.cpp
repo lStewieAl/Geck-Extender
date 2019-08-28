@@ -104,6 +104,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	bUISpeedHooks = GetOrCreateINIInt("General", "bUISpeedHooks", 1, filename);
 	bLibdeflate = GetOrCreateINIInt("General", "bLibDeflate", 0, filename);
 	bExpandFormIDColumn = GetOrCreateINIInt("General", "bExpandFormIDColumn", 0, filename);
+	bAllowEditLandEdges = GetOrCreateINIInt("General", "bAllowEditLandEdges", 0, filename);
 
 	bPatchScriptEditorFont = GetOrCreateINIInt("Script", "bPatchEditorFont", 1, filename);
 	bScriptCompileWarningPopup = GetOrCreateINIInt("Script", "bScriptCompileWarningPopup", 0, filename);
@@ -208,6 +209,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		// fix FormID column being collapsed
 		WriteRelJump(0x42EFBB, UInt32(CellViewListViewCreateFormIDColumnHook));
 		WriteRelJump(0x44965A, UInt32(ObjectWindowListViewColumnSizeHook));
+		WriteRelCall(0x4682FE, UInt32(InsertListViewHeaderSetSizeHook));
 	}
 
 	//	ignore .nam Files - initial credit to roy
@@ -471,6 +473,31 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 
 	// workaround infinite wait if saving fails bug
 	WriteRelJump(0x4E1DB9, UInt32(SaveFailureHook));
+
+	// fix null pointer with checking edges when using landscape editor
+	WriteRelJump(0x61CA59, UInt32(EditLandCheckLandIsNull));
+
+	if (bAllowEditLandEdges)
+	{
+		// changes: for(int i = 1; i < uGridsToLoad - 1; ++i);
+		// to :		for(int i = 0; i < uGridsToLoad; ++i);
+
+		// north
+		SafeWrite8(0x459B93, 0x90);
+		SafeWrite8(0x45DADC, 0x90); // flattening 
+
+		// east 
+		SafeWrite8(0x459B79, 0x90);
+		SafeWrite8(0x45DAB9, 0x90); // flattening 
+
+		// south
+		SafeWrite8(0x459AF5, 0);
+		SafeWrite8(0x45DA30, 0); // flattening
+
+		// west
+		SafeWrite8(0x459B16, 0);
+		SafeWrite8(0x45DA56, 0); // flattening
+	}
 
 	// wrap objects list callback
 //	SafeWrite32(0x442803, UInt32(ObjectWindowColumnsCallback));
