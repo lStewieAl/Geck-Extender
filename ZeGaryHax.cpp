@@ -485,18 +485,22 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		// north
 		SafeWrite8(0x459B93, 0x90);
 		SafeWrite8(0x45DADC, 0x90); // flattening 
+		SafeWrite8(0x45DEFB, 0); // texture painter
 
 		// east 
 		SafeWrite8(0x459B79, 0x90);
 		SafeWrite8(0x45DAB9, 0x90); // flattening 
+		SafeWrite8(0x45DF84, 0x90);	// texture painter
 
 		// south
 		SafeWrite8(0x459AF5, 0);
 		SafeWrite8(0x45DA30, 0); // flattening
+		SafeWrite8(0x45DF21, 0); // texture painter
 
 		// west
 		SafeWrite8(0x459B16, 0);
 		SafeWrite8(0x45DA56, 0); // flattening
+		SafeWrite8(0x45DFA5, 0x90); // texture painter
 	}
 
 	// wrap objects list callback
