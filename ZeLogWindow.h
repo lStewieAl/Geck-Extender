@@ -17,6 +17,7 @@
 #define UI_EXTMENU_LAUNCHGAME   51009
 #define UI_EXTMENU_SAVEPOSITION 51010
 #define UI_EXTMENU_LOADPOSITION 51011
+#define UI_EXTMENU_TOGGLENAVEMESHBISECT 51018
 #define ID_TRACKBAR				51012
 #define ID_TIMEOFDAYTEXT		51013
 #define ID_RENDERWINDOWCELLLOADS_CHECKBOX 51014
@@ -42,12 +43,23 @@ HWND g_allowCellWindowLoadsButtonHwnd;
 HWND g_renderWindowShowWaterButtonHwnd;
 HWND g_renderWindowShowPortalsButtonHwnd;
 
+void ToggleNavmeshPlaceAboveOthers(bool isAllowed)
+{
+	//	Patch Navmesh editing to allow placing vertices over existing navmesh (disables line bisection)
+	SafeWrite16(0x0045C590, isAllowed ? 0x9090 : 0x4675);
+	bNavmeshAllowPlaceAboveOthers = isAllowed;
+}
+
 void ToggleObjectWindowFilterUnedited(bool show)
 {
 	if (show)
+	{
 		SafeWriteBuf(0x439739, "\x8B\x44\x24\x1C\x85\xC0", 6);
+	}
 	else
+	{
 		WriteRelJump(0x439739, UInt32(ObjectWindowListFilterUneditedHook));
+	}
 	
 	// refresh object window
 	((bool(__stdcall*)(HWND hWnd, UInt32 msg, WPARAM, LPARAM))(0x449E50))(NULL, 1042, NULL, NULL);	
@@ -69,6 +81,7 @@ bool EditorUI_CreateExtensionMenu(HWND MainWindow, HMENU MainMenu)
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_RENDER, "Render Window Uncap (requires restart)");
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_PREVIEW, "Preview Window Uncap (requires restart)");
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED, "Object Window - Only Show Edited");
+	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_TOGGLENAVEMESHBISECT, "Allow Placement Of Navmesh Node Above Others");
 
 	MENUITEMINFO menuInfo;
 	memset(&menuInfo, 0, sizeof(MENUITEMINFO));
@@ -97,7 +110,7 @@ void EditorUI_AddSliderToToolbar(HWND MainWindow, HINSTANCE hInstance) {
 		NULL
 	);
 	SendMessageA(g_trackBarHwnd, TBM_SETRANGE, TRUE, MAKELONG(0, 24 * 4));
-	SendMessageA(g_trackBarHwnd, TBM_SETTICFREQ, 4, 0);
+	SendMessageA(g_trackBarHwnd, TBM_SETTICFREQ, 10, 0);
 	SendMessageA(g_trackBarHwnd, TBM_SETPOS, TRUE, 10 * 4);
 
 }
@@ -301,6 +314,14 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 					PostMessageA(g_MainHwnd, WM_COMMAND, 0x9CD1, 0);
 				}
 			}
+
+			if (!bNavmeshAllowPlaceAboveOthers == 0)
+			{
+				menuInfo.fState = MFS_CHECKED;
+				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLENAVEMESHBISECT, FALSE, &menuInfo);
+				PostMessageA(g_ConsoleHwnd, UI_EXTMENU_TOGGLENAVEMESHBISECT, (WPARAM)true, 0);
+				ToggleNavmeshPlaceAboveOthers(true);
+			}
 		}
 	}
 	else if (Message == WM_COMMAND)
@@ -480,6 +501,33 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 			}
 			return 0;
 
+			case UI_EXTMENU_TOGGLENAVEMESHBISECT:
+			{
+				MENUITEMINFO menuInfo;
+				menuInfo.cbSize = sizeof(MENUITEMINFO);
+				menuInfo.fMask = MIIM_STATE;
+				GetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLENAVEMESHBISECT, FALSE, &menuInfo);
+
+				if (menuInfo.fState == MFS_CHECKED)
+				{
+					menuInfo.fState = MFS_UNCHECKED;
+					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLENAVEMESHBISECT, FALSE, &menuInfo);
+					ToggleNavmeshPlaceAboveOthers(false);
+				}
+				else
+				{
+					//	Show unedited only
+					menuInfo.fState = MFS_CHECKED;
+					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLENAVEMESHBISECT, FALSE, &menuInfo);
+					ToggleNavmeshPlaceAboveOthers(true);
+				}
+
+				// save state to ini
+				char buffer[8];
+				WritePrivateProfileString("Render Window", "bNavmeshAllowPlaceAboveOthers", _itoa(bNavmeshAllowPlaceAboveOthers, buffer, 2), filename);
+			}
+			return 0;
+
 			case ID_TIMEOFDAYTEXT:
 			{
 				if (GetFocus() != (HWND)lParam) break;
@@ -557,7 +605,7 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 	{
 		//	Continue normal execution but with a custom string
 		char customTitle[256];
-		sprintf_s(customTitle, "%s -= GECK Extender Rev. 0.23 =-", (const char *)lParam);
+		sprintf_s(customTitle, "%s -= GECK Extender Rev. 0.24a =-", (const char *)lParam);
 
 		return CallWindowProc(OldEditorUI_WndProc, Hwnd, Message, wParam, (LPARAM)customTitle);
 	}

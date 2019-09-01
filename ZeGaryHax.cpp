@@ -118,6 +118,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	fMovementAltMultiplier = GetOrCreateINIInt("Render Window", "iAltSpeedPct", 15, filename) / 100.0F;
 	fMovementShiftMultiplier = GetOrCreateINIInt("Render Window", "iShiftSpeedPct", 200, filename) / 100.0F;
 	bShowTimeOfDaySlider = GetOrCreateINIInt("Render Window", "bShowTimeOfDaySlider", 1, filename);
+	bNavmeshAllowPlaceAboveOthers = GetOrCreateINIInt("Render Window", "bNavmeshAllowPlaceAboveOthers", 1, filename);
 	
 	bSmoothFlycamRotation = GetOrCreateINIInt("Flycam", "bSmoothRotation", 1, filename);
 	bFlycamUpDownRelativeToWorld = GetOrCreateINIInt("Flycam", "bFlycamUpDownRelativeToWorld", 1, filename);
@@ -269,9 +270,6 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	XUtil::PatchMemoryNop(0x004DC191, 0x05);
 	XUtil::PatchMemoryNop(0x004DC641, 0x05);
 	XUtil::PatchMemoryNop(0x004DC91C, 0x05);
-
-	//	Patch Navmesh editing to allow placing vertices over existing navmesh - credit to StewieA
-	SafeWrite16(0x0045C590, 0x9090);
 
 	//	nop useless calls to _vsprintf and SendMessage for 'Processing topic %s' - credit to roy/nukem
 	XUtil::PatchMemoryNop(0x00591CCE, 0x24);
