@@ -60,10 +60,11 @@ void ToggleObjectWindowFilterUnedited(bool show)
 	{
 		WriteRelJump(0x439739, UInt32(ObjectWindowListFilterUneditedHook));
 	}
-	
+
 	// refresh object window
 	((bool(__stdcall*)(HWND hWnd, UInt32 msg, WPARAM, LPARAM))(0x449E50))(NULL, 1042, NULL, NULL);	
 }
+
 
 bool EditorUI_CreateExtensionMenu(HWND MainWindow, HMENU MainMenu)
 {
@@ -605,7 +606,7 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 	{
 		//	Continue normal execution but with a custom string
 		char customTitle[256];
-		sprintf_s(customTitle, "%s -= GECK Extender Rev. 0.24a =-", (const char *)lParam);
+		sprintf_s(customTitle, "%s -= GECK Extender Rev. 0.24b =-", (const char *)lParam);
 
 		return CallWindowProc(OldEditorUI_WndProc, Hwnd, Message, wParam, (LPARAM)customTitle);
 	}
@@ -633,6 +634,7 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 			return 0;
 		}
 	}
+
 	return CallWindowProc(OldEditorUI_WndProc, Hwnd, Message, wParam, lParam);
 }
 

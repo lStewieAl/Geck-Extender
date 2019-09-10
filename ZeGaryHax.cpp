@@ -259,12 +259,12 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	SafeWrite8(0x0041B612, 0x90);
 
 	//	Splash Screen Hax - credit to nukem and roy
-	WriteRelJump(0x004463CD, (UInt32)hk_SplashScreen);
-	SafeWrite8(0x004463D2, 0x90);
+	WriteRelCall(0x4463CD, UInt32(SplashScreenHook));
+	SafeWrite8(0x4463CD + 5, 0x90);
 
 	//	About Dialog Hax - credit to nukem and roy
-	WriteRelJump(0x00441976, (UInt32)hk_AboutDialog);
-	SafeWrite8(0x0044197B, 0x90);
+	WriteRelCall(0x00441976, UInt32(AboutDialogHook));
+	SafeWrite8(0x00441976 + 5, 0x90);
 
 	//	Patch some SendMessageA to speed up loading - credit to nukem
 	XUtil::PatchMemoryNop(0x004DC191, 0x05);

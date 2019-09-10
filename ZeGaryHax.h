@@ -138,7 +138,7 @@ int GetOrCreateINIInt(char* sectionName, char* keyName, int defaultValue, char* 
 	int settingValue = GetPrivateProfileIntA(sectionName, keyName, INI_SETTING_NOT_FOUND, filename);
 	if (settingValue == INI_SETTING_NOT_FOUND) {
 		char arr[11];
-		WritePrivateProfileString(sectionName, keyName, itoa(defaultValue, arr, 10), filename);
+		WritePrivateProfileString(sectionName, keyName, _itoa(defaultValue, arr, 10), filename);
 		settingValue = defaultValue;
 	}
 	return settingValue;
@@ -225,50 +225,19 @@ bool GetINIExists()
 	return (attr != INVALID_FILE_ATTRIBUTES) && !(attr & FILE_ATTRIBUTE_DIRECTORY);
 }
 
-//	patch splash screen - credit to roy and nukem
-static __declspec(naked) void hk_SplashScreen()
+HWND __stdcall SplashScreenHook(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc, LPARAM dwInitParam)
 {
-	static const UInt32 kRetnAddr = 0x004463D3;
-	HWND hWnd;
-
-	__asm
-	{
-		call	dword ptr ds:[0x00D234CC]		//	CreateDialogParam
-		push	ebp
-		mov		ebp, esp
-		push	eax
-		mov		hWnd, eax
-	}
+	HWND hWnd = CreateDialogParamA(hInstance, lpTemplateName, hWndParent, lpDialogFunc, dwInitParam);
 	SendMessage(GetDlgItem((HWND)hWnd, 1962), STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)LoadImage(ZeGaryHaxHandle, MAKEINTRESOURCE(IDB_SPLASHBITMAP), IMAGE_BITMAP, 0, 0, 0));
-	__asm
-	{
-		pop		eax
-		pop		ebp
-		jmp		kRetnAddr
-	}
+	return hWnd;
 }
 
 //	patch about dialog - credit to roy and nukem
-static __declspec(naked) void hk_AboutDialog()
+HWND __stdcall AboutDialogHook(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc, LPARAM dwInitParam)
 {
-	static const UInt32 kRetnAddr = 0x0044197C;
-	HWND hWnd;
-
-	__asm
-	{
-		call	dword ptr ds:[0x00D234CC]		//	CreateDialogParam
-		push	ebp
-		mov		ebp, esp
-		push	eax
-		mov		hWnd, eax
-	}
+	HWND hWnd = CreateDialogParamA(hInstance, lpTemplateName, hWndParent, lpDialogFunc, dwInitParam);
 	SendMessage(GetDlgItem((HWND)hWnd, 1963), STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)LoadImage(ZeGaryHaxHandle, MAKEINTRESOURCE(IDB_SPLASHBITMAP), IMAGE_BITMAP, 0, 0, 0));
-	__asm
-	{
-		pop		eax
-		pop		ebp
-		jmp		kRetnAddr
-	}
+	return hWnd;
 }
 
 //	fix destruction dialog close button - credit to roy
