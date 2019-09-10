@@ -574,6 +574,10 @@ _declspec(naked) void EndLoadingHook() {
 // hooks before movement speed is determined for flycam mode
 static int lastFlycamTime = 0;
 _declspec(naked) void FlycamMovementSpeedMultiplierHook() {
+	_asm
+	{
+		pushad
+	}
 	static const UInt32 retnAddr = 0x455D17;
 	*(float*)(0xED12C0) = fFlycamNormalMovementSpeed;
 
@@ -592,7 +596,9 @@ _declspec(naked) void FlycamMovementSpeedMultiplierHook() {
 
 	lastFlycamTime = GetTickCount();
 	
-	_asm {
+	_asm 
+	{
+		popad
 	originalCode:
 		mov     eax, dword ptr ds:[0xF1FBF4]
 		jmp retnAddr
