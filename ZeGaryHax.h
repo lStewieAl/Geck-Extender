@@ -1118,3 +1118,21 @@ _declspec(naked) void EditLandCheckLandIsNull()
 		jmp retnAddr
 	}
 }
+
+_declspec(naked) void FormListCheckNull()
+{
+	// add check if eax is null before dereferencing it
+	static const UInt32 retnAddr = 0x501457;
+	_asm
+	{
+		add esp, 0x4
+		test eax, eax
+		je done
+		mov ecx, dword ptr ds : [eax]
+		test ecx, ecx
+	done:
+		jmp retnAddr
+	}
+}
+
+void BadFormLoadHook();

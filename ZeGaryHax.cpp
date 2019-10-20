@@ -35,6 +35,7 @@ BOOL __stdcall ScriptEditCallback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
 	return ((BOOL(__stdcall*)(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam))(0x5C3D40))(hWnd, msg, wParam, lParam);
 }
 
+
 extern "C"
 {
 	  BOOL WINAPI DllMain(HANDLE  hDllHandle, DWORD dwReason, LPVOID lpreserved)
@@ -501,6 +502,12 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		SafeWrite8(0x45DFA5, 0x90); // texture painter
 	}
 
+	// fix crash when doubling clicking an empty area in a form list
+	WriteRelJump(0x501450, UInt32(FormListCheckNull));
+
+	// give more informative error when "Bad forms are encountered by printing the bad form's formID"
+	WriteRelJump(0x4D9577, UInt32(BadFormLoadHook));
+
 	// wrap objects list callback
 //	SafeWrite32(0x442803, UInt32(ObjectWindowColumnsCallback));
 
@@ -595,6 +602,23 @@ void PrintCmdTable()
 	}
 }
 
+void __stdcall BadFormPrintID(TESForm* form)
+{
+	EditorUI_Log("FORMS: Bad form %08X could not be removed from the file.", form->refID);
+}
+
+_declspec(naked) void BadFormLoadHook()
+{
+	static const UInt32 retnAddr = 0x4D957C;
+	_asm
+	{
+		push esi
+		call BadFormPrintID
+	done:
+		mov byte ptr ss : [esp + 0x1A] , 0x1 // wasBadFormEncountered
+		jmp retnAddr
+	}
+}
 
 /* TODO 
 Creature + Leveled creature/character windows
