@@ -455,11 +455,15 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	WriteRelJump(0x893576, UInt32(EmbeddedRenderWindowSoundNullCheck));
 
 	if (bSkipVanillaLipGen) {
-		// skip topics whose mod index is less than 5 (there are 5 vanilla esms)
+		// skip topics that aren't modified
 		WriteRelJump(0x41EA7B, UInt32(LipGenLoopHook));
 
-		// don't include topics whose mod index is less than 5 for the progress bar counter
+		// don't include topics that aren't modified for the progress bar counter
 		WriteRelJump(0x41EA30, UInt32(LipGenCountTopicsHook));
+
+		// replace the "Do you want to forcibly recreate all facial animation files?" to for the current plugin
+		static char* facialAnimationsPopupText = "Do you want to forcibly recreate all facial animation files for the current plugin?";
+		SafeWrite32(0x440C43, UInt32(facialAnimationsPopupText));
 	}
 
 	SafeWrite32(0x4411A1, UInt32(RenderWindowCallbackHook));
@@ -507,6 +511,9 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 
 	// give more informative error when "Bad forms are encountered by printing the bad form's formID"
 	WriteRelJump(0x4D9577, UInt32(BadFormLoadHook));
+
+	// use armor model instead of ground object in preview window
+//	WriteRelCall(0x5F0C3E, UInt32(FormGetNameHook));
 
 	// wrap objects list callback
 //	SafeWrite32(0x442803, UInt32(ObjectWindowColumnsCallback));

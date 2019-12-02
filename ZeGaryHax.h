@@ -876,35 +876,14 @@ void __stdcall UpdateTimeOfDayInputBoxHook(HWND hWnd, UINT Msg, WPARAM wParam, L
 	SetWindowTextA(g_timeOfDayTextHwnd, timeBuf);
 }
 
-/*
-UInt16 modIndex = -1;
-bool __fastcall CheckIsValidTopic(TESTopic* topic) {
-	tList<TESTopic::Info> infos = topic->infos;
-
-	for (tList<TESTopic::Info>::Iterator iter = infos.Begin(); !iter.End(); ++iter) {
-		TopicInfoArray topicInfos = iter->infoArray;
-		UInt16 count = topicInfos.firstFreeEntry;
-		TESTopicInfo* data = *topicInfos.data;
-		for (int i = 0, n = topicInfos.firstFreeEntry; i < n; ++i) {
-			TESTopicInfo* topicInfo = (TESTopicInfo*)data + i;
-			if (topicInfo && topicInfo->GetModIndex() < 5) {
-				modIndex = topicInfo->GetModIndex();
-				return false;
-			}
-		}
-	}
-
-	return true;
-}
-*/
-
-/* skip the topic if its modIndex is less than 5 */
 _declspec(naked) void LipGenLoopHook() {
 	static const UInt32 retnAddr = 0x41EA83;
 	static const UInt32 skipAddr = 0x41EE65;
 	_asm {
-		cmp byte ptr[ecx + 0xF], 5
-		jl skip
+		// ecx contains TESForm
+		test byte ptr ss : [ecx + 8], 2 // form->flags & kModified
+
+		je skip
 
 		mov eax, [ecx]
 		mov edx, [eax+0xFC]
@@ -915,15 +894,17 @@ _declspec(naked) void LipGenLoopHook() {
 	}
 }
 
-/* don't increase the counter if the topic's modIndex is less than 5 */
 _declspec(naked) void LipGenCountTopicsHook() {
 	static const UInt32 retnAddr = 0x41EA35;
 	_asm {
 		mov esi, dword ptr ss:[eax]
 		test esi, esi
 		jz done
-		cmp byte ptr [esi+0xF], 5
-		jl done
+
+		// esi contains TESForm
+		test byte ptr ss : [esi + 8], 2 // form->flags & kModified
+
+		je done
 
 		inc ecx
 	done:
@@ -1013,9 +994,7 @@ _declspec(naked) void ObjectWindowListFilterUneditedHook()
 	static const UInt32 retnAddr = 0x43973F;
 	_asm {
 		// esi contains TESForm
-		mov eax, [esi+8] // form->flags
-		shr eax, 1
-		test al, 1 // form->flags & kModified
+		test byte ptr ss : [esi+8], 2 /// form->flags & kModified
 		jne editedForm
 		jmp skipAddr
 
