@@ -1115,3 +1115,24 @@ _declspec(naked) void FormListCheckNull()
 }
 
 void BadFormLoadHook();
+
+_declspec(naked) void MultipleMasterLoadHook()
+{
+	static char* MultipleMastersMessage = "Multiple master files selected for load, do you wish to continue? (enable bAllowMultipleMasterLoads to remove this warning)";
+	static const UInt32 continueLoadingAddr = 0x4DD394;
+	static const UInt32 stopLoadingAddr = 0x4DD2F9;
+	_asm
+	{
+		push MB_TASKMODAL | MB_ICONWARNING | MB_YESNO
+		push 0xD41FE4 // "Invalid File Selection"
+		push MultipleMastersMessage
+		push 0
+		call edi // MessageBoxA
+		cmp eax, IDYES
+		jne stopLoading
+		mov byte ptr ds : [0xED3B80], 1 // bAllowMultipleMasterLoads
+		jmp continueLoadingAddr
+	stopLoading:
+		jmp stopLoadingAddr
+	}
+}

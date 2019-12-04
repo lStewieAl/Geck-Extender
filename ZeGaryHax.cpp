@@ -512,11 +512,8 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	// give more informative error when "Bad forms are encountered by printing the bad form's formID"
 	WriteRelJump(0x4D9577, UInt32(BadFormLoadHook));
 
-	// use armor model instead of ground object in preview window
-//	WriteRelCall(0x5F0C3E, UInt32(FormGetNameHook));
-
-	// wrap objects list callback
-//	SafeWrite32(0x442803, UInt32(ObjectWindowColumnsCallback));
+	// add option to continue loading if multiple master files are selected
+	WriteRelJump(0x4DD2E6, UInt32(MultipleMasterLoadHook));
 
 	//	Create log window - credit to nukem
 	InitCommonControls();
