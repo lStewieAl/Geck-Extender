@@ -91,6 +91,7 @@ int bLibdeflate = 0;
 int bExpandFormIDColumn = 0;
 int bAllowEditLandEdges = 0;
 int bNavmeshAllowPlaceAboveOthers = 0;
+int bAllowRecompileAll = 0;
 
 int bUseAltShiftMultipliers = 1;
 float fMovementAltMultiplier = 0.15F;

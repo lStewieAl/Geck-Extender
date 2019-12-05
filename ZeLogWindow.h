@@ -26,7 +26,8 @@
 #define UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED	51017
 
 // unused button in vanilla menu
-#define VIEW_RENDER_WINDOW 0x9D06
+#define MENUOPTION_RENDER_WINDOW 0x9D06
+#define MENUOPTION_RECOMPILE_ALL 0x9ECE
 
 HWND g_MainHwnd;
 HWND g_ConsoleHwnd;
@@ -271,7 +272,17 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 			InsertMenu(createInfo->hMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_LAUNCHGAME, "Launch Game");
 
 			g_MainMenu = createInfo->hMenu;
-			EnableMenuItem(g_MainMenu, VIEW_RENDER_WINDOW, MF_DISABLED | MF_GRAYED);
+			EnableMenuItem(g_MainMenu, MENUOPTION_RENDER_WINDOW, MF_DISABLED | MF_GRAYED);
+
+			if (!bAllowRecompileAll)
+			{
+				EnableMenuItem(g_MainMenu, MENUOPTION_RECOMPILE_ALL, MF_DISABLED | MF_GRAYED);
+				// patch switch table offset for recompile all menu button
+				SafeWrite8(0x4455E0, 0xE8);
+
+				// patch switch table for script edit recompile all button
+				SafeWrite16(0x5C4E3C, 0x4D6B);
+			}
 
 			MENUITEMINFO menuInfo;
 			menuInfo.cbSize = sizeof(MENUITEMINFO);
@@ -578,24 +589,24 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 			}
 			return 0;
 
-			case VIEW_RENDER_WINDOW:
+			case MENUOPTION_RENDER_WINDOW:
 			{
 				MENUITEMINFO menuInfo;
 				menuInfo.cbSize = sizeof(MENUITEMINFO);
 				menuInfo.fMask = MIIM_STATE;
-				GetMenuItemInfo(g_MainMenu, VIEW_RENDER_WINDOW, FALSE, &menuInfo);
+				GetMenuItemInfo(g_MainMenu, MENUOPTION_RENDER_WINDOW, FALSE, &menuInfo);
 
 				if (menuInfo.fState == MFS_CHECKED)
 				{
 					//	Hide window
 					menuInfo.fState = MFS_UNCHECKED;
-					SetMenuItemInfo(g_MainMenu, VIEW_RENDER_WINDOW, FALSE, &menuInfo);
+					SetMenuItemInfo(g_MainMenu, MENUOPTION_RENDER_WINDOW, FALSE, &menuInfo);
 				}
 				else
 				{
 					//	Show window
 					menuInfo.fState = MFS_CHECKED;
-					SetMenuItemInfo(g_MainMenu, VIEW_RENDER_WINDOW, FALSE, &menuInfo);
+					SetMenuItemInfo(g_MainMenu, MENUOPTION_RENDER_WINDOW, FALSE, &menuInfo);
 					ShowWindow(g_renderWindowHwnd, 1);
 				}
 			}

@@ -106,6 +106,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	bLibdeflate = GetOrCreateINIInt("General", "bLibDeflate", 0, filename);
 	bExpandFormIDColumn = GetOrCreateINIInt("General", "bExpandFormIDColumn", 0, filename);
 	bAllowEditLandEdges = GetOrCreateINIInt("General", "bAllowEditLandEdges", 0, filename);
+	bAllowRecompileAll = GetOrCreateINIInt("General", "bAllowRecompileAll", 0, filename);
 
 	bPatchScriptEditorFont = GetOrCreateINIInt("Script", "bPatchEditorFont", 1, filename);
 	bScriptCompileWarningPopup = GetOrCreateINIInt("Script", "bScriptCompileWarningPopup", 0, filename);
@@ -217,7 +218,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	//	ignore .nam Files - initial credit to roy
 	if (bIgnoreNAMFiles == 1)
 	{
-		SafeWriteBuf(0xD412C1, "\x47\x41\x4C", 3); // replace NAM extension with GAL ('Geck Auto-Load')
+		SafeWriteBuf(0xD412C1, "GAL", 3); // replace NAM extension with GAL ('Geck Auto-Load')
 	}
 
 	if (bVersionControlMode == 0)
