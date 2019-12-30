@@ -683,8 +683,8 @@ bool __fastcall ScriptEdit__Save(byte* thiss, void* dummyEDX, HWND hDlg, char a3
 	return saveSuccess;
 }
 
-double GetRefSpeedMultiplier() {
-	double multiplier = 1.0F;
+float GetRefSpeedMultiplier() {
+	float multiplier = 1.0F;
 	if (GetAsyncKeyState(VK_SHIFT) < 0) {
 		multiplier *= fMovementShiftMultiplier;
 	}
@@ -791,7 +791,7 @@ _declspec(naked) void hk_LoadFilesInit() {
 	}
 }
 
-/* check if Q or E are pressed and modify the Z movement speed (stored in esp+0x2C) before it is passed to the view transform */
+/* check if Q or E are held and modify the Z movement speed (stored in esp+0x2C) before it is passed to the view transform */
 _declspec(naked) void RenderWindowFlycamPreTransformMovementHook() {
 	static const UInt32 retnAddr = 0x455DB1;
 	_asm {
@@ -1135,5 +1135,18 @@ _declspec(naked) void MultipleMasterLoadHook()
 		jmp continueLoadingAddr
 	stopLoading:
 		jmp stopLoadingAddr
+	}
+}
+
+__declspec(naked) void RenderWindowHandlesRefRotationHook()
+{
+	static const UInt32 retnAddr = 0x4523D0;
+	_asm
+	{
+		call GetRefSpeedMultiplier // no need to push/popad at this location
+		fild dword ptr ss : [esp + 0x114]
+		fmul
+		test byte ptr ds : [0x00ECFCEC] , 0x2
+		jmp retnAddr
 	}
 }

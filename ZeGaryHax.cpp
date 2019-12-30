@@ -410,6 +410,9 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 
 		// camera rotation with a selected ref
 		WriteRelJump(0x45F5FB, UInt32(hk_RefCameraRotation));
+
+		// ref rotation
+		WriteRelJump(0x4523C2, UInt32(RenderWindowHandlesRefRotationHook));
 	}
 
 	if (bNoVersionControlWarning) {
