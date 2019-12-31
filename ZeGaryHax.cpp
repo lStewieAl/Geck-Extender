@@ -147,6 +147,9 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		SafeWrite8(0x0072F095, 0x02);
 	}
 
+	// increase landscape edit settings max icon size to 4096x4096 from 512x512
+	SafeWrite8(0x448AA3, 0x10);
+
 	//	change help urls to our wiki - credit to roy
 	SafeWrite32(0x00441952, (UInt32)geckwikiurl);
 	SafeWrite32(0x005C4B0F, (UInt32)geckwikiscriptingurl);
