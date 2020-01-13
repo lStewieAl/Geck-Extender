@@ -107,6 +107,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	bExpandFormIDColumn = GetOrCreateINIInt("General", "bExpandFormIDColumn", 0, filename);
 	bAllowEditLandEdges = GetOrCreateINIInt("General", "bAllowEditLandEdges", 0, filename);
 	bAllowRecompileAll = GetOrCreateINIInt("General", "bAllowRecompileAll", 0, filename);
+	bNavmeshFindCoverConfirmPrompt = GetOrCreateINIInt("General", "bNavmeshFindCoverConfirmPrompt", 0, filename);
 
 	bPatchScriptEditorFont = GetOrCreateINIInt("Script", "bPatchEditorFont", 1, filename);
 	bScriptCompileWarningPopup = GetOrCreateINIInt("Script", "bScriptCompileWarningPopup", 0, filename);
@@ -521,6 +522,13 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 
 	// add option to continue loading if multiple master files are selected
 	WriteRelJump(0x4DD2E6, UInt32(MultipleMasterLoadHook));
+
+	if (bNavmeshFindCoverConfirmPrompt)
+	{
+		WriteRelJump(0x456F22, UInt32(RenderWindowNavMeshConfirmFindCover));
+		WriteRelJump(0x444511, UInt32(MainWindowNavMeshConfirmFindCover));
+		WriteRelJump(0x40AC6F, UInt32(NavMeshToolbarConfirmFindCover)); // skip 0x40AC87, retn 0x40AC7B
+	}
 
 	//	Create log window - credit to nukem
 	InitCommonControls();

@@ -92,6 +92,7 @@ int bExpandFormIDColumn = 0;
 int bAllowEditLandEdges = 0;
 int bNavmeshAllowPlaceAboveOthers = 0;
 int bAllowRecompileAll = 0;
+int bNavmeshFindCoverConfirmPrompt = 0;
 
 int bUseAltShiftMultipliers = 1;
 float fMovementAltMultiplier = 0.15F;
@@ -824,11 +825,11 @@ _declspec(naked) void RenderWindowFlycamPostTransformMovementHook() {
 	static const UInt32 retnAddr = 0x455DCE;
 	_asm {
 		push eax
-		push 'Q'
+		push VK_LCONTROL
 		call dword ptr ds:[0xD234D8] // GetAsyncKeyState
 		movzx eax, ax
 		test eax, 0x8000
-		jz noQ
+		jz noDown
 
 		pop eax
 		fld  dword ptr ss : [eax + 8]
@@ -836,12 +837,12 @@ _declspec(naked) void RenderWindowFlycamPostTransformMovementHook() {
 		fstp dword ptr ss : [eax + 8]
 		push eax
 
-	noQ :
-		push 'E'
+	noDown:
+		push VK_SPACE
 		call dword ptr ds : [0xD234D8] // GetAsyncKeyState
 		movzx eax, ax
 		test eax, 0x8000
-		jz noE
+		jz noUp
 
 		pop eax
 		fld  dword ptr ss : [eax + 8]
@@ -849,7 +850,7 @@ _declspec(naked) void RenderWindowFlycamPostTransformMovementHook() {
 		fstp dword ptr ss : [eax + 8]
 		push eax
 
-	noE:
+	noUp:
 		pop eax
 		mov edx, dword ptr ss:[eax]
 		mov ecx, dword ptr ss : [eax+4]
@@ -1148,5 +1149,78 @@ __declspec(naked) void RenderWindowHandlesRefRotationHook()
 		fmul
 		test byte ptr ds : [0x00ECFCEC] , 0x2
 		jmp retnAddr
+	}
+}
+
+const char* NavmeshConfirmMessage = "Are you sure you want to find cover edges?";
+_declspec(naked) void RenderWindowNavMeshConfirmFindCover()
+{
+	static const UInt32 skipAddr = 0x462C7A;
+
+	_asm
+	{
+		push MB_TASKMODAL | MB_ICONWARNING | MB_YESNO
+		push 0xD2D1F4 // "Navmesh: Find Cover"
+		push NavmeshConfirmMessage
+		push 0
+		call MessageBoxA
+		cmp eax, IDNO
+		je skip
+	doNavmesh:
+		push 0
+		mov ecx, 0xF073F8
+		push 0x456F2E // retnAddr
+		mov eax, 0x6F51B0 // Navmesh::FindCoverEdges
+		jmp eax
+	skip:
+		jmp skipAddr
+	}
+}
+
+_declspec(naked) void MainWindowNavMeshConfirmFindCover()
+{
+	static const UInt32 skipAddr = 0x44382F;
+
+	_asm
+	{
+		push MB_TASKMODAL | MB_ICONWARNING | MB_YESNO
+		push 0xD2D1F4 // "Navmesh: Find Cover"
+		push NavmeshConfirmMessage
+		push 0
+		call MessageBoxA
+		cmp eax, IDNO
+		je skip
+	doNavmesh:
+		push 0
+		mov ecx, 0xF073F8
+		push 0x44451D // retnAddr
+		mov eax, 0x6F51B0 // Navmesh::FindCoverEdges
+		jmp eax
+	skip:
+		jmp skipAddr
+	}
+}
+
+_declspec(naked) void NavMeshToolbarConfirmFindCover()
+{
+	static const UInt32 skipAddr = 0x40AC87;
+
+	_asm
+	{
+		push MB_TASKMODAL | MB_ICONWARNING | MB_YESNO
+		push 0xD2D1F4 // "Navmesh: Find Cover"
+		push NavmeshConfirmMessage
+		push 0
+		call MessageBoxA
+		cmp eax, IDNO
+		je skip
+	doNavmesh:
+		push 0
+		mov ecx, 0xF073F8
+		push 0x40AC7B // retnAddr
+		mov eax, 0x6F51B0 // Navmesh::FindCoverEdges
+		jmp eax
+	skip:
+		jmp skipAddr
 	}
 }
