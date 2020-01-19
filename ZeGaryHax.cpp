@@ -29,12 +29,12 @@
 #include "Editor.h"
 #include "UISpeedHooks.h"
 
+
 const NVSEInterface* savedNVSE = NULL;
 
 BOOL __stdcall ScriptEditCallback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	return ((BOOL(__stdcall*)(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam))(0x5C3D40))(hWnd, msg, wParam, lParam);
 }
-
 
 extern "C"
 {
@@ -111,6 +111,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 
 	bPatchScriptEditorFont = GetOrCreateINIInt("Script", "bPatchEditorFont", 1, filename);
 	bScriptCompileWarningPopup = GetOrCreateINIInt("Script", "bScriptCompileWarningPopup", 0, filename);
+	bShowScriptChangeTypeWarning = GetOrCreateINIInt("Script", "bShowChangeScriptTypeWarning", 0, filename);
 
 	bAutoScroll = GetOrCreateINIInt("Log", "bAutoScroll", 1, filename);
 
@@ -530,6 +531,11 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		WriteRelJump(0x40AC6F, UInt32(NavMeshToolbarConfirmFindCover)); // skip 0x40AC87, retn 0x40AC7B
 	}
 
+	if (bShowScriptChangeTypeWarning)
+	{
+		WriteRelCall(0x5C2FC2, UInt32(SaveScriptChangedType));
+	}
+
 	//	Create log window - credit to nukem
 	InitCommonControls();
 	LoadLibraryA("MSFTEDIT.dll");
@@ -636,6 +642,33 @@ _declspec(naked) void BadFormLoadHook()
 	done:
 		mov byte ptr ss : [esp + 0x1A] , 0x1 // wasBadFormEncountered
 		jmp retnAddr
+	}
+}
+
+char** scriptTypes = (char**)0xE9BC6C;
+void __cdecl PrintScriptTypeChangedMessage(UInt32 script, UInt8 newType)
+{
+
+	UInt8 scriptType = *(UInt8*)(script + 0x3C);
+	char* previousTypeStr = scriptTypes[scriptType];
+	char* newTypeStr = scriptTypes[newType];
+
+	char errorMsg[100];
+	sprintf(errorMsg, "Script Type Changed, Previous: %s - New: %s", previousTypeStr, newTypeStr);
+	MessageBoxA(nullptr, errorMsg, "Warning", MB_ICONWARNING);
+}
+
+_declspec(naked) void SaveScriptChangedType()
+{
+	_asm
+	{
+		push ecx
+		push esi
+		call PrintScriptTypeChangedMessage
+		pop esi
+		pop ecx
+		mov byte ptr ss : [esp + 0x15] , 1
+		ret
 	}
 }
 

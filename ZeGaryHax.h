@@ -11,8 +11,7 @@ HMODULE ZeGaryHaxHandle;
 extern HWND g_trackBarHwnd;
 extern HWND g_timeOfDayTextHwnd;
 extern HWND g_allowCellWindowLoadsButtonHwnd;
-
-IDebugLog		gLog("EditorWarnings.log");
+IDebugLog	gLog("EditorWarnings.log");
 
 void PrintCmdTable();
 
@@ -93,6 +92,7 @@ int bAllowEditLandEdges = 0;
 int bNavmeshAllowPlaceAboveOthers = 0;
 int bAllowRecompileAll = 0;
 int bNavmeshFindCoverConfirmPrompt = 0;
+int bShowScriptChangeTypeWarning = 0;
 
 int bUseAltShiftMultipliers = 1;
 float fMovementAltMultiplier = 0.15F;
@@ -1117,6 +1117,7 @@ _declspec(naked) void FormListCheckNull()
 }
 
 void BadFormLoadHook();
+void SaveScriptChangedType();
 
 _declspec(naked) void MultipleMasterLoadHook()
 {
