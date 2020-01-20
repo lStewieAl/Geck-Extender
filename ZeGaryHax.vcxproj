@@ -141,6 +141,7 @@ C:\Modding\MO2\ModOrganizer.exe "moshortcut://Tale of Two Wastelands:x32dbg GECK
     <ClCompile Include="ZeGaryHax.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DebugCellShaders.h" />
     <ClInclude Include="Editor.h" />
     <ClInclude Include="GECKUtility.h" />
     <ClInclude Include="nvse\CommandTable.h" />

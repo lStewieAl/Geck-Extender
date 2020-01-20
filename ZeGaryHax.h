@@ -105,6 +105,10 @@ float fFlycamNormalMovementSpeed;
 float fFlycamShiftMovementSpeed;
 float fFlycamAltMovementSpeed;
 
+UInt8 g_iPreviewWindowRed;
+UInt8 g_iPreviewWindowGreen;
+UInt8 g_iPreviewWindowBlue;
+
 char filename[MAX_PATH];
 static const char *geckwikiurl = "https://geckwiki.com/index.php/";
 static const char *geckwikiscriptingurl = "https://geckwiki.com/index.php/Category:Scripting";
@@ -1224,4 +1228,13 @@ _declspec(naked) void NavMeshToolbarConfirmFindCover()
 	skip:
 		jmp skipAddr
 	}
+}
+
+void __fastcall InitPreviewWindowBackgroundColor(void* window, void* edx, UInt32 unusedColor)
+{
+	UInt8 r = g_iPreviewWindowRed;
+	UInt8 g = g_iPreviewWindowGreen;
+	UInt8 b = g_iPreviewWindowBlue;
+	UInt32 color = r + (g << 8) + (b << 16);
+	ThisStdCall(0x4793D0, window, color);
 }
