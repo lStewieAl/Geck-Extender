@@ -28,6 +28,7 @@
 #include "ZeWarningHax.h"
 #include "Editor.h"
 #include "UISpeedHooks.h"
+#include "DebugCellShaders.h"
 
 
 const NVSEInterface* savedNVSE = NULL;
@@ -535,6 +536,8 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	{
 		WriteRelCall(0x5C2FC2, UInt32(SaveScriptChangedType));
 	}
+
+
 
 	//	Create log window - credit to nukem
 	InitCommonControls();
