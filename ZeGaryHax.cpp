@@ -541,6 +541,11 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		WriteRelCall(0x5C2FC2, UInt32(SaveScriptChangedType));
 	}
 
+	// fix preview window RGB labels
+	SafeWrite8(0x10E6600, 'G');
+	SafeWrite8(0x10E6680, 'B');
+	SafeWrite8(0x10E6960, 'R');
+
 	WriteRelCall(0x4100A0, UInt32(InitPreviewWindowBackgroundColor));
 
 	//	Create log window - credit to nukem
