@@ -14,6 +14,7 @@ extern HWND g_allowCellWindowLoadsButtonHwnd;
 IDebugLog	gLog("EditorWarnings.log");
 
 void PrintCmdTable();
+void EditorUI_Log(const char* Format, ...);
 
 struct z_stream_s
 {
@@ -1237,4 +1238,144 @@ void __fastcall InitPreviewWindowBackgroundColor(void* window, void* edx, UInt32
 	UInt8 b = g_iPreviewWindowBlue;
 	UInt32 color = r + (g << 8) + (b << 16);
 	ThisStdCall(0x4793D0, window, color);
+}
+
+static double havokAnimationRate = 1000.0;
+void SetHavokAnimationSpeed(float speed)
+{
+	havokAnimationRate = 1000.0 / speed;
+}
+
+#define ID_ANIMATIONSPEED_TRACKBAR 1337
+#define ID_ANIMATIONSPEED_EDIT 1338
+#define ID_ANIMATION_STATIC 1339
+BOOL __stdcall HavokPreviewCallback(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam) {
+
+	if (Message == WM_COMMAND)
+	{
+		const uint32_t param = LOWORD(wParam);
+		switch (param)
+		{
+		case ID_ANIMATIONSPEED_EDIT:
+			if (GetFocus() != (HWND)lParam) break;
+
+			if (HIWORD(wParam) == EN_MAXTEXT) break;
+
+			char text[16];
+			int len = SendMessageA((HWND)lParam, EM_GETLINE, 0, (LPARAM)text);
+			text[len] = '\0'; // null terminate the line since EM_GETLINE does not
+
+			float speed = atof(text);
+			SetHavokAnimationSpeed(speed);
+			SendMessageA(GetDlgItem(hWnd, ID_ANIMATIONSPEED_TRACKBAR), TBM_SETPOS, TRUE, speed * 50); // update scrollbar
+			return 0;
+		}
+	} 
+	else if (Message == WM_HSCROLL)
+	{
+		if ((HWND)lParam == GetDlgItem(hWnd, ID_ANIMATIONSPEED_TRACKBAR))
+		{
+			char timeBuf[100];
+
+			const uint32_t param = LOWORD(wParam);
+
+			if (param == SB_THUMBPOSITION || param == SB_THUMBTRACK || param == SB_ENDSCROLL)
+			{
+				float speed;
+				if (param == SB_ENDSCROLL) speed = SendDlgItemMessageA(hWnd, ID_ANIMATIONSPEED_TRACKBAR, TBM_GETPOS, 0, 0);
+				else speed = HIWORD(wParam);
+
+				speed *= 0.02; // convert speed from 0-100 to 0-2
+
+				SetHavokAnimationSpeed(speed);
+
+				sprintf(timeBuf, "%.2f", speed);
+				SetWindowTextA(GetDlgItem(hWnd, ID_ANIMATIONSPEED_EDIT), timeBuf);
+			}
+			return 0;
+		}
+	}
+	else if (Message == WM_INITDIALOG)
+	{
+		HWND trackbar = GetDlgItem(hWnd, ID_ANIMATIONSPEED_TRACKBAR);
+		SendMessageA(trackbar, TBM_SETPOS, true, 50);
+
+		SendMessageA(trackbar, TBM_SETRANGE, TRUE, MAKELONG(0, 100));
+		SendMessageA(trackbar, TBM_SETTICFREQ, 10, 0);
+
+		char* defaultTime = "1.00";
+		SendDlgItemMessageA(hWnd, ID_ANIMATIONSPEED_EDIT, WM_SETTEXT, NULL, (LPARAM)defaultTime);
+
+		g_iPreviewWindowRed = GetOrCreateINIInt("Preview Window", "iBackgroundRed", 127, filename);
+		g_iPreviewWindowGreen = GetOrCreateINIInt("Preview Window", "iBackgroundGreen", 127, filename);
+		g_iPreviewWindowBlue = GetOrCreateINIInt("Preview Window", "iBackgroundBlue", 127, filename);
+	}
+	else if (Message == WM_DESTROY)
+	{
+		int red = GetDlgItemInt(hWnd, 1109, 0, 0); 
+		int green = GetDlgItemInt(hWnd, 1033, 0, 0);
+		int blue = GetDlgItemInt(hWnd, 1111, 0, 0);
+		char arr[11];
+		WritePrivateProfileString("Preview Window", "iBackgroundRed", _itoa(red, arr, 10), filename);
+		WritePrivateProfileString("Preview Window", "iBackgroundGreen", _itoa(green, arr, 10), filename);
+		WritePrivateProfileString("Preview Window", "iBackgroundBlue", _itoa(blue, arr, 10), filename);
+	}
+
+	return ((BOOL(__stdcall*)(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam))(0x4107F0))(hWnd, Message, wParam, lParam);
+}
+
+void MoveDlgItem(HWND hWnd, int ID, int deltaX, int deltaY)
+{
+	RECT rect;
+	POINT point;
+	HWND element = GetDlgItem(hWnd, ID);
+	GetWindowRect(element, &rect);
+	point.x = rect.left;
+	point.y = rect.top;
+	ScreenToClient(hWnd, &point);
+	LONG height = rect.bottom - rect.top;
+	LONG width = rect.right - rect.left;
+	SetWindowPos(element, NULL, point.x + deltaX, point.y + deltaY, width, height, 0);
+}
+
+RECT* previousHavokWindowRect = (RECT*)0xECECBC;
+void __cdecl HavokPreviewResize(HWND hWnd)
+{
+	RECT clientRect;
+	GetClientRect(hWnd, &clientRect);
+	LONG deltaX = clientRect.right - previousHavokWindowRect->right;
+	LONG deltaY = clientRect.bottom - previousHavokWindowRect->bottom;
+	
+	// move the trackbar and edit dialogs
+	MoveDlgItem(hWnd, ID_ANIMATIONSPEED_TRACKBAR, deltaX/2, deltaY);
+	MoveDlgItem(hWnd, ID_ANIMATIONSPEED_EDIT, deltaX/2, deltaY);
+	MoveDlgItem(hWnd, ID_ANIMATION_STATIC, deltaX/2, deltaY);
+	InvalidateRect(hWnd, &clientRect, true);
+	// call original function
+	((void(__cdecl*)(HWND))(0x40F930))(hWnd);
+}
+
+void SetupHavokPreviewWindow()
+{
+	SafeWrite32(0x441162, UInt32(HavokPreviewCallback));
+	SafeWrite32(0x444EF7, UInt32(HavokPreviewCallback));
+	SafeWrite32(0x44BB7C, UInt32(HavokPreviewCallback));
+
+	SafeWrite32(0x4109E3, UInt32(&havokAnimationRate));
+	SafeWrite32(0x410A50, UInt32(&havokAnimationRate));
+	SafeWrite32(0x40FCE2, UInt32(&havokAnimationRate));
+	SafeWrite32(0x40FD2C, UInt32(&havokAnimationRate));
+
+	WriteRelCall(0x410868, UInt32(HavokPreviewResize));
+
+	// fix preview window RGB labels
+	SafeWrite8(0x10E6600, 'G');
+	SafeWrite8(0x10E6680, 'B');
+	SafeWrite8(0x10E6960, 'R');
+
+	// read background color from ini
+	WriteRelCall(0x4100A0, UInt32(InitPreviewWindowBackgroundColor));
+
+	// make pause button not forget particle position (still fails occasionally)
+	SafeWrite32(0x410C2A, 0xCCEB006A); // jump over calls setting dword ECECD8
 }

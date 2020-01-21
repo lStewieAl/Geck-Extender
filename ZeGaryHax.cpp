@@ -132,10 +132,6 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	fFlycamShiftMovementSpeed = GetOrCreateINIInt("Flycam", "iRunMovementSpeedPct", 300, filename) / 100.0F;
 	fFlycamAltMovementSpeed = GetOrCreateINIInt("Flycam", "iWalkMovementSpeedPct", 20, filename) / 100.0F;
 
-	g_iPreviewWindowRed = GetOrCreateINIInt("Preview Window", "iBackgroundRed", 127, filename);
-	g_iPreviewWindowGreen = GetOrCreateINIInt("Preview Window", "iBackgroundGreen", 127, filename);
-	g_iPreviewWindowBlue = GetOrCreateINIInt("Preview Window", "iBackgroundBlue", 127, filename);
-
 	//	stop geck crash with bUseMultibounds = 0 in exterior cells with multibounds - credit to roy
 	WriteRelCall(0x004CA48F, (UInt32)FixMultiBounds);
 	XUtil::PatchMemoryNop(0x004CA494, 0x05);
@@ -541,12 +537,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		WriteRelCall(0x5C2FC2, UInt32(SaveScriptChangedType));
 	}
 
-	// fix preview window RGB labels
-	SafeWrite8(0x10E6600, 'G');
-	SafeWrite8(0x10E6680, 'B');
-	SafeWrite8(0x10E6960, 'R');
-
-	WriteRelCall(0x4100A0, UInt32(InitPreviewWindowBackgroundColor));
+	SetupHavokPreviewWindow();
 
 	//	Create log window - credit to nukem
 	InitCommonControls();
