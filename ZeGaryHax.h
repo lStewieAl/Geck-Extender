@@ -1309,6 +1309,9 @@ BOOL __stdcall HavokPreviewCallback(HWND hWnd, UINT Message, WPARAM wParam, LPAR
 		g_iPreviewWindowRed = GetOrCreateINIInt("Preview Window", "iBackgroundRed", 127, filename);
 		g_iPreviewWindowGreen = GetOrCreateINIInt("Preview Window", "iBackgroundGreen", 127, filename);
 		g_iPreviewWindowBlue = GetOrCreateINIInt("Preview Window", "iBackgroundBlue", 127, filename);
+		int landHeight = GetOrCreateINIInt("Preview Window", "iLandHeight", 50, filename);
+
+		SendDlgItemMessageA(hWnd, 2543, TBM_SETPOS, 1u, landHeight);
 	}
 	else if (Message == WM_DESTROY)
 	{
@@ -1319,6 +1322,9 @@ BOOL __stdcall HavokPreviewCallback(HWND hWnd, UINT Message, WPARAM wParam, LPAR
 		WritePrivateProfileString("Preview Window", "iBackgroundRed", _itoa(red, arr, 10), filename);
 		WritePrivateProfileString("Preview Window", "iBackgroundGreen", _itoa(green, arr, 10), filename);
 		WritePrivateProfileString("Preview Window", "iBackgroundBlue", _itoa(blue, arr, 10), filename);
+
+		int landHeight = SendDlgItemMessageA(hWnd, 2543, TBM_GETPOS, 0, 0);
+		WritePrivateProfileString("Preview Window", "iLandHeight", _itoa(landHeight, arr, 10), filename);
 	}
 
 	return ((BOOL(__stdcall*)(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam))(0x4107F0))(hWnd, Message, wParam, lParam);
@@ -1378,4 +1384,7 @@ void SetupHavokPreviewWindow()
 
 	// make pause button not forget particle position (still fails occasionally)
 	SafeWrite32(0x410C2A, 0xCCEB006A); // jump over calls setting dword ECECD8
+
+	// skip setting ground height taskbar pos as it's done in the callback instead
+	SafeWrite16(0x40FF78, 0x13EB);
 }
