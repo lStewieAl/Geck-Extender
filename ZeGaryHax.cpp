@@ -539,6 +539,9 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 
 	SetupHavokPreviewWindow();
 
+	// attempt to save the active plugin to "CrashSave - PLUGINNAME.esp" when crashing (not compatible with NVAC)
+	SetCrashSaveHandler();
+
 	//	Create log window - credit to nukem
 	InitCommonControls();
 	LoadLibraryA("MSFTEDIT.dll");

@@ -1388,3 +1388,41 @@ void SetupHavokPreviewWindow()
 	// skip setting ground height taskbar pos as it's done in the callback instead
 	SafeWrite16(0x40FF78, 0x13EB);
 }
+
+void __cdecl CrashSaveSetName(char* dst, size_t size, char* format, void* DEFAULT)
+{
+	ModInfo* activeFile = DataHandler::GetSingleton()->activeFile;
+	char* modName = "DEFAULT.esp";
+	if (activeFile)
+	{
+		modName = activeFile->name;
+	}
+	sprintf(dst, "CrashSave - %s", modName);
+}
+static LPTOP_LEVEL_EXCEPTION_FILTER WINAPI s_originalFilter = nullptr;
+
+LONG WINAPI DoCrashSave(EXCEPTION_POINTERS* info) 
+{
+	// create a save in the data folder called CrashSave%s.esp
+	WriteRelCall(0x4DB07A, UInt32(CrashSaveSetName));
+	
+	static char* path = "Data\\";
+	SafeWrite32(0x4DB0AC, UInt32(path));
+	
+	ThisStdCall(0x4DB020, DataHandler::GetSingleton()); // DoAutosave
+
+	MessageBoxA(nullptr, "The geck has quit unexpectedly. Please check the Data folder for a crash save and verify it in xEdit.", "Error", MB_ICONERROR | MB_OK);
+	return s_originalFilter && s_originalFilter(info); 
+};
+
+LPTOP_LEVEL_EXCEPTION_FILTER WINAPI FakeSetUnhandledExceptionFilter(__in LPTOP_LEVEL_EXCEPTION_FILTER lpTopLevelExceptionFilter)
+{
+	s_originalFilter = lpTopLevelExceptionFilter;
+	return nullptr;
+}
+
+void SetCrashSaveHandler()
+{
+	SafeWrite32(0xD2326C, UInt32(FakeSetUnhandledExceptionFilter));
+	SetUnhandledExceptionFilter(&DoCrashSave);
+}
