@@ -168,5 +168,6 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ZeGaryHax.rc" />
+    <ResourceCompile Include="HavokPreview.rc" />
   </ItemGroup>
 </Project>

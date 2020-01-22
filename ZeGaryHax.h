@@ -15,6 +15,8 @@ IDebugLog	gLog("EditorWarnings.log");
 
 void PrintCmdTable();
 void EditorUI_Log(const char* Format, ...);
+BOOL __stdcall HavokPreviewCallback(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
+extern "C" IMAGE_DOS_HEADER __ImageBase;
 
 struct z_stream_s
 {
@@ -232,21 +234,6 @@ bool GetINIExists()
 	return (attr != INVALID_FILE_ATTRIBUTES) && !(attr & FILE_ATTRIBUTE_DIRECTORY);
 }
 
-HWND __stdcall SplashScreenHook(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc, LPARAM dwInitParam)
-{
-	HWND hWnd = CreateDialogParamA(hInstance, lpTemplateName, hWndParent, lpDialogFunc, dwInitParam);
-	SendMessage(GetDlgItem((HWND)hWnd, 1962), STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)LoadImage(ZeGaryHaxHandle, MAKEINTRESOURCE(IDB_SPLASHBITMAP), IMAGE_BITMAP, 0, 0, 0));
-	return hWnd;
-}
-
-//	patch about dialog - credit to roy and nukem
-HWND __stdcall AboutDialogHook(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc, LPARAM dwInitParam)
-{
-	HWND hWnd = CreateDialogParamA(hInstance, lpTemplateName, hWndParent, lpDialogFunc, dwInitParam);
-	SendMessage(GetDlgItem((HWND)hWnd, 1963), STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)LoadImage(ZeGaryHaxHandle, MAKEINTRESOURCE(IDB_SPLASHBITMAP), IMAGE_BITMAP, 0, 0, 0));
-	return hWnd;
-}
-
 //	fix destruction dialog close button - credit to roy
 BOOL WINAPI hk_DialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -308,6 +295,16 @@ INT_PTR WINAPI DialogFuncOverride(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 
 HWND WINAPI hk_CreateDialogParamA(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc, LPARAM dwInitParam)
 {
+
+	// Override certain default dialogs to use this DLL's resources and callbacks
+	switch ((uintptr_t)lpTemplateName)
+	{
+	case IDD_HAVOK_PREVIEW_DIALOG:// "Havok Preview Window"
+		hInstance = (HINSTANCE)& __ImageBase;
+		lpDialogFunc = HavokPreviewCallback;
+		break;
+	}
+
 	//	EndDialog MUST NOT be used
 	DialogOverrideData *data = new DialogOverrideData;
 	data->DialogFunc = lpDialogFunc;
@@ -315,6 +312,7 @@ HWND WINAPI hk_CreateDialogParamA(HINSTANCE hInstance, LPCSTR lpTemplateName, HW
 	data->IsDialog = false;
 
 	DlgData = data;
+
 	return CreateDialogParamA(hInstance, lpTemplateName, hWndParent, DialogFuncOverride, dwInitParam);
 }
 
@@ -363,6 +361,21 @@ LRESULT WINAPI hk_SendMessageA(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam
 	}
 
 	return SendMessageA(hWnd, Msg, wParam, lParam);
+}
+
+HWND __stdcall SplashScreenHook(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc, LPARAM dwInitParam)
+{
+	HWND hWnd = hk_CreateDialogParamA(hInstance, lpTemplateName, hWndParent, lpDialogFunc, dwInitParam);
+	SendMessage(GetDlgItem((HWND)hWnd, 1962), STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)LoadImage(ZeGaryHaxHandle, MAKEINTRESOURCE(IDB_SPLASHBITMAP), IMAGE_BITMAP, 0, 0, 0));
+	return hWnd;
+}
+
+//	patch about dialog - credit to roy and nukem
+HWND __stdcall AboutDialogHook(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc, LPARAM dwInitParam)
+{
+	HWND hWnd = hk_CreateDialogParamA(hInstance, lpTemplateName, hWndParent, lpDialogFunc, dwInitParam);
+	SendMessage(GetDlgItem((HWND)hWnd, 1963), STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)LoadImage(ZeGaryHaxHandle, MAKEINTRESOURCE(IDB_SPLASHBITMAP), IMAGE_BITMAP, 0, 0, 0));
+	return hWnd;
 }
 
 void __stdcall hk_sub_4A1C10(HWND ListViewControl)
@@ -1363,10 +1376,6 @@ void __cdecl HavokPreviewResize(HWND hWnd)
 
 void SetupHavokPreviewWindow()
 {
-	SafeWrite32(0x441162, UInt32(HavokPreviewCallback));
-	SafeWrite32(0x444EF7, UInt32(HavokPreviewCallback));
-	SafeWrite32(0x44BB7C, UInt32(HavokPreviewCallback));
-
 	SafeWrite32(0x4109E3, UInt32(&havokAnimationRate));
 	SafeWrite32(0x410A50, UInt32(&havokAnimationRate));
 	SafeWrite32(0x40FCE2, UInt32(&havokAnimationRate));
