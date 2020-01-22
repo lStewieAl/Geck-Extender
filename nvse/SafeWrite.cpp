@@ -27,6 +27,15 @@ void SafeWrite32(UInt32 addr, UInt32 data)
 	VirtualProtect((void *)addr, 4, oldProtect, &oldProtect);
 }
 
+void SafeWrite64(UInt32 addr, UInt64 data)
+{
+	UInt32	oldProtect;
+
+	VirtualProtect((void*)addr, 4, PAGE_EXECUTE_READWRITE, &oldProtect);
+	*((UInt64*)addr) = data;
+	VirtualProtect((void*)addr, 4, oldProtect, &oldProtect);
+}
+
 void SafeWriteBuf(UInt32 addr, void * data, UInt32 len)
 {
 	UInt32	oldProtect;
