@@ -294,7 +294,7 @@ public:
 
 	UInt32							unk1FC[0x3];			// 1FC	208 looks like next created refID
 	UInt32							nextCreatedRefID;		// 208	Init'd to FF000800 (in GECK init'd to nn000800)
-	UInt32							unk20C;					// 20C	last unselected mod in modList. GECK: active ESM
+	ModInfo*						activeFile;					// 20C	last unselected mod in modList. GECK: active ESM
 	ModList							modList;				// 210
 	UInt8							unk618;					// 618	5A4
 	UInt8							unk619;					// 619
@@ -315,7 +315,7 @@ public:
 	UInt32							unk634;					// 634
 	UInt32							unk638;					// 638
 
-	static DataHandler* Get();
+	static DataHandler* GetSingleton();
 	const ModInfo ** GetActiveModList();		// returns array of modEntry* corresponding to loaded mods sorted by mod index
 	const ModInfo* LookupModByName(const char* modName);
 	UInt8 GetModIndex(const char* modName);

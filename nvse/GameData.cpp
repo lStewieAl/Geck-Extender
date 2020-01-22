@@ -1,8 +1,8 @@
 #include "GameData.h"
 
 
-DataHandler* DataHandler::Get() {
-	DataHandler** g_dataHandler = (DataHandler**)0x011C3F2C;
+DataHandler* DataHandler::GetSingleton() {
+	DataHandler** g_dataHandler = (DataHandler**)0xED3B0C;
 	return *g_dataHandler;
 }
 
@@ -31,9 +31,9 @@ const ModInfo ** DataHandler::GetActiveModList()
 	if (!(*activeModList))
 	{
 		UInt16 index = 0;
-		for (index = 0  ; index < DataHandler::Get()->modList.modInfoList.Count() ; index++)
+		for (index = 0  ; index < DataHandler::GetSingleton()->modList.modInfoList.Count() ; index++)
 		{
-			ModInfo* entry = DataHandler::Get()->modList.modInfoList.GetNthItem(index);
+			ModInfo* entry = DataHandler::GetSingleton()->modList.modInfoList.GetNthItem(index);
 			if (entry->IsLoaded())
 				activeModList[index] = entry;
 		}
