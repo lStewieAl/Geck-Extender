@@ -1446,11 +1446,6 @@ void SetupHavokPreviewWindow()
 
 	WriteRelCall(0x410868, UInt32(HavokPreviewResize));
 
-	// fix preview window RGB labels
-	SafeWrite8(0x10E6600, 'G');
-	SafeWrite8(0x10E6680, 'B');
-	SafeWrite8(0x10E6960, 'R');
-
 	// read background color from ini
 	WriteRelCall(0x4100A0, UInt32(InitPreviewWindowBackgroundColor));
 
