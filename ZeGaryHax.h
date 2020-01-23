@@ -96,6 +96,7 @@ int bNavmeshAllowPlaceAboveOthers = 0;
 int bAllowRecompileAll = 0;
 int bNavmeshFindCoverConfirmPrompt = 0;
 int bShowScriptChangeTypeWarning = 0;
+int bAppendAnimLengthToName = 0;
 
 int bUseAltShiftMultipliers = 1;
 float fMovementAltMultiplier = 0.15F;
@@ -656,8 +657,6 @@ _declspec(naked) void ReferenceBatchActionDoButtonHook() {
 		jmp retnAddr
 	}
 }
-
-
 
 void __cdecl SaveWindowPositionToINI(HWND hWnd, char* name) {
 	((void(__cdecl*)(HWND hWnd, char* Src))(0x43E170))(hWnd, name);
@@ -1244,6 +1243,44 @@ _declspec(naked) void NavMeshToolbarConfirmFindCover()
 	}
 }
 
+void __cdecl CrashSaveSetName(char* dst, size_t size, char* format, void* DEFAULT)
+{
+	ModInfo* activeFile = DataHandler::GetSingleton()->activeFile;
+	char* modName = "DEFAULT.esp";
+	if (activeFile)
+	{
+		modName = activeFile->name;
+	}
+	sprintf(dst, "CrashSave - %s", modName);
+}
+static LPTOP_LEVEL_EXCEPTION_FILTER WINAPI s_originalFilter = nullptr;
+
+LONG WINAPI DoCrashSave(EXCEPTION_POINTERS* info)
+{
+	// create a save in the data folder called CrashSave%s.esp
+	WriteRelCall(0x4DB07A, UInt32(CrashSaveSetName));
+
+	static char* path = "Data\\";
+	SafeWrite32(0x4DB0AC, UInt32(path));
+
+	ThisStdCall(0x4DB020, DataHandler::GetSingleton()); // DoAutosave
+
+	MessageBoxA(nullptr, "The geck has quit unexpectedly. Please check the Data folder for a crash save and verify it in xEdit.", "Error", MB_ICONERROR | MB_OK);
+	return s_originalFilter && s_originalFilter(info);
+};
+
+LPTOP_LEVEL_EXCEPTION_FILTER WINAPI FakeSetUnhandledExceptionFilter(__in LPTOP_LEVEL_EXCEPTION_FILTER lpTopLevelExceptionFilter)
+{
+	s_originalFilter = lpTopLevelExceptionFilter;
+	return nullptr;
+}
+
+void SetCrashSaveHandler()
+{
+	SafeWrite32(0xD2326C, UInt32(FakeSetUnhandledExceptionFilter));
+	SetUnhandledExceptionFilter(&DoCrashSave);
+}
+
 void __fastcall InitPreviewWindowBackgroundColor(void* window, void* edx, UInt32 unusedColor)
 {
 	UInt8 r = g_iPreviewWindowRed;
@@ -1374,6 +1411,32 @@ void __cdecl HavokPreviewResize(HWND hWnd)
 	((void(__cdecl*)(HWND))(0x40F930))(hWnd);
 }
 
+/* Need to figure how to fill out the "length" column with the animation length
+void __cdecl HavokPreviewAddColumns(HWND hWnd, WPARAM index, char* name, int width, int a5)
+{
+	((void(__cdecl*)(HWND, WPARAM, char*, int, int))(0x419F50))(hWnd, index, name, width, a5);
+	((void(__cdecl*)(HWND, WPARAM, char*, int, int))(0x419F50))(hWnd, index+1, "Length", width, a5);
+}
+
+void AddAnimLengthColumnToHavokPreviewAnimsList()
+{
+	WriteRelCall(0x40FBD8, UInt32(HavokPreviewAddColumns));
+}
+*/
+
+void __cdecl HavokPreviewSetAnimNameHook(char* dst, char* format, NiControllerSequence* anim)
+{
+	sprintf(dst, "%s (%.2fs)", anim->filePath, anim->end - anim->begin);
+}
+
+void HavokPreview_AddAnimLengthToName()
+{
+	// replace push NiControllerSequence->sequenceName with push NiControllerSequence
+	XUtil::PatchMemoryNop(0x40F887, 3);
+
+	WriteRelCall(0x40F894, UInt32(HavokPreviewSetAnimNameHook));
+}
+
 void SetupHavokPreviewWindow()
 {
 	SafeWrite32(0x4109E3, UInt32(&havokAnimationRate));
@@ -1396,42 +1459,8 @@ void SetupHavokPreviewWindow()
 
 	// skip setting ground height taskbar pos as it's done in the callback instead
 	SafeWrite16(0x40FF78, 0x13EB);
-}
 
-void __cdecl CrashSaveSetName(char* dst, size_t size, char* format, void* DEFAULT)
-{
-	ModInfo* activeFile = DataHandler::GetSingleton()->activeFile;
-	char* modName = "DEFAULT.esp";
-	if (activeFile)
-	{
-		modName = activeFile->name;
-	}
-	sprintf(dst, "CrashSave - %s", modName);
-}
-static LPTOP_LEVEL_EXCEPTION_FILTER WINAPI s_originalFilter = nullptr;
+	if(bAppendAnimLengthToName)	HavokPreview_AddAnimLengthToName();
 
-LONG WINAPI DoCrashSave(EXCEPTION_POINTERS* info) 
-{
-	// create a save in the data folder called CrashSave%s.esp
-	WriteRelCall(0x4DB07A, UInt32(CrashSaveSetName));
-	
-	static char* path = "Data\\";
-	SafeWrite32(0x4DB0AC, UInt32(path));
-	
-	ThisStdCall(0x4DB020, DataHandler::GetSingleton()); // DoAutosave
-
-	MessageBoxA(nullptr, "The geck has quit unexpectedly. Please check the Data folder for a crash save and verify it in xEdit.", "Error", MB_ICONERROR | MB_OK);
-	return s_originalFilter && s_originalFilter(info); 
-};
-
-LPTOP_LEVEL_EXCEPTION_FILTER WINAPI FakeSetUnhandledExceptionFilter(__in LPTOP_LEVEL_EXCEPTION_FILTER lpTopLevelExceptionFilter)
-{
-	s_originalFilter = lpTopLevelExceptionFilter;
-	return nullptr;
-}
-
-void SetCrashSaveHandler()
-{
-	SafeWrite32(0xD2326C, UInt32(FakeSetUnhandledExceptionFilter));
-	SetUnhandledExceptionFilter(&DoCrashSave);
+//	AddAnimLengthColumnToHavokPreviewAnimsList();
 }
