@@ -1347,14 +1347,14 @@ BOOL __stdcall HavokPreviewCallback(HWND hWnd, UINT Message, WPARAM wParam, LPAR
 	}
 	else if (Message == WM_INITDIALOG)
 	{
+		// initialize the animation speed to 1.0 and update trackbars accordingly
+		SetHavokAnimationSpeed(1);
+
 		HWND trackbar = GetDlgItem(hWnd, ID_ANIMATIONSPEED_TRACKBAR);
 		SendMessageA(trackbar, TBM_SETPOS, true, 50);
-
 		SendMessageA(trackbar, TBM_SETRANGE, TRUE, MAKELONG(0, 100));
 		SendMessageA(trackbar, TBM_SETTICFREQ, 10, 0);
-
-		char* defaultTime = "1.00";
-		SendDlgItemMessageA(hWnd, ID_ANIMATIONSPEED_EDIT, WM_SETTEXT, NULL, (LPARAM)defaultTime);
+		SendDlgItemMessageA(hWnd, ID_ANIMATIONSPEED_EDIT, WM_SETTEXT, NULL, (LPARAM)"1.00");
 
 		g_iPreviewWindowRed = GetOrCreateINIInt("Preview Window", "iBackgroundRed", 127, filename);
 		g_iPreviewWindowGreen = GetOrCreateINIInt("Preview Window", "iBackgroundGreen", 127, filename);
@@ -1362,6 +1362,7 @@ BOOL __stdcall HavokPreviewCallback(HWND hWnd, UINT Message, WPARAM wParam, LPAR
 		int landHeight = GetOrCreateINIInt("Preview Window", "iLandHeight", 50, filename);
 
 		SendDlgItemMessageA(hWnd, 2543, TBM_SETPOS, 1u, landHeight);
+
 	}
 	else if (Message == WM_DESTROY)
 	{
