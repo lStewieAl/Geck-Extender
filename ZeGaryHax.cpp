@@ -221,6 +221,9 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		WriteRelJump(0x42EFBB, UInt32(CellViewListViewCreateFormIDColumnHook));
 		WriteRelJump(0x44965A, UInt32(ObjectWindowListViewColumnSizeHook));
 		WriteRelCall(0x4682FE, UInt32(InsertListViewHeaderSetSizeHook));
+
+		// set default object window formID column width
+		SafeWrite16(0xE8E5C2, 0x40);
 	}
 
 	//	ignore .nam Files - initial credit to roy
