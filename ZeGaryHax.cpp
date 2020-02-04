@@ -209,7 +209,6 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	if (bListEditFix == 1)
 	{
 		//	fix windows 8/10 conditions collapsed column bug - credit to nukem
-		WriteRelCall(0x004A2791, (UInt32)hk_sub_4A1C10);
 		WriteRelCall(0x004A382D, (UInt32)hk_sub_4A1C10);
 		WriteRelCall(0x00765214, (UInt32)hk_sub_4A1C10);
 		WriteRelCall(0x00766A4D, (UInt32)hk_sub_4A1C10);
