@@ -205,6 +205,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	//	fix WM_CLOSE in destruction data dialog - credit to roy
 	SafeWrite32(0x004E640F, (UInt32)hk_DialogProc);
 
+	
 	if (bListEditFix == 1)
 	{
 		//	fix windows 8/10 conditions collapsed column bug - credit to nukem
@@ -214,7 +215,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		WriteRelCall(0x00766A4D, (UInt32)hk_sub_4A1C10);
 		WriteRelCall(0x0076E195, (UInt32)hk_sub_4A1C10);
 	}
-
+	
 	if (bExpandFormIDColumn)
 	{
 		// fix FormID column being collapsed
@@ -546,6 +547,12 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 
 	// attempt to save the active plugin to "CrashSave - PLUGINNAME.esp" when crashing (not compatible with NVAC)
 	SetCrashSaveHandler();
+
+	// make the preferences window use 4 decimal places for settings
+	for (UInt32 patchAddr : {0x44DC03, 0x44DC1D, 0x44DC51, 0x44D483, 0x44D4D5, 0x44D573, 0x44D58D, 0x44D5C1, 0x44D5DB})
+	{
+		SafeWrite8(patchAddr, 4);
+	}
 
 	//	Create log window - credit to nukem
 	InitCommonControls();
