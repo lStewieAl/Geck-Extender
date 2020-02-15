@@ -1519,3 +1519,50 @@ _declspec(naked) void RefreshCellHook()
 		jmp eax
 	}
 }
+
+void ResizeFormListWindow(HWND hWnd, WORD newWidth, WORD newHeight)
+{
+	static const WORD RIGHT_PADDING = 50;
+	static const WORD BOTTOM_PADDING = 100;
+
+	RECT clientRect;
+	GetClientRect(hWnd, &clientRect);
+
+	HWND idTextField = GetDlgItem(hWnd, 5500);
+	RECT idRect;
+	GetWindowRect(idTextField, &idRect);
+
+	POINT point;
+	point.x = idRect.left;
+	point.y = idRect.top;
+	ScreenToClient(hWnd, &point);
+	LONG height = idRect.bottom - idRect.top;
+	SetWindowPos(idTextField, NULL, point.x, point.y, newWidth - RIGHT_PADDING, height, 0);
+
+	HWND listView = GetDlgItem(hWnd, 2445);
+	GetWindowRect(listView, &idRect);
+	point.x = idRect.left;
+	point.y = idRect.top;
+	ScreenToClient(hWnd, &point);
+	height = idRect.bottom - idRect.top;
+	SetWindowPos(listView, NULL, point.x, point.y, newWidth - RIGHT_PADDING + 20, newHeight - BOTTOM_PADDING, 0);
+
+	// move the bottom buttons
+	HWND OkButton = GetDlgItem(hWnd, 1);
+	HWND CancelButton = GetDlgItem(hWnd, 2);
+	HWND LeftArrowButton = GetDlgItem(hWnd, 4008);
+	HWND RightArrowButton = GetDlgItem(hWnd, 4009);
+
+	InvalidateRect(hWnd, &clientRect, true);
+}
+
+BOOL __stdcall FormListCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) 
+{
+	if (msg == WM_SIZE)
+	{
+		WORD width = LOWORD(lParam);
+		WORD height = HIWORD(lParam);
+		ResizeFormListWindow(hDlg, width, height);
+	}
+	return ((WNDPROC)(0x480110))(hDlg, msg, wParam, lParam);
+}

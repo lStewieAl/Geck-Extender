@@ -554,6 +554,13 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	WriteRelJump(0x4585B3, UInt32(RefreshCellHook));
 	WriteRelJz(0x4585BF, UInt32(RefreshCellHook));
 
+	// fix "Hide when displaying mode." being clipped in the Terminal Dialog (3282)
+	SafeWrite8(0xC3F964 + RES_HACKER_ADDR_TO_ACTUAL, 0x84); // change width of "Welcome Text" control
+
+	// allow resizing of the FormList window
+	SafeWrite8(0x110C98A, 0xCE); // Set WS_THICKFRAME for the FormList dialog (2374)
+	SafeWrite32(0x43768B, UInt32(FormListCallback));
+
 	// make the preferences window use 4 decimal places for settings
 	for (UInt32 patchAddr : {0x44DC03, 0x44DC1D, 0x44DC51, 0x44D483, 0x44D4D5, 0x44D573, 0x44D58D, 0x44D5C1, 0x44D5DB})
 	{
