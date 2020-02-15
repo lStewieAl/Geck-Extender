@@ -1412,9 +1412,7 @@ void MoveDlgItem(HWND hWnd, int ID, int deltaX, int deltaY)
 	point.x = rect.left;
 	point.y = rect.top;
 	ScreenToClient(hWnd, &point);
-	LONG height = rect.bottom - rect.top;
-	LONG width = rect.right - rect.left;
-	SetWindowPos(element, NULL, point.x + deltaX, point.y + deltaY, width, height, 0);
+	SetWindowPos(element, NULL, point.x + deltaX, point.y + deltaY, NULL, NULL, SWP_NOSIZE);
 }
 
 RECT* previousHavokWindowRect = (RECT*)0xECECBC;
@@ -1524,6 +1522,7 @@ void ResizeFormListWindow(HWND hWnd, WORD newWidth, WORD newHeight)
 {
 	static const WORD RIGHT_PADDING = 50;
 	static const WORD BOTTOM_PADDING = 100;
+	static const WORD BUTTON_BOTTOM_PADDING = 30;
 
 	RECT clientRect;
 	GetClientRect(hWnd, &clientRect);
@@ -1544,7 +1543,6 @@ void ResizeFormListWindow(HWND hWnd, WORD newWidth, WORD newHeight)
 	point.x = idRect.left;
 	point.y = idRect.top;
 	ScreenToClient(hWnd, &point);
-	height = idRect.bottom - idRect.top;
 	SetWindowPos(listView, NULL, point.x, point.y, newWidth - RIGHT_PADDING + 20, newHeight - BOTTOM_PADDING, 0);
 
 	// move the bottom buttons
@@ -1552,6 +1550,35 @@ void ResizeFormListWindow(HWND hWnd, WORD newWidth, WORD newHeight)
 	HWND CancelButton = GetDlgItem(hWnd, 2);
 	HWND LeftArrowButton = GetDlgItem(hWnd, 4008);
 	HWND RightArrowButton = GetDlgItem(hWnd, 4009);
+
+	RECT buttonRect;
+
+	for (HWND button : {OkButton, CancelButton, LeftArrowButton, RightArrowButton})
+	{
+		if (button == OkButton)
+		{
+			point.x = newWidth / 2 - 90;
+			point.y = newHeight - BUTTON_BOTTOM_PADDING;
+		}
+		else if (button == CancelButton)
+		{
+			point.x = newWidth / 2 + 20;
+			point.y = newHeight - BUTTON_BOTTOM_PADDING;
+		}
+		else if (button == LeftArrowButton)
+		{
+			point.x = newWidth / 2 - 30;
+			point.y = newHeight - BUTTON_BOTTOM_PADDING - 25;
+		}
+		else if (button == RightArrowButton)
+		{
+			point.x = newWidth / 2 + 10;
+			point.y = newHeight - BUTTON_BOTTOM_PADDING - 25;
+		}
+
+		SetWindowPos(button, NULL, point.x, point.y, NULL, NULL, SWP_NOSIZE);
+	}
+	
 
 	InvalidateRect(hWnd, &clientRect, true);
 }
