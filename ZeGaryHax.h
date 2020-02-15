@@ -156,6 +156,17 @@ int GetOrCreateINIInt(char* sectionName, char* keyName, int defaultValue, char* 
 }
 #undef INI_SETTING_NOT_FOUND
 
+void MoveDlgItem(HWND hWnd, int ID, int deltaX, int deltaY)
+{
+	RECT rect;
+	POINT point;
+	HWND element = GetDlgItem(hWnd, ID);
+	GetWindowRect(element, &rect);
+	point.x = rect.left;
+	point.y = rect.top;
+	ScreenToClient(hWnd, &point);
+	SetWindowPos(element, NULL, point.x + deltaX, point.y + deltaY, NULL, NULL, SWP_NOSIZE);
+}
 
 static void DoModScriptWindow(HWND wnd)
 {
@@ -570,13 +581,49 @@ _declspec(naked) void RecompileAllWarningMainHook() {
 
 void doKonami(int);
 
+void ResizeDataWindow(HWND hWnd, WORD width, WORD height, LPRECT previousSize)
+{
+	RECT clientRect;
+	GetClientRect(hWnd, &clientRect);
+	LONG deltaX = clientRect.right - previousSize->right;
+	LONG deltaY = clientRect.bottom - previousSize->bottom;
+
+	// move the bottom buttons
+	for (UInt32 id : {1121, 1185, 1, 2})
+	{
+		MoveDlgItem(hWnd, id, 0, deltaY);
+	}
+	InvalidateRect(hWnd, &clientRect, true);
+}
+
 /* small konami easter egg */
 BOOL __stdcall hk_LoadESPESMCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
-	if (msg == WM_NOTIFY && ((LPNMHDR)lParam)->code == LVN_KEYDOWN) {
+	static RECT WindowSize;
+	if (msg == WM_NOTIFY && ((LPNMHDR)lParam)->code == LVN_KEYDOWN)
+	{
 		doKonami(((LPNMLVKEYDOWN)lParam)->wVKey);
+	}
+	else if (msg == WM_SIZE)
+	{
+		WORD newWidth = LOWORD(lParam);
+		WORD newHeight = HIWORD(lParam);
+		ResizeDataWindow(hDlg, newWidth, newHeight, &WindowSize);
+
+		// store the new window size
+		GetClientRect(hDlg, &WindowSize);
+	}
+	else if (msg == WM_INITDIALOG)
+	{
+		// create the dialog
+		BOOL result = ((WNDPROC)(0x432A80))(hDlg, msg, wParam, lParam);
+
+		// store its size
+		GetClientRect(hDlg, &WindowSize);
+		return result;
 	}
 	return ((WNDPROC)(0x432A80))(hDlg, msg, wParam, lParam);
 }
+
 
 BOOL __stdcall hk_SearchAndReplaceCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
 	return ((WNDPROC)(0x47C990))(hDlg, msg, wParam, lParam);
@@ -1403,18 +1450,6 @@ BOOL __stdcall HavokPreviewCallback(HWND hWnd, UINT Message, WPARAM wParam, LPAR
 	return ((BOOL(__stdcall*)(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam))(0x4107F0))(hWnd, Message, wParam, lParam);
 }
 
-void MoveDlgItem(HWND hWnd, int ID, int deltaX, int deltaY)
-{
-	RECT rect;
-	POINT point;
-	HWND element = GetDlgItem(hWnd, ID);
-	GetWindowRect(element, &rect);
-	point.x = rect.left;
-	point.y = rect.top;
-	ScreenToClient(hWnd, &point);
-	SetWindowPos(element, NULL, point.x + deltaX, point.y + deltaY, NULL, NULL, SWP_NOSIZE);
-}
-
 RECT* previousHavokWindowRect = (RECT*)0xECECBC;
 void __cdecl HavokPreviewResize(HWND hWnd)
 {
@@ -1527,23 +1562,14 @@ void ResizeFormListWindow(HWND hWnd, WORD newWidth, WORD newHeight)
 	RECT clientRect;
 	GetClientRect(hWnd, &clientRect);
 
-	HWND idTextField = GetDlgItem(hWnd, 5500);
 	RECT idRect;
+	HWND idTextField = GetDlgItem(hWnd, 5500);
 	GetWindowRect(idTextField, &idRect);
-
-	POINT point;
-	point.x = idRect.left;
-	point.y = idRect.top;
-	ScreenToClient(hWnd, &point);
 	LONG height = idRect.bottom - idRect.top;
-	SetWindowPos(idTextField, NULL, point.x, point.y, newWidth - RIGHT_PADDING, height, 0);
+	SetWindowPos(idTextField, NULL, NULL, NULL, newWidth - RIGHT_PADDING, height, SWP_NOMOVE);
 
 	HWND listView = GetDlgItem(hWnd, 2445);
-	GetWindowRect(listView, &idRect);
-	point.x = idRect.left;
-	point.y = idRect.top;
-	ScreenToClient(hWnd, &point);
-	SetWindowPos(listView, NULL, point.x, point.y, newWidth - RIGHT_PADDING + 20, newHeight - BOTTOM_PADDING, 0);
+	SetWindowPos(listView, NULL, NULL, NULL, newWidth - RIGHT_PADDING + 20, newHeight - BOTTOM_PADDING, SWP_NOMOVE);
 
 	// move the bottom buttons
 	HWND OkButton = GetDlgItem(hWnd, 1);
@@ -1553,30 +1579,31 @@ void ResizeFormListWindow(HWND hWnd, WORD newWidth, WORD newHeight)
 
 	RECT buttonRect;
 
+	POINT pos;
 	for (HWND button : {OkButton, CancelButton, LeftArrowButton, RightArrowButton})
 	{
 		if (button == OkButton)
 		{
-			point.x = newWidth / 2 - 90;
-			point.y = newHeight - BUTTON_BOTTOM_PADDING;
+			pos.x = newWidth / 2 - 90;
+			pos.y = newHeight - BUTTON_BOTTOM_PADDING;
 		}
 		else if (button == CancelButton)
 		{
-			point.x = newWidth / 2 + 20;
-			point.y = newHeight - BUTTON_BOTTOM_PADDING;
+			pos.x = newWidth / 2 + 20;
+			pos.y = newHeight - BUTTON_BOTTOM_PADDING;
 		}
 		else if (button == LeftArrowButton)
 		{
-			point.x = newWidth / 2 - 30;
-			point.y = newHeight - BUTTON_BOTTOM_PADDING - 25;
+			pos.x = newWidth / 2 - 30;
+			pos.y = newHeight - BUTTON_BOTTOM_PADDING - 25;
 		}
 		else if (button == RightArrowButton)
 		{
-			point.x = newWidth / 2 + 10;
-			point.y = newHeight - BUTTON_BOTTOM_PADDING - 25;
+			pos.x = newWidth / 2 + 10;
+			pos.y = newHeight - BUTTON_BOTTOM_PADDING - 25;
 		}
 
-		SetWindowPos(button, NULL, point.x, point.y, NULL, NULL, SWP_NOSIZE);
+		SetWindowPos(button, NULL, pos.x, pos.y, NULL, NULL, SWP_NOSIZE);
 	}
 	
 
