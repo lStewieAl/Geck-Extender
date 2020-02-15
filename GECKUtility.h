@@ -139,13 +139,21 @@ int GetPreviousRenderWindowHeight() {
 	return (*(int*)(0xED1448));
 }
 
+void RefreshLightMarkers() {
+	((void(*)(void))(0x416490))();
+}
+
 bool GetIsShowLightMarkers() {
 	return (*(byte*)(0xECEEBC));
 }
 
 void SetIsShowLightMarkers(bool state) {
 	(*(byte*)(0xECEEBC)) = state;
-	((void(*)(void))(0x416490))();
+	RefreshLightMarkers();
+}
+
+void RefreshSoundMarkers() {
+	((void(*)(void))(0x4165B0))();
 }
 
 bool GetIsShowSoundMarkers() {
@@ -154,7 +162,7 @@ bool GetIsShowSoundMarkers() {
 
 void SetIsShowSoundMarkers(bool state) {
 	(*(byte*)(0xECEEA4)) = state;
-	((void(*)(void))(0x4165B0))();
+	RefreshSoundMarkers();
 }
 
 void SetFlycamMode(int state) {

@@ -213,6 +213,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		WriteRelCall(0x00765214, (UInt32)hk_sub_4A1C10);
 		WriteRelCall(0x00766A4D, (UInt32)hk_sub_4A1C10);
 		WriteRelCall(0x0076E195, (UInt32)hk_sub_4A1C10);
+		WriteRelCall(0x4A2791, UInt32(SetupConditonsColumns));
 	}
 	
 	if (bExpandFormIDColumn)
@@ -523,6 +524,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 
 	// fix crash when doubling clicking an empty area in a form list
 	WriteRelJump(0x501450, UInt32(FormListCheckNull));
+	WriteRelJump(0x5AE0A5, UInt32(FormListCheckNull2));
 
 	// give more informative error when "Bad forms are encountered by printing the bad form's formID"
 	WriteRelJump(0x4D9577, UInt32(BadFormLoadHook));
@@ -546,6 +548,11 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 
 	// attempt to save the active plugin to "CrashSave - PLUGINNAME.esp" when crashing (not compatible with NVAC)
 	SetCrashSaveHandler();
+
+	// hide markers where appropriate when refreshing a cell
+	WriteRelJump(0x458593, UInt32(RefreshCellHook));
+	WriteRelJump(0x4585B3, UInt32(RefreshCellHook));
+	WriteRelJz(0x4585BF, UInt32(RefreshCellHook));
 
 	// make the preferences window use 4 decimal places for settings
 	for (UInt32 patchAddr : {0x44DC03, 0x44DC1D, 0x44DC51, 0x44D483, 0x44D4D5, 0x44D573, 0x44D58D, 0x44D5C1, 0x44D5DB})

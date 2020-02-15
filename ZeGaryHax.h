@@ -6,6 +6,7 @@
 
 #define GH_NAME				"ZeGaryHax"		// this is the string for IsPluginInstalled and GetPluginVersion (also shows in nvse.log)
 #define GH_VERSION			0				// set this to 0 to enable log output from _DMESSAGE (useful for debug traces)
+#define RES_HACKER_ADDR_TO_ACTUAL 0x4CF800
 
 HMODULE ZeGaryHaxHandle;
 extern HWND g_trackBarHwnd;
@@ -574,11 +575,11 @@ BOOL __stdcall hk_LoadESPESMCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM 
 	if (msg == WM_NOTIFY && ((LPNMHDR)lParam)->code == LVN_KEYDOWN) {
 		doKonami(((LPNMLVKEYDOWN)lParam)->wVKey);
 	}
-	return ((BOOL(__stdcall *)(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam))(0x432A80))(hDlg, msg, wParam, lParam);
+	return ((WNDPROC)(0x432A80))(hDlg, msg, wParam, lParam);
 }
 
 BOOL __stdcall hk_SearchAndReplaceCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
-	return ((BOOL(__stdcall *)(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam))(0x47C990))(hDlg, msg, wParam, lParam);
+	return ((WNDPROC)(0x47C990))(hDlg, msg, wParam, lParam);
 }
 
 _declspec(naked) void EndLoadingHook() {
@@ -956,6 +957,8 @@ extern void SetFlycamMode(int);
 extern int GetFlycamMode();
 extern void SetIsShowSoundMarkers(bool);
 extern bool GetIsShowSoundMarkers(void);
+extern void RefreshSoundMarkers();
+extern void RefreshLightMarkers();
 
 void __fastcall PreferencesWindowApplyButtonHook(int* thiss, void* dummyEDX, int a2) {
 	((int(__thiscall*)(int* thiss, int a2))(0x855B30))(thiss, a2);
@@ -985,7 +988,7 @@ BOOL __stdcall RenderWindowCallbackHook(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 	else if (msg == WM_RBUTTONDOWN) {
 		SetFlycamMode(0);
 	}
-	return ((BOOL(__stdcall*)(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam))(0x455AA0))(hWnd, msg, wParam, lParam);
+	return ((WNDPROC)(0x455AA0))(hWnd, msg, wParam, lParam);
 }
 
 extern HWND g_MainHwnd;
@@ -1133,6 +1136,22 @@ _declspec(naked) void FormListCheckNull()
 	}
 }
 
+_declspec(naked) void FormListCheckNull2()
+{
+	static const UInt32 retnAddr = 0x5AE0AB;
+	static const UInt32 skipAddr = 0x5AE118;//0x5AE12E; // 0x5AE37E
+	_asm
+	{
+		test eax, eax
+		je skip
+		mov ecx, dword ptr ds : [0xECFB38] // g_hWndParent
+		jmp retnAddr
+	skip:
+		add esp, 4
+		jmp skipAddr
+	}
+}
+
 void BadFormLoadHook();
 void SaveScriptChangedType();
 
@@ -1264,6 +1283,9 @@ LONG WINAPI DoCrashSave(EXCEPTION_POINTERS* info)
 	SafeWrite32(0x4DB0AC, UInt32(path));
 
 	ThisStdCall(0x4DB020, DataHandler::GetSingleton()); // DoAutosave
+
+	// restore original path (Data\\Backup\\)
+	SafeWrite32(0x4DB0AC, 0xD415C4);
 
 	MessageBoxA(nullptr, "The geck has quit unexpectedly. Please check the Data folder for a crash save and verify it in xEdit.", "Error", MB_ICONERROR | MB_OK);
 	return s_originalFilter && s_originalFilter(info);
@@ -1459,4 +1481,41 @@ void SetupHavokPreviewWindow()
 	if(bAppendAnimLengthToName)	HavokPreview_AddAnimLengthToName();
 
 //	AddAnimLengthColumnToHavokPreviewAnimsList();
+}
+
+void InsertListViewColumn(HWND hWnd, UInt32 index, char* text, int width)
+{
+	LVCOLUMN column;
+	column.mask = 0xF;
+	column.cx = width;
+	column.pszText = text;
+	column.fmt = 0;
+	column.iSubItem = index;
+
+	SendMessageA(hWnd, LVM_INSERTCOLUMNA, index, (LPARAM)&column);
+}
+
+void SetupConditonsColumns(HWND hWnd)
+{
+	SendMessageA(hWnd, LVM_SETEXTENDEDLISTVIEWSTYLE, 0x21, 33);
+	while (SendMessageA(hWnd, LVM_DELETECOLUMN, 0, 0))
+		;
+
+	InsertListViewColumn(hWnd, 0, "Target", 10);
+	InsertListViewColumn(hWnd, 1, "Function Name", 10);
+	InsertListViewColumn(hWnd, 2, "Function Info", 10);
+	InsertListViewColumn(hWnd, 3, "Comp", 10);
+	InsertListViewColumn(hWnd, 4, "Value", 10);
+	InsertListViewColumn(hWnd, 5, "", 10);
+}
+
+_declspec(naked) void RefreshCellHook()
+{
+	_asm
+	{
+		call RefreshSoundMarkers
+		call RefreshLightMarkers
+		mov eax, 0x462C73 // retnAddr
+		jmp eax
+	}
 }
