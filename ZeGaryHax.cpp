@@ -213,7 +213,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		WriteRelCall(0x00765214, (UInt32)hk_sub_4A1C10);
 		WriteRelCall(0x00766A4D, (UInt32)hk_sub_4A1C10);
 		WriteRelCall(0x0076E195, (UInt32)hk_sub_4A1C10);
-		WriteRelCall(0x4A2791, UInt32(SetupConditonsColumns));
+		WriteRelCall(0x004A2791, (UInt32)hk_sub_4A1C10); // necessary, but causes a crash when viewing the anims list
 	}
 	
 	if (bExpandFormIDColumn)
