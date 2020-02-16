@@ -1,6 +1,6 @@
 #pragma once
 #pragma comment(lib, "libdeflate/libdeflatestatic.lib")
-
+#include "GECKUtility.h"
 #include "Editor.h"
 #include "resource.h"
 
@@ -98,6 +98,8 @@ int bAllowRecompileAll = 0;
 int bNavmeshFindCoverConfirmPrompt = 0;
 int bShowScriptChangeTypeWarning = 0;
 int bAppendAnimLengthToName = 0;
+int bObjectPaletteAllowRandom = 0;
+bool bObjectPaletteRandomByDefault = 0;
 
 int bUseAltShiftMultipliers = 1;
 float fMovementAltMultiplier = 0.15F;
@@ -593,6 +595,7 @@ void ResizeDataWindow(HWND hWnd, WORD width, WORD height, LPRECT previousSize)
 	{
 		MoveDlgItem(hWnd, id, 0, deltaY);
 	}
+
 	InvalidateRect(hWnd, &clientRect, true);
 }
 
@@ -996,16 +999,6 @@ _declspec(naked) void EmbeddedRenderWindowSoundNullCheck() {
 		jmp noSoundFileAddr
 	}
 }
-
-extern bool GetIsRenderWindowAllowCellLoads();
-extern void SetIsShowLightMarkers(bool);
-extern bool GetIsShowLightMarkers();
-extern void SetFlycamMode(int);
-extern int GetFlycamMode();
-extern void SetIsShowSoundMarkers(bool);
-extern bool GetIsShowSoundMarkers(void);
-extern void RefreshSoundMarkers();
-extern void RefreshLightMarkers();
 
 void __fastcall PreferencesWindowApplyButtonHook(int* thiss, void* dummyEDX, int a2) {
 	((int(__thiscall*)(int* thiss, int a2))(0x855B30))(thiss, a2);
@@ -1606,7 +1599,6 @@ void ResizeFormListWindow(HWND hWnd, WORD newWidth, WORD newHeight)
 		SetWindowPos(button, NULL, pos.x, pos.y, NULL, NULL, SWP_NOSIZE);
 	}
 	
-
 	InvalidateRect(hWnd, &clientRect, true);
 }
 
@@ -1619,4 +1611,18 @@ BOOL __stdcall FormListCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 		ResizeFormListWindow(hDlg, width, height);
 	}
 	return ((WNDPROC)(0x480110))(hDlg, msg, wParam, lParam);
+}
+
+UInt32 __fastcall PlaceOPALObjectHook(ObjectPalette::Object* current, void* edx, float* point1, float* point2)
+{
+	ObjectPalette::Object* toPlace = current;
+	if ((GetAsyncKeyState(VK_CAPITAL) < 0) ^ bObjectPaletteRandomByDefault)
+	{
+		ObjectPalette* opal = ObjectPalette::GetSingleton();
+
+		UInt32 randomIndex = rand() % opal->list.Count();
+		toPlace = opal->list.GetNthItem(randomIndex);
+	}
+	
+	return ThisStdCall(0x40BF90, toPlace, point1, point2);
 }

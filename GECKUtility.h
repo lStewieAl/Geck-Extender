@@ -1,5 +1,4 @@
 #pragma once
-#include "ZeLogWindow.h"
 
 struct NiPoint3
 {
@@ -57,7 +56,6 @@ void SetCameraViewMatrix(ViewMatrix* newView) {
 	current->x9 = newView->x9;
 
 }
-
 
 void GetCameraPos(NiPoint3* outPosition) {
 	NiPoint3* currentPos = &GetLPMem()->unk4->pos;
@@ -176,3 +174,32 @@ int GetFlycamMode() {
 HWND g_renderWindowHwnd = (HWND)0xE0C1AA;
 HWND g_mainWindowToolbar = (HWND)0xECFC14;
 HWND g_objectWindowHwnd = (HWND)0xECFB70;
+
+struct ObjectPalette
+{
+	struct Object
+	{
+		char	*name;			// 00
+		UInt16	unk04;			// 04
+		UInt16	unk06;			// 06
+		int		formID;			// 08
+		int		conformToSlope;	// 0C
+		float	sinkMin;		// 10
+		float	sinkMax;		// 14
+		float	scaleMin;		// 18
+		float	scaleMax;		// 1C
+		float	xMin;			// 20
+		float	xMax;			// 24
+		float	yMin;			// 28
+		float	yMax;			// 2C
+		float	zMin;			// 30
+		float	zMax;			// 34
+	};
+
+	ObjectPalette::Object *current;		// 00
+	tList<ObjectPalette::Object> list;	// 04
+	UInt32 sPaletteFileNameSetting;		// 0C		
+	char* paletteName;					// 10
+
+	static ObjectPalette* GetSingleton() { return (ObjectPalette*)0xECE248; };
+};

@@ -134,6 +134,9 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 
 	bAppendAnimLengthToName = GetOrCreateINIInt("Preview Window", "bAppendAnimLengthToName", 0, filename);
 
+	bObjectPaletteAllowRandom = GetOrCreateINIInt("Object Palette", "bObjectPaletteAllowRandom", 1, filename);
+	bObjectPaletteRandomByDefault = GetOrCreateINIInt("Object Palette", "bObjectPaletteRandomByDefault", 0, filename);
+
 	//	stop geck crash with bUseMultibounds = 0 in exterior cells with multibounds - credit to roy
 	WriteRelCall(0x004CA48F, (UInt32)FixMultiBounds);
 	XUtil::PatchMemoryNop(0x004CA494, 0x05);
@@ -563,6 +566,13 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 
 	// allow resizing the Select Files dialog (162)
 	SafeWrite8(0xC029BA + RES_HACKER_ADDR_TO_ACTUAL, 0xCE); // Set WS_THICKFRAME
+
+
+	// add modifier CAPSLOCK for placing a random object from the objects palette 
+	if (bObjectPaletteAllowRandom)
+	{
+		WriteRelCall(0x45A6B8, UInt32(PlaceOPALObjectHook));
+	}
 
 	// make the preferences window use 4 decimal places for settings
 	for (UInt32 patchAddr : {0x44DC03, 0x44DC1D, 0x44DC51, 0x44D483, 0x44D4D5, 0x44D573, 0x44D58D, 0x44D5C1, 0x44D5DB})
