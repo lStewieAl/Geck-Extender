@@ -1663,30 +1663,23 @@ BOOL __stdcall ObjectPaletteCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM 
 	return ((WNDPROC)(0x40D190))(hDlg, msg, wParam, lParam);
 }
 
-
 const double M_TAU = 6.28318530717958647692528676;
 
 float __fastcall CalculateRefRotation(signed int amount)
 {
 	const double pi_on_180 = *(double*)0xD2C320;;
-
 	float rotationSpeedMult = *(float*)0xECFD10;
 	float* currentRotation = (float*)0xED1164;
 	int iSnapToAngle = *(int*)0xECFD04;
 
 	double snapRadians = iSnapToAngle * pi_on_180;
-
 	double addend = (amount * rotationSpeedMult / 10.0);
-	EditorUI_Log("Amount: %d\tRotation Speed Mult: %.4f\tAddend: %.4f", amount, rotationSpeedMult, addend);
-
 	*currentRotation += addend;
-	EditorUI_Log("After: %f", *currentRotation);
 
-	int truncatedSnapRadians = *currentRotation / snapRadians;
 	// computes how many "SnapRadians" the rotation should be scaled to
+	int truncatedSnapRadians = *currentRotation / snapRadians;
 
 	double rotation = snapRadians * truncatedSnapRadians;
-
 	if (rotation == 0.0)
 	{
 		return 0;
