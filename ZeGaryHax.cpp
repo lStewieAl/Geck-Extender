@@ -124,7 +124,8 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	fMovementShiftMultiplier = GetOrCreateINIInt("Render Window", "iShiftSpeedPct", 200, filename) / 100.0F;
 	bShowTimeOfDaySlider = GetOrCreateINIInt("Render Window", "bShowTimeOfDaySlider", 1, filename);
 	bNavmeshAllowPlaceAboveOthers = GetOrCreateINIInt("Render Window", "bNavmeshAllowPlaceAboveOthers", 1, filename);
-	
+	bSnapToGridRotationUseDoublePrecision = GetOrCreateINIInt("Render Window", "bSnapToGridRotationUseDoublePrecision", 0, filename);
+
 	bSmoothFlycamRotation = GetOrCreateINIInt("Flycam", "bSmoothRotation", 1, filename);
 	bFlycamUpDownRelativeToWorld = GetOrCreateINIInt("Flycam", "bFlycamUpDownRelativeToWorld", 1, filename);
 	fFlycamRotationSpeed = GetOrCreateINIInt("Flycam", "iRotationSpeedPct", 100, filename) * - 0.001F;
@@ -567,6 +568,9 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	// allow resizing the Select Files dialog (162)
 	SafeWrite8(0xC029BA + RES_HACKER_ADDR_TO_ACTUAL, 0xCE); // Set WS_THICKFRAME
 
+	// allow resizing the objects palette window
+	SafeWrite8(0xC23E0A + RES_HACKER_ADDR_TO_ACTUAL, 0xCC); // Set WS_THICKFRAME
+	SafeWrite32(0x4440FA, UInt32(ObjectPaletteCallback));
 
 	// add modifier CAPSLOCK for placing a random object from the objects palette 
 	if (bObjectPaletteAllowRandom)
@@ -578,6 +582,12 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	for (UInt32 patchAddr : {0x44DC03, 0x44DC1D, 0x44DC51, 0x44D483, 0x44D4D5, 0x44D573, 0x44D58D, 0x44D5C1, 0x44D5DB})
 	{
 		SafeWrite8(patchAddr, 4);
+	}
+
+	if (bSnapToGridRotationUseDoublePrecision)
+	{
+		// use double precision when calculating reference rotation to fix floating point errors
+		WriteRelJump(0x4523E2, UInt32(RenderWindowHandleRefRotationHook));
 	}
 
 	//	Create log window - credit to nukem

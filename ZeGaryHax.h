@@ -100,6 +100,7 @@ int bShowScriptChangeTypeWarning = 0;
 int bAppendAnimLengthToName = 0;
 int bObjectPaletteAllowRandom = 0;
 bool bObjectPaletteRandomByDefault = 0;
+int bSnapToGridRotationUseDoublePrecision = 0;
 
 int bUseAltShiftMultipliers = 1;
 float fMovementAltMultiplier = 0.15F;
@@ -1625,4 +1626,87 @@ UInt32 __fastcall PlaceOPALObjectHook(ObjectPalette::Object* current, void* edx,
 	}
 	
 	return ThisStdCall(0x40BF90, toPlace, point1, point2);
+}
+
+void ResizeObjectPalette(HWND hWnd, WORD newWidth, WORD newHeight)
+{
+	RECT clientRect;
+	GetClientRect(hWnd, &clientRect);
+
+	HWND listView = GetDlgItem(hWnd, 1018);
+	SetWindowPos(listView, NULL, NULL, NULL, 200, newHeight - 90, SWP_NOMOVE);
+
+	// move the bottom buttons
+	HWND NewButton = GetDlgItem(hWnd, 1124);
+	HWND LoadButton = GetDlgItem(hWnd, 5097);
+	HWND SaveButton = GetDlgItem(hWnd, 1000);
+	HWND SaveAsButton = GetDlgItem(hWnd, 1986);
+	HWND MergeButton = GetDlgItem(hWnd, 1988);
+	
+	SetWindowPos(NewButton, NULL, 8, newHeight - 42, NULL, NULL, SWP_NOSIZE);
+	SetWindowPos(LoadButton, NULL, 78, newHeight - 30, NULL, NULL, SWP_NOSIZE);
+	SetWindowPos(SaveButton, NULL, 78, newHeight - 55, NULL, NULL, SWP_NOSIZE);
+	SetWindowPos(SaveAsButton, NULL, 148, newHeight - 55, NULL, NULL, SWP_NOSIZE);
+	SetWindowPos(MergeButton, NULL, 148, newHeight - 30, NULL, NULL, SWP_NOSIZE);
+
+	InvalidateRect(hWnd, &clientRect, true);
+}
+
+BOOL __stdcall ObjectPaletteCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	if (msg == WM_SIZE)
+	{
+		WORD width = LOWORD(lParam);
+		WORD height = HIWORD(lParam);
+		ResizeObjectPalette(hDlg, width, height);
+	}
+	return ((WNDPROC)(0x40D190))(hDlg, msg, wParam, lParam);
+}
+
+
+const double M_TAU = 6.28318530717958647692528676;
+
+float __fastcall CalculateRefRotation(signed int amount)
+{
+	const double pi_on_180 = *(double*)0xD2C320;;
+
+	float rotationSpeedMult = *(float*)0xECFD10;
+	float* currentRotation = (float*)0xED1164;
+	int iSnapToAngle = *(int*)0xECFD04;
+
+	double snapRadians = iSnapToAngle * pi_on_180;
+
+	double addend = (amount * rotationSpeedMult / 10.0);
+	EditorUI_Log("Amount: %d\tRotation Speed Mult: %.4f\tAddend: %.4f", amount, rotationSpeedMult, addend);
+
+	*currentRotation += addend;
+	EditorUI_Log("After: %f", *currentRotation);
+
+	int truncatedSnapRadians = *currentRotation / snapRadians;
+	// computes how many "SnapRadians" the rotation should be scaled to
+
+	double rotation = snapRadians * truncatedSnapRadians;
+
+	if (rotation == 0.0)
+	{
+		return 0;
+	}
+
+	*currentRotation = 0;
+	while (rotation >= M_TAU) rotation -= M_TAU;
+	while (rotation < 0) rotation += M_TAU;
+
+	return rotation;
+}
+
+_declspec(naked) void RenderWindowHandleRefRotationHook()
+{
+	static const UInt32 retnAddr = 0x4524A2;
+	_asm
+	{
+		mov ecx, [esp + 0x114] // rotation amount
+		call CalculateRefRotation
+		fstp [esp + 0x14]
+		jmp retnAddr
+	}
 }
