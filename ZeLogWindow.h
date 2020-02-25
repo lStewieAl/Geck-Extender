@@ -269,7 +269,12 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 				EditorUI_AddRenderWindowShowPortalsCheckbox(Hwnd, createInfo->hInstance);
 			}
 
-			InsertMenu(createInfo->hMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_LAUNCHGAME, "Launch Game");
+			// insert a Launch Game button if an executable was specified in the ini
+			char buf[MAX_PATH];
+			if (GetPrivateProfileStringA("Launch Game", "ExecutableName", "", buf, MAX_PATH, filename))
+			{
+				InsertMenu(createInfo->hMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_LAUNCHGAME, "Launch Game");
+			}
 
 			g_MainMenu = createInfo->hMenu;
 			EnableMenuItem(g_MainMenu, MENUOPTION_RENDER_WINDOW, MF_DISABLED | MF_GRAYED);
@@ -617,7 +622,7 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 	{
 		//	Continue normal execution but with a custom string
 		char customTitle[256];
-		sprintf_s(customTitle, "%s -= GECK Extender Rev. 0.31 =-", (const char *)lParam);
+		sprintf_s(customTitle, "%s -= GECK Extender Rev. 0.32a =-", (const char *)lParam);
 
 		return CallWindowProc(OldEditorUI_WndProc, Hwnd, Message, wParam, (LPARAM)customTitle);
 	}
