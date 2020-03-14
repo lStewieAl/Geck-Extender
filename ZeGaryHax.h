@@ -101,6 +101,7 @@ int bAppendAnimLengthToName = 0;
 int bObjectPaletteAllowRandom = 0;
 bool bObjectPaletteRandomByDefault = 0;
 int bSnapToGridRotationUseDoublePrecision = 0;
+int bFaceGenOnlyEdited = 0;
 
 int bUseAltShiftMultipliers = 1;
 float fMovementAltMultiplier = 0.15F;
@@ -1701,5 +1702,68 @@ _declspec(naked) void RenderWindowHandleRefRotationHook()
 		call CalculateRefRotation
 		fstp [esp + 0x14]
 		jmp retnAddr
+	}
+}
+
+#define USE_REPORT_TEXT1 101
+#define USE_REPORT_TEXT2 102
+void ResizeUseReportWindow(HWND hWnd, WORD newWidth, WORD newHeight)
+{
+	static const WORD LEFT_PADDING = 10;
+	static const WORD RIGHT_PADDING = 40;
+	static const WORD BOTTOM_PADDING = 100;
+	static const WORD BUTTON_BOTTOM_PADDING = 30;
+	static const WORD INTER_LIST_PADDING = 40;
+	static const WORD BUTTON_SIZE = 39;
+
+	RECT clientRect;
+	GetClientRect(hWnd, &clientRect);
+
+	int List1Height = newHeight / 2 - INTER_LIST_PADDING;
+	int List1Width = newWidth - RIGHT_PADDING + 20;
+	HWND listView1 = GetDlgItem(hWnd, 1637);
+	SetWindowPos(listView1, NULL, NULL, NULL, List1Width, List1Height, SWP_NOMOVE);
+
+	HWND UsedInTheseCellsText = GetDlgItem(hWnd, USE_REPORT_TEXT2);
+	SetWindowPos(UsedInTheseCellsText, NULL, LEFT_PADDING, newHeight / 2, NULL, NULL, SWP_NOSIZE);
+
+	HWND listView2 = GetDlgItem(hWnd, 1638);
+	SetWindowPos(listView2, NULL, LEFT_PADDING, List1Height + 1.5 * INTER_LIST_PADDING, newWidth - RIGHT_PADDING + 20, (newHeight / 2) - 60, NULL);
+
+	// move the bottom buttons
+	HWND OkButton = GetDlgItem(hWnd, 1);
+	POINT newButtonPos;
+	newButtonPos.x = newWidth / 2 - BUTTON_SIZE;
+	newButtonPos.y = newHeight - BUTTON_BOTTOM_PADDING;
+
+	SetWindowPos(OkButton, NULL, newButtonPos.x, newButtonPos.y, NULL, NULL, SWP_NOSIZE);
+	
+	InvalidateRect(hWnd, &clientRect, true);
+}
+
+BOOL __stdcall UseReportCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	if (msg == WM_SIZE)
+	{
+		WORD width = LOWORD(lParam);
+		WORD height = HIWORD(lParam);
+		ResizeUseReportWindow(hDlg, width, height);
+	}
+	return ((WNDPROC)(0x468860))(hDlg, msg, wParam, lParam);
+}
+
+_declspec(naked) void ExportFaceGenCheckIsFormEdited()
+{
+	static const UInt32 retnAddr = 0x442055;
+	static const UInt32 skipAddr = 0x44207A;
+	_asm
+	{
+		cmp byte ptr ds : [esi + 0x4], bl
+		jne skip
+		test byte ptr ss : [esi + 8] , 2 // form->flags & kModified
+		je skip
+		jmp retnAddr
+	skip:
+		jmp skipAddr
 	}
 }

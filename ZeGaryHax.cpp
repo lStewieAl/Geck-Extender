@@ -33,8 +33,9 @@
 
 const NVSEInterface* savedNVSE = NULL;
 
-BOOL __stdcall ScriptEditCallback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-	return ((BOOL(__stdcall*)(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam))(0x5C3D40))(hWnd, msg, wParam, lParam);
+BOOL __stdcall ScriptEditCallback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
+{
+	return ((WNDPROC)(0x5C3D40))(hWnd, msg, wParam, lParam);
 }
 
 extern "C"
@@ -109,6 +110,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	bAllowEditLandEdges = GetOrCreateINIInt("General", "bAllowEditLandEdges", 0, filename);
 	bAllowRecompileAll = GetOrCreateINIInt("General", "bAllowRecompileAll", 0, filename);
 	bNavmeshFindCoverConfirmPrompt = GetOrCreateINIInt("General", "bNavmeshFindCoverConfirmPrompt", 0, filename);
+	bFaceGenOnlyEdited = GetOrCreateINIInt("General", "bFaceGenOnlyEdited", 0, filename);
 
 	bPatchScriptEditorFont = GetOrCreateINIInt("Script", "bPatchEditorFont", 1, filename);
 	bScriptCompileWarningPopup = GetOrCreateINIInt("Script", "bScriptCompileWarningPopup", 0, filename);
@@ -228,7 +230,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		WriteRelCall(0x4682FE, UInt32(InsertListViewHeaderSetSizeHook));
 
 		// set default object window formID column width
-		SafeWrite16(0xE8E5C2, 0x40);
+		SafeWrite16(0xE8E5C2, 0x42);
 	}
 
 	//	ignore .nam Files - initial credit to roy
@@ -588,6 +590,25 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	{
 		// use double precision when calculating reference rotation to fix floating point errors
 		WriteRelJump(0x4523E2, UInt32(RenderWindowHandleRefRotationHook));
+	}
+
+	// allow resizing the Use Report window
+	// give the statics on the window IDs instead of -1
+	SafeWrite8(0xC076F6 + RES_HACKER_ADDR_TO_ACTUAL, 0xCC); // Set WS_THICKFRAME
+
+	SafeWrite16(0xC077AC + RES_HACKER_ADDR_TO_ACTUAL, USE_REPORT_TEXT1);
+	SafeWrite16(0xC07830 + RES_HACKER_ADDR_TO_ACTUAL, USE_REPORT_TEXT2);
+
+	for (UInt32 patchAddr : {0x47F429, 0x4822E3, 0x48280C, 0x483607})
+	{
+		SafeWrite32(patchAddr, UInt32(UseReportCallback));
+	}
+
+	if (bFaceGenOnlyEdited)
+	{
+		char* faceGenMessage = "Export mod face gen textures for all edited NPCs?";
+		WriteRelJump(0x442050, UInt32(ExportFaceGenCheckIsFormEdited));
+		SafeWrite32(0x442026, UInt32(faceGenMessage));
 	}
 
 	//	Create log window - credit to nukem
