@@ -186,8 +186,8 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	//	fast exit - credit to roy - tweaks by jazzisparis
 	WriteRelCall(0x00440A4F, (UInt32)FastExitHook);
 
-	//	enable big guns for weapon skill - credit to roy
-	SafeWrite16(0x0047A830, 0x9090);
+	//	enable big guns for weapon skill
+	SafeWrite32(0x492D0C, 0x410);
 
 	//	uncap framerate on render window - credit to shademe
 	if (bRenderWindowUncap == 1)
