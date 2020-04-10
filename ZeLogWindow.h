@@ -63,7 +63,7 @@ void ToggleObjectWindowFilterUnedited(bool show)
 	}
 
 	// refresh object window
-	((bool(__stdcall*)(HWND hWnd, UInt32 msg, WPARAM, LPARAM))(0x449E50))(NULL, 1042, NULL, NULL);	
+	((bool(__stdcall*)(HWND hWnd, UInt32 msg, WPARAM, LPARAM))(0x449E50))(NULL, 1042, NULL, NULL);
 }
 
 
@@ -106,9 +106,9 @@ void EditorUI_AddSliderToToolbar(HWND MainWindow, HINSTANCE hInstance) {
 		(WS_CHILD | WS_VISIBLE | TBS_NOTICKS),
 		898, 2, // x, y
 		200, 24, // width, height
-		MainWindow, 
-		(HMENU)ID_TRACKBAR, 
-		hInstance, 
+		MainWindow,
+		(HMENU)ID_TRACKBAR,
+		hInstance,
 		NULL
 	);
 	SendMessageA(g_trackBarHwnd, TBM_SETRANGE, TRUE, MAKELONG(0, 24 * 4));
@@ -204,7 +204,7 @@ void EditorUI_AddRenderWindowShowWaterCheckbox(HWND MainWindow, HINSTANCE hInsta
 }
 
 
-void EditorUI_LogVa(const char *Format, va_list Va)
+void EditorUI_LogVa(const char* Format, va_list Va)
 {
 	char buffer[2048];
 	int len = _vsnprintf_s(buffer, _TRUNCATE, Format, Va);
@@ -217,11 +217,11 @@ void EditorUI_LogVa(const char *Format, va_list Va)
 
 	if (g_ConsoleHwnd)
 		PostMessageA(g_ConsoleHwnd, UI_CMD_ADDLOGTEXT, 0, (LPARAM)_strdup(buffer));
-	
+
 	_MESSAGE(buffer);
 }
 
-void EditorUI_Log(const char *Format, ...)
+void EditorUI_Log(const char* Format, ...)
 {
 	va_list va;
 	va_start(va, Format);
@@ -229,7 +229,7 @@ void EditorUI_Log(const char *Format, ...)
 	va_end(va);
 }
 
-int __cdecl EditorUI_Log2(const char *Format, ...)
+int __cdecl EditorUI_Log2(const char* Format, ...)
 {
 	va_list va;
 	va_start(va, Format);
@@ -246,7 +246,7 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 
 		if (!editorUIInit)
 		{
-			const CREATESTRUCT *createInfo = (CREATESTRUCT *)lParam;
+			const CREATESTRUCT* createInfo = (CREATESTRUCT*)lParam;
 
 			if (_stricmp(createInfo->lpszName, "Garden of Eden Creation Kit") != 0 || _stricmp(createInfo->lpszName, "Garden of Eden Creation Kit") != 0)
 			{
@@ -255,14 +255,14 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 
 			editorUIInit = true;
 			g_MainHwnd = Hwnd;
-			
+
 			EditorUI_CreateExtensionMenu(Hwnd, createInfo->hMenu);
 
 			if (bShowTimeOfDaySlider) {
 				EditorUI_AddSliderToToolbar(Hwnd, createInfo->hInstance);
 				EditorUI_AddTimeOfDayTextToToolbar(Hwnd, createInfo->hInstance);
 			}
-			
+
 			if (bShowAdditionalToolbarButtons) {
 				EditorUI_AddAllowRenderWindowCellLoadsCheckbox(Hwnd, createInfo->hInstance);
 				EditorUI_AddRenderWindowShowWaterCheckbox(Hwnd, createInfo->hInstance);
@@ -347,291 +347,291 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 
 		switch (param)
 		{
-			case UI_EXTMENU_SHOWLOG:
+		case UI_EXTMENU_SHOWLOG:
+		{
+			ShowWindow(g_ConsoleHwnd, SW_SHOW);
+			SetForegroundWindow(g_ConsoleHwnd);
+		}
+		return 0;
+
+		case UI_EXTMENU_CLEARLOG:
+		{
+			PostMessageA(g_ConsoleHwnd, UI_CMD_CLEARLOGTEXT, 0, 0);
+		}
+		return 0;
+
+		case UI_EXTMENU_AUTOSCROLL:
+		{
+			MENUITEMINFO menuInfo;
+			menuInfo.cbSize = sizeof(MENUITEMINFO);
+			menuInfo.fMask = MIIM_STATE;
+			GetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_AUTOSCROLL, FALSE, &menuInfo);
+
+			if (menuInfo.fState == MFS_CHECKED)
 			{
-				ShowWindow(g_ConsoleHwnd, SW_SHOW);
-				SetForegroundWindow(g_ConsoleHwnd);
+				//	Disable scroll
+				menuInfo.fState = MFS_UNCHECKED;
+				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_AUTOSCROLL, FALSE, &menuInfo);
+				PostMessageA(g_ConsoleHwnd, UI_CMD_AUTOSCROLL, (WPARAM)false, 0);
 			}
-			return 0;
-
-			case UI_EXTMENU_CLEARLOG:
+			else
 			{
-				PostMessageA(g_ConsoleHwnd, UI_CMD_CLEARLOGTEXT, 0, 0);
+				//	Enable scroll
+				menuInfo.fState = MFS_CHECKED;
+				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_AUTOSCROLL, FALSE, &menuInfo);
+				PostMessageA(g_ConsoleHwnd, UI_CMD_AUTOSCROLL, (WPARAM)true, 0);
 			}
-			return 0;
+		}
+		return 0;
 
-			case UI_EXTMENU_AUTOSCROLL:
+		case UI_EXTMENU_SPELLCHECK:
+		{
+			MENUITEMINFO menuInfo;
+			menuInfo.cbSize = sizeof(MENUITEMINFO);
+			menuInfo.fMask = MIIM_STATE;
+			GetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_SPELLCHECK, FALSE, &menuInfo);
+
+			if (menuInfo.fState == MFS_CHECKED)
 			{
-				MENUITEMINFO menuInfo;
-				menuInfo.cbSize = sizeof(MENUITEMINFO);
-				menuInfo.fMask = MIIM_STATE;
-				GetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_AUTOSCROLL, FALSE, &menuInfo);
-
-				if (menuInfo.fState == MFS_CHECKED)
-				{
-					//	Disable scroll
-					menuInfo.fState = MFS_UNCHECKED;
-					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_AUTOSCROLL, FALSE, &menuInfo);
-					PostMessageA(g_ConsoleHwnd, UI_CMD_AUTOSCROLL, (WPARAM)false, 0);
-					}
-				else
-					{
-					//	Enable scroll
-					menuInfo.fState = MFS_CHECKED;
-					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_AUTOSCROLL, FALSE, &menuInfo);
-					PostMessageA(g_ConsoleHwnd, UI_CMD_AUTOSCROLL, (WPARAM)true, 0);
-				}
-			}
-			return 0;
-
-			case UI_EXTMENU_SPELLCHECK:
-			{
-				MENUITEMINFO menuInfo;
-				menuInfo.cbSize = sizeof(MENUITEMINFO);
-				menuInfo.fMask = MIIM_STATE;
-				GetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_SPELLCHECK, FALSE, &menuInfo);
-
-				if (menuInfo.fState == MFS_CHECKED)
-				{
-					//	Disable Spell Check
-					menuInfo.fState = MFS_UNCHECKED;
-					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_SPELLCHECK, FALSE, &menuInfo);
-					bEnableSpellChecker = 0;
-					char buffer[8];
-					WritePrivateProfileString("General", "bEnableSpellChecker" , _itoa(bEnableSpellChecker,buffer,2), iniName);
-				}
-				else
-				{
-					//	Enable Spell Check
-					menuInfo.fState = MFS_CHECKED;
-					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_SPELLCHECK, FALSE, &menuInfo);
-					bEnableSpellChecker = 1;
-					char buffer[8];
-					WritePrivateProfileString("General", "bEnableSpellChecker" , _itoa(bEnableSpellChecker,buffer,2), iniName);
-				}
-			}
-			return 0;
-
-			case UI_EXTMENU_RENDER:
-			{
-				MENUITEMINFO menuInfo;
-				menuInfo.cbSize = sizeof(MENUITEMINFO);
-				menuInfo.fMask = MIIM_STATE;
-				GetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_RENDER, FALSE, &menuInfo);
-
-				if (menuInfo.fState == MFS_CHECKED)
-				{
-					//	Disable Render Uncap
-					menuInfo.fState = MFS_UNCHECKED;
-					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_RENDER, FALSE, &menuInfo);
-					bRenderWindowUncap = 0;
-					char buffer[8];
-					WritePrivateProfileString("General", "bRenderWindowUncap" , _itoa(bRenderWindowUncap,buffer,2), iniName);
-				}
-				else
-				{
-					//	Enable Render Uncap
-					menuInfo.fState = MFS_CHECKED;
-					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_RENDER, FALSE, &menuInfo);
-					bRenderWindowUncap = 1;
-					char buffer[8];
-					WritePrivateProfileString("General", "bRenderWindowUncap" , _itoa(bRenderWindowUncap,buffer,2), iniName);
-				}
-			}
-			return 0;
-
-			case UI_EXTMENU_PREVIEW:
-			{
-				MENUITEMINFO menuInfo;
-				menuInfo.cbSize = sizeof(MENUITEMINFO);
-				menuInfo.fMask = MIIM_STATE;
-				GetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_PREVIEW, FALSE, &menuInfo);
-
-				if (menuInfo.fState == MFS_CHECKED)
-				{
-					//	Disable Preview Uncap
-					menuInfo.fState = MFS_UNCHECKED;
-					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_PREVIEW, FALSE, &menuInfo);
-					bPreviewWindowUncap = 0;
-					char buffer[8];
-					WritePrivateProfileString("General", "bPreviewWindowUncap" , _itoa(bPreviewWindowUncap,buffer,2), iniName);
-				}
-				else
-				{
-					//	Enable Preview Uncap
-					menuInfo.fState = MFS_CHECKED;
-					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_PREVIEW, FALSE, &menuInfo);
-					bPreviewWindowUncap = 1;
-					char buffer[8];
-					WritePrivateProfileString("General", "bPreviewWindowUncap" , _itoa(bPreviewWindowUncap,buffer,2), iniName);
-				}
-			}
-			return 0;
-
-			case UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED:
-			{
-				MENUITEMINFO menuInfo;
-				menuInfo.cbSize = sizeof(MENUITEMINFO);
-				menuInfo.fMask = MIIM_STATE;
-				GetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED, FALSE, &menuInfo);
-
-				if (menuInfo.fState == MFS_CHECKED)
-				{
-					//	Disable showing unedited
-					menuInfo.fState = MFS_UNCHECKED;
-					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED, FALSE, &menuInfo);
-					ToggleObjectWindowFilterUnedited(true);
-				}
-				else
-				{
-					//	Show unedited only
-					menuInfo.fState = MFS_CHECKED;
-					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED, FALSE, &menuInfo);
-					ToggleObjectWindowFilterUnedited(false);
-				}
-			}
-			return 0;
-
-			case UI_EXTMENU_LAUNCHGAME:
-			{
-				char falloutNVPath[MAX_PATH];
-				strcpy(falloutNVPath, (const char*)0xECFE30); // current dir from command line args
-				strcat(falloutNVPath, "\\");
-
-				char nvExeName[MAX_PATH];
-				GetPrivateProfileStringA("Launch Game", "ExecutableName", "FalloutNV.exe", nvExeName, MAX_PATH, iniName);			
-				strcat(falloutNVPath, nvExeName);
-
-				ShellExecuteA(0, 0, falloutNVPath, 0, 0, 1);
-			}
-			return 0;
-
-			case UI_EXTMENU_SAVEPOSITION:
-			{
-				GetCamera(&savedRenderPos, &savedRenderDirection);
-			}
-			return 0;
-
-			case UI_EXTMENU_LOADPOSITION:
-			{
-				SetCamera(&savedRenderPos, &savedRenderDirection);
-			}
-			return 0;
-
-			case UI_EXTMENU_TOGGLENAVEMESHBISECT:
-			{
-				MENUITEMINFO menuInfo;
-				menuInfo.cbSize = sizeof(MENUITEMINFO);
-				menuInfo.fMask = MIIM_STATE;
-				GetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLENAVEMESHBISECT, FALSE, &menuInfo);
-
-				if (menuInfo.fState == MFS_CHECKED)
-				{
-					menuInfo.fState = MFS_UNCHECKED;
-					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLENAVEMESHBISECT, FALSE, &menuInfo);
-					ToggleNavmeshPlaceAboveOthers(false);
-				}
-				else
-				{
-					//	Show unedited only
-					menuInfo.fState = MFS_CHECKED;
-					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLENAVEMESHBISECT, FALSE, &menuInfo);
-					ToggleNavmeshPlaceAboveOthers(true);
-				}
-
-				// save state to ini
+				//	Disable Spell Check
+				menuInfo.fState = MFS_UNCHECKED;
+				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_SPELLCHECK, FALSE, &menuInfo);
+				bEnableSpellChecker = 0;
 				char buffer[8];
-				WritePrivateProfileString("Render Window", "bNavmeshAllowPlaceAboveOthers", _itoa(bNavmeshAllowPlaceAboveOthers, buffer, 2), iniName);
+				WritePrivateProfileString("General", "bEnableSpellChecker", _itoa(bEnableSpellChecker, buffer, 2), iniName);
 			}
-			return 0;
-
-			case ID_TIMEOFDAYTEXT:
+			else
 			{
-				if (GetFocus() != (HWND)lParam) break;
-
-				if (HIWORD(wParam) == EN_MAXTEXT) break;
-				
-				char text[16];
-				int len = SendMessageA((HWND)lParam, EM_GETLINE, 0, (LPARAM)text);
-				text[len] = '\0'; // null terminate the line since EM_GETLINE does not
-
-				float time = atof(text);
-				SetTimeOfDay(time);
-				SendMessageA(g_trackBarHwnd, TBM_SETPOS, TRUE, time*4); // update scrollbar
+				//	Enable Spell Check
+				menuInfo.fState = MFS_CHECKED;
+				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_SPELLCHECK, FALSE, &menuInfo);
+				bEnableSpellChecker = 1;
+				char buffer[8];
+				WritePrivateProfileString("General", "bEnableSpellChecker", _itoa(bEnableSpellChecker, buffer, 2), iniName);
 			}
-			return 0;
+		}
+		return 0;
 
-			case ID_RENDERWINDOWCELLLOADS_CHECKBOX:
+		case UI_EXTMENU_RENDER:
+		{
+			MENUITEMINFO menuInfo;
+			menuInfo.cbSize = sizeof(MENUITEMINFO);
+			menuInfo.fMask = MIIM_STATE;
+			GetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_RENDER, FALSE, &menuInfo);
+
+			if (menuInfo.fState == MFS_CHECKED)
 			{
-				if (HIWORD(wParam) == BN_CLICKED && bShowAdditionalToolbarButtons)
-				{
-					bool newButtonState = !SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_GETCHECK, 0, 0);
-					SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_SETCHECK, newButtonState, 0);
-					ToggleRenderWindowAllowCellLoads(newButtonState);
-				}
+				//	Disable Render Uncap
+				menuInfo.fState = MFS_UNCHECKED;
+				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_RENDER, FALSE, &menuInfo);
+				bRenderWindowUncap = 0;
+				char buffer[8];
+				WritePrivateProfileString("General", "bRenderWindowUncap", _itoa(bRenderWindowUncap, buffer, 2), iniName);
 			}
-			return 0;
-
-			case ID_RENDERWINDOW_SHOWWATER_CHECKBOX:
+			else
 			{
-				if (HIWORD(wParam) == BN_CLICKED && bShowAdditionalToolbarButtons)
-				{
-					bool newButtonState = !SendMessageA(g_renderWindowShowWaterButtonHwnd, BM_GETCHECK, 0, 0);
-					SendMessageA(g_renderWindowShowWaterButtonHwnd, BM_SETCHECK, newButtonState, 0);
-					SetIsShowWater(newButtonState);
-				}
+				//	Enable Render Uncap
+				menuInfo.fState = MFS_CHECKED;
+				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_RENDER, FALSE, &menuInfo);
+				bRenderWindowUncap = 1;
+				char buffer[8];
+				WritePrivateProfileString("General", "bRenderWindowUncap", _itoa(bRenderWindowUncap, buffer, 2), iniName);
 			}
-			return 0;
+		}
+		return 0;
 
-			case ID_RENDERWINDOW_SHOWPORTALS_CHECKBOX:
+		case UI_EXTMENU_PREVIEW:
+		{
+			MENUITEMINFO menuInfo;
+			menuInfo.cbSize = sizeof(MENUITEMINFO);
+			menuInfo.fMask = MIIM_STATE;
+			GetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_PREVIEW, FALSE, &menuInfo);
+
+			if (menuInfo.fState == MFS_CHECKED)
 			{
-				if (HIWORD(wParam) == BN_CLICKED && bShowAdditionalToolbarButtons)
-				{
-					bool newButtonState = !SendMessageA(g_renderWindowShowPortalsButtonHwnd, BM_GETCHECK, 0, 0);
-					SendMessageA(g_renderWindowShowPortalsButtonHwnd, BM_SETCHECK, newButtonState, 0);
-					SetIsShowPortalsAndRooms(newButtonState);
-				}
+				//	Disable Preview Uncap
+				menuInfo.fState = MFS_UNCHECKED;
+				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_PREVIEW, FALSE, &menuInfo);
+				bPreviewWindowUncap = 0;
+				char buffer[8];
+				WritePrivateProfileString("General", "bPreviewWindowUncap", _itoa(bPreviewWindowUncap, buffer, 2), iniName);
 			}
-			return 0;
-
-			case MENUOPTION_RENDER_WINDOW:
+			else
 			{
-				MENUITEMINFO menuInfo;
-				menuInfo.cbSize = sizeof(MENUITEMINFO);
-				menuInfo.fMask = MIIM_STATE;
-				GetMenuItemInfo(g_MainMenu, MENUOPTION_RENDER_WINDOW, FALSE, &menuInfo);
-
-				if (menuInfo.fState == MFS_CHECKED)
-				{
-					//	Hide window
-					menuInfo.fState = MFS_UNCHECKED;
-					SetMenuItemInfo(g_MainMenu, MENUOPTION_RENDER_WINDOW, FALSE, &menuInfo);
-				}
-				else
-				{
-					//	Show window
-					menuInfo.fState = MFS_CHECKED;
-					SetMenuItemInfo(g_MainMenu, MENUOPTION_RENDER_WINDOW, FALSE, &menuInfo);
-					ShowWindow(g_renderWindowHwnd, 1);
-				}
+				//	Enable Preview Uncap
+				menuInfo.fState = MFS_CHECKED;
+				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_PREVIEW, FALSE, &menuInfo);
+				bPreviewWindowUncap = 1;
+				char buffer[8];
+				WritePrivateProfileString("General", "bPreviewWindowUncap", _itoa(bPreviewWindowUncap, buffer, 2), iniName);
 			}
-			return 0;
+		}
+		return 0;
+
+		case UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED:
+		{
+			MENUITEMINFO menuInfo;
+			menuInfo.cbSize = sizeof(MENUITEMINFO);
+			menuInfo.fMask = MIIM_STATE;
+			GetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED, FALSE, &menuInfo);
+
+			if (menuInfo.fState == MFS_CHECKED)
+			{
+				//	Disable showing unedited
+				menuInfo.fState = MFS_UNCHECKED;
+				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED, FALSE, &menuInfo);
+				ToggleObjectWindowFilterUnedited(true);
+			}
+			else
+			{
+				//	Show unedited only
+				menuInfo.fState = MFS_CHECKED;
+				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED, FALSE, &menuInfo);
+				ToggleObjectWindowFilterUnedited(false);
+			}
+		}
+		return 0;
+
+		case UI_EXTMENU_LAUNCHGAME:
+		{
+			char falloutNVPath[MAX_PATH];
+			strcpy(falloutNVPath, (const char*)0xECFE30); // current dir from command line args
+			strcat(falloutNVPath, "\\");
+
+			char nvExeName[MAX_PATH];
+			GetPrivateProfileStringA("Launch Game", "ExecutableName", "FalloutNV.exe", nvExeName, MAX_PATH, iniName);
+			strcat(falloutNVPath, nvExeName);
+
+			ShellExecuteA(0, 0, falloutNVPath, 0, 0, 1);
+		}
+		return 0;
+
+		case UI_EXTMENU_SAVEPOSITION:
+		{
+			GetCamera(&savedRenderPos, &savedRenderDirection);
+		}
+		return 0;
+
+		case UI_EXTMENU_LOADPOSITION:
+		{
+			SetCamera(&savedRenderPos, &savedRenderDirection);
+		}
+		return 0;
+
+		case UI_EXTMENU_TOGGLENAVEMESHBISECT:
+		{
+			MENUITEMINFO menuInfo;
+			menuInfo.cbSize = sizeof(MENUITEMINFO);
+			menuInfo.fMask = MIIM_STATE;
+			GetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLENAVEMESHBISECT, FALSE, &menuInfo);
+
+			if (menuInfo.fState == MFS_CHECKED)
+			{
+				menuInfo.fState = MFS_UNCHECKED;
+				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLENAVEMESHBISECT, FALSE, &menuInfo);
+				ToggleNavmeshPlaceAboveOthers(false);
+			}
+			else
+			{
+				//	Show unedited only
+				menuInfo.fState = MFS_CHECKED;
+				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLENAVEMESHBISECT, FALSE, &menuInfo);
+				ToggleNavmeshPlaceAboveOthers(true);
+			}
+
+			// save state to ini
+			char buffer[8];
+			WritePrivateProfileString("Render Window", "bNavmeshAllowPlaceAboveOthers", _itoa(bNavmeshAllowPlaceAboveOthers, buffer, 2), iniName);
+		}
+		return 0;
+
+		case ID_TIMEOFDAYTEXT:
+		{
+			if (GetFocus() != (HWND)lParam) break;
+
+			if (HIWORD(wParam) == EN_MAXTEXT) break;
+
+			char text[16];
+			int len = SendMessageA((HWND)lParam, EM_GETLINE, 0, (LPARAM)text);
+			text[len] = '\0'; // null terminate the line since EM_GETLINE does not
+
+			float time = atof(text);
+			SetTimeOfDay(time);
+			SendMessageA(g_trackBarHwnd, TBM_SETPOS, TRUE, time * 4); // update scrollbar
+		}
+		return 0;
+
+		case ID_RENDERWINDOWCELLLOADS_CHECKBOX:
+		{
+			if (HIWORD(wParam) == BN_CLICKED && bShowAdditionalToolbarButtons)
+			{
+				bool newButtonState = !SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_GETCHECK, 0, 0);
+				SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_SETCHECK, newButtonState, 0);
+				ToggleRenderWindowAllowCellLoads(newButtonState);
+			}
+		}
+		return 0;
+
+		case ID_RENDERWINDOW_SHOWWATER_CHECKBOX:
+		{
+			if (HIWORD(wParam) == BN_CLICKED && bShowAdditionalToolbarButtons)
+			{
+				bool newButtonState = !SendMessageA(g_renderWindowShowWaterButtonHwnd, BM_GETCHECK, 0, 0);
+				SendMessageA(g_renderWindowShowWaterButtonHwnd, BM_SETCHECK, newButtonState, 0);
+				SetIsShowWater(newButtonState);
+			}
+		}
+		return 0;
+
+		case ID_RENDERWINDOW_SHOWPORTALS_CHECKBOX:
+		{
+			if (HIWORD(wParam) == BN_CLICKED && bShowAdditionalToolbarButtons)
+			{
+				bool newButtonState = !SendMessageA(g_renderWindowShowPortalsButtonHwnd, BM_GETCHECK, 0, 0);
+				SendMessageA(g_renderWindowShowPortalsButtonHwnd, BM_SETCHECK, newButtonState, 0);
+				SetIsShowPortalsAndRooms(newButtonState);
+			}
+		}
+		return 0;
+
+		case MENUOPTION_RENDER_WINDOW:
+		{
+			MENUITEMINFO menuInfo;
+			menuInfo.cbSize = sizeof(MENUITEMINFO);
+			menuInfo.fMask = MIIM_STATE;
+			GetMenuItemInfo(g_MainMenu, MENUOPTION_RENDER_WINDOW, FALSE, &menuInfo);
+
+			if (menuInfo.fState == MFS_CHECKED)
+			{
+				//	Hide window
+				menuInfo.fState = MFS_UNCHECKED;
+				SetMenuItemInfo(g_MainMenu, MENUOPTION_RENDER_WINDOW, FALSE, &menuInfo);
+			}
+			else
+			{
+				//	Show window
+				menuInfo.fState = MFS_CHECKED;
+				SetMenuItemInfo(g_MainMenu, MENUOPTION_RENDER_WINDOW, FALSE, &menuInfo);
+				ShowWindow(g_renderWindowHwnd, 1);
+			}
+		}
+		return 0;
 		}
 	}
 	else if (Message == WM_SETTEXT && Hwnd == g_MainHwnd)
 	{
 		//	Continue normal execution but with a custom string
 		char customTitle[256];
-		sprintf_s(customTitle, "%s -= GECK Extender Rev. 0.32a =-", (const char *)lParam);
+		sprintf_s(customTitle, "%s -= GECK Extender Rev. 0.32a =-", (const char*)lParam);
 
 		return CallWindowProc(OldEditorUI_WndProc, Hwnd, Message, wParam, (LPARAM)customTitle);
 	}
 	else if (Message == WM_HSCROLL && bShowTimeOfDaySlider)
 	{
-		if ((HWND)lParam == g_trackBarHwnd) 
+		if ((HWND)lParam == g_trackBarHwnd)
 		{
 			char timeBuf[100];
-			if ((LOWORD(wParam) == SB_THUMBPOSITION || LOWORD(wParam) == SB_THUMBTRACK)) 
+			if ((LOWORD(wParam) == SB_THUMBPOSITION || LOWORD(wParam) == SB_THUMBTRACK))
 			{
 				float time = HIWORD(wParam) * 0.25;
 				SetTimeOfDay(time);
@@ -662,7 +662,7 @@ LRESULT CALLBACK EditorUI_LogWndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPA
 	{
 	case WM_CREATE:
 	{
-		const CREATESTRUCT *info = (CREATESTRUCT *)lParam;
+		const CREATESTRUCT* info = (CREATESTRUCT*)lParam;
 
 		//	Create the rich edit control (https://docs.microsoft.com/en-us/windows/desktop/Controls/rich-edit-controls)
 		uint32_t style = WS_VISIBLE | WS_CHILD | WS_VSCROLL | ES_MULTILINE | ES_LEFT | ES_NOHIDESEL | ES_AUTOVSCROLL | ES_READONLY;
@@ -687,7 +687,7 @@ LRESULT CALLBACK EditorUI_LogWndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPA
 		mbstowcs(format.szFaceName, fontNameBuf, 31);
 
 		format.wWeight = (WORD)GetOrCreateINIInt("Log", "FontWeight", FW_MEDIUM, iniName);
-        SendMessageA(richEditHwnd, EM_SETCHARFORMAT, SCF_ALL, (LPARAM)&format);
+		SendMessageA(richEditHwnd, EM_SETCHARFORMAT, SCF_ALL, (LPARAM)& format);
 
 		//	Subscribe to EN_MSGFILTER and EN_SELCHANGE
 		SendMessageW(richEditHwnd, EM_SETEVENTMASK, 0, ENM_MOUSEEVENTS | ENM_SELCHANGE);
@@ -717,7 +717,7 @@ LRESULT CALLBACK EditorUI_LogWndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPA
 	case WM_CLOSE:
 		ShowWindow(Hwnd, SW_HIDE);
 		return 0;
-	
+
 	case WM_NOTIFY:
 	{
 		static uint64_t lastDoubleClickTime;
@@ -725,14 +725,14 @@ LRESULT CALLBACK EditorUI_LogWndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPA
 
 		if (notification->code == EN_MSGFILTER)
 		{
-			auto msgFilter = (MSGFILTER *)notification;
+			auto msgFilter = (MSGFILTER*)notification;
 
 			if (msgFilter->msg == WM_LBUTTONDBLCLK)
 				lastDoubleClickTime = GetTickCount();
 		}
 		else if (notification->code == EN_SELCHANGE)
 		{
-			auto selChange = (SELCHANGE *)lParam;
+			auto selChange = (SELCHANGE*)lParam;
 
 			//	Mouse double click with a valid selection -> try to parse form id
 			if ((GetTickCount() - lastDoubleClickTime > 1000) || abs(selChange->chrg.cpMax - selChange->chrg.cpMin) <= 0)
@@ -745,9 +745,9 @@ LRESULT CALLBACK EditorUI_LogWndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPA
 			LRESULT lineIndex = SendMessageA(richEditHwnd, EM_LINEFROMCHAR, selChange->chrg.cpMin, 0);
 
 			char lineData[4096];
-			*(uint16_t *)&lineData[0] = ARRAYSIZE(lineData);
+			*(uint16_t*)& lineData[0] = ARRAYSIZE(lineData);
 
-			LRESULT charCount = SendMessageA(richEditHwnd, EM_GETLINE, lineIndex, (LPARAM)&lineData);
+			LRESULT charCount = SendMessageA(richEditHwnd, EM_GETLINE, lineIndex, (LPARAM)& lineData);
 
 			if (charCount > 0)
 			{
@@ -762,20 +762,20 @@ LRESULT CALLBACK EditorUI_LogWndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPA
 					//	Parse to integer, then bring up the menu
 					uint32_t id = strtoul(sm[1].str().c_str(), nullptr, 16);
 
-					TESForm* (*LookupFormByID)(UInt32 formID) = (TESForm* (*)(UInt32))0x4F9620;
+					TESForm* (*LookupFormByID)(UInt32 formID) = (TESForm * (*)(UInt32))0x4F9620;
 					__int32 form = (__int32)LookupFormByID(id);
 
 					if (form)
-						(*(void(__thiscall **)(__int32, HWND, __int32, __int32))(*(__int32 *)form + 0x164))(form, g_MainHwnd, 0, 1);
+						(*(void(__thiscall * *)(__int32, HWND, __int32, __int32))(*(__int32*)form + 0x164))(form, g_MainHwnd, 0, 1);
 				}
 			}
 		}
 	}
 	break;
-	
+
 	case UI_CMD_ADDLOGTEXT:
 	{
-		void *textData = (void *)lParam;
+		void* textData = (void*)lParam;
 
 		//	Save old position if not scrolling
 		POINT scrollRange;
@@ -807,8 +807,7 @@ LRESULT CALLBACK EditorUI_LogWndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPA
 
 	case UI_CMD_CLEARLOGTEXT:
 	{
-		char emptyString[1];
-		emptyString[0] = '\0';
+		char emptyString[1] = { '\0' };
 
 		SendMessageA(richEditHwnd, WM_SETTEXT, 0, (LPARAM)&emptyString);
 	}
@@ -818,12 +817,12 @@ LRESULT CALLBACK EditorUI_LogWndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPA
 	{
 		bAutoScroll = wParam;
 		char buffer[8];
-		WritePrivateProfileString("Log", "bAutoScroll" , _itoa(bAutoScroll,buffer,2), iniName);
+		WritePrivateProfileString("Log", "bAutoScroll", _itoa(bAutoScroll, buffer, 2), iniName);
 	}
 	return 0;
 
-  }
-  return DefWindowProc(Hwnd, Message, wParam, lParam);
+	}
+	return DefWindowProc(Hwnd, Message, wParam, lParam);
 }
 
 bool EditorUI_CreateLogWindow()

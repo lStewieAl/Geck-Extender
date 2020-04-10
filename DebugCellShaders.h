@@ -12,9 +12,9 @@ _declspec(naked) void DebugShaderHook925E80()
 		cmp eax, 6
 		jg noDebugFlags
 		jmp debugAddr
-	noDebugFlags:
+		noDebugFlags :
 		mov ecx, [0xF23C30]
-		jmp retnAddr
+			jmp retnAddr
 	}
 }
 
@@ -30,9 +30,9 @@ _declspec(naked) void DebugShaderHook9261D0()
 		cmp eax, 6
 		jg noDebugFlags
 		jmp debugAddr
-	noDebugFlags :
+		noDebugFlags :
 		mov esi, [edi + 0xF8]
-		jmp retnAddr
+			jmp retnAddr
 	}
 }
 
@@ -47,7 +47,7 @@ _declspec(naked) void DebugShaderHook952F60()
 		test eax, eax
 		jne debugFlags
 		jmp retnAddr
-	debugFlags :
+		debugFlags :
 		jmp debugAddr
 	}
 }
@@ -73,7 +73,7 @@ _declspec(naked) void DebugShaderHook965B40()
 		test eax, eax
 		je jmp1
 		mov ecx, [0xF23F80]
-		mov [eax + 8], ecx
+		mov[eax + 8], ecx
 	jmp1:
 		mov edx, [0xF983E4]
 		mov eax, [edx + 0x24]
@@ -81,7 +81,7 @@ _declspec(naked) void DebugShaderHook965B40()
 		test eax, eax
 		je done
 		mov ecx, [0xF23F60]
-		mov [eax + 8], ecx
+		mov[eax + 8], ecx
 		jmp done
 
 	debugFlags:
@@ -116,7 +116,7 @@ _declspec(naked) void DebugShaderHook9661C0()
 
 	shader5:
 
-//	done:
+		//	done
 		add esp, 0x10
 		ret 8
 	}

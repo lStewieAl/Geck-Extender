@@ -9,7 +9,7 @@ HWND g_DeferredListView;
 HWND g_DeferredComboBox;
 uintptr_t g_DeferredStringLength;
 bool g_AllowResize;
-std::vector<std::pair<const char *, void *>> g_DeferredMenuItems;
+std::vector<std::pair<const char*, void*>> g_DeferredMenuItems;
 
 void ResetUIDefer()
 {

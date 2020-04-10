@@ -1,7 +1,7 @@
 #pragma once
 
 static const UInt32 kPatch_Warnings1[] =
-	//	These are pushes to 0x00AA4830 for FaceFX warnings
+//	These are pushes to 0x00AA4830 for FaceFX warnings
 {
 	0x0077BDF1,	//	FxLinkFn
 	0x0077BF21,	//	FxNullLinkFn
@@ -21,7 +21,7 @@ static const UInt32 kPatch_Warnings1[] =
 
 static const UInt32 kPatch_Warnings2[] =
 
-	//	These are movs to 0x00AA4830 for unknown warnings
+//	These are movs to 0x00AA4830 for unknown warnings
 
 {
 	0x007DEE86,	//	
@@ -37,7 +37,7 @@ static const UInt32 kPatch_Warnings2[] =
 };
 
 static const UInt32 kPatch_Warnings3[] =
-	//	These are the normal warning message calls to 0x00AA4830
+//	These are the normal warning message calls to 0x00AA4830
 {
 	0x004161F0,	//	Failed to load data from file %s.
 	0x0041D507,	//	Audio: Could not find TESSound corresponding to form name "%s"
@@ -1074,7 +1074,7 @@ static const UInt32 kPatch_Warnings3[] =
 };
 
 static const UInt32 kPatch_Warnings4[] =
-	//	these are report calls to 846650
+//	these are report calls to 846650
 {
 	0x004018D2,	//	Building relationship map from cell %s (%i/%i)
 	0x00401911,	//	--Finding relationships for file %s (%i/%i)

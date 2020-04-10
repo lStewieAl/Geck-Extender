@@ -24,12 +24,12 @@ LRESULT __fastcall hk_ObjectListViewListView(DWORD* thisptr, void* ignorethisthi
 _declspec(naked) void DialogueListViewBeginUI() {
 	static const UInt32 retnAddr = 0x592EB4;
 	static const UInt32 skipAddr = 0x592FB8;
-	_asm 
+	_asm
 	{
 		jne defer
 		jmp skipAddr
-	
-	defer:
+
+	defer :
 		push edi
 		call BeginUIDefer
 		pop edi
@@ -40,9 +40,9 @@ _declspec(naked) void DialogueListViewBeginUI() {
 _declspec(naked) void DialogueListViewEndUI() {
 	static const UInt32 retnAddr = 0x592FB8;
 	EndUIDefer();
-	_asm 
+	_asm
 	{
-//	originalCode:
+		//	originalCode
 		mov esi, dword ptr ds : [0xD23550] //SendMessageA
 		jmp retnAddr
 	}
@@ -58,12 +58,10 @@ void __stdcall hk_sub_59C7B0(HWND hWnd) {
 It would be a lot faster with the BeginUIDefer calls, however it causes dirty edits in PNAM - Previous INFO and ANAM - Speaker
 */
 void __fastcall hk_sub_59C950(char* thiss, void* dummyEDX, int a2, HWND hDlg) {
-	//	BeginUIDefer();
 	SendMessage(hDlg, WM_SETREDRAW, FALSE, 0);
 	((char(__thiscall*)(char* str, int a2, HWND wnd))(0x59C950))(thiss, a2, hDlg);
 	SendMessage(hDlg, WM_SETREDRAW, TRUE, 0);
 	RedrawWindow(hDlg, nullptr, nullptr, RDW_ERASE | RDW_INVALIDATE);
-	//	EndUIDefer();
 }
 
 int* __cdecl hk_sub_595410(HWND hDlg, int a2, char a3) {
@@ -175,11 +173,11 @@ void WriteUIHooks() {
 	WriteRelCall(0x59957B, UInt32(hk_sub_59C950));
 	WriteRelCall(0x59A728, UInt32(hk_sub_59C950));
 	WriteRelCall(0x5A1952, UInt32(hk_sub_59C950));
-	
+
 	WriteRelCall(0x57E673, UInt32(hk_sub_595410));
-//	WriteRelCall(0x57E69A, UInt32(hk_sub_595410)); causes conversation next speaker to be blank
+	//	WriteRelCall(0x57E69A, UInt32(hk_sub_595410)); causes conversation next speaker to be blank
 	WriteRelCall(0x57E6C1, UInt32(hk_sub_595410));
-	
+
 	WriteRelCall(0x57E6E8, UInt32(hk_sub_595410));
 	WriteRelCall(0x57E70F, UInt32(hk_sub_595410));
 	WriteRelCall(0x57E75D, UInt32(hk_sub_595410));
@@ -189,7 +187,7 @@ void WriteUIHooks() {
 	WriteRelCall(0x59CC55, UInt32(hk_sub_47F7A0));
 	WriteRelCall(0x59CC70, UInt32(hk_sub_47F7A0));
 	WriteRelCall(0x59CC8B, UInt32(hk_sub_47F7A0));
-	
+
 	// speed up select dialog topic
 	WriteRelCall(0x597312, UInt32(hk_sub_595800));
 	WriteRelCall(0x597504, UInt32(hk_sub_595800));
@@ -224,7 +222,7 @@ void WriteUIHooks() {
 	WriteRelCall(0x47FBF3, UInt32(hk_sub_47D330));
 	WriteRelCall(0x48C0AF, UInt32(hk_sub_47D330));
 	WriteRelCall(0x48C128, UInt32(hk_sub_47D330));
-	
+
 	// speed up packages window
 	WriteRelCall(0x498CB4, UInt32(hk_sub_4979F0));
 	WriteRelCall(0x499509, UInt32(hk_sub_4979F0));

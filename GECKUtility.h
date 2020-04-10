@@ -27,7 +27,7 @@ struct lpMem {
 
 
 lpMem* GetLPMem() {
-	return *(lpMem**)(0xED116C);
+	return *(lpMem * *)(0xED116C);
 }
 
 // functions for getting and setting the render window camera
@@ -86,7 +86,7 @@ void SetTimeOfDay(float time) {
 	float* unknownStruct = *(float**)(0xECF93C);
 	if (!unknownStruct) return;
 
-	float* timeStruct = *(float**)(unknownStruct+0x1A);
+	float* timeStruct = *(float**)(unknownStruct + 0x1A);
 	if (!timeStruct) return;
 
 	((void(__thiscall*)(float* timeStruct, float newTime))(0x44CD00))(timeStruct, time);
@@ -98,7 +98,7 @@ void ToggleRenderWindowAllowCellLoads(bool toggle) {
 	{
 		*(byte*)(0xECFCEC) |= (1 << 2);
 	}
-	else 
+	else
 	{
 		*(byte*)(0xECFCEC) &= ~(1 << 2);
 	}
@@ -180,7 +180,7 @@ struct ObjectPalette
 {
 	struct Object
 	{
-		char	*name;			// 00
+		char* name;			// 00
 		UInt16	unk04;			// 04
 		UInt16	unk06;			// 06
 		int		formID;			// 08
@@ -197,7 +197,7 @@ struct ObjectPalette
 		float	zMax;			// 34
 	};
 
-	ObjectPalette::Object *current;		// 00
+	ObjectPalette::Object* current;		// 00
 	tList<ObjectPalette::Object> list;	// 04
 	UInt32 sPaletteFileNameSetting;		// 0C		
 	char* paletteName;					// 10

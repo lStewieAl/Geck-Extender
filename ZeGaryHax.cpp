@@ -31,38 +31,38 @@
 #include "DebugCellShaders.h"
 #include "ZeEditBoxHax.h"
 
-BOOL __stdcall ScriptEditCallback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
+BOOL __stdcall ScriptEditCallback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	return ((WNDPROC)(0x5C3D40))(hWnd, msg, wParam, lParam);
 }
 
 extern "C"
 {
-	  BOOL WINAPI DllMain(HANDLE  hDllHandle, DWORD dwReason, LPVOID lpreserved)
-    {
-		  if (dwReason == DLL_PROCESS_ATTACH)
-		  {
-			  ZeGaryHaxHandle = (HMODULE)hDllHandle;
-		  }
-          return TRUE;
-    }
+	BOOL WINAPI DllMain(HANDLE  hDllHandle, DWORD dwReason, LPVOID lpreserved)
+	{
+		if (dwReason == DLL_PROCESS_ATTACH)
+		{
+			ZeGaryHaxHandle = (HMODULE)hDllHandle;
+		}
+		return TRUE;
+	}
 }
 
-bool NVSEPlugin_Query(const NVSEInterface * nvse, PluginInfo * info)
+bool NVSEPlugin_Query(const NVSEInterface* nvse, PluginInfo* info)
 {
-    info->infoVersion = PluginInfo::kInfoVersion;
-    info->name = GH_NAME;
-    info->version = GH_VERSION;
+	info->infoVersion = PluginInfo::kInfoVersion;
+	info->name = GH_NAME;
+	info->version = GH_VERSION;
 	return (nvse->isEditor && nvse->nvseVersion >= NVSE_VERSION_INTEGER);
 }
 
-bool NVSEPlugin_Load(const NVSEInterface * nvse)
+bool NVSEPlugin_Load(const NVSEInterface* nvse)
 {
 	_DMESSAGE("Geck Extender Base Address: %08X", GetModuleHandle("ZeGaryHax.dll"));
 
 	//	ini thing - credit to carxt
 	GetModuleFileNameA(NULL, iniName, MAX_PATH);
-	strcpy((char *)(strrchr(iniName, '\\') + 1), "Data\\nvse\\plugins\\geckextender.ini");
+	strcpy((char*)(strrchr(iniName, '\\') + 1), "Data\\nvse\\plugins\\geckextender.ini");
 
 	bEnableSpellChecker = GetOrCreateINIInt("General", "bEnableSpellChecker", 0, iniName);
 	bFastExit = GetOrCreateINIInt("General", "bFastExit", 1, iniName);
@@ -72,7 +72,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	bHighResLandscapeLOD = GetOrCreateINIInt("General", "bHighResLandscapeLOD", 0, iniName);
 	bRemoveStatusBarLoadingText = GetOrCreateINIInt("General", "bRemoveLoadingText", 1, iniName);
 	bPlaySoundEndOfLoading = GetOrCreateINIInt("General", "bPlaySoundEndOfLoading", 1, iniName);
-	bNoDXSoundCaptureErrorPopup = GetOrCreateINIInt("General", "bNoDXSoundCaptureErrorPopup", 0, iniName); 
+	bNoDXSoundCaptureErrorPopup = GetOrCreateINIInt("General", "bNoDXSoundCaptureErrorPopup", 0, iniName);
 	bNoPreviewWindowAutoFocus = GetOrCreateINIInt("General", "bNoPreviewWindowAutoFocus", 1, iniName);
 	bNoLODMeshMessage = GetOrCreateINIInt("General", "bNoLODMeshMessage", 0, iniName);
 	bAutoLoadFiles = GetOrCreateINIInt("General", "bAutoLoadFiles", 0, iniName);
@@ -108,7 +108,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 
 	bSmoothFlycamRotation = GetOrCreateINIInt("Flycam", "bSmoothRotation", 1, iniName);
 	bFlycamUpDownRelativeToWorld = GetOrCreateINIInt("Flycam", "bFlycamUpDownRelativeToWorld", 1, iniName);
-	fFlycamRotationSpeed = GetOrCreateINIInt("Flycam", "iRotationSpeedPct", 100, iniName) * - 0.001F;
+	fFlycamRotationSpeed = GetOrCreateINIInt("Flycam", "iRotationSpeedPct", 100, iniName) * -0.001F;
 	fFlycamNormalMovementSpeed = GetOrCreateINIInt("Flycam", "iMovementSpeed", 10, iniName) * 3.0F;
 	fFlycamShiftMovementSpeed = GetOrCreateINIInt("Flycam", "iRunMovementSpeedPct", 300, iniName) / 100.0F;
 	fFlycamAltMovementSpeed = GetOrCreateINIInt("Flycam", "iWalkMovementSpeedPct", 20, iniName) / 100.0F;
@@ -202,7 +202,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	//	fix WM_CLOSE in destruction data dialog - credit to roy
 	SafeWrite32(0x004E640F, (UInt32)hk_DialogProc);
 
-	
+
 	if (bListEditFix)
 	{
 		//	fix windows 8/10 conditions collapsed column bug - credit to nukem
@@ -212,7 +212,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		WriteRelCall(0x0076E195, (UInt32)hk_sub_4A1C10);
 		WriteRelCall(0x004A2791, (UInt32)hk_sub_4A1C10); // necessary, but causes a crash when viewing the anims list
 	}
-	
+
 	if (bExpandFormIDColumn)
 	{
 		// fix FormID column being collapsed
@@ -363,7 +363,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 
 	// hook Load ESP/ESM window callback
 	SafeWrite32(0x44192A, UInt32(hk_LoadESPESMCallback));
-	
+
 	// make flycam mouse rotation grid smaller (1*1 instead of 2*2)
 	// the game was checking if the difference in mouse position was > 1 rather than >= 1
 	SafeWrite8(0x45D3AD, 0x7C);
@@ -378,7 +378,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		WriteRelJump(0x45D3A3, UInt32(FlycamRotationSpeedMultiplierHook));
 		WriteRelJump(0x456A9F, 0x456AE6); // skip call to SetCursorPos when changing to flycam mode
 	}
-	
+
 	if (bSwapRenderCYKeys) {
 		// set C as hotkey for restricting movement to Y direction
 		SafeWrite8(0x462D8B, 0x6); // (patch a switch table offset)
@@ -400,7 +400,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 
 	/* allow ctrl S to save */
 	WriteRelJump(0x5C3ECD, UInt32(ScriptEditKeypressHook));
-	
+
 	/* fix vanilla bug where modified flag was not reset upon successful saving */
 	WriteRelCall(0x5C4974, UInt32(ScriptEdit__Save));
 
@@ -653,25 +653,25 @@ void doKonami(int key) {
 	/* handles the case where up is pressed in the middle of the sequence */
 	if (konamiStage == 0 && key == VK_UP) konamiStage++;
 }
-	
+
 void SaveWindowPositions() {
 	SaveWindowPositionToINI(*(HWND*)(0xECFB40), "Render Window");
 
 	char buffer[8];
-	
+
 	WINDOWPLACEMENT pos;
 	GetWindowPlacement(g_ConsoleHwnd, &pos);
 	WritePrivateProfileString("Log", "iWindowPosX", _itoa(pos.rcNormalPosition.left, buffer, 10), iniName);
 	WritePrivateProfileString("Log", "iWindowPosY", _itoa(pos.rcNormalPosition.top, buffer, 10), iniName);
-	WritePrivateProfileString("Log", "iWindowPosDX", _itoa(pos.rcNormalPosition.right-pos.rcNormalPosition.left, buffer, 10), iniName);
-	WritePrivateProfileString("Log", "iWindowPosDY", _itoa(pos.rcNormalPosition.bottom-pos.rcNormalPosition.top, buffer, 10), iniName);
+	WritePrivateProfileString("Log", "iWindowPosDX", _itoa(pos.rcNormalPosition.right - pos.rcNormalPosition.left, buffer, 10), iniName);
+	WritePrivateProfileString("Log", "iWindowPosDY", _itoa(pos.rcNormalPosition.bottom - pos.rcNormalPosition.top, buffer, 10), iniName);
 }
 
 void __fastcall FastExitHook(volatile LONG** thiss)
 {
 	SaveWindowPositions();
 	if (GetINIExists() && bFastExit) TerminateProcess(GetCurrentProcess(), 0);
-	((void(__thiscall *)(volatile LONG **thiss))(0x4CC540))(thiss);
+	((void(__thiscall*)(volatile LONG** thiss))(0x4CC540))(thiss);
 }
 
 void __stdcall BadFormPrintID(TESForm* form)
@@ -686,7 +686,8 @@ _declspec(naked) void BadFormLoadHook()
 	{
 		push esi
 		call BadFormPrintID
-//	originalCode:
+		
+		//	originalCode
 		mov byte ptr ss : [esp + 0x1A] , 0x1 // wasBadFormEncountered
 		jmp retnAddr
 	}
@@ -719,7 +720,7 @@ _declspec(naked) void SaveScriptChangedType()
 	}
 }
 
-/* TODO 
+/* TODO
 Creature + Leveled creature/character windows
 NPC
 GameEffects->BaseEffect

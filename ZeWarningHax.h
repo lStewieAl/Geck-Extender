@@ -119,26 +119,26 @@
 0x006ED31A,	//	MASTERFILE: Could not find Parent Space with ID %08x for NavmeshInfo %08x
 */
 
-static const char *messageCreateFileMapping = "This operation was not completed because CreateFileMapping failed to open file \"%s\" with error:\n%s\n\nExit other applications, restart the Construction Kit, and try again.";
-static const char *messageCouldNotCheckoutForm = "FORMS: Could not checkout form (%08X) during import.";
-static const char *messageBodyPartDataNotFound = "MASTERFILE: Could not find body part data (%08X) during import.";
-static const char *messageAmmoNotFound = "MASTERFILE: Could not find ammo (%08X) during import.";
-static const char *messageNavmeshTriangleDegenerate = "PATHFINDING: Navmesh (%08X) Cell %s, Triangle %d is degenerate, Vertices 1 and 2 both use vertex index %d";
-static const char *messageMediaLocationController = "MASTERFILE: Could not find Media Location Controller (%08X) for Audio Marker (%08X) in extra data list.";
-static const char *messagePotentiallyInvalidZValue = "CELLS: Potentially Invalid Z value (%.2f) on reference:\n%s";
-static const char *messagePotentiallyInvalidXValue = "CELLS: Potentially Invalid X value (%.2f) on reference:\n%s";
-static const char *messagePotentiallyInvalidYValue = "CELLS: Potentially Invalid Y value (%.2f) on reference:\n%s";
+static const char* messageCreateFileMapping = "This operation was not completed because CreateFileMapping failed to open file \"%s\" with error:\n%s\n\nExit other applications, restart the Construction Kit, and try again.";
+static const char* messageCouldNotCheckoutForm = "FORMS: Could not checkout form (%08X) during import.";
+static const char* messageBodyPartDataNotFound = "MASTERFILE: Could not find body part data (%08X) during import.";
+static const char* messageAmmoNotFound = "MASTERFILE: Could not find ammo (%08X) during import.";
+static const char* messageNavmeshTriangleDegenerate = "PATHFINDING: Navmesh (%08X) Cell %s, Triangle %d is degenerate, Vertices 1 and 2 both use vertex index %d";
+static const char* messageMediaLocationController = "MASTERFILE: Could not find Media Location Controller (%08X) for Audio Marker (%08X) in extra data list.";
+static const char* messagePotentiallyInvalidZValue = "CELLS: Potentially Invalid Z value (%.2f) on reference:\n%s";
+static const char* messagePotentiallyInvalidXValue = "CELLS: Potentially Invalid X value (%.2f) on reference:\n%s";
+static const char* messagePotentiallyInvalidYValue = "CELLS: Potentially Invalid Y value (%.2f) on reference:\n%s";
 
 __declspec(naked) void hk_UnableToFindEnableStateParentMsgHook()
 {
-	static const char *messageFormat = "MASTERFILE: Unable to find enable state parent %08X. Enable state parent data will be removed in ref (%08X).";
+	static const char* messageFormat = "MASTERFILE: Unable to find enable state parent %08X. Enable state parent data will be removed in ref (%08X).";
 	static const UInt32 kRetnAddr = 0x004AFD59;
 
 	__asm
 	{
-		mov		eax, dword ptr ds:[ebp + 0x0C]
+		mov		eax, dword ptr ds : [ebp + 0x0C]
 		push	eax
-		mov		eax, dword ptr ss:[esp + 0x44]
+		mov		eax, dword ptr ss : [esp + 0x44]
 		push	eax
 		push	messageFormat
 		jmp		kRetnAddr
@@ -147,14 +147,14 @@ __declspec(naked) void hk_UnableToFindEnableStateParentMsgHook()
 
 __declspec(naked) void hk_UnableToFindPackageReferenceMsgHook()
 {
-	static const char *messageFormat = "MASTERFILE: Unable to find Package Target Reference (%08X) on owner object \"%s\" (%08X).";
+	static const char* messageFormat = "MASTERFILE: Unable to find Package Target Reference (%08X) on owner object \"%s\" (%08X).";
 	static const UInt32 kRetnAddr = 0x004A1687;
 
 	__asm
 	{
-		mov		ecx, dword ptr ds:[ebp + 0x0C]
+		mov		ecx, dword ptr ds : [ebp + 0x0C]
 		push	ecx
-		mov		ecx, dword ptr ss:[esp + 0x08]
+		mov		ecx, dword ptr ss : [esp + 0x08]
 		push	eax
 		push	ecx
 		push	messageFormat
@@ -163,21 +163,21 @@ __declspec(naked) void hk_UnableToFindPackageReferenceMsgHook()
 }
 __declspec(naked) void hk_UnableToFindPackageLocationMsgHook()
 {
-	static const char *messageFormat = "MASTERFILE: Unable to find Package Location Reference (%08X) on owner object \"%s\" (%08X).";
+	static const char* messageFormat = "MASTERFILE: Unable to find Package Location Reference (%08X) on owner object \"%s\" (%08X).";
 	static const UInt32 kCallAddr = (UInt32)EditorUI_Log2;
 	static const UInt32 kRetnAddr = 0x0049FCFB;
 
 	__asm
 	{
-		mov		ecx, dword ptr ds:[ebp + 0x0C]
+		mov		ecx, dword ptr ds : [ebp + 0x0C]
 		push	ecx
-		mov		ecx, dword ptr ss:[esp + 0x0C]
+		mov		ecx, dword ptr ss : [esp + 0x0C]
 		push	eax
 		push	ecx
 		push	messageFormat
 		mov		eax, kCallAddr
 		call	eax
-		mov		byte ptr ds:[edi], 0
+		mov		byte ptr ds : [edi] , 0
 		add		esp, 0x10
 		jmp		kRetnAddr
 	}
@@ -185,14 +185,14 @@ __declspec(naked) void hk_UnableToFindPackageLocationMsgHook()
 
 __declspec(naked) void hk_TryingToAccessLocalVariableInScriptMsgHook()
 {
-	static const char *messageFormat = "SCRIPTS: Trying to access local variable %d in script '%s' (%08X) -- variable not found.\r\n";
+	static const char* messageFormat = "SCRIPTS: Trying to access local variable %d in script '%s' (%08X) -- variable not found.\r\n";
 	static const UInt32 kRetnAddr = 0x005C2852;
 	uint32_t kTemp;
 
 	__asm
 	{
 		mov		kTemp, eax
-		mov		eax, dword ptr ds:[ecx + 0x0C]
+		mov		eax, dword ptr ds : [ecx + 0x0C]
 		push	eax
 		mov		eax, kTemp
 		push	eax
@@ -204,14 +204,14 @@ __declspec(naked) void hk_TryingToAccessLocalVariableInScriptMsgHook()
 
 __declspec(naked) void hk_UnableToFindLinkedReferenceMsgHook()
 {
-	static const char *messageFormat = "MASTERFILE: Unable to find linked reference (%08X). Linked reference data will be removed in ref (%08X).";
+	static const char* messageFormat = "MASTERFILE: Unable to find linked reference (%08X). Linked reference data will be removed in ref (%08X).";
 	static const UInt32 kRetnAddr = 0x004AFE7F;
 
 	__asm
 	{
-		mov		edx, dword ptr ds:[ebp + 0x0C]
+		mov		edx, dword ptr ds : [ebp + 0x0C]
 		push	edx
-		mov		edx, dword ptr ss:[esp + 0x4C]
+		mov		edx, dword ptr ss : [esp + 0x4C]
 		push	edx
 		push	messageFormat
 		jmp		kRetnAddr
@@ -219,14 +219,14 @@ __declspec(naked) void hk_UnableToFindLinkedReferenceMsgHook()
 }
 __declspec(naked) void hk_CouldNotFindMediaLocationControllerMsgHook()
 {
-	static const char *messageFormat = "MASTERFILE: Could not find MediaLocationController (%08X) for AudioMarker (%08X) in extra data list.";
+	static const char* messageFormat = "MASTERFILE: Could not find MediaLocationController (%08X) for AudioMarker (%08X) in extra data list.";
 	static const UInt32 kRetnAddr = 0x004AF98C;
 	uint32_t kTemp;
 
 	__asm
 	{
 		mov		kTemp, edx
-		mov		edx, dword ptr ds:[ebp + 0x0C]
+		mov		edx, dword ptr ds : [ebp + 0x0C]
 		push	edx
 		mov		edx, kTemp
 		push	edx
@@ -237,12 +237,12 @@ __declspec(naked) void hk_CouldNotFindMediaLocationControllerMsgHook()
 
 __declspec(naked) void hk_ChunkAbnormallyTerminatedMsgHook()
 {
-	static const char *messageFormat = "MASTERFILE: Chunk %c%c%c%c abnormally terminated TESObjectREFR::Load for ref (%08X).\n";
+	static const char* messageFormat = "MASTERFILE: Chunk %c%c%c%c abnormally terminated TESObjectREFR::Load for ref (%08X).\n";
 	static const UInt32 kRetnAddr = 0x0064FF84;
 
 	__asm
 	{
-		mov		ecx, dword ptr ds:[edi + 0x0C]
+		mov		ecx, dword ptr ds : [edi + 0x0C]
 		push	ecx
 		mov		ecx, eax
 		shr		ecx, 0x18
@@ -250,12 +250,12 @@ __declspec(naked) void hk_ChunkAbnormallyTerminatedMsgHook()
 		mov		edx, eax
 		mov		ecx, eax
 		sar		edx, 0x10
-		and		edx, 0xFF
+		and edx, 0xFF
 		push	edx
 		sar		ecx, 0x08
-		and		ecx, 0xFF
+		and ecx, 0xFF
 		push	ecx
-		and		eax, 0xFF
+		and eax, 0xFF
 		push	eax
 		push	messageFormat
 		jmp		kRetnAddr
@@ -264,7 +264,7 @@ __declspec(naked) void hk_ChunkAbnormallyTerminatedMsgHook()
 
 __declspec(naked) void hk_OnPackageBeginScriptNotCompiledMsgHook()
 {
-	static const char *messageFormat = "MASTERFILE: %s (%08X)";
+	static const char* messageFormat = "MASTERFILE: %s (%08X)";
 	static const UInt32 kCallAddr = 0x00407120;
 	static const UInt32 kRetnAddr = 0x00496F3C;
 
@@ -272,9 +272,9 @@ __declspec(naked) void hk_OnPackageBeginScriptNotCompiledMsgHook()
 	{
 		mov		eax, kCallAddr
 		call	eax
-		mov		ebx, dword ptr ds:[esi + 0x0C]
+		mov		ebx, dword ptr ds : [esi + 0x0C]
 		push	ebx
-		mov		ebx, dword ptr ss:[ebp + 0x58]
+		mov		ebx, dword ptr ss : [ebp + 0x58]
 		push	ebx
 		push	messageFormat
 		jmp		kRetnAddr
@@ -283,7 +283,7 @@ __declspec(naked) void hk_OnPackageBeginScriptNotCompiledMsgHook()
 
 __declspec(naked) void hk_OnPackageChangeScriptNotCompiledMsgHook()
 {
-	static const char *messageFormat = "MASTERFILE: %s (%08X)";
+	static const char* messageFormat = "MASTERFILE: %s (%08X)";
 	static const UInt32 kCallAddr = 0x00407120;
 	static const UInt32 kRetnAddr = 0x00496F79;
 
@@ -291,9 +291,9 @@ __declspec(naked) void hk_OnPackageChangeScriptNotCompiledMsgHook()
 	{
 		mov		eax, kCallAddr
 		call	eax
-		mov		ebx, dword ptr ds:[esi + 0x0C]
+		mov		ebx, dword ptr ds : [esi + 0x0C]
 		push	ebx
-		mov		ebx, dword ptr ss:[ebp + 0x58]
+		mov		ebx, dword ptr ss : [ebp + 0x58]
 		push	ebx
 		push	messageFormat
 		jmp		kRetnAddr
@@ -302,7 +302,7 @@ __declspec(naked) void hk_OnPackageChangeScriptNotCompiledMsgHook()
 
 __declspec(naked) void hk_OnPackageEndScriptNotCompiledMsgHook()
 {
-	static const char *messageFormat = "MASTERFILE: %s (%08X)";
+	static const char* messageFormat = "MASTERFILE: %s (%08X)";
 	static const UInt32 kCallAddr = 0x00407120;
 	static const UInt32 kRetnAddr = 0x00496FB3;
 
@@ -310,9 +310,9 @@ __declspec(naked) void hk_OnPackageEndScriptNotCompiledMsgHook()
 	{
 		mov		eax, kCallAddr
 		call	eax
-		mov		ebx, dword ptr ds:[esi + 0x0C]
+		mov		ebx, dword ptr ds : [esi + 0x0C]
 		push	ebx
-		mov		ebx, dword ptr ss:[ebp + 0x58]
+		mov		ebx, dword ptr ss : [ebp + 0x58]
 		push	ebx
 		push	messageFormat
 		jmp		kRetnAddr
@@ -322,7 +322,7 @@ __declspec(naked) void hk_OnPackageEndScriptNotCompiledMsgHook()
 
 __declspec(naked) void hk_ScriptHasTextButNotCompiledMsgHook()
 {
-	static const char *messageFormat = "SCRIPTS: %s (%X08)";
+	static const char* messageFormat = "SCRIPTS: %s (%X08)";
 	static const UInt32 kCallAddr = 0x00407120;
 	static const UInt32 kRetnAddr = 0x005C36F1;
 
@@ -332,7 +332,7 @@ __declspec(naked) void hk_ScriptHasTextButNotCompiledMsgHook()
 		call	eax
 		mov		eax, [ebx + 0x0C]
 		push	eax
-		mov		ecx, dword ptr ss:[ebp - 0x20]
+		mov		ecx, dword ptr ss : [ebp - 0x20]
 		push	ecx
 		push	messageFormat
 		jmp		kRetnAddr
@@ -341,7 +341,7 @@ __declspec(naked) void hk_ScriptHasTextButNotCompiledMsgHook()
 
 __declspec(naked) void hk_RemoveEmptyLitWaterMsgHook()
 {
-	static const char *messageFormat = "MASTERFILE: Removing empty lit water extra data in ref (%08X).";
+	static const char* messageFormat = "MASTERFILE: Removing empty lit water extra data in ref (%08X).";
 	static const UInt32 kRetnAddr = 0x004B044A;
 
 	__asm
@@ -356,7 +356,7 @@ __declspec(naked) void hk_RemoveEmptyLitWaterMsgHook()
 
 __declspec(naked) void hk_EnableStateParentLoopMsgHook()
 {
-	static const char *messageFormat = "MASTERFILE: Enable state parent loop detected in ref (%08X). Parent removed.";
+	static const char* messageFormat = "MASTERFILE: Enable state parent loop detected in ref (%08X). Parent removed.";
 	static const UInt32 kRetnAddr = 0x004AFDB7;
 	uint32_t kTemp;
 
@@ -375,7 +375,7 @@ __declspec(naked) void hk_EnableStateParentLoopMsgHook()
 
 __declspec(naked) void hk_RemoveEmptyActivateParentMsgHook()
 {
-	static const char *messageFormat = "MASTERFILE: Removing empty activate parent extra data in ref (%08X).";
+	static const char* messageFormat = "MASTERFILE: Removing empty activate parent extra data in ref (%08X).";
 	static const UInt32 kRetnAddr = 0x004B0214;
 	uint32_t kTemp;
 
@@ -394,7 +394,7 @@ __declspec(naked) void hk_RemoveEmptyActivateParentMsgHook()
 
 __declspec(naked) void hk_UnableToFindLeveledObjectMsgHook()
 {
-	static const char *messageFormat = "Unable to find Leveled Object Form (%08X) for owner object \"%s\" (%08X).";
+	static const char* messageFormat = "Unable to find Leveled Object Form (%08X) for owner object \"%s\" (%08X).";
 	static const UInt32 kRetnAddr = 0x005004BB;
 	uint32_t kTemp;
 
@@ -429,9 +429,9 @@ __declspec(naked) void hk_EnableScriptErrorsMsgHook()
 		push	eax
 		call	DoScriptErrorWarning
 		add		esp, 4
-		
+
 		popad
-		mov		dword ptr ss:[esp + 0x0120], 0xFFFFFFFF
+		mov		dword ptr ss : [esp + 0x0120] , 0xFFFFFFFF
 		jmp		kRetnAddr
 	}
 }

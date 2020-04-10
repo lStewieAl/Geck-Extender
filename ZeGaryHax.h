@@ -14,33 +14,32 @@ extern HWND g_timeOfDayTextHwnd;
 extern HWND g_allowCellWindowLoadsButtonHwnd;
 IDebugLog	gLog("EditorWarnings.log");
 
-void PrintCmdTable();
 void EditorUI_Log(const char* Format, ...);
 BOOL __stdcall HavokPreviewCallback(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
 extern "C" IMAGE_DOS_HEADER __ImageBase;
 
 struct z_stream_s
 {
-	const void *next_in;
+	const void* next_in;
 	uint32_t avail_in;
 	uint32_t total_in;
-	void *next_out;
+	void* next_out;
 	uint32_t avail_out;
 	uint32_t total_out;
-	const char *msg;
-	struct internal_state *state;
+	const char* msg;
+	struct internal_state* state;
 };
 
 struct DialogOverrideData
 {
-    DLGPROC DialogFunc; // Original function pointer
-    LPARAM Param;       // Original parameter
-    bool IsDialog;      // True if it requires EndDialog()
+	DLGPROC DialogFunc; // Original function pointer
+	LPARAM Param;       // Original parameter
+	bool IsDialog;      // True if it requires EndDialog()
 };
 
 std::recursive_mutex g_DialogMutex;
 std::unordered_map<HWND, DialogOverrideData> g_DialogOverrides;
-__declspec(thread) DialogOverrideData *DlgData;
+__declspec(thread) DialogOverrideData* DlgData;
 
 char* nvseMSG[20] =
 {
@@ -114,15 +113,13 @@ float fFlycamNormalMovementSpeed;
 float fFlycamShiftMovementSpeed;
 float fFlycamAltMovementSpeed;
 
-UInt8 g_iPreviewWindowRed;
-UInt8 g_iPreviewWindowGreen;
-UInt8 g_iPreviewWindowBlue;
+UInt8 g_iPreviewWindowRed, g_iPreviewWindowGreen, g_iPreviewWindowBlue;
 
 char iniName[MAX_PATH];
-static const char *geckwikiurl = "https://geckwiki.com/index.php/";
-static const char *geckwikiscriptingurl = "https://geckwiki.com/index.php/Category:Scripting";
-static const char *geckwikicommandsurl = "https://geckwiki.com/index.php/Category:Commands";
-static const char *geckwikifunctionsurl = "https://geckwiki.com/index.php/Category:Functions";
+static const char* geckwikiurl = "https://geckwiki.com/index.php/";
+static const char* geckwikiscriptingurl = "https://geckwiki.com/index.php/Category:Scripting";
+static const char* geckwikicommandsurl = "https://geckwiki.com/index.php/Category:Commands";
+static const char* geckwikifunctionsurl = "https://geckwiki.com/index.php/Category:Functions";
 
 // From NVSE Hooks_Editor.cpp
 // Patch script window font
@@ -197,7 +194,7 @@ static void DoModScriptWindow(HWND wnd)
 
 	// one tab stop every 16 dialog units
 	UInt32	tabStopSize = 16;
-	SendMessage(wnd, EM_SETTABSTOPS, 1, (LPARAM)&tabStopSize);
+	SendMessage(wnd, EM_SETTABSTOPS, 1, (LPARAM)& tabStopSize);
 	DeleteObject(fontHandle);
 }
 
@@ -217,14 +214,12 @@ static __declspec(naked) void ModScriptWindow()
 	}
 }
 
-static UInt32 pModScriptWindow = (UInt32)&ModScriptWindow;
-
 static void FixEditorFont(void)
 {
 	// Right after call d:CreateWindowA after aRichedit20a
 	UInt32	basePatchAddr = 0x005C432B;
 
-	WriteRelJump(basePatchAddr, pModScriptWindow);
+	WriteRelJump(basePatchAddr, UInt32(ModScriptWindow));
 	SafeWrite8(basePatchAddr + 5, 0x90);
 }
 
@@ -235,7 +230,7 @@ static __declspec(naked) void FixMultiBounds()
 		cmp		eax, 0x7F7FFFFF
 		je		AhhGary
 		mov		ecx, dword ptr ds : [eax + 0x0C]
-		mov		dword ptr ds : [ecx + 0x08], 0x00000000
+		mov		dword ptr ds : [ecx + 0x08] , 0x00000000
 	AhhGary:
 		ret
 	}
@@ -317,7 +312,7 @@ HWND WINAPI hk_CreateDialogParamA(HINSTANCE hInstance, LPCSTR lpTemplateName, HW
 	}
 
 	//	EndDialog MUST NOT be used
-	DialogOverrideData *data = new DialogOverrideData;
+	DialogOverrideData* data = new DialogOverrideData;
 	data->DialogFunc = lpDialogFunc;
 	data->Param = dwInitParam;
 	data->IsDialog = false;
@@ -330,7 +325,7 @@ HWND WINAPI hk_CreateDialogParamA(HINSTANCE hInstance, LPCSTR lpTemplateName, HW
 INT_PTR WINAPI hk_DialogBoxParamA(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc, LPARAM dwInitParam)
 {
 	//	EndDialog MUST be used
-	DialogOverrideData *data = new DialogOverrideData;
+	DialogOverrideData* data = new DialogOverrideData;
 	data->DialogFunc = lpDialogFunc;
 	data->Param = dwInitParam;
 	data->IsDialog = true;
@@ -391,7 +386,7 @@ HWND __stdcall AboutDialogHook(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND 
 
 void __stdcall hk_sub_4A1C10(HWND ListViewControl)
 {
-	((void(__stdcall *)(HWND))(0x004A1C10))(ListViewControl);
+	((void(__stdcall*)(HWND))(0x004A1C10))(ListViewControl);
 
 	SendMessageA(ListViewControl, LVM_SETCOLUMNWIDTH, 0, LVSCW_AUTOSIZE_USEHEADER);
 	SendMessageA(ListViewControl, LVM_SETCOLUMNWIDTH, 1, LVSCW_AUTOSIZE_USEHEADER);
@@ -409,10 +404,10 @@ static __declspec(naked) void hk_addr_42CD31()
 		test ecx, ecx
 		jne HahaGary
 		xor al, al
-		mov dword ptr ss : [esp], 0x0042CD6D
+		mov dword ptr ss : [esp] , 0x0042CD6D
 		ret
 
-	HahaGary :
+	HahaGary:
 		mov esi, dword ptr ds : [ecx + 0x110]
 		mov edx, dword ptr ds : [eax]
 		ret
@@ -424,7 +419,7 @@ static __declspec(naked) void hk_addr_4E26BA()
 {
 	__asm
 	{
-		mov dword ptr ds : [esi + 0x434], eax
+		mov dword ptr ds : [esi + 0x434] , eax
 		mov edx, 0x04
 		mul edx
 		seto cl
@@ -433,15 +428,15 @@ static __declspec(naked) void hk_addr_4E26BA()
 }
 
 //	Fix Rock-It Launcher crash - credit to jazzisparis
-TESForm* (*GetFormByID)(UInt32 formID) = (TESForm* (*)(UInt32))0x004F9620;
+TESForm* (*GetFormByID)(UInt32 formID) = (TESForm * (*)(UInt32))0x004F9620;
 
-bool __fastcall GetIsRIL(TESForm *form)
+bool __fastcall GetIsRIL(TESForm* form)
 {
 	static UInt32 RIL_FormID = 0;
 	if (!RIL_FormID)
 	{
 		RIL_FormID = 0xFFFFFFFF;
-		DataHandler *dataHandler = *(DataHandler**)0x00ED3B0C;
+		DataHandler* dataHandler = *(DataHandler**)0x00ED3B0C;
 		if (dataHandler)
 		{
 			for (tList<ModInfo>::Iterator infoIter = dataHandler->modList.modInfoList.Begin(); !infoIter.End(); ++infoIter)
@@ -483,7 +478,7 @@ __declspec(naked) void hk_SpellCheck()
 	{
 		cmp		bEnableSpellChecker, 0
 		je		AwwGary
-		call	dword ptr ds:[0x00D23548]	//	GetDlgItem
+		call	dword ptr ds : [0x00D23548]	//	GetDlgItem
 		jmp		kRetnAddrYes
 	AwwGary:
 		add		esp, 0x0C
@@ -499,12 +494,12 @@ void __declspec(naked) hk_SearchDestroyHook()
 
 	_asm
 	{
-		call dword ptr ds:[0x00D2353C]
+		call dword ptr ds : [0x00D2353C]
 		jmp kRetnAddr
 	}
 }
 
-int hk_inflateInit(z_stream_s *Stream, const char *Version, int Mode)
+int hk_inflateInit(z_stream_s* Stream, const char* Version, int Mode)
 {
 	// Force inflateEnd to error out and skip frees
 	Stream->state = nullptr;
@@ -512,10 +507,10 @@ int hk_inflateInit(z_stream_s *Stream, const char *Version, int Mode)
 	return 0;
 }
 
-int hk_inflate(z_stream_s *Stream, int Flush)
+int hk_inflate(z_stream_s* Stream, int Flush)
 {
 	size_t outBytes = 0;
-	libdeflate_decompressor *decompressor = libdeflate_alloc_decompressor();
+	libdeflate_decompressor* decompressor = libdeflate_alloc_decompressor();
 
 	libdeflate_result result = libdeflate_zlib_decompress(decompressor, Stream->next_in, Stream->avail_in, Stream->next_out, Stream->avail_out, &outBytes);
 	libdeflate_free_decompressor(decompressor);
@@ -552,7 +547,7 @@ _declspec(naked) void hk_PreviewWindowCheckForeground() {
 		push esi
 		call dword ptr ds : [0xD234DC] //SetFocus
 
-	skipSetFocus :
+	skipSetFocus:
 		jmp returnAddr
 	}
 }
@@ -594,9 +589,9 @@ BOOL __stdcall hk_SearchAndReplaceCallback(HWND hDlg, UINT msg, WPARAM wParam, L
 
 _declspec(naked) void EndLoadingHook() {
 	PlaySound("MouseClick", NULL, SND_ASYNC);
-	_asm 
+	_asm
 	{
-//	originalCode:
+		//	originalCode
 		add esp, 8
 		pop esi
 		retn
@@ -623,16 +618,16 @@ _declspec(naked) void FlycamMovementSpeedMultiplierHook() {
 
 	/* fix flycam speed being dependent on framerate by slowing down movement if framerate is greater than 30fps (33ms/frame)*/
 	if (GetTickCount() - lastFlycamTime < 33) {
-		*(float*)(0xED12C0) *= (GetTickCount() - lastFlycamTime)/33.0;
+		*(float*)(0xED12C0) *= (GetTickCount() - lastFlycamTime) / 33.0;
 	}
 
 	lastFlycamTime = GetTickCount();
-	
-	_asm 
+
+	_asm
 	{
 		popad
-//	originalCode:
-		mov     eax, dword ptr ds:[0xF1FBF4]
+		//	originalCode
+		mov     eax, dword ptr ds : [0xF1FBF4]
 		jmp retnAddr
 	}
 }
@@ -643,16 +638,16 @@ _declspec(naked) void FlycamMovementSpeedMultiplierHook() {
 _declspec(naked) void FlycamRotationSpeedMultiplierHook() {
 	static const UInt32 retnAddr = 0x45D3F8;
 	_asm {
-		mov dword ptr ds : [0x00ED140C], ebx
-		
+		mov dword ptr ds : [0x00ED140C] , ebx
+
 		push edi
 		fild dword ptr ss : [esp]
 		add esp, 4
-		
+
 		fmul fFlycamRotationSpeed
 		fstp dword ptr ss : [esp + 0xF0]
 
-		fild dword ptr ss : [esp+0x324]
+		fild dword ptr ss : [esp + 0x324]
 		fmul fFlycamRotationSpeed
 		fstp dword ptr ss : [esp + 0x18]
 		jmp retnAddr
@@ -678,12 +673,12 @@ _declspec(naked) void ScriptEditKeypressHook(HWND hWnd) {
 		ja skip
 		cmp ebx, 'S'
 		jne notSave
-		
-		cmp byte ptr ds:[esp+0x1F], 0 // check if control pressed
+
+		cmp byte ptr ds : [esp + 0x1F] , 0 // check if control pressed
 		jz notSave
-		
-		jmp saveAddr 
-		
+
+		jmp saveAddr
+
 	skip:
 		jmp skipAddr
 	notSave:
@@ -692,16 +687,16 @@ _declspec(naked) void ScriptEditKeypressHook(HWND hWnd) {
 }
 
 bool __fastcall ScriptEdit__Save(byte* thiss, void* dummyEDX, HWND hDlg, char a3, char a4) {
-	bool saveSuccess = ((bool (__thiscall *)(byte* thiss, HWND hDlg, char a3, char a4))(0x5C2F40))(thiss, hDlg, a3, a4);
+	bool saveSuccess = ((bool(__thiscall*)(byte * thiss, HWND hDlg, char a3, char a4))(0x5C2F40))(thiss, hDlg, a3, a4);
 	if (saveSuccess) {
 		SendDlgItemMessageA(hDlg, 1166, EM_SETMODIFY, 0, 0);
-		
+
 		// remove the '*' from the end of the window name
 		char windowName[MAX_PATH];
-		int len = GetWindowTextA(hDlg, windowName, MAX_PATH)-1;
+		int len = GetWindowTextA(hDlg, windowName, MAX_PATH) - 1;
 
 		if (len > 2 && windowName[len] == '*') {
-			windowName[len-1] = '\0'; // strip the '* '
+			windowName[len - 1] = '\0'; // strip the '* '
 			SetWindowTextA(hDlg, windowName);
 		}
 	}
@@ -743,8 +738,8 @@ _declspec(naked) void RenderWindowReferenceMovementSpeedHook() {
 		fmul
 		popad
 
-//	originalCode:
-		fmul dword ptr ds:[0xECFD1C]
+		//	originalCode:
+		fmul dword ptr ds : [0xECFD1C]
 		jmp retnAddr
 	}
 }
@@ -764,7 +759,7 @@ _declspec(naked) void hk_OrthographicZoom() {
 		fmul
 		popad
 
-//	originalCode:
+		//	originalCode
 		fmul    dword ptr ds : [0xD2E0D0]
 		jmp retnAddr
 	}
@@ -773,30 +768,30 @@ _declspec(naked) void hk_OrthographicZoom() {
 _declspec(naked) void hk_OrthographicZoom2() {
 	static const UInt32 retnAddr = 0x4602DE;
 	_asm {
-		fild dword ptr ss:[esp+0x24]
-		fmul dword ptr ds:[eax]
+		fild dword ptr ss : [esp + 0x24]
+		fmul dword ptr ds : [eax]
 
 		pushad
 		call GetOrthoSpeedMultiplier
 		fmul
 		popad
 
-		jmp retnAddr 
+		jmp retnAddr
 	}
 }
 
 _declspec(naked) void hk_RefCameraRotation() {
 	static const UInt32 retnAddr = 0x45F601;
 	_asm {
-		fld dword ptr [eax]
-		
+		fld dword ptr[eax]
+
 		pushad
 		call GetOrthoSpeedMultiplier
 		fmul
 		popad
 
 		push ecx
-		fstp [esp]
+		fstp[esp]
 		jmp retnAddr
 	}
 }
@@ -807,11 +802,11 @@ _declspec(naked) void hk_LoadFilesInit() {
 	static const UInt32 noLoadAddr = 0x432E64;
 
 	_asm {
-		cmp byte ptr ds:[isFirstInit], 0
+		cmp byte ptr ds : [isFirstInit] , 0
 		je notFirst
-		mov byte ptr ds:[isFirstInit], 0
+		mov byte ptr ds : [isFirstInit] , 0
 		jmp autoLoadAddr
-	notFirst:
+		notFirst :
 		jmp noLoadAddr
 	}
 }
@@ -826,9 +821,9 @@ _declspec(naked) void RenderWindowFlycamPreTransformMovementHook() {
 		test eax, 0x8000
 		jz noQ
 
-		fld  dword ptr ss:[esp+0x2C]
-		fsub dword ptr ds:[0xED12C0]
-		fstp dword ptr ss:[esp+0x2C]
+		fld  dword ptr ss : [esp + 0x2C]
+		fsub dword ptr ds : [0xED12C0]
+		fstp dword ptr ss : [esp + 0x2C]
 	noQ:
 		push 'E'
 		call esi
@@ -836,11 +831,11 @@ _declspec(naked) void RenderWindowFlycamPreTransformMovementHook() {
 		test eax, 0x8000
 		jz noE
 
-		fld dword ptr ss:[esp + 0x2C]
+		fld dword ptr ss : [esp + 0x2C]
 		fadd dword ptr ds : [0xED12C0]
-		fstp dword ptr ss:[esp + 0x2C]
+		fstp dword ptr ss : [esp + 0x2C]
 	noE:
-		mov esi, dword ptr ds:[0xED116C]
+		mov esi, dword ptr ds : [0xED116C]
 		jmp retnAddr
 	}
 }
@@ -850,7 +845,7 @@ _declspec(naked) void RenderWindowFlycamPostTransformMovementHook() {
 	_asm {
 		push eax
 		push VK_LCONTROL
-		call dword ptr ds:[0xD234D8] // GetAsyncKeyState
+		call dword ptr ds : [0xD234D8] // GetAsyncKeyState
 		movzx eax, ax
 		test eax, 0x8000
 		jz noDown
@@ -876,8 +871,8 @@ _declspec(naked) void RenderWindowFlycamPostTransformMovementHook() {
 
 	noUp:
 		pop eax
-		mov edx, dword ptr ss:[eax]
-		mov ecx, dword ptr ss : [eax+4]
+		mov edx, dword ptr ss : [eax]
+		mov ecx, dword ptr ss : [eax + 4]
 		jmp retnAddr
 	}
 }
@@ -885,18 +880,18 @@ _declspec(naked) void RenderWindowFlycamPostTransformMovementHook() {
 LRESULT __stdcall UpdateTimeOfDayScrollbarHook(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
 	LRESULT scrollPos = SendMessageA(hWnd, Msg, wParam, lParam);
 	SendMessageA(g_trackBarHwnd, TBM_SETPOS, TRUE, scrollPos);
-	
+
 	char timeBuf[100];
 	sprintf(timeBuf, "%.2f", scrollPos / 4.0F);
 	SetWindowTextA(g_timeOfDayTextHwnd, timeBuf);
-	
+
 	return scrollPos;
 }
 
 void __stdcall UpdateTimeOfDayInputBoxHook(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
 	SendMessageA(hWnd, Msg, wParam, lParam);
 	SendMessageA(g_trackBarHwnd, TBM_SETPOS, TRUE, lParam);
-	
+
 	char timeBuf[100];
 	sprintf(timeBuf, "%.2f", lParam / 4.0F);
 	SetWindowTextA(g_timeOfDayTextHwnd, timeBuf);
@@ -907,15 +902,15 @@ _declspec(naked) void LipGenLoopHook() {
 	static const UInt32 skipAddr = 0x41EE65;
 	_asm {
 		// ecx contains TESForm
-		test byte ptr ss : [ecx + 8], 2 // form->flags & kModified
+		test byte ptr ss : [ecx + 8] , 2 // form->flags & kModified
 
 		je skip
 
 		mov eax, [ecx]
-		mov edx, [eax+0xFC]
+		mov edx, [eax + 0xFC]
 		jmp retnAddr
-		
-	skip:
+
+		skip :
 		jmp skipAddr
 	}
 }
@@ -923,17 +918,17 @@ _declspec(naked) void LipGenLoopHook() {
 _declspec(naked) void LipGenCountTopicsHook() {
 	static const UInt32 retnAddr = 0x41EA35;
 	_asm {
-		mov esi, dword ptr ss:[eax]
+		mov esi, dword ptr ss : [eax]
 		test esi, esi
 		jz done
 
 		// esi contains TESForm
-		test byte ptr ss : [esi + 8], 2 // form->flags & kModified
+		test byte ptr ss : [esi + 8] , 2 // form->flags & kModified
 
 		je done
 
 		inc ecx
-	done:
+		done :
 		jmp retnAddr
 	}
 }
@@ -944,14 +939,14 @@ _declspec(naked) void EmbeddedRenderWindowSoundNullCheck() {
 	_asm {
 		test ecx, ecx
 		je noSound
-		
-		movsx edx, byte ptr ds:[ecx]
+
+		movsx edx, byte ptr ds : [ecx]
 		test edx, edx
 		je noSound
-		
+
 		jmp soundFileAddr
 
-	noSound:
+		noSound :
 		jmp noSoundFileAddr
 	}
 }
@@ -972,13 +967,13 @@ BOOL __stdcall RenderWindowCallbackHook(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 		case 'I':
 			SetIsShowLightMarkers(!GetIsShowLightMarkers());
 			break;
-/*
-		case 'S':
-			if (GetFlycamMode() == 0) {
-				SetIsShowSoundMarkers(!GetIsShowSoundMarkers());
-			}
-			break;
-			*/
+			/*
+					case 'S':
+						if (GetFlycamMode() == 0) {
+							SetIsShowSoundMarkers(!GetIsShowSoundMarkers());
+						}
+						break;
+						*/
 		}
 	}
 	else if (msg == WM_RBUTTONDOWN) {
@@ -1001,7 +996,7 @@ _declspec(naked) void SaveFailureHook()
 		pushad
 		call ShowSaveFailureError
 		popad
-	noWarn:
+		noWarn :
 		jmp retnAddr
 	}
 }
@@ -1012,11 +1007,11 @@ _declspec(naked) void ObjectWindowListFilterUneditedHook()
 	static const UInt32 retnAddr = 0x43973F;
 	_asm {
 		// esi contains TESForm
-		test byte ptr ss : [esi+8], 2 /// form->flags & kModified
+		test byte ptr ss : [esi + 8] , 2 /// form->flags & kModified
 		jne editedForm
 		jmp skipAddr
 
-	editedForm:
+	editedForm :
 		mov eax, dword ptr ss : [esp + 0x1C]
 		test eax, eax
 		jmp retnAddr
@@ -1051,7 +1046,7 @@ _declspec(naked) void ObjectWindowListViewColumnSizeHook()
 		push LVM_SETCOLUMNWIDTH
 		push edi // g_objectWindowListHdlg
 		call ebx // SendMessageA
-		
+
 		mov ecx, dword ptr ss : [esp + 0x54]
 		push 1
 		jmp retnAddr
@@ -1069,12 +1064,12 @@ _declspec(naked) void EditLandCheckLandIsNull()
 	static const UInt32 retnAddr = 0x61CA60;
 	_asm
 	{
-		mov dword ptr ss : [esp + 0x4], ebx
+		mov dword ptr ss : [esp + 0x4] , ebx
 		test eax, eax
 		je done
-		cmp dword ptr ds : [eax], 0
+		cmp dword ptr ds : [eax] , 0
 	done:
-		jmp retnAddr
+		 jmp retnAddr
 	}
 }
 
@@ -1089,7 +1084,7 @@ _declspec(naked) void FormListCheckNull()
 		je done
 		mov ecx, dword ptr ds : [eax]
 		test ecx, ecx
-	done:
+	done :
 		jmp retnAddr
 	}
 }
@@ -1127,7 +1122,7 @@ _declspec(naked) void MultipleMasterLoadHook()
 		call edi // MessageBoxA
 		cmp eax, IDYES
 		jne stopLoading
-		mov byte ptr ds : [0xED3B80], 1 // bAllowMultipleMasterLoads
+		mov byte ptr ds : [0xED3B80] , 1 // bAllowMultipleMasterLoads
 		jmp continueLoadingAddr
 	stopLoading:
 		jmp stopLoadingAddr
@@ -1161,7 +1156,8 @@ _declspec(naked) void RenderWindowNavMeshConfirmFindCover()
 		call MessageBoxA
 		cmp eax, IDNO
 		je skip
-//	doNavmesh:
+
+		//	doNavmesh
 		push 0
 		mov ecx, 0xF073F8
 		push 0x456F2E // retnAddr
@@ -1185,13 +1181,14 @@ _declspec(naked) void MainWindowNavMeshConfirmFindCover()
 		call MessageBoxA
 		cmp eax, IDNO
 		je skip
-//	doNavmesh:
+
+		//	doNavmesh
 		push 0
 		mov ecx, 0xF073F8
 		push 0x44451D // retnAddr
 		mov eax, 0x6F51B0 // Navmesh::FindCoverEdges
 		jmp eax
-	skip:
+	skip :
 		jmp skipAddr
 	}
 }
@@ -1209,7 +1206,8 @@ _declspec(naked) void NavMeshToolbarConfirmFindCover()
 		call MessageBoxA
 		cmp eax, IDNO
 		je skip
-//	doNavmesh:
+
+		//	doNavmesh
 		push 0
 		mov ecx, 0xF073F8
 		push 0x40AC7B // retnAddr
@@ -1301,7 +1299,7 @@ BOOL __stdcall HavokPreviewCallback(HWND hWnd, UINT Message, WPARAM wParam, LPAR
 			SendMessageA(GetDlgItem(hWnd, ID_ANIMATIONSPEED_TRACKBAR), TBM_SETPOS, TRUE, speed * 50); // update scrollbar
 			return 0;
 		}
-	} 
+	}
 	else if (Message == WM_HSCROLL)
 	{
 		if ((HWND)lParam == GetDlgItem(hWnd, ID_ANIMATIONSPEED_TRACKBAR))
@@ -1347,7 +1345,7 @@ BOOL __stdcall HavokPreviewCallback(HWND hWnd, UINT Message, WPARAM wParam, LPAR
 	}
 	else if (Message == WM_DESTROY)
 	{
-		int red = GetDlgItemInt(hWnd, 1109, 0, 0); 
+		int red = GetDlgItemInt(hWnd, 1109, 0, 0);
 		int green = GetDlgItemInt(hWnd, 1033, 0, 0);
 		int blue = GetDlgItemInt(hWnd, 1111, 0, 0);
 		char arr[11];
@@ -1369,11 +1367,11 @@ void __cdecl HavokPreviewResize(HWND hWnd)
 	GetClientRect(hWnd, &clientRect);
 	LONG deltaX = clientRect.right - previousHavokWindowRect->right;
 	LONG deltaY = clientRect.bottom - previousHavokWindowRect->bottom;
-	
+
 	// move the trackbar and edit dialogs
-	MoveDlgItem(hWnd, ID_ANIMATIONSPEED_TRACKBAR, deltaX/2, deltaY);
-	MoveDlgItem(hWnd, ID_ANIMATIONSPEED_EDIT, deltaX/2, deltaY);
-	MoveDlgItem(hWnd, ID_ANIMATION_STATIC, deltaX/2, deltaY);
+	MoveDlgItem(hWnd, ID_ANIMATIONSPEED_TRACKBAR, deltaX / 2, deltaY);
+	MoveDlgItem(hWnd, ID_ANIMATIONSPEED_EDIT, deltaX / 2, deltaY);
+	MoveDlgItem(hWnd, ID_ANIMATION_STATIC, deltaX / 2, deltaY);
 	InvalidateRect(hWnd, &clientRect, true);
 	// call original function
 	((void(__cdecl*)(HWND))(0x40F930))(hWnd);
@@ -1423,9 +1421,9 @@ void SetupHavokPreviewWindow()
 	// skip setting ground height taskbar pos as it's done in the callback instead
 	SafeWrite16(0x40FF78, 0x13EB);
 
-	if(bAppendAnimLengthToName)	HavokPreview_AddAnimLengthToName();
+	if (bAppendAnimLengthToName)	HavokPreview_AddAnimLengthToName();
 
-//	AddAnimLengthColumnToHavokPreviewAnimsList();
+	//	AddAnimLengthColumnToHavokPreviewAnimsList();
 }
 
 void InsertListViewColumn(HWND hWnd, UInt32 index, char* text, int width)
@@ -1437,7 +1435,7 @@ void InsertListViewColumn(HWND hWnd, UInt32 index, char* text, int width)
 	column.fmt = 0;
 	column.iSubItem = index;
 
-	SendMessageA(hWnd, LVM_INSERTCOLUMNA, index, (LPARAM)&column);
+	SendMessageA(hWnd, LVM_INSERTCOLUMNA, index, (LPARAM)& column);
 }
 
 void SetupConditonsColumns(HWND hWnd)
@@ -1475,7 +1473,7 @@ UInt32 __fastcall PlaceOPALObjectHook(ObjectPalette::Object* current, void* edx,
 		UInt32 randomIndex = rand() % opal->list.Count();
 		toPlace = opal->list.GetNthItem(randomIndex);
 	}
-	
+
 	return ThisStdCall(0x40BF90, toPlace, point1, point2);
 }
 
@@ -1514,7 +1512,7 @@ _declspec(naked) void RenderWindowHandleRefRotationHook()
 	{
 		mov ecx, [esp + 0x114] // rotation amount
 		call CalculateRefRotation
-		fstp [esp + 0x14]
+		fstp[esp + 0x14]
 		jmp retnAddr
 	}
 }
@@ -1526,7 +1524,7 @@ _declspec(naked) void ExportFaceGenCheckIsFormEdited()
 	static const UInt32 skipAddr = 0x44207A;
 	_asm
 	{
-		cmp byte ptr ds : [esi + 0x4], bl
+		cmp byte ptr ds : [esi + 0x4] , bl
 		jne skip
 		test byte ptr ss : [esi + 8] , 2 // form->flags & kModified
 		je skip
