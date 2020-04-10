@@ -112,13 +112,11 @@ _declspec(naked) void DebugShaderHook9661C0()
 
 	shader2:
 
-	shader3:
-
 	shader4:
 
 	shader5:
 
-	done:
+//	done:
 		add esp, 0x10
 		ret 8
 	}

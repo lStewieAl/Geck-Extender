@@ -24,16 +24,15 @@ LRESULT __fastcall hk_ObjectListViewListView(DWORD* thisptr, void* ignorethisthi
 _declspec(naked) void DialogueListViewBeginUI() {
 	static const UInt32 retnAddr = 0x592EB4;
 	static const UInt32 skipAddr = 0x592FB8;
-	_asm {
+	_asm 
+	{
 		jne defer
 		jmp skipAddr
-		defer :
+	
+	defer:
 		push edi
-	}
-	BeginUIDefer();
-	_asm {
+		call BeginUIDefer
 		pop edi
-		originalCode :
 		jmp retnAddr
 	}
 }
@@ -41,10 +40,11 @@ _declspec(naked) void DialogueListViewBeginUI() {
 _declspec(naked) void DialogueListViewEndUI() {
 	static const UInt32 retnAddr = 0x592FB8;
 	EndUIDefer();
-	_asm {
-	originalCode:
+	_asm 
+	{
+//	originalCode:
 		mov esi, dword ptr ds : [0xD23550] //SendMessageA
-			jmp retnAddr
+		jmp retnAddr
 	}
 }
 

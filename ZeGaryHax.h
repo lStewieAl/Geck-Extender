@@ -118,7 +118,7 @@ UInt8 g_iPreviewWindowRed;
 UInt8 g_iPreviewWindowGreen;
 UInt8 g_iPreviewWindowBlue;
 
-char filename[MAX_PATH];
+char iniName[MAX_PATH];
 static const char *geckwikiurl = "https://geckwiki.com/index.php/";
 static const char *geckwikiscriptingurl = "https://geckwiki.com/index.php/Category:Scripting";
 static const char *geckwikicommandsurl = "https://geckwiki.com/index.php/Category:Commands";
@@ -176,9 +176,9 @@ static void DoModScriptWindow(HWND wnd)
 {
 	SendMessage(wnd, EM_EXLIMITTEXT, 0, 0x00FFFFFF);
 
-	GetPrivateProfileStringA("Script", "Font", "Consolas", editorFont.lfFaceName, 31, filename);
-	editorFont.lfHeight = GetOrCreateINIInt("Script", "FontSize", 13, filename);
-	editorFont.lfWeight = GetOrCreateINIInt("Script", "FontWeight", FW_MEDIUM, filename);
+	GetPrivateProfileStringA("Script", "Font", "Consolas", editorFont.lfFaceName, 31, iniName);
+	editorFont.lfHeight = GetOrCreateINIInt("Script", "FontSize", 13, iniName);
+	editorFont.lfWeight = GetOrCreateINIInt("Script", "FontWeight", FW_MEDIUM, iniName);
 
 	// try something nice, otherwise fall back on SYSTEM_FIXED_FONT
 	fontHandle = CreateFontIndirect(&editorFont);
@@ -254,19 +254,13 @@ bool GetINIExists()
 //	fix destruction dialog close button - credit to roy
 BOOL WINAPI hk_DialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	if (hWnd && uMsg == WM_CLOSE)
+	if (uMsg == WM_CLOSE)
 	{
 		EndDialog(hWnd, 0);
 		DestroyWindow(hWnd);
 		return TRUE;
 	}
-		__asm
-		{
-			pop esi
-			pop ebp
-			push 0x004E5E30
-			ret
-		}
+	return ((WNDPROC)(0x004E5E30))(hWnd, uMsg, wParam, lParam);
 }
 
 //	fix handle memory leak - credit to nukem
@@ -584,51 +578,15 @@ _declspec(naked) void RecompileAllWarningMainHook() {
 }
 
 void doKonami(int);
-
-void ResizeDataWindow(HWND hWnd, WORD width, WORD height, LPRECT previousSize)
-{
-	RECT clientRect;
-	GetClientRect(hWnd, &clientRect);
-	LONG deltaX = clientRect.right - previousSize->right;
-	LONG deltaY = clientRect.bottom - previousSize->bottom;
-
-	// move the bottom buttons
-	for (UInt32 id : {1121, 1185, 1, 2})
-	{
-		MoveDlgItem(hWnd, id, 0, deltaY);
-	}
-
-	InvalidateRect(hWnd, &clientRect, true);
-}
-
-/* small konami easter egg */
 BOOL __stdcall hk_LoadESPESMCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
 	static RECT WindowSize;
 	if (msg == WM_NOTIFY && ((LPNMHDR)lParam)->code == LVN_KEYDOWN)
 	{
+		/* small konami easter egg */
 		doKonami(((LPNMLVKEYDOWN)lParam)->wVKey);
-	}
-	else if (msg == WM_SIZE)
-	{
-		WORD newWidth = LOWORD(lParam);
-		WORD newHeight = HIWORD(lParam);
-		ResizeDataWindow(hDlg, newWidth, newHeight, &WindowSize);
-
-		// store the new window size
-		GetClientRect(hDlg, &WindowSize);
-	}
-	else if (msg == WM_INITDIALOG)
-	{
-		// create the dialog
-		BOOL result = ((WNDPROC)(0x432A80))(hDlg, msg, wParam, lParam);
-
-		// store its size
-		GetClientRect(hDlg, &WindowSize);
-		return result;
 	}
 	return ((WNDPROC)(0x432A80))(hDlg, msg, wParam, lParam);
 }
-
 
 BOOL __stdcall hk_SearchAndReplaceCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
 	return ((WNDPROC)(0x47C990))(hDlg, msg, wParam, lParam);
@@ -636,12 +594,12 @@ BOOL __stdcall hk_SearchAndReplaceCallback(HWND hDlg, UINT msg, WPARAM wParam, L
 
 _declspec(naked) void EndLoadingHook() {
 	PlaySound("MouseClick", NULL, SND_ASYNC);
-//	PrintCmdTable();
-	_asm {
-	originalCode:
+	_asm 
+	{
+//	originalCode:
 		add esp, 8
-			pop esi
-			retn
+		pop esi
+		retn
 	}
 }
 
@@ -673,7 +631,7 @@ _declspec(naked) void FlycamMovementSpeedMultiplierHook() {
 	_asm 
 	{
 		popad
-	originalCode:
+//	originalCode:
 		mov     eax, dword ptr ds:[0xF1FBF4]
 		jmp retnAddr
 	}
@@ -709,10 +667,6 @@ _declspec(naked) void ReferenceBatchActionDoButtonHook() {
 		push esi
 		jmp retnAddr
 	}
-}
-
-void __cdecl SaveWindowPositionToINI(HWND hWnd, char* name) {
-	((void(__cdecl*)(HWND hWnd, char* Src))(0x43E170))(hWnd, name);
 }
 
 /* ideally this would be replaced with a wrapper around the Script Edit callback function */
@@ -789,7 +743,7 @@ _declspec(naked) void RenderWindowReferenceMovementSpeedHook() {
 		fmul
 		popad
 
-	originalCode:
+//	originalCode:
 		fmul dword ptr ds:[0xECFD1C]
 		jmp retnAddr
 	}
@@ -810,7 +764,7 @@ _declspec(naked) void hk_OrthographicZoom() {
 		fmul
 		popad
 
-	originalCode:
+//	originalCode:
 		fmul    dword ptr ds : [0xD2E0D0]
 		jmp retnAddr
 	}
@@ -1068,46 +1022,8 @@ _declspec(naked) void ObjectWindowListFilterUneditedHook()
 		jmp retnAddr
 	}
 }
-/*
-#define ID_OBJECTWINDOWFILTEREDITED_CHECKBOX 51017
-HWND g_objectWindowFilterEditedHwnd;
-void ObjectWindow_AddFilterEditedCheckbox(HWND MainWindow, HINSTANCE hInstance) {
-	g_objectWindowFilterEditedHwnd = CreateWindowEx(
-		NULL,
-		"BUTTON",
-		"Toggle show only edited",
-		BS_PUSHLIKE | BS_CHECKBOX | WS_CHILD | WS_VISIBLE | BS_NOTIFY | BS_BITMAP,
-		1160, 4, // x, y
-		24, 21, // width, height
-		MainWindow,
-		(HMENU)ID_OBJECTWINDOWFILTEREDITED_CHECKBOX,
-		hInstance,
-		NULL
-	);
-	SendMessageA(g_objectWindowFilterEditedHwnd, BM_SETCHECK, false, NULL);
 
-	HBITMAP hBitmap = (HBITMAP)LoadImage(ZeGaryHaxHandle, MAKEINTRESOURCE(IDB_ALLOW_CELL_LOADS_ICON), IMAGE_BITMAP, NULL, NULL, NULL);
-	SendMessageA(g_objectWindowFilterEditedHwnd, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
-}
-*/
-WNDPROC OldObjectWindowColumnsCallback_WndProc = (WNDPROC)0x449530;
-bool __stdcall ObjectWindowColumnsCallback(HWND hWnd, UInt32 msg, WPARAM wParam, LPARAM lParam)
-{
-	if (msg == WM_CREATE)
-	{
-		const CREATESTRUCT* createInfo = (CREATESTRUCT*)lParam;
-//		ObjectWindow_AddFilterEditedCheckbox(hWnd, createInfo->hInstance);
-	}
-	if (msg == WM_COMMAND)
-	{
-		const uint32_t param = LOWORD(wParam);
-		//		if (param == ID_OBJECTWINDOWFILTEREDITED_CHECKBOX)
-		{
 
-		}
-	}
-	return CallWindowProc(OldObjectWindowColumnsCallback_WndProc, hWnd, msg, wParam, lParam);
-}
 void __fastcall FastExitHook(volatile LONG** thiss);
 
 _declspec(naked) void CellViewListViewCreateFormIDColumnHook()
@@ -1245,7 +1161,7 @@ _declspec(naked) void RenderWindowNavMeshConfirmFindCover()
 		call MessageBoxA
 		cmp eax, IDNO
 		je skip
-	doNavmesh:
+//	doNavmesh:
 		push 0
 		mov ecx, 0xF073F8
 		push 0x456F2E // retnAddr
@@ -1269,7 +1185,7 @@ _declspec(naked) void MainWindowNavMeshConfirmFindCover()
 		call MessageBoxA
 		cmp eax, IDNO
 		je skip
-	doNavmesh:
+//	doNavmesh:
 		push 0
 		mov ecx, 0xF073F8
 		push 0x44451D // retnAddr
@@ -1293,7 +1209,7 @@ _declspec(naked) void NavMeshToolbarConfirmFindCover()
 		call MessageBoxA
 		cmp eax, IDNO
 		je skip
-	doNavmesh:
+//	doNavmesh:
 		push 0
 		mov ecx, 0xF073F8
 		push 0x40AC7B // retnAddr
@@ -1314,7 +1230,8 @@ void __cdecl CrashSaveSetName(char* dst, size_t size, char* format, void* DEFAUL
 	}
 	sprintf(dst, "CrashSave - %s", modName);
 }
-static LPTOP_LEVEL_EXCEPTION_FILTER WINAPI s_originalFilter = nullptr;
+
+LPTOP_LEVEL_EXCEPTION_FILTER s_originalFilter = nullptr;
 
 LONG WINAPI DoCrashSave(EXCEPTION_POINTERS* info)
 {
@@ -1420,10 +1337,10 @@ BOOL __stdcall HavokPreviewCallback(HWND hWnd, UINT Message, WPARAM wParam, LPAR
 		SendMessageA(trackbar, TBM_SETTICFREQ, 10, 0);
 		SendDlgItemMessageA(hWnd, ID_ANIMATIONSPEED_EDIT, WM_SETTEXT, NULL, (LPARAM)"1.00");
 
-		g_iPreviewWindowRed = GetOrCreateINIInt("Preview Window", "iBackgroundRed", 127, filename);
-		g_iPreviewWindowGreen = GetOrCreateINIInt("Preview Window", "iBackgroundGreen", 127, filename);
-		g_iPreviewWindowBlue = GetOrCreateINIInt("Preview Window", "iBackgroundBlue", 127, filename);
-		int landHeight = GetOrCreateINIInt("Preview Window", "iLandHeight", 50, filename);
+		g_iPreviewWindowRed = GetOrCreateINIInt("Preview Window", "iBackgroundRed", 127, iniName);
+		g_iPreviewWindowGreen = GetOrCreateINIInt("Preview Window", "iBackgroundGreen", 127, iniName);
+		g_iPreviewWindowBlue = GetOrCreateINIInt("Preview Window", "iBackgroundBlue", 127, iniName);
+		int landHeight = GetOrCreateINIInt("Preview Window", "iLandHeight", 50, iniName);
 
 		SendDlgItemMessageA(hWnd, 2543, TBM_SETPOS, 1u, landHeight);
 
@@ -1434,12 +1351,12 @@ BOOL __stdcall HavokPreviewCallback(HWND hWnd, UINT Message, WPARAM wParam, LPAR
 		int green = GetDlgItemInt(hWnd, 1033, 0, 0);
 		int blue = GetDlgItemInt(hWnd, 1111, 0, 0);
 		char arr[11];
-		WritePrivateProfileString("Preview Window", "iBackgroundRed", _itoa(red, arr, 10), filename);
-		WritePrivateProfileString("Preview Window", "iBackgroundGreen", _itoa(green, arr, 10), filename);
-		WritePrivateProfileString("Preview Window", "iBackgroundBlue", _itoa(blue, arr, 10), filename);
+		WritePrivateProfileString("Preview Window", "iBackgroundRed", _itoa(red, arr, 10), iniName);
+		WritePrivateProfileString("Preview Window", "iBackgroundGreen", _itoa(green, arr, 10), iniName);
+		WritePrivateProfileString("Preview Window", "iBackgroundBlue", _itoa(blue, arr, 10), iniName);
 
 		int landHeight = SendDlgItemMessageA(hWnd, 2543, TBM_GETPOS, 0, 0);
-		WritePrivateProfileString("Preview Window", "iLandHeight", _itoa(landHeight, arr, 10), filename);
+		WritePrivateProfileString("Preview Window", "iLandHeight", _itoa(landHeight, arr, 10), iniName);
 	}
 
 	return ((BOOL(__stdcall*)(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam))(0x4107F0))(hWnd, Message, wParam, lParam);
@@ -1548,73 +1465,6 @@ _declspec(naked) void RefreshCellHook()
 	}
 }
 
-void ResizeFormListWindow(HWND hWnd, WORD newWidth, WORD newHeight)
-{
-	static const WORD RIGHT_PADDING = 50;
-	static const WORD BOTTOM_PADDING = 100;
-	static const WORD BUTTON_BOTTOM_PADDING = 30;
-
-	RECT clientRect;
-	GetClientRect(hWnd, &clientRect);
-
-	RECT idRect;
-	HWND idTextField = GetDlgItem(hWnd, 5500);
-	GetWindowRect(idTextField, &idRect);
-	LONG height = idRect.bottom - idRect.top;
-	SetWindowPos(idTextField, NULL, NULL, NULL, newWidth - RIGHT_PADDING, height, SWP_NOMOVE);
-
-	HWND listView = GetDlgItem(hWnd, 2445);
-	SetWindowPos(listView, NULL, NULL, NULL, newWidth - RIGHT_PADDING + 20, newHeight - BOTTOM_PADDING, SWP_NOMOVE);
-
-	// move the bottom buttons
-	HWND OkButton = GetDlgItem(hWnd, 1);
-	HWND CancelButton = GetDlgItem(hWnd, 2);
-	HWND LeftArrowButton = GetDlgItem(hWnd, 4008);
-	HWND RightArrowButton = GetDlgItem(hWnd, 4009);
-
-	RECT buttonRect;
-
-	POINT pos;
-	for (HWND button : {OkButton, CancelButton, LeftArrowButton, RightArrowButton})
-	{
-		if (button == OkButton)
-		{
-			pos.x = newWidth / 2 - 90;
-			pos.y = newHeight - BUTTON_BOTTOM_PADDING;
-		}
-		else if (button == CancelButton)
-		{
-			pos.x = newWidth / 2 + 20;
-			pos.y = newHeight - BUTTON_BOTTOM_PADDING;
-		}
-		else if (button == LeftArrowButton)
-		{
-			pos.x = newWidth / 2 - 30;
-			pos.y = newHeight - BUTTON_BOTTOM_PADDING - 25;
-		}
-		else if (button == RightArrowButton)
-		{
-			pos.x = newWidth / 2 + 10;
-			pos.y = newHeight - BUTTON_BOTTOM_PADDING - 25;
-		}
-
-		SetWindowPos(button, NULL, pos.x, pos.y, NULL, NULL, SWP_NOSIZE);
-	}
-	
-	InvalidateRect(hWnd, &clientRect, true);
-}
-
-BOOL __stdcall FormListCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) 
-{
-	if (msg == WM_SIZE)
-	{
-		WORD width = LOWORD(lParam);
-		WORD height = HIWORD(lParam);
-		ResizeFormListWindow(hDlg, width, height);
-	}
-	return ((WNDPROC)(0x480110))(hDlg, msg, wParam, lParam);
-}
-
 UInt32 __fastcall PlaceOPALObjectHook(ObjectPalette::Object* current, void* edx, float* point1, float* point2)
 {
 	ObjectPalette::Object* toPlace = current;
@@ -1629,43 +1479,7 @@ UInt32 __fastcall PlaceOPALObjectHook(ObjectPalette::Object* current, void* edx,
 	return ThisStdCall(0x40BF90, toPlace, point1, point2);
 }
 
-void ResizeObjectPalette(HWND hWnd, WORD newWidth, WORD newHeight)
-{
-	RECT clientRect;
-	GetClientRect(hWnd, &clientRect);
-
-	HWND listView = GetDlgItem(hWnd, 1018);
-	SetWindowPos(listView, NULL, NULL, NULL, 200, newHeight - 90, SWP_NOMOVE);
-
-	// move the bottom buttons
-	HWND NewButton = GetDlgItem(hWnd, 1124);
-	HWND LoadButton = GetDlgItem(hWnd, 5097);
-	HWND SaveButton = GetDlgItem(hWnd, 1000);
-	HWND SaveAsButton = GetDlgItem(hWnd, 1986);
-	HWND MergeButton = GetDlgItem(hWnd, 1988);
-	
-	SetWindowPos(NewButton, NULL, 8, newHeight - 42, NULL, NULL, SWP_NOSIZE);
-	SetWindowPos(LoadButton, NULL, 78, newHeight - 30, NULL, NULL, SWP_NOSIZE);
-	SetWindowPos(SaveButton, NULL, 78, newHeight - 55, NULL, NULL, SWP_NOSIZE);
-	SetWindowPos(SaveAsButton, NULL, 148, newHeight - 55, NULL, NULL, SWP_NOSIZE);
-	SetWindowPos(MergeButton, NULL, 148, newHeight - 30, NULL, NULL, SWP_NOSIZE);
-
-	InvalidateRect(hWnd, &clientRect, true);
-}
-
-BOOL __stdcall ObjectPaletteCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	if (msg == WM_SIZE)
-	{
-		WORD width = LOWORD(lParam);
-		WORD height = HIWORD(lParam);
-		ResizeObjectPalette(hDlg, width, height);
-	}
-	return ((WNDPROC)(0x40D190))(hDlg, msg, wParam, lParam);
-}
-
 const double M_TAU = 6.28318530717958647692528676;
-
 float __fastcall CalculateRefRotation(signed int amount)
 {
 	const double pi_on_180 = *(double*)0xD2C320;;
@@ -1705,52 +1519,6 @@ _declspec(naked) void RenderWindowHandleRefRotationHook()
 	}
 }
 
-#define USE_REPORT_TEXT1 101
-#define USE_REPORT_TEXT2 102
-void ResizeUseReportWindow(HWND hWnd, WORD newWidth, WORD newHeight)
-{
-	static const WORD LEFT_PADDING = 10;
-	static const WORD RIGHT_PADDING = 40;
-	static const WORD BOTTOM_PADDING = 100;
-	static const WORD BUTTON_BOTTOM_PADDING = 30;
-	static const WORD INTER_LIST_PADDING = 40;
-	static const WORD BUTTON_SIZE = 39;
-
-	RECT clientRect;
-	GetClientRect(hWnd, &clientRect);
-
-	int List1Height = newHeight / 2 - INTER_LIST_PADDING;
-	int List1Width = newWidth - RIGHT_PADDING + 20;
-	HWND listView1 = GetDlgItem(hWnd, 1637);
-	SetWindowPos(listView1, NULL, NULL, NULL, List1Width, List1Height, SWP_NOMOVE);
-
-	HWND UsedInTheseCellsText = GetDlgItem(hWnd, USE_REPORT_TEXT2);
-	SetWindowPos(UsedInTheseCellsText, NULL, LEFT_PADDING, newHeight / 2, NULL, NULL, SWP_NOSIZE);
-
-	HWND listView2 = GetDlgItem(hWnd, 1638);
-	SetWindowPos(listView2, NULL, LEFT_PADDING, List1Height + 1.5 * INTER_LIST_PADDING, newWidth - RIGHT_PADDING + 20, (newHeight / 2) - 60, NULL);
-
-	// move the bottom buttons
-	HWND OkButton = GetDlgItem(hWnd, 1);
-	POINT newButtonPos;
-	newButtonPos.x = newWidth / 2 - BUTTON_SIZE;
-	newButtonPos.y = newHeight - BUTTON_BOTTOM_PADDING;
-
-	SetWindowPos(OkButton, NULL, newButtonPos.x, newButtonPos.y, NULL, NULL, SWP_NOSIZE);
-	
-	InvalidateRect(hWnd, &clientRect, true);
-}
-
-BOOL __stdcall UseReportCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	if (msg == WM_SIZE)
-	{
-		WORD width = LOWORD(lParam);
-		WORD height = HIWORD(lParam);
-		ResizeUseReportWindow(hDlg, width, height);
-	}
-	return ((WNDPROC)(0x468860))(hDlg, msg, wParam, lParam);
-}
 
 _declspec(naked) void ExportFaceGenCheckIsFormEdited()
 {
@@ -1766,4 +1534,9 @@ _declspec(naked) void ExportFaceGenCheckIsFormEdited()
 	skip:
 		jmp skipAddr
 	}
+}
+
+char* SpeedTreeGetTexturePath()
+{
+	return "Data\\Textures\\Trees\\Leaves";
 }

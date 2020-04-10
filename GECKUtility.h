@@ -1,4 +1,5 @@
 #pragma once
+void(__cdecl* SaveWindowPositionToINI)(HWND, char*) = ((void(__cdecl*)(HWND hWnd, char* Src))(0x43E170));
 
 struct NiPoint3
 {
@@ -113,11 +114,11 @@ void SetIsShowWater(bool state) {
 }
 
 bool GetIsShowWater() {
-	return (*(byte*)(0xECEED4));
+	return (*(bool*)(0xECEED4));
 }
 
 bool GetIsShowPortalsAndRooms() {
-	return (*(byte*)(0xECEEF8));
+	return (*(bool*)(0xECEEF8));
 }
 
 void SetIsShowPortalsAndRooms(bool state) {
@@ -142,7 +143,7 @@ void RefreshLightMarkers() {
 }
 
 bool GetIsShowLightMarkers() {
-	return (*(byte*)(0xECEEBC));
+	return (*(bool*)(0xECEEBC));
 }
 
 void SetIsShowLightMarkers(bool state) {
@@ -155,7 +156,7 @@ void RefreshSoundMarkers() {
 }
 
 bool GetIsShowSoundMarkers() {
-	return (*(byte*)(0xECEEA4));
+	return (*(bool*)(0xECEEA4));
 }
 
 void SetIsShowSoundMarkers(bool state) {

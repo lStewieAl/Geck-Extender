@@ -29,9 +29,7 @@
 #include "Editor.h"
 #include "UISpeedHooks.h"
 #include "DebugCellShaders.h"
-
-
-const NVSEInterface* savedNVSE = NULL;
+#include "ZeEditBoxHax.h"
 
 BOOL __stdcall ScriptEditCallback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
 {
@@ -42,113 +40,106 @@ extern "C"
 {
 	  BOOL WINAPI DllMain(HANDLE  hDllHandle, DWORD dwReason, LPVOID lpreserved)
     {
-        switch (dwReason)
-        {
-			case (DLL_PROCESS_ATTACH):
-				ZeGaryHaxHandle = (HMODULE)hDllHandle;
-				break;
-        }
-        return TRUE;
+		  if (dwReason == DLL_PROCESS_ATTACH)
+		  {
+			  ZeGaryHaxHandle = (HMODULE)hDllHandle;
+		  }
+          return TRUE;
     }
 }
 
 bool NVSEPlugin_Query(const NVSEInterface * nvse, PluginInfo * info)
 {
-	if(!nvse->isEditor)
-	{
-		return false;	//	unload if the game
-	} 
-
-	_MESSAGE("Gary?");
     info->infoVersion = PluginInfo::kInfoVersion;
     info->name = GH_NAME;
     info->version = GH_VERSION;
-	if(!nvse->isEditor)
-	{
-		return false;	//	returning FALSE from Query or Load skips your plugin with the "incompatible" message in nvse.log
-	}
-    if(nvse->nvseVersion < 0x05000020)
-    {
-		_ERROR("NVSE does not meet version requirements. %08X < %08X", nvse->nvseVersion, 0x05000020);			// 5.0.2
-        return false;
-    }
-    return true;
+	return (nvse->isEditor && nvse->nvseVersion >= NVSE_VERSION_INTEGER);
 }
 
 bool NVSEPlugin_Load(const NVSEInterface * nvse)
 {
-	if (!nvse->isEditor) return false;
-	savedNVSE = nvse;
-
-	_MESSAGE("Haha Gary!");
-	_DMESSAGE("ZGH Address: %08X", GetModuleHandle("ZeGaryHax.dll"));
+	_DMESSAGE("Geck Extender Base Address: %08X", GetModuleHandle("ZeGaryHax.dll"));
 
 	//	ini thing - credit to carxt
-	GetModuleFileNameA(NULL, filename, MAX_PATH);
-	strcpy((char *)(strrchr(filename, '\\') + 1), "Data\\nvse\\plugins\\geckextender.ini");
-	bEnableSpellChecker = GetOrCreateINIInt("General", "bEnableSpellChecker", 0, filename);
-	bFastExit = GetOrCreateINIInt("General", "bFastExit", 1, filename);
-	bListEditFix = GetOrCreateINIInt("General", "bListEditFix", 0, filename);
-	bIgnoreNAMFiles = GetOrCreateINIInt("General", "bIgnoreNAMFiles", 1, filename);
-	bVersionControlMode = GetOrCreateINIInt("General", "bVersionControlMode", 0, filename);
-	bHighResLandscapeLOD = GetOrCreateINIInt("General", "bHighResLandscapeLOD", 0, filename);
-	bRemoveStatusBarLoadingText = GetOrCreateINIInt("General", "bRemoveLoadingText", 1, filename);
-	bPlaySoundEndOfLoading = GetOrCreateINIInt("General", "bPlaySoundEndOfLoading", 1, filename);
-	bNoDXSoundCaptureErrorPopup = GetOrCreateINIInt("General", "bNoDXSoundCaptureErrorPopup", 0, filename); 
-	bNoPreviewWindowAutoFocus = GetOrCreateINIInt("General", "bNoPreviewWindowAutoFocus", 1, filename);
-	bNoLODMeshMessage = GetOrCreateINIInt("General", "bNoLODMeshMessage", 0, filename);
-	bAutoLoadFiles = GetOrCreateINIInt("General", "bAutoLoadFiles", 0, filename);
-	bShowLoadFilesAtStartup = GetOrCreateINIInt("General", "bShowLoadFilesAtStartup", 0, filename) | bAutoLoadFiles;
-	bNoVersionControlWarning = GetOrCreateINIInt("General", "bNoVersionControlWarning", 0, filename);
-	bSkipVanillaLipGen = GetPrivateProfileIntA("General", "bSkipVanillaLipGen", 0, filename);
-	bShowAdditionalToolbarButtons = GetOrCreateINIInt("General", "bShowAdditionalToolbarButtons", 0, filename);
-	bAllowMultipleSearchAndReplace = GetOrCreateINIInt("General", "bAllowMultipleSearchAndReplace", 0, filename);
-	bNoFactionReactionMessage = GetOrCreateINIInt("General", "bNoFactionReactionMessage", 0, filename);
-	bUISpeedHooks = GetOrCreateINIInt("General", "bUISpeedHooks", 1, filename);
-	bLibdeflate = GetOrCreateINIInt("General", "bLibDeflate", 0, filename);
-	bExpandFormIDColumn = GetOrCreateINIInt("General", "bExpandFormIDColumn", 0, filename);
-	bAllowEditLandEdges = GetOrCreateINIInt("General", "bAllowEditLandEdges", 0, filename);
-	bAllowRecompileAll = GetOrCreateINIInt("General", "bAllowRecompileAll", 0, filename);
-	bNavmeshFindCoverConfirmPrompt = GetOrCreateINIInt("General", "bNavmeshFindCoverConfirmPrompt", 0, filename);
-	bFaceGenOnlyEdited = GetOrCreateINIInt("General", "bFaceGenOnlyEdited", 0, filename);
+	GetModuleFileNameA(NULL, iniName, MAX_PATH);
+	strcpy((char *)(strrchr(iniName, '\\') + 1), "Data\\nvse\\plugins\\geckextender.ini");
 
-	bPatchScriptEditorFont = GetOrCreateINIInt("Script", "bPatchEditorFont", 1, filename);
-	bScriptCompileWarningPopup = GetOrCreateINIInt("Script", "bScriptCompileWarningPopup", 0, filename);
-	bShowScriptChangeTypeWarning = GetOrCreateINIInt("Script", "bShowChangeScriptTypeWarning", 0, filename);
+	bEnableSpellChecker = GetOrCreateINIInt("General", "bEnableSpellChecker", 0, iniName);
+	bFastExit = GetOrCreateINIInt("General", "bFastExit", 1, iniName);
+	bListEditFix = GetOrCreateINIInt("General", "bListEditFix", 0, iniName);
+	bIgnoreNAMFiles = GetOrCreateINIInt("General", "bIgnoreNAMFiles", 1, iniName);
+	bVersionControlMode = GetOrCreateINIInt("General", "bVersionControlMode", 0, iniName);
+	bHighResLandscapeLOD = GetOrCreateINIInt("General", "bHighResLandscapeLOD", 0, iniName);
+	bRemoveStatusBarLoadingText = GetOrCreateINIInt("General", "bRemoveLoadingText", 1, iniName);
+	bPlaySoundEndOfLoading = GetOrCreateINIInt("General", "bPlaySoundEndOfLoading", 1, iniName);
+	bNoDXSoundCaptureErrorPopup = GetOrCreateINIInt("General", "bNoDXSoundCaptureErrorPopup", 0, iniName); 
+	bNoPreviewWindowAutoFocus = GetOrCreateINIInt("General", "bNoPreviewWindowAutoFocus", 1, iniName);
+	bNoLODMeshMessage = GetOrCreateINIInt("General", "bNoLODMeshMessage", 0, iniName);
+	bAutoLoadFiles = GetOrCreateINIInt("General", "bAutoLoadFiles", 0, iniName);
+	bShowLoadFilesAtStartup = GetOrCreateINIInt("General", "bShowLoadFilesAtStartup", 0, iniName) | bAutoLoadFiles;
+	bNoVersionControlWarning = GetOrCreateINIInt("General", "bNoVersionControlWarning", 0, iniName);
+	bSkipVanillaLipGen = GetPrivateProfileIntA("General", "bSkipVanillaLipGen", 0, iniName);
+	bShowAdditionalToolbarButtons = GetOrCreateINIInt("General", "bShowAdditionalToolbarButtons", 0, iniName);
+	bAllowMultipleSearchAndReplace = GetOrCreateINIInt("General", "bAllowMultipleSearchAndReplace", 0, iniName);
+	bNoFactionReactionMessage = GetOrCreateINIInt("General", "bNoFactionReactionMessage", 0, iniName);
+	bUISpeedHooks = GetOrCreateINIInt("General", "bUISpeedHooks", 1, iniName);
+	bLibdeflate = GetOrCreateINIInt("General", "bLibDeflate", 0, iniName);
+	bExpandFormIDColumn = GetOrCreateINIInt("General", "bExpandFormIDColumn", 0, iniName);
+	bAllowEditLandEdges = GetOrCreateINIInt("General", "bAllowEditLandEdges", 0, iniName);
+	bAllowRecompileAll = GetOrCreateINIInt("General", "bAllowRecompileAll", 0, iniName);
+	bNavmeshFindCoverConfirmPrompt = GetOrCreateINIInt("General", "bNavmeshFindCoverConfirmPrompt", 0, iniName);
+	bFaceGenOnlyEdited = GetOrCreateINIInt("General", "bFaceGenOnlyEdited", 0, iniName);
 
-	bAutoScroll = GetOrCreateINIInt("Log", "bAutoScroll", 1, filename);
+	bPatchScriptEditorFont = GetOrCreateINIInt("Script", "bPatchEditorFont", 1, iniName);
+	bScriptCompileWarningPopup = GetOrCreateINIInt("Script", "bScriptCompileWarningPopup", 0, iniName);
+	bShowScriptChangeTypeWarning = GetOrCreateINIInt("Script", "bShowChangeScriptTypeWarning", 0, iniName);
 
-	bRenderWindowUncap = GetOrCreateINIInt("Render Window", "bRenderWindowUncap", 1, filename);
-	bPreviewWindowUncap = GetOrCreateINIInt("Render Window", "bPreviewWindowUncap", 1, filename);
-	bSwapRenderCYKeys = GetOrCreateINIInt("Render Window", "bSwapCandYKeys", 0, filename);
-	bUseAltShiftMultipliers = GetOrCreateINIInt("Render Window", "bUseAltShiftMultipliers", 1, filename);
-	fMovementAltMultiplier = GetOrCreateINIInt("Render Window", "iAltSpeedPct", 15, filename) / 100.0F;
-	fMovementShiftMultiplier = GetOrCreateINIInt("Render Window", "iShiftSpeedPct", 200, filename) / 100.0F;
-	bShowTimeOfDaySlider = GetOrCreateINIInt("Render Window", "bShowTimeOfDaySlider", 1, filename);
-	bNavmeshAllowPlaceAboveOthers = GetOrCreateINIInt("Render Window", "bNavmeshAllowPlaceAboveOthers", 1, filename);
-	bSnapToGridRotationUseDoublePrecision = GetOrCreateINIInt("Render Window", "bSnapToGridRotationUseDoublePrecision", 0, filename);
+	bAutoScroll = GetOrCreateINIInt("Log", "bAutoScroll", 1, iniName);
 
-	bSmoothFlycamRotation = GetOrCreateINIInt("Flycam", "bSmoothRotation", 1, filename);
-	bFlycamUpDownRelativeToWorld = GetOrCreateINIInt("Flycam", "bFlycamUpDownRelativeToWorld", 1, filename);
-	fFlycamRotationSpeed = GetOrCreateINIInt("Flycam", "iRotationSpeedPct", 100, filename) * - 0.001F;
-	fFlycamNormalMovementSpeed = GetOrCreateINIInt("Flycam", "iMovementSpeed", 10, filename) * 3.0F;
-	fFlycamShiftMovementSpeed = GetOrCreateINIInt("Flycam", "iRunMovementSpeedPct", 300, filename) / 100.0F;
-	fFlycamAltMovementSpeed = GetOrCreateINIInt("Flycam", "iWalkMovementSpeedPct", 20, filename) / 100.0F;
+	bRenderWindowUncap = GetOrCreateINIInt("Render Window", "bRenderWindowUncap", 1, iniName);
+	bPreviewWindowUncap = GetOrCreateINIInt("Render Window", "bPreviewWindowUncap", 1, iniName);
+	bSwapRenderCYKeys = GetOrCreateINIInt("Render Window", "bSwapCandYKeys", 0, iniName);
+	bUseAltShiftMultipliers = GetOrCreateINIInt("Render Window", "bUseAltShiftMultipliers", 1, iniName);
+	fMovementAltMultiplier = GetOrCreateINIInt("Render Window", "iAltSpeedPct", 15, iniName) / 100.0F;
+	fMovementShiftMultiplier = GetOrCreateINIInt("Render Window", "iShiftSpeedPct", 200, iniName) / 100.0F;
+	bShowTimeOfDaySlider = GetOrCreateINIInt("Render Window", "bShowTimeOfDaySlider", 1, iniName);
+	bNavmeshAllowPlaceAboveOthers = GetOrCreateINIInt("Render Window", "bNavmeshAllowPlaceAboveOthers", 1, iniName);
+	bSnapToGridRotationUseDoublePrecision = GetOrCreateINIInt("Render Window", "bSnapToGridRotationUseDoublePrecision", 0, iniName);
 
-	bAppendAnimLengthToName = GetOrCreateINIInt("Preview Window", "bAppendAnimLengthToName", 0, filename);
+	bSmoothFlycamRotation = GetOrCreateINIInt("Flycam", "bSmoothRotation", 1, iniName);
+	bFlycamUpDownRelativeToWorld = GetOrCreateINIInt("Flycam", "bFlycamUpDownRelativeToWorld", 1, iniName);
+	fFlycamRotationSpeed = GetOrCreateINIInt("Flycam", "iRotationSpeedPct", 100, iniName) * - 0.001F;
+	fFlycamNormalMovementSpeed = GetOrCreateINIInt("Flycam", "iMovementSpeed", 10, iniName) * 3.0F;
+	fFlycamShiftMovementSpeed = GetOrCreateINIInt("Flycam", "iRunMovementSpeedPct", 300, iniName) / 100.0F;
+	fFlycamAltMovementSpeed = GetOrCreateINIInt("Flycam", "iWalkMovementSpeedPct", 20, iniName) / 100.0F;
 
-	bObjectPaletteAllowRandom = GetOrCreateINIInt("Object Palette", "bObjectPaletteAllowRandom", 1, filename);
-	bObjectPaletteRandomByDefault = GetOrCreateINIInt("Object Palette", "bObjectPaletteRandomByDefault", 0, filename);
+	bAppendAnimLengthToName = GetOrCreateINIInt("Preview Window", "bAppendAnimLengthToName", 0, iniName);
+
+	bObjectPaletteAllowRandom = GetOrCreateINIInt("Object Palette", "bObjectPaletteAllowRandom", 1, iniName);
+	bObjectPaletteRandomByDefault = GetOrCreateINIInt("Object Palette", "bObjectPaletteRandomByDefault", 0, iniName) != 0;
 
 	//	stop geck crash with bUseMultibounds = 0 in exterior cells with multibounds - credit to roy
 	WriteRelCall(0x004CA48F, (UInt32)FixMultiBounds);
 	XUtil::PatchMemoryNop(0x004CA494, 0x05);
 
+	// fix various file path vtable entries to exclude the "//" in the path - credit to roy
+	SafeWrite32(0x00D39FB0, 0x004FE910);	// skills icon in actor values
+	SafeWrite32(0x00D47E28, 0x004FE910);	// landscape (and texture sets?)
+	SafeWrite32(0x00D527D0, 0x004FE910);	// class image
+	SafeWrite32(0x00D53980, 0x004FE910);	// eyes
+	SafeWrite32(0x00D54050, 0x004FE910);	// hair
+	SafeWrite32(0x00D58330, 0x004FE910);	// skills (not sure where this is viewable)
+	SafeWrite32(0x00D5DFD8, 0x004FE910);	// loading screen
+	SafeWrite32(0x00D73D60, 0x004FE910);	// billboard tree (not sure where this is viewable)
+	SafeWrite32(0x00D7BED8, 0x004FE910);	// worldspace map
+	SafeWrite32(0x00D73EE0, UInt32(SpeedTreeGetTexturePath));	// destructable tree (not sure where this is viewable)
+	SafeWrite32(0x00D73F68, UInt32(SpeedTreeGetTexturePath));	// tree
+
 	//	enable wasteland level 2 lod generation - credit to roy
 	SafeWrite8(0x00419557, 0xEB);
 
 	//	enable 512px landscape LOD textures and normals - credit to roy
-	if (bHighResLandscapeLOD == 1)
+	if (bHighResLandscapeLOD)
 	{
 		SafeWrite8(0x00728A3C, 0x02);
 		SafeWrite8(0x00728A41, 0x02);
@@ -168,7 +159,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	SafeWrite32(0x005C4B43, (UInt32)geckwikifunctionsurl);
 
 	//	force patch script editor font - credit to nvse team
-	if (bPatchScriptEditorFont == 1)
+	if (bPatchScriptEditorFont)
 	{
 		FixEditorFont();
 	}
@@ -190,13 +181,13 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	SafeWrite32(0x492D0C, 0x410);
 
 	//	uncap framerate on render window - credit to shademe
-	if (bRenderWindowUncap == 1)
+	if (bRenderWindowUncap)
 	{
 		SafeWrite8(0x0045911B, 0x0A);
 	}
 
 	//	uncap framerate on preview window - credit to shademe
-	if (bPreviewWindowUncap == 1)
+	if (bPreviewWindowUncap)
 	{
 		SafeWrite8(0x004100E5, 0x0A);
 	}
@@ -212,7 +203,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	SafeWrite32(0x004E640F, (UInt32)hk_DialogProc);
 
 	
-	if (bListEditFix == 1)
+	if (bListEditFix)
 	{
 		//	fix windows 8/10 conditions collapsed column bug - credit to nukem
 		WriteRelCall(0x004A382D, (UInt32)hk_sub_4A1C10);
@@ -234,7 +225,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	}
 
 	//	ignore .nam Files - initial credit to roy
-	if (bIgnoreNAMFiles == 1)
+	if (bIgnoreNAMFiles)
 	{
 		SafeWriteBuf(0xD412C1, "GAL", 3); // replace NAM extension with GAL ('Geck Auto-Load')
 	}
@@ -244,16 +235,24 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		//	enable esm as active file - credit to hlp
 		XUtil::PatchMemoryNop(0x00430F07, 0x09);
 		XUtil::PatchMemoryNop(0x004CF429, 0x09);
+
 		//	fix crash
 		WriteRelCall(0x0042CD31, (UInt32)hk_addr_42CD31);
 		XUtil::PatchMemoryNop(0x0042CD36, 0x03);
+
 		//	patch formid
 		SafeWrite16(0x004DF7D8, 0x9090);
+
 		//	patch esp as master
 		XUtil::PatchMemoryNop(0x004D9CA5, 0x09);
+
 		//	patch ONAM count
 		WriteRelCall(0x004E26BA, (UInt32)hk_addr_4E26BA);
 		XUtil::PatchMemoryNop(0x004E26BF, 0x0B);
+
+		// enable editing file author and summary in an ESM
+		SafeWrite8(0x00432776, 0xEB);
+		SafeWrite8(0x004327BE, 0xEB);
 	}
 
 	//	fix Rock-It Launcher crash - credit to jazzisparis
@@ -560,19 +559,17 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	WriteRelJump(0x4585B3, UInt32(RefreshCellHook));
 	WriteRelJz(0x4585BF, UInt32(RefreshCellHook));
 
-	// fix "Hide when displaying mode." being clipped in the Terminal Dialog (3282)
-	SafeWrite8(0xC3F964 + RES_HACKER_ADDR_TO_ACTUAL, 0x84); // change width of "Welcome Text" control
-
-	// allow resizing the FormList dialog (2374)
-	SafeWrite8(0x110C98A, 0xCE); // Set WS_THICKFRAME
+	// allow resizing the FormList dialog (3274)
 	SafeWrite32(0x43768B, UInt32(FormListCallback));
 
-	// allow resizing the Select Files dialog (162)
-	SafeWrite8(0xC029BA + RES_HACKER_ADDR_TO_ACTUAL, 0xCE); // Set WS_THICKFRAME
-
-	// allow resizing the objects palette window
-	SafeWrite8(0xC23E0A + RES_HACKER_ADDR_TO_ACTUAL, 0xCC); // Set WS_THICKFRAME
+	// allow resizing the objects palette window (375)
 	SafeWrite32(0x4440FA, UInt32(ObjectPaletteCallback));
+
+	// allow resizing the Use Report window (220)
+	for (UInt32 patchAddr : {0x47F429, 0x4822E3, 0x48280C, 0x483607})
+	{
+		SafeWrite32(patchAddr, UInt32(UseReportCallback));
+	}
 
 	// add modifier CAPSLOCK for placing a random object from the objects palette 
 	if (bObjectPaletteAllowRandom)
@@ -590,18 +587,6 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	{
 		// use double precision when calculating reference rotation to fix floating point errors
 		WriteRelJump(0x4523E2, UInt32(RenderWindowHandleRefRotationHook));
-	}
-
-	// allow resizing the Use Report window
-	// give the statics on the window IDs instead of -1
-	SafeWrite8(0xC076F6 + RES_HACKER_ADDR_TO_ACTUAL, 0xCC); // Set WS_THICKFRAME
-
-	SafeWrite16(0xC077AC + RES_HACKER_ADDR_TO_ACTUAL, USE_REPORT_TEXT1);
-	SafeWrite16(0xC07830 + RES_HACKER_ADDR_TO_ACTUAL, USE_REPORT_TEXT2);
-
-	for (UInt32 patchAddr : {0x47F429, 0x4822E3, 0x48280C, 0x483607})
-	{
-		SafeWrite32(patchAddr, UInt32(UseReportCallback));
 	}
 
 	if (bFaceGenOnlyEdited)
@@ -676,10 +661,10 @@ void SaveWindowPositions() {
 	
 	WINDOWPLACEMENT pos;
 	GetWindowPlacement(g_ConsoleHwnd, &pos);
-	WritePrivateProfileString("Log", "iWindowPosX", _itoa(pos.rcNormalPosition.left, buffer, 10), filename);
-	WritePrivateProfileString("Log", "iWindowPosY", _itoa(pos.rcNormalPosition.top, buffer, 10), filename);
-	WritePrivateProfileString("Log", "iWindowPosDX", _itoa(pos.rcNormalPosition.right-pos.rcNormalPosition.left, buffer, 10), filename);
-	WritePrivateProfileString("Log", "iWindowPosDY", _itoa(pos.rcNormalPosition.bottom-pos.rcNormalPosition.top, buffer, 10), filename);
+	WritePrivateProfileString("Log", "iWindowPosX", _itoa(pos.rcNormalPosition.left, buffer, 10), iniName);
+	WritePrivateProfileString("Log", "iWindowPosY", _itoa(pos.rcNormalPosition.top, buffer, 10), iniName);
+	WritePrivateProfileString("Log", "iWindowPosDX", _itoa(pos.rcNormalPosition.right-pos.rcNormalPosition.left, buffer, 10), iniName);
+	WritePrivateProfileString("Log", "iWindowPosDY", _itoa(pos.rcNormalPosition.bottom-pos.rcNormalPosition.top, buffer, 10), iniName);
 }
 
 void __fastcall FastExitHook(volatile LONG** thiss)
@@ -687,19 +672,6 @@ void __fastcall FastExitHook(volatile LONG** thiss)
 	SaveWindowPositions();
 	if (GetINIExists() && bFastExit) TerminateProcess(GetCurrentProcess(), 0);
 	((void(__thiscall *)(volatile LONG **thiss))(0x4CC540))(thiss);
-}
-
-
-void PrintCmdTable()
-{
-	NVSECommandTableInterface* cmdTable = (NVSECommandTableInterface*)savedNVSE->QueryInterface(kInterface_CommandTable);
-
-	CommandInfo* curr = const_cast<CommandInfo*> (cmdTable->Start());
-	CommandInfo* End = const_cast<CommandInfo*> (cmdTable->End());
-	while (++curr < End)
-	{
-		EditorUI_Log("%s", curr->longName);
-	}
 }
 
 void __stdcall BadFormPrintID(TESForm* form)
@@ -714,7 +686,7 @@ _declspec(naked) void BadFormLoadHook()
 	{
 		push esi
 		call BadFormPrintID
-	done:
+//	originalCode:
 		mov byte ptr ss : [esp + 0x1A] , 0x1 // wasBadFormEncountered
 		jmp retnAddr
 	}
