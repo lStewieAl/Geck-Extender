@@ -1767,3 +1767,8 @@ _declspec(naked) void ExportFaceGenCheckIsFormEdited()
 		jmp skipAddr
 	}
 }
+
+char* SpeedTreeGetTexturePath()
+{
+	return "Data\\Textures\\Trees\\Leaves";
+}
