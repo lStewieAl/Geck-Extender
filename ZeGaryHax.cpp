@@ -29,6 +29,7 @@
 #include "Editor.h"
 #include "UISpeedHooks.h"
 #include "DebugCellShaders.h"
+#include "ZeEditBoxHax.h"
 
 BOOL __stdcall ScriptEditCallback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
 {
@@ -234,16 +235,24 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		//	enable esm as active file - credit to hlp
 		XUtil::PatchMemoryNop(0x00430F07, 0x09);
 		XUtil::PatchMemoryNop(0x004CF429, 0x09);
+
 		//	fix crash
 		WriteRelCall(0x0042CD31, (UInt32)hk_addr_42CD31);
 		XUtil::PatchMemoryNop(0x0042CD36, 0x03);
+
 		//	patch formid
 		SafeWrite16(0x004DF7D8, 0x9090);
+
 		//	patch esp as master
 		XUtil::PatchMemoryNop(0x004D9CA5, 0x09);
+
 		//	patch ONAM count
 		WriteRelCall(0x004E26BA, (UInt32)hk_addr_4E26BA);
 		XUtil::PatchMemoryNop(0x004E26BF, 0x0B);
+
+		// enable editing file author and summary in an ESM
+		SafeWrite8(0x00432776, 0xEB);
+		SafeWrite8(0x004327BE, 0xEB);
 	}
 
 	//	fix Rock-It Launcher crash - credit to jazzisparis
@@ -550,19 +559,17 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	WriteRelJump(0x4585B3, UInt32(RefreshCellHook));
 	WriteRelJz(0x4585BF, UInt32(RefreshCellHook));
 
-	// fix "Hide when displaying mode." being clipped in the Terminal Dialog (3282)
-	SafeWrite8(0xC3F964 + RES_HACKER_ADDR_TO_ACTUAL, 0x84); // change width of "Welcome Text" control
-
-	// allow resizing the FormList dialog (2374)
-	SafeWrite8(0x110C98A, 0xCE); // Set WS_THICKFRAME
+	// allow resizing the FormList dialog (3274)
 	SafeWrite32(0x43768B, UInt32(FormListCallback));
 
-	// allow resizing the Select Files dialog (162)
-	SafeWrite8(0xC029BA + RES_HACKER_ADDR_TO_ACTUAL, 0xCE); // Set WS_THICKFRAME
-
-	// allow resizing the objects palette window
-	SafeWrite8(0xC23E0A + RES_HACKER_ADDR_TO_ACTUAL, 0xCC); // Set WS_THICKFRAME
+	// allow resizing the objects palette window (375)
 	SafeWrite32(0x4440FA, UInt32(ObjectPaletteCallback));
+
+	// allow resizing the Use Report window (220)
+	for (UInt32 patchAddr : {0x47F429, 0x4822E3, 0x48280C, 0x483607})
+	{
+		SafeWrite32(patchAddr, UInt32(UseReportCallback));
+	}
 
 	// add modifier CAPSLOCK for placing a random object from the objects palette 
 	if (bObjectPaletteAllowRandom)
@@ -580,18 +587,6 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	{
 		// use double precision when calculating reference rotation to fix floating point errors
 		WriteRelJump(0x4523E2, UInt32(RenderWindowHandleRefRotationHook));
-	}
-
-	// allow resizing the Use Report window
-	// give the statics on the window IDs instead of -1
-	SafeWrite8(0xC076F6 + RES_HACKER_ADDR_TO_ACTUAL, 0xCC); // Set WS_THICKFRAME
-
-	SafeWrite16(0xC077AC + RES_HACKER_ADDR_TO_ACTUAL, USE_REPORT_TEXT1);
-	SafeWrite16(0xC07830 + RES_HACKER_ADDR_TO_ACTUAL, USE_REPORT_TEXT2);
-
-	for (UInt32 patchAddr : {0x47F429, 0x4822E3, 0x48280C, 0x483607})
-	{
-		SafeWrite32(patchAddr, UInt32(UseReportCallback));
 	}
 
 	if (bFaceGenOnlyEdited)

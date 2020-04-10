@@ -578,51 +578,15 @@ _declspec(naked) void RecompileAllWarningMainHook() {
 }
 
 void doKonami(int);
-
-void ResizeDataWindow(HWND hWnd, WORD width, WORD height, LPRECT previousSize)
-{
-	RECT clientRect;
-	GetClientRect(hWnd, &clientRect);
-	LONG deltaX = clientRect.right - previousSize->right;
-	LONG deltaY = clientRect.bottom - previousSize->bottom;
-
-	// move the bottom buttons
-	for (UInt32 id : {1121, 1185, 1, 2})
-	{
-		MoveDlgItem(hWnd, id, 0, deltaY);
-	}
-
-	InvalidateRect(hWnd, &clientRect, true);
-}
-
-/* small konami easter egg */
 BOOL __stdcall hk_LoadESPESMCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
 	static RECT WindowSize;
 	if (msg == WM_NOTIFY && ((LPNMHDR)lParam)->code == LVN_KEYDOWN)
 	{
+		/* small konami easter egg */
 		doKonami(((LPNMLVKEYDOWN)lParam)->wVKey);
-	}
-	else if (msg == WM_SIZE)
-	{
-		WORD newWidth = LOWORD(lParam);
-		WORD newHeight = HIWORD(lParam);
-		ResizeDataWindow(hDlg, newWidth, newHeight, &WindowSize);
-
-		// store the new window size
-		GetClientRect(hDlg, &WindowSize);
-	}
-	else if (msg == WM_INITDIALOG)
-	{
-		// create the dialog
-		BOOL result = ((WNDPROC)(0x432A80))(hDlg, msg, wParam, lParam);
-
-		// store its size
-		GetClientRect(hDlg, &WindowSize);
-		return result;
 	}
 	return ((WNDPROC)(0x432A80))(hDlg, msg, wParam, lParam);
 }
-
 
 BOOL __stdcall hk_SearchAndReplaceCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
 	return ((WNDPROC)(0x47C990))(hDlg, msg, wParam, lParam);
@@ -630,7 +594,6 @@ BOOL __stdcall hk_SearchAndReplaceCallback(HWND hDlg, UINT msg, WPARAM wParam, L
 
 _declspec(naked) void EndLoadingHook() {
 	PlaySound("MouseClick", NULL, SND_ASYNC);
-//	PrintCmdTable();
 	_asm 
 	{
 //	originalCode:
@@ -1502,71 +1465,6 @@ _declspec(naked) void RefreshCellHook()
 	}
 }
 
-void ResizeFormListWindow(HWND hWnd, WORD newWidth, WORD newHeight)
-{
-	static const WORD RIGHT_PADDING = 50;
-	static const WORD BOTTOM_PADDING = 100;
-	static const WORD BUTTON_BOTTOM_PADDING = 30;
-
-	RECT clientRect;
-	GetClientRect(hWnd, &clientRect);
-
-	RECT idRect;
-	HWND idTextField = GetDlgItem(hWnd, 5500);
-	GetWindowRect(idTextField, &idRect);
-	LONG height = idRect.bottom - idRect.top;
-	SetWindowPos(idTextField, NULL, NULL, NULL, newWidth - RIGHT_PADDING, height, SWP_NOMOVE);
-
-	HWND listView = GetDlgItem(hWnd, 2445);
-	SetWindowPos(listView, NULL, NULL, NULL, newWidth - RIGHT_PADDING + 20, newHeight - BOTTOM_PADDING, SWP_NOMOVE);
-
-	// move the bottom buttons
-	HWND OkButton = GetDlgItem(hWnd, 1);
-	HWND CancelButton = GetDlgItem(hWnd, 2);
-	HWND LeftArrowButton = GetDlgItem(hWnd, 4008);
-	HWND RightArrowButton = GetDlgItem(hWnd, 4009);
-
-	POINT pos;
-	for (HWND button : {OkButton, CancelButton, LeftArrowButton, RightArrowButton})
-	{
-		if (button == OkButton)
-		{
-			pos.x = newWidth / 2 - 90;
-			pos.y = newHeight - BUTTON_BOTTOM_PADDING;
-		}
-		else if (button == CancelButton)
-		{
-			pos.x = newWidth / 2 + 20;
-			pos.y = newHeight - BUTTON_BOTTOM_PADDING;
-		}
-		else if (button == LeftArrowButton)
-		{
-			pos.x = newWidth / 2 - 30;
-			pos.y = newHeight - BUTTON_BOTTOM_PADDING - 25;
-		}
-		else if (button == RightArrowButton)
-		{
-			pos.x = newWidth / 2 + 10;
-			pos.y = newHeight - BUTTON_BOTTOM_PADDING - 25;
-		}
-
-		SetWindowPos(button, NULL, pos.x, pos.y, NULL, NULL, SWP_NOSIZE);
-	}
-	
-	InvalidateRect(hWnd, &clientRect, true);
-}
-
-BOOL __stdcall FormListCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) 
-{
-	if (msg == WM_SIZE)
-	{
-		WORD width = LOWORD(lParam);
-		WORD height = HIWORD(lParam);
-		ResizeFormListWindow(hDlg, width, height);
-	}
-	return ((WNDPROC)(0x480110))(hDlg, msg, wParam, lParam);
-}
-
 UInt32 __fastcall PlaceOPALObjectHook(ObjectPalette::Object* current, void* edx, float* point1, float* point2)
 {
 	ObjectPalette::Object* toPlace = current;
@@ -1581,43 +1479,7 @@ UInt32 __fastcall PlaceOPALObjectHook(ObjectPalette::Object* current, void* edx,
 	return ThisStdCall(0x40BF90, toPlace, point1, point2);
 }
 
-void ResizeObjectPalette(HWND hWnd, WORD newWidth, WORD newHeight)
-{
-	RECT clientRect;
-	GetClientRect(hWnd, &clientRect);
-
-	HWND listView = GetDlgItem(hWnd, 1018);
-	SetWindowPos(listView, NULL, NULL, NULL, 200, newHeight - 90, SWP_NOMOVE);
-
-	// move the bottom buttons
-	HWND NewButton = GetDlgItem(hWnd, 1124);
-	HWND LoadButton = GetDlgItem(hWnd, 5097);
-	HWND SaveButton = GetDlgItem(hWnd, 1000);
-	HWND SaveAsButton = GetDlgItem(hWnd, 1986);
-	HWND MergeButton = GetDlgItem(hWnd, 1988);
-	
-	SetWindowPos(NewButton, NULL, 8, newHeight - 42, NULL, NULL, SWP_NOSIZE);
-	SetWindowPos(LoadButton, NULL, 78, newHeight - 30, NULL, NULL, SWP_NOSIZE);
-	SetWindowPos(SaveButton, NULL, 78, newHeight - 55, NULL, NULL, SWP_NOSIZE);
-	SetWindowPos(SaveAsButton, NULL, 148, newHeight - 55, NULL, NULL, SWP_NOSIZE);
-	SetWindowPos(MergeButton, NULL, 148, newHeight - 30, NULL, NULL, SWP_NOSIZE);
-
-	InvalidateRect(hWnd, &clientRect, true);
-}
-
-BOOL __stdcall ObjectPaletteCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	if (msg == WM_SIZE)
-	{
-		WORD width = LOWORD(lParam);
-		WORD height = HIWORD(lParam);
-		ResizeObjectPalette(hDlg, width, height);
-	}
-	return ((WNDPROC)(0x40D190))(hDlg, msg, wParam, lParam);
-}
-
 const double M_TAU = 6.28318530717958647692528676;
-
 float __fastcall CalculateRefRotation(signed int amount)
 {
 	const double pi_on_180 = *(double*)0xD2C320;;
@@ -1657,52 +1519,6 @@ _declspec(naked) void RenderWindowHandleRefRotationHook()
 	}
 }
 
-#define USE_REPORT_TEXT1 101
-#define USE_REPORT_TEXT2 102
-void ResizeUseReportWindow(HWND hWnd, WORD newWidth, WORD newHeight)
-{
-	static const WORD LEFT_PADDING = 10;
-	static const WORD RIGHT_PADDING = 40;
-	static const WORD BOTTOM_PADDING = 100;
-	static const WORD BUTTON_BOTTOM_PADDING = 30;
-	static const WORD INTER_LIST_PADDING = 40;
-	static const WORD BUTTON_SIZE = 39;
-
-	RECT clientRect;
-	GetClientRect(hWnd, &clientRect);
-
-	int List1Height = newHeight / 2 - INTER_LIST_PADDING;
-	int List1Width = newWidth - RIGHT_PADDING + 20;
-	HWND listView1 = GetDlgItem(hWnd, 1637);
-	SetWindowPos(listView1, NULL, NULL, NULL, List1Width, List1Height, SWP_NOMOVE);
-
-	HWND UsedInTheseCellsText = GetDlgItem(hWnd, USE_REPORT_TEXT2);
-	SetWindowPos(UsedInTheseCellsText, NULL, LEFT_PADDING, newHeight / 2, NULL, NULL, SWP_NOSIZE);
-
-	HWND listView2 = GetDlgItem(hWnd, 1638);
-	SetWindowPos(listView2, NULL, LEFT_PADDING, List1Height + 1.5 * INTER_LIST_PADDING, newWidth - RIGHT_PADDING + 20, (newHeight / 2) - 60, NULL);
-
-	// move the bottom buttons
-	HWND OkButton = GetDlgItem(hWnd, 1);
-	POINT newButtonPos;
-	newButtonPos.x = newWidth / 2 - BUTTON_SIZE;
-	newButtonPos.y = newHeight - BUTTON_BOTTOM_PADDING;
-
-	SetWindowPos(OkButton, NULL, newButtonPos.x, newButtonPos.y, NULL, NULL, SWP_NOSIZE);
-	
-	InvalidateRect(hWnd, &clientRect, true);
-}
-
-BOOL __stdcall UseReportCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	if (msg == WM_SIZE)
-	{
-		WORD width = LOWORD(lParam);
-		WORD height = HIWORD(lParam);
-		ResizeUseReportWindow(hDlg, width, height);
-	}
-	return ((WNDPROC)(0x468860))(hDlg, msg, wParam, lParam);
-}
 
 _declspec(naked) void ExportFaceGenCheckIsFormEdited()
 {

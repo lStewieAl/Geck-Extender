@@ -171,6 +171,7 @@ C:\Modding\MO2\ModOrganizer.exe "moshortcut://Tale of Two Wastelands:x32dbg GECK
     <ClInclude Include="resource.h" />
     <ClInclude Include="UISpeedHooks.h" />
     <ClInclude Include="xutil.h" />
+    <ClInclude Include="ZeEditBoxHax.h" />
     <ClInclude Include="ZeGaryHax.h" />
     <ClInclude Include="ZeLogWindow.h" />
     <ClInclude Include="ZeWarningHax.h" />

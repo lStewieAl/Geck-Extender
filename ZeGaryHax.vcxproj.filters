@@ -148,6 +148,7 @@
     <ClInclude Include="UISpeedHooks.h" />
     <ClInclude Include="GECKUtility.h" />
     <ClInclude Include="DebugCellShaders.h" />
+    <ClInclude Include="ZeEditBoxHax.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
