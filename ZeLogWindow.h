@@ -271,7 +271,7 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 
 			// insert a Launch Game button if an executable was specified in the ini
 			char buf[MAX_PATH];
-			if (GetPrivateProfileStringA("Launch Game", "ExecutableName", "", buf, MAX_PATH, filename))
+			if (GetPrivateProfileStringA("Launch Game", "ExecutableName", "", buf, MAX_PATH, iniName))
 			{
 				InsertMenu(createInfo->hMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_LAUNCHGAME, "Launch Game");
 			}
@@ -398,7 +398,7 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_SPELLCHECK, FALSE, &menuInfo);
 					bEnableSpellChecker = 0;
 					char buffer[8];
-					WritePrivateProfileString("General", "bEnableSpellChecker" , _itoa(bEnableSpellChecker,buffer,2), filename);
+					WritePrivateProfileString("General", "bEnableSpellChecker" , _itoa(bEnableSpellChecker,buffer,2), iniName);
 				}
 				else
 				{
@@ -407,7 +407,7 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_SPELLCHECK, FALSE, &menuInfo);
 					bEnableSpellChecker = 1;
 					char buffer[8];
-					WritePrivateProfileString("General", "bEnableSpellChecker" , _itoa(bEnableSpellChecker,buffer,2), filename);
+					WritePrivateProfileString("General", "bEnableSpellChecker" , _itoa(bEnableSpellChecker,buffer,2), iniName);
 				}
 			}
 			return 0;
@@ -426,7 +426,7 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_RENDER, FALSE, &menuInfo);
 					bRenderWindowUncap = 0;
 					char buffer[8];
-					WritePrivateProfileString("General", "bRenderWindowUncap" , _itoa(bRenderWindowUncap,buffer,2), filename);
+					WritePrivateProfileString("General", "bRenderWindowUncap" , _itoa(bRenderWindowUncap,buffer,2), iniName);
 				}
 				else
 				{
@@ -435,7 +435,7 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_RENDER, FALSE, &menuInfo);
 					bRenderWindowUncap = 1;
 					char buffer[8];
-					WritePrivateProfileString("General", "bRenderWindowUncap" , _itoa(bRenderWindowUncap,buffer,2), filename);
+					WritePrivateProfileString("General", "bRenderWindowUncap" , _itoa(bRenderWindowUncap,buffer,2), iniName);
 				}
 			}
 			return 0;
@@ -454,7 +454,7 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_PREVIEW, FALSE, &menuInfo);
 					bPreviewWindowUncap = 0;
 					char buffer[8];
-					WritePrivateProfileString("General", "bPreviewWindowUncap" , _itoa(bPreviewWindowUncap,buffer,2), filename);
+					WritePrivateProfileString("General", "bPreviewWindowUncap" , _itoa(bPreviewWindowUncap,buffer,2), iniName);
 				}
 				else
 				{
@@ -463,7 +463,7 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_PREVIEW, FALSE, &menuInfo);
 					bPreviewWindowUncap = 1;
 					char buffer[8];
-					WritePrivateProfileString("General", "bPreviewWindowUncap" , _itoa(bPreviewWindowUncap,buffer,2), filename);
+					WritePrivateProfileString("General", "bPreviewWindowUncap" , _itoa(bPreviewWindowUncap,buffer,2), iniName);
 				}
 			}
 			return 0;
@@ -499,7 +499,7 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 				strcat(falloutNVPath, "\\");
 
 				char nvExeName[MAX_PATH];
-				GetPrivateProfileStringA("Launch Game", "ExecutableName", "FalloutNV.exe", nvExeName, MAX_PATH, filename);			
+				GetPrivateProfileStringA("Launch Game", "ExecutableName", "FalloutNV.exe", nvExeName, MAX_PATH, iniName);			
 				strcat(falloutNVPath, nvExeName);
 
 				ShellExecuteA(0, 0, falloutNVPath, 0, 0, 1);
@@ -541,7 +541,7 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 
 				// save state to ini
 				char buffer[8];
-				WritePrivateProfileString("Render Window", "bNavmeshAllowPlaceAboveOthers", _itoa(bNavmeshAllowPlaceAboveOthers, buffer, 2), filename);
+				WritePrivateProfileString("Render Window", "bNavmeshAllowPlaceAboveOthers", _itoa(bNavmeshAllowPlaceAboveOthers, buffer, 2), iniName);
 			}
 			return 0;
 
@@ -679,14 +679,14 @@ LRESULT CALLBACK EditorUI_LogWndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPA
 		format.dwMask = CFM_FACE | CFM_SIZE | CFM_WEIGHT;
 
 		// Convert Twips to points (1 point = 20 Twips)
-		int pointSize = GetOrCreateINIInt("Log", "FontSize", 10, filename) * 20;
+		int pointSize = GetOrCreateINIInt("Log", "FontSize", 10, iniName) * 20;
 		format.yHeight = pointSize;
 
 		char fontNameBuf[32];
-		GetPrivateProfileStringA("Log", "Font", "Consolas", fontNameBuf, 31, filename);
+		GetPrivateProfileStringA("Log", "Font", "Consolas", fontNameBuf, 31, iniName);
 		mbstowcs(format.szFaceName, fontNameBuf, 31);
 
-		format.wWeight = (WORD)GetOrCreateINIInt("Log", "FontWeight", FW_MEDIUM, filename);
+		format.wWeight = (WORD)GetOrCreateINIInt("Log", "FontWeight", FW_MEDIUM, iniName);
         SendMessageA(richEditHwnd, EM_SETCHARFORMAT, SCF_ALL, (LPARAM)&format);
 
 		//	Subscribe to EN_MSGFILTER and EN_SELCHANGE
@@ -818,7 +818,7 @@ LRESULT CALLBACK EditorUI_LogWndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPA
 	{
 		bAutoScroll = (bool)wParam;
 		char buffer[8];
-		WritePrivateProfileString("Log", "bAutoScroll" , _itoa(bAutoScroll,buffer,2), filename);
+		WritePrivateProfileString("Log", "bAutoScroll" , _itoa(bAutoScroll,buffer,2), iniName);
 	}
 	return 0;
 
@@ -847,10 +847,10 @@ bool EditorUI_CreateLogWindow()
 		return false;
 
 	// get previous stored position
-	int posX = GetPrivateProfileIntA("Log", "iWindowPosX", 64, filename);
-	int posY = GetPrivateProfileIntA("Log", "iWindowPosY", 64, filename);
-	int width = GetPrivateProfileIntA("Log", "iWindowPosDX", 1024, filename);
-	int height = GetPrivateProfileIntA("Log", "iWindowPosDY", 768, filename);
+	int posX = GetPrivateProfileIntA("Log", "iWindowPosX", 64, iniName);
+	int posY = GetPrivateProfileIntA("Log", "iWindowPosY", 64, iniName);
+	int width = GetPrivateProfileIntA("Log", "iWindowPosDX", 1024, iniName);
+	int height = GetPrivateProfileIntA("Log", "iWindowPosDY", 768, iniName);
 
 	g_ConsoleHwnd = CreateWindowExA(0, "RTEDITLOG", "Message Log", WS_OVERLAPPEDWINDOW, posX, posY, width, height, nullptr, nullptr, instance, nullptr);
 

@@ -118,7 +118,7 @@ UInt8 g_iPreviewWindowRed;
 UInt8 g_iPreviewWindowGreen;
 UInt8 g_iPreviewWindowBlue;
 
-char filename[MAX_PATH];
+char iniName[MAX_PATH];
 static const char *geckwikiurl = "https://geckwiki.com/index.php/";
 static const char *geckwikiscriptingurl = "https://geckwiki.com/index.php/Category:Scripting";
 static const char *geckwikicommandsurl = "https://geckwiki.com/index.php/Category:Commands";
@@ -176,9 +176,9 @@ static void DoModScriptWindow(HWND wnd)
 {
 	SendMessage(wnd, EM_EXLIMITTEXT, 0, 0x00FFFFFF);
 
-	GetPrivateProfileStringA("Script", "Font", "Consolas", editorFont.lfFaceName, 31, filename);
-	editorFont.lfHeight = GetOrCreateINIInt("Script", "FontSize", 13, filename);
-	editorFont.lfWeight = GetOrCreateINIInt("Script", "FontWeight", FW_MEDIUM, filename);
+	GetPrivateProfileStringA("Script", "Font", "Consolas", editorFont.lfFaceName, 31, iniName);
+	editorFont.lfHeight = GetOrCreateINIInt("Script", "FontSize", 13, iniName);
+	editorFont.lfWeight = GetOrCreateINIInt("Script", "FontWeight", FW_MEDIUM, iniName);
 
 	// try something nice, otherwise fall back on SYSTEM_FIXED_FONT
 	fontHandle = CreateFontIndirect(&editorFont);
@@ -1420,10 +1420,10 @@ BOOL __stdcall HavokPreviewCallback(HWND hWnd, UINT Message, WPARAM wParam, LPAR
 		SendMessageA(trackbar, TBM_SETTICFREQ, 10, 0);
 		SendDlgItemMessageA(hWnd, ID_ANIMATIONSPEED_EDIT, WM_SETTEXT, NULL, (LPARAM)"1.00");
 
-		g_iPreviewWindowRed = GetOrCreateINIInt("Preview Window", "iBackgroundRed", 127, filename);
-		g_iPreviewWindowGreen = GetOrCreateINIInt("Preview Window", "iBackgroundGreen", 127, filename);
-		g_iPreviewWindowBlue = GetOrCreateINIInt("Preview Window", "iBackgroundBlue", 127, filename);
-		int landHeight = GetOrCreateINIInt("Preview Window", "iLandHeight", 50, filename);
+		g_iPreviewWindowRed = GetOrCreateINIInt("Preview Window", "iBackgroundRed", 127, iniName);
+		g_iPreviewWindowGreen = GetOrCreateINIInt("Preview Window", "iBackgroundGreen", 127, iniName);
+		g_iPreviewWindowBlue = GetOrCreateINIInt("Preview Window", "iBackgroundBlue", 127, iniName);
+		int landHeight = GetOrCreateINIInt("Preview Window", "iLandHeight", 50, iniName);
 
 		SendDlgItemMessageA(hWnd, 2543, TBM_SETPOS, 1u, landHeight);
 
@@ -1434,12 +1434,12 @@ BOOL __stdcall HavokPreviewCallback(HWND hWnd, UINT Message, WPARAM wParam, LPAR
 		int green = GetDlgItemInt(hWnd, 1033, 0, 0);
 		int blue = GetDlgItemInt(hWnd, 1111, 0, 0);
 		char arr[11];
-		WritePrivateProfileString("Preview Window", "iBackgroundRed", _itoa(red, arr, 10), filename);
-		WritePrivateProfileString("Preview Window", "iBackgroundGreen", _itoa(green, arr, 10), filename);
-		WritePrivateProfileString("Preview Window", "iBackgroundBlue", _itoa(blue, arr, 10), filename);
+		WritePrivateProfileString("Preview Window", "iBackgroundRed", _itoa(red, arr, 10), iniName);
+		WritePrivateProfileString("Preview Window", "iBackgroundGreen", _itoa(green, arr, 10), iniName);
+		WritePrivateProfileString("Preview Window", "iBackgroundBlue", _itoa(blue, arr, 10), iniName);
 
 		int landHeight = SendDlgItemMessageA(hWnd, 2543, TBM_GETPOS, 0, 0);
-		WritePrivateProfileString("Preview Window", "iLandHeight", _itoa(landHeight, arr, 10), filename);
+		WritePrivateProfileString("Preview Window", "iLandHeight", _itoa(landHeight, arr, 10), iniName);
 	}
 
 	return ((BOOL(__stdcall*)(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam))(0x4107F0))(hWnd, Message, wParam, lParam);
