@@ -115,13 +115,13 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	bAppendAnimLengthToName = GetOrCreateINIInt("Preview Window", "bAppendAnimLengthToName", 0, iniName);
 
 	bObjectPaletteAllowRandom = GetOrCreateINIInt("Object Palette", "bObjectPaletteAllowRandom", 1, iniName);
-	bObjectPaletteRandomByDefault = GetOrCreateINIInt("Object Palette", "bObjectPaletteRandomByDefault", 0, iniName);
+	bObjectPaletteRandomByDefault = GetOrCreateINIInt("Object Palette", "bObjectPaletteRandomByDefault", 0, iniName) != 0;
 
 	//	stop geck crash with bUseMultibounds = 0 in exterior cells with multibounds - credit to roy
 	WriteRelCall(0x004CA48F, (UInt32)FixMultiBounds);
 	XUtil::PatchMemoryNop(0x004CA494, 0x05);
 
-	// fix file path vtable pointers - credit to roy
+	// fix various file path vtable entries to exclude the "//" in the path - credit to roy
 	SafeWrite32(0x00D39FB0, 0x004FE910);	// skills icon in actor values
 	SafeWrite32(0x00D47E28, 0x004FE910);	// landscape (and texture sets?)
 	SafeWrite32(0x00D527D0, 0x004FE910);	// class image
@@ -133,7 +133,6 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	SafeWrite32(0x00D7BED8, 0x004FE910);	// worldspace map
 	SafeWrite32(0x00D73EE0, UInt32(SpeedTreeGetTexturePath));	// destructable tree (not sure where this is viewable)
 	SafeWrite32(0x00D73F68, UInt32(SpeedTreeGetTexturePath));	// tree
-
 
 	//	enable wasteland level 2 lod generation - credit to roy
 	SafeWrite8(0x00419557, 0xEB);
@@ -692,7 +691,7 @@ _declspec(naked) void BadFormLoadHook()
 	{
 		push esi
 		call BadFormPrintID
-	done:
+//	originalCode:
 		mov byte ptr ss : [esp + 0x1A] , 0x1 // wasBadFormEncountered
 		jmp retnAddr
 	}

@@ -816,7 +816,7 @@ LRESULT CALLBACK EditorUI_LogWndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPA
 
 	case UI_CMD_AUTOSCROLL:
 	{
-		bAutoScroll = (bool)wParam;
+		bAutoScroll = wParam;
 		char buffer[8];
 		WritePrivateProfileString("Log", "bAutoScroll" , _itoa(bAutoScroll,buffer,2), iniName);
 	}

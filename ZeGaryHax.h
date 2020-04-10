@@ -254,19 +254,13 @@ bool GetINIExists()
 //	fix destruction dialog close button - credit to roy
 BOOL WINAPI hk_DialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	if (hWnd && uMsg == WM_CLOSE)
+	if (uMsg == WM_CLOSE)
 	{
 		EndDialog(hWnd, 0);
 		DestroyWindow(hWnd);
 		return TRUE;
 	}
-		__asm
-		{
-			pop esi
-			pop ebp
-			push 0x004E5E30
-			ret
-		}
+	return ((WNDPROC)(0x004E5E30))(hWnd, uMsg, wParam, lParam);
 }
 
 //	fix handle memory leak - credit to nukem
@@ -637,11 +631,12 @@ BOOL __stdcall hk_SearchAndReplaceCallback(HWND hDlg, UINT msg, WPARAM wParam, L
 _declspec(naked) void EndLoadingHook() {
 	PlaySound("MouseClick", NULL, SND_ASYNC);
 //	PrintCmdTable();
-	_asm {
-	originalCode:
+	_asm 
+	{
+//	originalCode:
 		add esp, 8
-			pop esi
-			retn
+		pop esi
+		retn
 	}
 }
 
@@ -673,7 +668,7 @@ _declspec(naked) void FlycamMovementSpeedMultiplierHook() {
 	_asm 
 	{
 		popad
-	originalCode:
+//	originalCode:
 		mov     eax, dword ptr ds:[0xF1FBF4]
 		jmp retnAddr
 	}
@@ -709,10 +704,6 @@ _declspec(naked) void ReferenceBatchActionDoButtonHook() {
 		push esi
 		jmp retnAddr
 	}
-}
-
-void __cdecl SaveWindowPositionToINI(HWND hWnd, char* name) {
-	((void(__cdecl*)(HWND hWnd, char* Src))(0x43E170))(hWnd, name);
 }
 
 /* ideally this would be replaced with a wrapper around the Script Edit callback function */
@@ -789,7 +780,7 @@ _declspec(naked) void RenderWindowReferenceMovementSpeedHook() {
 		fmul
 		popad
 
-	originalCode:
+//	originalCode:
 		fmul dword ptr ds:[0xECFD1C]
 		jmp retnAddr
 	}
@@ -810,7 +801,7 @@ _declspec(naked) void hk_OrthographicZoom() {
 		fmul
 		popad
 
-	originalCode:
+//	originalCode:
 		fmul    dword ptr ds : [0xD2E0D0]
 		jmp retnAddr
 	}
@@ -1068,46 +1059,8 @@ _declspec(naked) void ObjectWindowListFilterUneditedHook()
 		jmp retnAddr
 	}
 }
-/*
-#define ID_OBJECTWINDOWFILTEREDITED_CHECKBOX 51017
-HWND g_objectWindowFilterEditedHwnd;
-void ObjectWindow_AddFilterEditedCheckbox(HWND MainWindow, HINSTANCE hInstance) {
-	g_objectWindowFilterEditedHwnd = CreateWindowEx(
-		NULL,
-		"BUTTON",
-		"Toggle show only edited",
-		BS_PUSHLIKE | BS_CHECKBOX | WS_CHILD | WS_VISIBLE | BS_NOTIFY | BS_BITMAP,
-		1160, 4, // x, y
-		24, 21, // width, height
-		MainWindow,
-		(HMENU)ID_OBJECTWINDOWFILTEREDITED_CHECKBOX,
-		hInstance,
-		NULL
-	);
-	SendMessageA(g_objectWindowFilterEditedHwnd, BM_SETCHECK, false, NULL);
 
-	HBITMAP hBitmap = (HBITMAP)LoadImage(ZeGaryHaxHandle, MAKEINTRESOURCE(IDB_ALLOW_CELL_LOADS_ICON), IMAGE_BITMAP, NULL, NULL, NULL);
-	SendMessageA(g_objectWindowFilterEditedHwnd, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
-}
-*/
-WNDPROC OldObjectWindowColumnsCallback_WndProc = (WNDPROC)0x449530;
-bool __stdcall ObjectWindowColumnsCallback(HWND hWnd, UInt32 msg, WPARAM wParam, LPARAM lParam)
-{
-	if (msg == WM_CREATE)
-	{
-		const CREATESTRUCT* createInfo = (CREATESTRUCT*)lParam;
-//		ObjectWindow_AddFilterEditedCheckbox(hWnd, createInfo->hInstance);
-	}
-	if (msg == WM_COMMAND)
-	{
-		const uint32_t param = LOWORD(wParam);
-		//		if (param == ID_OBJECTWINDOWFILTEREDITED_CHECKBOX)
-		{
 
-		}
-	}
-	return CallWindowProc(OldObjectWindowColumnsCallback_WndProc, hWnd, msg, wParam, lParam);
-}
 void __fastcall FastExitHook(volatile LONG** thiss);
 
 _declspec(naked) void CellViewListViewCreateFormIDColumnHook()
@@ -1245,7 +1198,7 @@ _declspec(naked) void RenderWindowNavMeshConfirmFindCover()
 		call MessageBoxA
 		cmp eax, IDNO
 		je skip
-	doNavmesh:
+//	doNavmesh:
 		push 0
 		mov ecx, 0xF073F8
 		push 0x456F2E // retnAddr
@@ -1269,7 +1222,7 @@ _declspec(naked) void MainWindowNavMeshConfirmFindCover()
 		call MessageBoxA
 		cmp eax, IDNO
 		je skip
-	doNavmesh:
+//	doNavmesh:
 		push 0
 		mov ecx, 0xF073F8
 		push 0x44451D // retnAddr
@@ -1293,7 +1246,7 @@ _declspec(naked) void NavMeshToolbarConfirmFindCover()
 		call MessageBoxA
 		cmp eax, IDNO
 		je skip
-	doNavmesh:
+//	doNavmesh:
 		push 0
 		mov ecx, 0xF073F8
 		push 0x40AC7B // retnAddr
@@ -1314,7 +1267,8 @@ void __cdecl CrashSaveSetName(char* dst, size_t size, char* format, void* DEFAUL
 	}
 	sprintf(dst, "CrashSave - %s", modName);
 }
-static LPTOP_LEVEL_EXCEPTION_FILTER WINAPI s_originalFilter = nullptr;
+
+LPTOP_LEVEL_EXCEPTION_FILTER s_originalFilter = nullptr;
 
 LONG WINAPI DoCrashSave(EXCEPTION_POINTERS* info)
 {
@@ -1571,8 +1525,6 @@ void ResizeFormListWindow(HWND hWnd, WORD newWidth, WORD newHeight)
 	HWND CancelButton = GetDlgItem(hWnd, 2);
 	HWND LeftArrowButton = GetDlgItem(hWnd, 4008);
 	HWND RightArrowButton = GetDlgItem(hWnd, 4009);
-
-	RECT buttonRect;
 
 	POINT pos;
 	for (HWND button : {OkButton, CancelButton, LeftArrowButton, RightArrowButton})
