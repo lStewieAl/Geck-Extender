@@ -612,6 +612,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	PatchRememberLandscapeEditSettingsWindowPosition();
 
+	PatchClearLandscapeEditUndoStackIfNearlyOOM();
+
 	return true;
 }
 

@@ -3,6 +3,7 @@
 #include "GECKUtility.h"
 #include "Editor.h"
 #include "resource.h"
+#include <Psapi.h>
 
 #define GH_NAME				"ZeGaryHax"		// this is the string for IsPluginInstalled and GetPluginVersion (also shows in nvse.log)
 #define GH_VERSION			0				// set this to 0 to enable log output from _DMESSAGE (useful for debug traces)
@@ -1226,7 +1227,7 @@ void __cdecl CrashSaveSetName(char* dst, size_t size, char* format, void* DEFAUL
 	{
 		modName = activeFile->name;
 	}
-	sprintf(dst, "CrashSave - %s", modName);
+	sprintf(dst, "%s", modName);
 }
 
 LPTOP_LEVEL_EXCEPTION_FILTER s_originalFilter = nullptr;
@@ -1236,15 +1237,9 @@ LONG WINAPI DoCrashSave(EXCEPTION_POINTERS* info)
 	// create a save in the data folder called CrashSave%s.esp
 	WriteRelCall(0x4DB07A, UInt32(CrashSaveSetName));
 
-	static char* path = "Data\\";
-	SafeWrite32(0x4DB0AC, UInt32(path));
-
 	ThisStdCall(0x4DB020, DataHandler::GetSingleton()); // DoAutosave
 
-	// restore original path (Data\\Backup\\)
-	SafeWrite32(0x4DB0AC, 0xD415C4);
-
-	MessageBoxA(nullptr, "The geck has quit unexpectedly. Please check the Data folder for a crash save and verify it in xEdit.", "Error", MB_ICONERROR | MB_OK);
+	MessageBoxA(nullptr, "The geck has quit unexpectedly. Please check the Data//Backup folder for a crash save and verify it in xEdit.", "Error", MB_ICONERROR | MB_OK);
 	return s_originalFilter && s_originalFilter(info);
 };
 
@@ -1629,4 +1624,52 @@ void PatchRememberLandscapeEditSettingsWindowPosition()
 {
 	WriteRelCall(0x441297, UInt32(CreateLandscapeEditHook));
 	SafeWrite8(0x441297 + 5, 0x90);
+}
+
+bool IsNearlyOutOfMemory()
+{
+	const int MAX_MEMORY = 2560 * (1024 * 1024); // 2.5gb
+	PROCESS_MEMORY_COUNTERS procMem;
+	GetProcessMemoryInfo(GetCurrentProcess(), &procMem, sizeof(procMem));
+	return (procMem.WorkingSetSize > MAX_MEMORY);
+}
+
+_declspec(naked) void LandscapePaintHook1()
+{
+	static const UInt32 retnAddr = 0x45CA17;
+	_asm
+	{
+		call IsNearlyOutOfMemory
+		test al, al
+		je done
+		mov ecx, dword ptr ds : [0xECFDF4]
+		mov eax, 0x467CC0
+		call eax
+	done:
+		mov ecx, dword ptr ds : [0xED13F8]
+		jmp retnAddr
+	}
+}
+
+_declspec(naked) void LandscapePaintHook2()
+{
+	static const UInt32 retnAddr = 0x45E107;
+	_asm
+	{
+		call IsNearlyOutOfMemory
+		test al, al
+		je done
+		mov ecx, dword ptr ds : [0xECFDF4]
+		mov eax, 0x467CC0
+		call eax
+	done:
+		mov ecx, dword ptr ds : [0xED13F8]
+		jmp retnAddr
+	}
+}
+
+void PatchClearLandscapeEditUndoStackIfNearlyOOM()
+{
+	WriteRelJump(0x45CA11, UInt32(LandscapePaintHook1));
+	WriteRelJump(0x45E101, UInt32(LandscapePaintHook2));
 }
