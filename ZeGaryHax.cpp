@@ -600,6 +600,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	InitCommonControls();
 	LoadLibraryA("MSFTEDIT.dll");
 
+	patchTextureMemoryAllocator();
+
 	if (!EditorUI_CreateLogWindow())
 	{
 		MessageBoxA(nullptr, "Failed to create console log window", "Error", MB_ICONERROR);
@@ -607,6 +609,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	SafeWrite32(0x0044612D, (UInt32)EditorUI_WndProc);
 	OldEditorUI_WndProc = (WNDPROC)0x00440780;
+
+	PatchRememberLandscapeEditSettingsWindowPosition();
 
 	return true;
 }

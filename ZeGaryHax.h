@@ -1538,3 +1538,95 @@ char* SpeedTreeGetTexturePath()
 {
 	return "Data\\Textures\\Trees\\Leaves";
 }
+
+typedef HRESULT(__stdcall* D3DXCreateTextureFromFileInMemoryEx_)(_In_    void* pDevice,
+	_In_    LPCVOID            pSrcData,
+	_In_    UINT               SrcDataSize,
+	_In_    UINT               Width,
+	_In_    UINT               Height,
+	_In_    UINT               MipLevels,
+	_In_    DWORD              Usage,
+	_In_    int                Format,
+	_In_    int                Pool,
+	_In_    DWORD              Filter,
+	_In_    DWORD              MipFilter,
+	_In_    int                ColorKey,
+	_Inout_ LPVOID             pSrcInfo,
+	_Out_   PALETTEENTRY* pPalette,
+	_Out_   LPVOID             ppTexture);
+
+enum d3
+{
+	D3DFMT_UNKNOWN = 0,
+	D3DX_DEFAULT = -1,
+	D3DPOOL_DEFAULT = 0
+};
+
+D3DXCreateTextureFromFileInMemoryEx_ D3DXCreateTextureFromFileInMemoryEx;
+
+HRESULT __stdcall CreateTextureHook(void* pDevice, LPCVOID pSrcData, UINT SrcDataSize, void* ppTexture) {
+
+	return D3DXCreateTextureFromFileInMemoryEx(pDevice, pSrcData, SrcDataSize, D3DX_DEFAULT, D3DX_DEFAULT, D3DX_DEFAULT, 0, D3DFMT_UNKNOWN, D3DPOOL_DEFAULT, D3DX_DEFAULT, D3DX_DEFAULT, 0, NULL, NULL, ppTexture);
+}
+
+void patchTextureMemoryAllocator()
+{
+	if (*(UInt32*)0xC137BE != 0x0006F596)
+	{
+		// something has already patched the call address, so do nothing
+		return;
+	}
+
+	if (HMODULE d3d9 = GetModuleHandleA("d3dx9_38.dll"))
+	{
+		if (D3DXCreateTextureFromFileInMemoryEx = (D3DXCreateTextureFromFileInMemoryEx_)GetProcAddress(d3d9, "D3DXCreateTextureFromFileInMemoryEx"))
+		{
+			WriteRelCall(0xC137BD, (UInt32)CreateTextureHook);
+		}
+	}
+}
+
+WNDPROC originalLandscapeEditCallback;
+POINT savedLandscapeEditPos;
+BOOL __stdcall LandscapeEditCallback(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam) 
+{
+	if (Message == WM_DESTROY)
+	{
+		char buffer[8];
+		WINDOWPLACEMENT pos;
+		GetWindowPlacement(hWnd, &pos);
+
+		LONG x = pos.rcNormalPosition.left;
+		LONG y = pos.rcNormalPosition.top;
+
+		savedLandscapeEditPos.x = x;
+		savedLandscapeEditPos.y = y;
+
+		WritePrivateProfileString("Landscape Editor", "iWindowPosX", _itoa(x, buffer, 10), iniName);
+		WritePrivateProfileString("Landscape Editor", "iWindowPosY", _itoa(y, buffer, 10), iniName);
+	}
+	else if (Message == WM_INITDIALOG)
+	{
+		SetWindowPos(hWnd, NULL, savedLandscapeEditPos.x, savedLandscapeEditPos.y, NULL, NULL, SWP_NOSIZE);
+	}
+	return CallWindowProc(originalLandscapeEditCallback, hWnd, Message, wParam, lParam);
+}
+
+
+HWND __stdcall CreateLandscapeEditHook(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, WNDPROC lpDialogFunc, LPARAM dwInitParam)
+{
+	long posX = GetPrivateProfileIntA("Landscape Editor", "iWindowPosX", 0, iniName);
+	long posY = GetPrivateProfileIntA("Landscape Editor", "iWindowPosY", 0, iniName);
+
+	savedLandscapeEditPos.x = posX;
+	savedLandscapeEditPos.y = posY;
+
+	originalLandscapeEditCallback = lpDialogFunc;
+	return CreateDialogParamA(hInstance, lpTemplateName, hWndParent, (DLGPROC)LandscapeEditCallback, dwInitParam);
+}
+
+void PatchRememberLandscapeEditSettingsWindowPosition()
+{
+	WriteRelCall(0x441297, UInt32(CreateLandscapeEditHook));
+	SafeWrite8(0x441297 + 5, 0x90);
+}

@@ -148,9 +148,21 @@ BOOL __stdcall FormListCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 {
 	if (msg == WM_SIZE)
 	{
-		WORD width = LOWORD(lParam);
-		WORD height = HIWORD(lParam);
-		ResizeFormListWindow(hDlg, width, height);
+		// the callback is shared, only filter for the FormList dialog (classname is AlchemyClass)
+		char className[256];
+		if (GetClassNameA(hDlg, className, ARRAYSIZE(className)) > 0)
+		{
+			if (!strcmp(className, "AlchemyClass"))
+			{
+				WORD width = LOWORD(lParam);
+				WORD height = HIWORD(lParam);
+				ResizeFormListWindow(hDlg, width, height);
+			}
+		}
+		else
+		{
+			return true;
+		}
 	}
 	return ((WNDPROC)(0x480110))(hDlg, msg, wParam, lParam);
 }
