@@ -1674,3 +1674,64 @@ void PatchClearLandscapeEditUndoStackIfNearlyOOM()
 	WriteRelJump(0x45CA11, UInt32(LandscapePaintHook1));
 	WriteRelJump(0x45E101, UInt32(LandscapePaintHook2));
 }
+
+std::unordered_set<std::string> FileCacheMap;
+
+void __cdecl hk_call_sub_41E8F0(bool a1)
+{
+    // Build the file cache map, run the LIP generation, then free it all
+    if (std::filesystem::exists("Data\\Sound\\Voice"))
+    {
+        for (const auto& p : std::filesystem::recursive_directory_iterator("Data\\Sound\\Voice"))
+        {
+            if (std::filesystem::is_directory(p))
+                continue;
+
+            // Temp.lip/Temp.wav/FonixData.cdf/temp_resampled_audio.wav should probably be blacklisted here
+            FileCacheMap.emplace(p.path().string());
+        }
+    }
+
+    ((void(__cdecl *)(bool))(0x0041E8F0))(a1);
+    FileCacheMap.clear();
+}
+
+int __fastcall hk_sub_8A1FC0(void *thisptr, void *_EDX, const char *Path, const char *a2, int a3, int a4)
+{
+    // Short circuit for GetFileAttributesA()
+    if (!FileCacheMap.empty() && !FileCacheMap.count(Path))
+        return 0;
+
+    return ((int(__thiscall *)(void *, const char *, const char *, int, int))(0x008A1FC0))(thisptr, Path, a2, a3, a4);
+}
+
+void __declspec(naked) hk_call_41EBDE()
+{
+    // Unchecked return value that determines if the file exists or not
+    __asm
+    {
+        mov eax, 0x0058D8F0
+        call eax
+
+        test eax, eax
+        je fileDoesNotExist
+
+        mov eax, 0x0041EBE3
+        jmp eax
+
+        fileDoesNotExist:
+        mov eax, 0x0041EE13
+        jmp eax
+    }
+}
+
+void patchFasterLipGen()
+{
+	WriteRelJump(0x0041EBDE, (UInt32)hk_call_41EBDE);
+
+	WriteRelCall(0x00440C5D, (UInt32)hk_call_sub_41E8F0);
+	WriteRelCall(0x00440C6E, (UInt32)hk_call_sub_41E8F0);
+
+	WriteRelCall(0x0058DA9A, (UInt32)hk_sub_8A1FC0);
+	WriteRelCall(0x0047964E, (UInt32)hk_sub_8A1FC0);
+}

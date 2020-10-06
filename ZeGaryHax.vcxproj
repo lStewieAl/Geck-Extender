@@ -15,11 +15,12 @@
     <RootNamespace>ttwx</RootNamespace>
     <Keyword>Win32Proj</Keyword>
     <ProjectName>ZeGaryHax</ProjectName>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
@@ -96,6 +97,7 @@ C:\Modding\MO2\ModOrganizer.exe "moshortcut://Tale of Two Wastelands:x32dbg GECK
       <DebugInformationFormat>None</DebugInformationFormat>
       <ForcedIncludeFiles>nvse/prefix.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
@@ -168,6 +170,7 @@ C:\Modding\MO2\ModOrganizer.exe "moshortcut://Tale of Two Wastelands:x32dbg GECK
     <ClInclude Include="nvse\NiTypes.h" />
     <ClInclude Include="nvse\SafeWrite.h" />
     <ClInclude Include="nvse\Utilities.h" />
+    <ClInclude Include="prefix.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="UISpeedHooks.h" />
     <ClInclude Include="xutil.h" />

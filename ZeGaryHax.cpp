@@ -1,3 +1,4 @@
+#include <string>
 #include <Richedit.h>
 #include <CommCtrl.h>
 #include <list>
@@ -9,9 +10,10 @@
 #include <mutex>
 #include <atomic>
 #include <set>
-#include <string>
 #include <regex>
 #include <libdeflate/libdeflate.h>
+#include <unordered_set>
+#include <filesystem>
 
 #include "nvse/GameData.h"
 #include "nvse/PluginAPI.h"
@@ -617,6 +619,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	PatchRememberLandscapeEditSettingsWindowPosition();
 
 	PatchClearLandscapeEditUndoStackIfNearlyOOM();
+
+	PatchFasterLipGen();
 
 	return true;
 }

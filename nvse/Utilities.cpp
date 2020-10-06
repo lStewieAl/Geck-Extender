@@ -1,6 +1,6 @@
+#include <string>
 #include "Utilities.h"
 #include "SafeWrite.h"
-#include <string>
 #include <algorithm>
 
 #if RUNTIME
@@ -564,21 +564,21 @@ ErrOutput::ErrOutput(_ShowError errorFunc, _ShowWarning warningFunc)
 	ShowError = errorFunc;
 }
 
-void ErrOutput::vShow(ErrOutput::Message& msg, va_list args)
+void ErrOutput::vShow(ErrOutput::Message* msg, va_list args)
 {
 	char msgText[0x400];
-	vsprintf_s(msgText, sizeof(msgText), msg.fmt, args);
-	if (msg.bCanDisable)
+	vsprintf_s(msgText, sizeof(msgText), msg->fmt, args);
+	if (msg->bCanDisable)
 	{
-		if (!msg.bDisabled)
+		if (!msg->bDisabled)
 			if (ShowWarning(msgText))
-				msg.bDisabled = true;
+				msg->bDisabled = true;
 	}
 	else
 		ShowError(msgText);
 }
 
-void ErrOutput::Show(ErrOutput::Message& msg, ...)
+void ErrOutput::Show(ErrOutput::Message* msg, ...)
 {
 	va_list args;
 	va_start(args, msg);
@@ -601,5 +601,5 @@ void ErrOutput::vShow(const char* msg, va_list args)
 	tempMsg.bCanDisable = false;
 	tempMsg.bDisabled = false;
 
-	vShow(tempMsg, args);
+	vShow(&tempMsg, args);
 }

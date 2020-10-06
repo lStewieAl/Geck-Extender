@@ -1,5 +1,5 @@
 #pragma once
-
+#include <string>
 #include "NiNodes.h"
 #include "GameTypes.h"
 

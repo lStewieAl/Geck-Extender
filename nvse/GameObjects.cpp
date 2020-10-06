@@ -166,15 +166,6 @@ bool TESObjectREFR::Update3D()
 	return true;
 }
 
-TESObjectREFR* TESObjectREFR::Create(bool bTemp)
-{
-	TESObjectREFR* refr = (TESObjectREFR*)FormHeap_Allocate(sizeof(TESObjectREFR));
-	ThisStdCall(s_TESObject_REFR_init, refr);
-	if (bTemp)
-		CALL_MEMBER_FN(refr, MarkAsTemporary);
-	return refr;
-}
-
 TESForm* GetPermanentBaseForm(TESObjectREFR* thisObj)	// For LevelledForm, find real baseForm, not temporary one.
 {
 	ExtraLeveledCreature * pXCreatureData = NULL;
