@@ -1235,7 +1235,7 @@ LPTOP_LEVEL_EXCEPTION_FILTER s_originalFilter = nullptr;
 
 LONG WINAPI DoCrashSave(EXCEPTION_POINTERS* info)
 {
-	// create a save in the data folder called CrashSave%s.esp
+	// create a save in the Data//Backup folder called %s.esp
 	WriteRelCall(0x4DB07A, UInt32(CrashSaveSetName));
 
 	ThisStdCall(0x4DB020, DataHandler::GetSingleton()); // DoAutosave
