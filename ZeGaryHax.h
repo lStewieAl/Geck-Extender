@@ -102,6 +102,7 @@ int bObjectPaletteAllowRandom = 0;
 bool bObjectPaletteRandomByDefault = 0;
 int bSnapToGridRotationUseDoublePrecision = 0;
 int bFaceGenOnlyEdited = 0;
+int bDisableTextureMirroring = 1;
 
 int bUseAltShiftMultipliers = 1;
 float fMovementAltMultiplier = 0.15F;
