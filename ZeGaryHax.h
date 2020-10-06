@@ -1627,12 +1627,17 @@ void PatchRememberLandscapeEditSettingsWindowPosition()
 	SafeWrite8(0x441297 + 5, 0x90);
 }
 
-bool IsNearlyOutOfMemory()
+void ClearLandscapeUndosIfNearlyOutOfMemory()
 {
-	const int MAX_MEMORY = 2560 * (1024 * 1024); // 2.5gb
+	const UInt64 MAX_MEMORY = 2560L * (1024 * 1024); // 2.5gb
 	PROCESS_MEMORY_COUNTERS procMem;
 	GetProcessMemoryInfo(GetCurrentProcess(), &procMem, sizeof(procMem));
-	return (procMem.WorkingSetSize > MAX_MEMORY);
+	if (procMem.WorkingSetSize > MAX_MEMORY)
+	{
+		auto hist = HistoryManager::GetSingleton();
+		hist->ClearHistoryForCurrentElement();
+		EditorUI_Log("2.5gb memory usage exceeded, clearing land edit history.");
+	}
 }
 
 _declspec(naked) void LandscapePaintHook1()
@@ -1640,13 +1645,7 @@ _declspec(naked) void LandscapePaintHook1()
 	static const UInt32 retnAddr = 0x45CA17;
 	_asm
 	{
-		call IsNearlyOutOfMemory
-		test al, al
-		je done
-		mov ecx, dword ptr ds : [0xECFDF4]
-		mov eax, 0x467CC0
-		call eax
-	done:
+		call ClearLandscapeUndosIfNearlyOutOfMemory
 		mov ecx, dword ptr ds : [0xED13F8]
 		jmp retnAddr
 	}
@@ -1657,13 +1656,7 @@ _declspec(naked) void LandscapePaintHook2()
 	static const UInt32 retnAddr = 0x45E107;
 	_asm
 	{
-		call IsNearlyOutOfMemory
-		test al, al
-		je done
-		mov ecx, dword ptr ds : [0xECFDF4]
-		mov eax, 0x467CC0
-		call eax
-	done:
+		call ClearLandscapeUndosIfNearlyOutOfMemory
 		mov ecx, dword ptr ds : [0xED13F8]
 		jmp retnAddr
 	}
@@ -1725,7 +1718,7 @@ void __declspec(naked) hk_call_41EBDE()
     }
 }
 
-void patchFasterLipGen()
+void PatchFasterLipGen()
 {
 	WriteRelJump(0x0041EBDE, (UInt32)hk_call_41EBDE);
 

@@ -170,7 +170,6 @@ C:\Modding\MO2\ModOrganizer.exe "moshortcut://Tale of Two Wastelands:x32dbg GECK
     <ClInclude Include="nvse\NiTypes.h" />
     <ClInclude Include="nvse\SafeWrite.h" />
     <ClInclude Include="nvse\Utilities.h" />
-    <ClInclude Include="prefix.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="UISpeedHooks.h" />
     <ClInclude Include="xutil.h" />

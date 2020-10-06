@@ -204,3 +204,43 @@ struct ObjectPalette
 
 	static ObjectPalette* GetSingleton() { return (ObjectPalette*)0xECE248; };
 };
+
+struct HistoryManager
+{
+	enum UndoType
+	{
+		kUndoType_ColorLand = 0x5,
+		kUndoType_PaintLand = 0x6,
+	};
+
+	struct Element
+	{
+		UInt32 count000;
+		UInt32 unk004;
+		TESForm* form;
+		UInt32 undoType;
+		NiPoint3 rotation;
+		NiPoint3 refPos;
+		TESObjectCELL* parentCell;
+		UInt32 unk02C;
+		UInt32 unk030;
+		UInt32 unk034;
+		UInt32 unk038;
+		UInt32 unk03C;
+		UInt32 unk040;
+		UInt32 undoPaintLandData;
+		void* portalRefData;
+		void* occlusionPlaneData;
+		NiPoint3* primitivePlaneBoundsX;
+		UInt32 primitivePlaneBoundsY;
+		UInt32 primitivePlaneBoundsZ;
+		HistoryManager::Element* ptr06C;
+		UInt32 prev;
+	};
+
+	HistoryManager::Element* element;
+	HistoryManager::Element* current;
+
+	static HistoryManager* GetSingleton() { return *(HistoryManager **)0xECFDF4; };
+	void ClearHistoryForCurrentElement() { ((void(__thiscall*)(HistoryManager * thiss))(0x467CC0))(this); };
+};

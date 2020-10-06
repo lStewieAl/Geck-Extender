@@ -111,8 +111,6 @@ void ResizeFormListWindow(HWND hWnd, WORD newWidth, WORD newHeight)
 	HWND LeftArrowButton = GetDlgItem(hWnd, 4008);
 	HWND RightArrowButton = GetDlgItem(hWnd, 4009);
 
-	RECT buttonRect;
-
 	POINT pos;
 	for (HWND button : {OkButton, CancelButton, LeftArrowButton, RightArrowButton})
 	{
