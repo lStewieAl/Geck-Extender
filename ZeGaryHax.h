@@ -1238,7 +1238,13 @@ LONG WINAPI DoCrashSave(EXCEPTION_POINTERS* info)
 	// create a save in the Data//Backup folder called %s.esp
 	WriteRelCall(0x4DB07A, UInt32(CrashSaveSetName));
 
+	static char* path = "Data\\CrashSaves";
+	SafeWrite32(0x4DB0AC, UInt32(path));
+
 	ThisStdCall(0x4DB020, DataHandler::GetSingleton()); // DoAutosave
+
+	// restore original path (Data\\Backup\\)
+	SafeWrite32(0x4DB0AC, 0xD415C4);
 
 	MessageBoxA(nullptr, "The geck has quit unexpectedly. Please check the Data//Backup folder for a crash save and verify it in xEdit.", "Error", MB_ICONERROR | MB_OK);
 	return s_originalFilter && s_originalFilter(info);
@@ -1629,7 +1635,7 @@ void PatchRememberLandscapeEditSettingsWindowPosition()
 
 void ClearLandscapeUndosIfNearlyOutOfMemory()
 {
-	const UInt64 MAX_MEMORY = 2560L * (1024 * 1024); // 2.5gb
+	const UInt64 MAX_MEMORY = 2560L * (1024L * 1024L); // 2.5gb
 	PROCESS_MEMORY_COUNTERS procMem;
 	GetProcessMemoryInfo(GetCurrentProcess(), &procMem, sizeof(procMem));
 	if (procMem.WorkingSetSize > MAX_MEMORY)
