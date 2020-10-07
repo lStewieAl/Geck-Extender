@@ -1235,10 +1235,10 @@ LPTOP_LEVEL_EXCEPTION_FILTER s_originalFilter = nullptr;
 
 LONG WINAPI DoCrashSave(EXCEPTION_POINTERS* info)
 {
-	// create a save in the Data//Backup folder called %s.esp
+	// create a save in the Data//CrashSaves folder called %s.esp
 	WriteRelCall(0x4DB07A, UInt32(CrashSaveSetName));
 
-	static char* path = "Data\\CrashSaves";
+	static char* path = "Data\\CrashSaves\\";
 	SafeWrite32(0x4DB0AC, UInt32(path));
 
 	ThisStdCall(0x4DB020, DataHandler::GetSingleton()); // DoAutosave
@@ -1246,7 +1246,32 @@ LONG WINAPI DoCrashSave(EXCEPTION_POINTERS* info)
 	// restore original path (Data\\Backup\\)
 	SafeWrite32(0x4DB0AC, 0xD415C4);
 
-	MessageBoxA(nullptr, "The geck has quit unexpectedly. Please check the Data//Backup folder for a crash save and verify it in xEdit.", "Error", MB_ICONERROR | MB_OK);
+	char buf[0x1000];
+
+	auto contextRecord = info->ContextRecord;
+
+	sprintf(buf, "The geck has quit unexpectedly. Please check the Data//CrashSaves folder for a crash save and verify it in xEdit.\r\nDebug Information:\r\nREGISTERS\r\neip: %08X", contextRecord->Eip);
+	sprintf(buf, "%s\r\neax: %08X", buf, contextRecord->Eax);
+	sprintf(buf, "%s\r\nebx: %08X", buf, contextRecord->Ebx);
+	sprintf(buf, "%s\r\necx: %08X", buf, contextRecord->Ecx);
+	sprintf(buf, "%s\r\nedx: %08X", buf, contextRecord->Edx);
+	sprintf(buf, "%s\r\nedi: %08X", buf, contextRecord->Edi);
+	sprintf(buf, "%s\r\nesi: %08X", buf, contextRecord->Esi);
+	sprintf(buf, "%s\r\nebp: %08X", buf, contextRecord->Ebp);
+
+	UInt32* esp = (UInt32*)contextRecord->Esp;
+	sprintf(buf, "%s\r\n\r\nSTACK", buf);
+	sprintf(buf, "%s\r\n%08X |", buf, esp);
+
+	UInt32 i = 0;
+	do {
+		UInt32 p = esp[i];
+		sprintf(buf, "%s\r\n%08X |", buf, p);
+	} while (++i < 10);
+
+	_MESSAGE("%s", buf);
+	MessageBoxA(nullptr, buf, "Error", MB_ICONERROR | MB_OK);
+	
 	return s_originalFilter && s_originalFilter(info);
 };
 
