@@ -5,6 +5,7 @@
 #define UI_CMD_ADDLOGTEXT	(WM_APP + 1)
 #define UI_CMD_CLEARLOGTEXT (WM_APP + 2)
 #define UI_CMD_AUTOSCROLL	(WM_APP + 3)
+#define UI_CMD_ADDLOGTEXT_NOFREE (WM_APP + 4)
 
 #define UI_EXTMENU_ID			51001
 #define UI_EXTMENU_SHOWLOG		51002
@@ -24,6 +25,7 @@
 #define ID_RENDERWINDOW_SHOWWATER_CHECKBOX	51015
 #define ID_RENDERWINDOW_SHOWPORTALS_CHECKBOX	51016
 #define UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED	51017
+#define MAIN_WINDOW_CALLBACK 0xFEED
 
 // unused button in vanilla menu
 #define MENUOPTION_RENDER_WINDOW 0x9D06
@@ -616,7 +618,16 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 			}
 		}
 		return 0;
+			
+		case MAIN_WINDOW_CALLBACK:
+		{
+			auto callback = reinterpret_cast<void(*)()>(lParam);
+			callback();
 		}
+		return 0;
+		}
+		
+		
 	}
 	else if (Message == WM_SETTEXT && Hwnd == g_MainHwnd)
 	{
@@ -652,6 +663,38 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 	}
 
 	return CallWindowProc(OldEditorUI_WndProc, Hwnd, Message, wParam, lParam);
+}
+
+void AddLogText(LPARAM lParam, HWND richEditHwnd, bool doFree)
+{
+	void* textData = (void*)lParam;
+
+	//	Save old position if not scrolling
+	POINT scrollRange;
+
+	if (!bAutoScroll)
+	{
+		SendMessageA(richEditHwnd, WM_SETREDRAW, FALSE, 0);
+		SendMessageA(richEditHwnd, EM_GETSCROLLPOS, 0, (WPARAM)&scrollRange);
+	}
+
+	//	Move caret to the end, then write
+	CHARRANGE range;
+	range.cpMin = LONG_MAX;
+	range.cpMax = LONG_MAX;
+
+	SendMessageA(richEditHwnd, EM_EXSETSEL, 0, (LPARAM)&range);
+	SendMessageA(richEditHwnd, EM_REPLACESEL, FALSE, (LPARAM)textData);
+
+	if (!bAutoScroll)
+	{
+		SendMessageA(richEditHwnd, EM_SETSCROLLPOS, 0, (WPARAM)&scrollRange);
+		SendMessageA(richEditHwnd, WM_SETREDRAW, TRUE, 0);
+		RedrawWindow(richEditHwnd, nullptr, nullptr, RDW_ERASE | RDW_INVALIDATE | RDW_NOCHILDREN);
+	}
+
+	if (doFree)
+		free(textData);
 }
 
 LRESULT CALLBACK EditorUI_LogWndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
@@ -775,36 +818,18 @@ LRESULT CALLBACK EditorUI_LogWndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPA
 
 	case UI_CMD_ADDLOGTEXT:
 	{
-		void* textData = (void*)lParam;
-
-		//	Save old position if not scrolling
-		POINT scrollRange;
-
-		if (!bAutoScroll)
-		{
-			SendMessageA(richEditHwnd, WM_SETREDRAW, FALSE, 0);
-			SendMessageA(richEditHwnd, EM_GETSCROLLPOS, 0, (WPARAM)&scrollRange);
-		}
-
-		//	Move caret to the end, then write
-		CHARRANGE range;
-		range.cpMin = LONG_MAX;
-		range.cpMax = LONG_MAX;
-
-		SendMessageA(richEditHwnd, EM_EXSETSEL, 0, (LPARAM)&range);
-		SendMessageA(richEditHwnd, EM_REPLACESEL, FALSE, (LPARAM)textData);
-
-		if (!bAutoScroll)
-		{
-			SendMessageA(richEditHwnd, EM_SETSCROLLPOS, 0, (WPARAM)&scrollRange);
-			SendMessageA(richEditHwnd, WM_SETREDRAW, TRUE, 0);
-			RedrawWindow(richEditHwnd, nullptr, nullptr, RDW_ERASE | RDW_INVALIDATE | RDW_NOCHILDREN);
-		}
-
-		free(textData);
+		AddLogText(lParam, richEditHwnd, true);
 	}
 	return 0;
 
+
+	case UI_CMD_ADDLOGTEXT_NOFREE:
+	{
+		AddLogText(lParam, richEditHwnd, false);
+	}
+	return 0;
+
+		
 	case UI_CMD_CLEARLOGTEXT:
 	{
 		char emptyString[1] = { '\0' };
