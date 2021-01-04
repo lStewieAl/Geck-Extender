@@ -1759,3 +1759,24 @@ void PatchFasterLipGen()
 	WriteRelCall(0x0058DA9A, (UInt32)hk_sub_8A1FC0);
 	WriteRelCall(0x0047964E, (UInt32)hk_sub_8A1FC0);
 }
+
+__declspec(naked) void LoadCellCheckLinkedRefNullHook()
+{
+	_asm
+	{
+		test eax, eax
+		je isNull
+		mov ecx, [eax]
+		cmp ecx, [eax + 4]
+		ret
+
+	isNull:
+		cmp al, 1 // set flags for jne at retnAddr
+		ret
+	}
+}
+
+void PatchCellExtraDataCrash()
+{
+	WriteRelCall(0x4B0025, UInt32(LoadCellCheckLinkedRefNullHook));
+}

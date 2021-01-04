@@ -622,6 +622,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	PatchFasterLipGen();
 
+	PatchCellExtraDataCrash();
+
 	return true;
 }
 

@@ -67,7 +67,7 @@ static const UInt32 kPatch_Warnings3[] =
 	0x00468E1A,	//	This operation was not completed because CreateFileMapping failed to open file \"%s\" with error:\n%s\n\nExit other applications, restart the Construction Set, and try again.
 	0x00469839,	//	Form at offset %i has an invalid length.
 	0x0046992D,	//	Form Group at offset %i has an invalid length.
-	0x00469C8C,	//	File index %i is invalid. Clamping to 01. Does a master file depend on more than one master?
+//	0x00469C8C,	//	File index %i is invalid. Clamping to 01. Does a master file depend on more than one master?
 	0x0046A918,	//	Master file %s does not contain form groups. This master file must be upgraded before it can be used.
 	0x0046AA36,	//	DeviceIoControl failed to open \"%s\" in TESVersionControl::OpenFile\n%s
 	0x0046AD80,	//	Form Group at offset %i extends past the file end.
@@ -77,8 +77,8 @@ static const UInt32 kPatch_Warnings3[] =
 	0x0046AE6E,	//	Form Group at offset %i ends at a FORM it should not at offset %i.
 	0x0046B204,	//	Form (%08X) exceeds maximum size.
 	0x0046B2BC,	//	Form insert at offset %i beyond the end of group at offset %i is changing that group's size. File may be corrupt.
-	0x0046C5CD,	//	File index %i is invalid. Clamping to 01. Does a master file depend on more than one master?
-	0x0046C83E,	//	File index %i is invalid. Clamping to 01. Does a master file depend on more than one master?
+//	0x0046C5CD,	//	File index %i is invalid. Clamping to 01. Does a master file depend on more than one master?
+//	0x0046C83E,	//	File index %i is invalid. Clamping to 01. Does a master file depend on more than one master?
 	0x0046C881,	//	ID for Form %s '%s' (%08X) is not marked as used.
 	0x0046C8F4,	//	User for Form %s '%s' (%08X) is %i (%s) in file but %i (%s) as loaded.
 	0x0046C9CF,	//	Failed to create bit array files for file %s.
@@ -101,8 +101,8 @@ static const UInt32 kPatch_Warnings3[] =
 	0x00470CA2,	//	Failed to create offset array for worldspace '%s' (%08X) due to invalid width (%i) or height (%i).
 	0x00470DD0,	//	Cell (%08X) (%i, %i) is out of bounds for worldspace '%s' (%08X).
 	0x00470E0A,	//	Could not find cell (%08X) for worldspace '%s' (%08X).
-	0x00471206,	//	File index %i is invalid. Clamping to 01. Does a master file depend on more than one master?
-	0x004714A2,	//	File index %i is invalid. Clamping to 01. Does a master file depend on more than one master?
+//	0x00471206,	//	File index %i is invalid. Clamping to 01. Does a master file depend on more than one master?
+//	0x004714A2,	//	File index %i is invalid. Clamping to 01. Does a master file depend on more than one master?
 	0x00471CE8,	//	Could not find form for %s (%08X).
 	0x00472095,	//	Failed to create temp copy file with error %i.
 	0x004721F0,	//	Failed to create buffer for new file.

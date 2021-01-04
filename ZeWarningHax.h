@@ -436,6 +436,33 @@ __declspec(naked) void hk_EnableScriptErrorsMsgHook()
 	}
 }
 
+__declspec(naked) void hk_UnableToFindPortalLinkedMsgHook()
+{
+	static const UInt32 retnAddr = 0x4B000E;
+	static const char* msg = "MASTERFILE: Unable to find portal linked reference %08X for ref %08X. Portal linked reference data will be removed.";
+	_asm
+	{
+		push [ebp + 0xC] // form->refID
+		push msg
+		jmp retnAddr
+	}
+}
+
+__declspec(naked) void hk_RemovingEmptyReflectorWaterMsgHook()
+{
+	static const UInt32 retnAddr = 0x4B0482;
+	static const char* msg = "MASTERFILE: Removing empty reflector water extra for ref %08X.";
+	_asm
+	{
+		push [ebp + 0xC] // form->refID
+		push msg
+		jmp retnAddr
+	}
+}
+
+
+
+
 void WriteErrorMessageHooks() {
 	//	Fix message bugs/change message formatting - credit to roy
 	SafeWrite32(0x00468D13 + 1, (UInt32)messageCreateFileMapping);
@@ -534,4 +561,10 @@ void WriteErrorMessageHooks() {
 	//	patch script editor messages - credit to roy
 	WriteRelJump(0x005C57E2, (UInt32)hk_EnableScriptErrorsMsgHook);
 	XUtil::PatchMemoryNop(0x005C57E7, 0x06);
+
+	WriteRelJump(0x4B0009, UInt32(hk_UnableToFindPortalLinkedMsgHook));
+	SafeWrite8(0x4B0019, 0xC); // add esp, 8 => add esp, 0xC for extra pushed arg
+
+	WriteRelJump(0x4B047D, UInt32(hk_RemovingEmptyReflectorWaterMsgHook));
+	SafeWrite8(0x4B0489, 0x8); // pop extra arg
 }
