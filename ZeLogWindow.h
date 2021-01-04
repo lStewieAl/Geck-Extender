@@ -24,6 +24,7 @@
 #define ID_RENDERWINDOW_SHOWWATER_CHECKBOX	51015
 #define ID_RENDERWINDOW_SHOWPORTALS_CHECKBOX	51016
 #define UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED	51017
+#define MAIN_WINDOW_CALLBACK 0xFEED
 
 // unused button in vanilla menu
 #define MENUOPTION_RENDER_WINDOW 0x9D06
@@ -616,7 +617,16 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 			}
 		}
 		return 0;
+			
+		case MAIN_WINDOW_CALLBACK:
+		{
+			auto callback = reinterpret_cast<void(*)()>(lParam);
+			callback();
 		}
+		return 0;
+		}
+		
+		
 	}
 	else if (Message == WM_SETTEXT && Hwnd == g_MainHwnd)
 	{

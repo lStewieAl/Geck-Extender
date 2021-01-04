@@ -4,6 +4,8 @@
 #include "Editor.h"
 #include "resource.h"
 #include <Psapi.h>
+#include <filesystem>
+#include <unordered_set>
 
 #define GH_NAME				"ZeGaryHax"		// this is the string for IsPluginInstalled and GetPluginVersion (also shows in nvse.log)
 #define GH_VERSION			0				// set this to 0 to enable log output from _DMESSAGE (useful for debug traces)
