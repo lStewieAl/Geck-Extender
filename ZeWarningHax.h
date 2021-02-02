@@ -187,7 +187,7 @@ __declspec(naked) void hk_TryingToAccessLocalVariableInScriptMsgHook()
 {
 	static const char* messageFormat = "SCRIPTS: Trying to access local variable %d in script '%s' (%08X) -- variable not found.\r\n";
 	static const UInt32 kRetnAddr = 0x005C2852;
-	uint32_t kTemp;
+	static uint32_t kTemp;
 
 	__asm
 	{
@@ -221,7 +221,7 @@ __declspec(naked) void hk_CouldNotFindMediaLocationControllerMsgHook()
 {
 	static const char* messageFormat = "MASTERFILE: Could not find MediaLocationController (%08X) for AudioMarker (%08X) in extra data list.";
 	static const UInt32 kRetnAddr = 0x004AF98C;
-	uint32_t kTemp;
+	static uint32_t kTemp;
 
 	__asm
 	{
@@ -358,7 +358,7 @@ __declspec(naked) void hk_EnableStateParentLoopMsgHook()
 {
 	static const char* messageFormat = "MASTERFILE: Enable state parent loop detected in ref (%08X). Parent removed.";
 	static const UInt32 kRetnAddr = 0x004AFDB7;
-	uint32_t kTemp;
+	static uint32_t kTemp;
 
 	__asm
 	{
@@ -377,7 +377,7 @@ __declspec(naked) void hk_RemoveEmptyActivateParentMsgHook()
 {
 	static const char* messageFormat = "MASTERFILE: Removing empty activate parent extra data in ref (%08X).";
 	static const UInt32 kRetnAddr = 0x004B0214;
-	uint32_t kTemp;
+	static uint32_t kTemp;
 
 	__asm
 	{
@@ -396,7 +396,7 @@ __declspec(naked) void hk_UnableToFindLeveledObjectMsgHook()
 {
 	static const char* messageFormat = "Unable to find Leveled Object Form (%08X) for owner object \"%s\" (%08X).";
 	static const UInt32 kRetnAddr = 0x005004BB;
-	uint32_t kTemp;
+	static uint32_t kTemp;
 
 	__asm
 	{

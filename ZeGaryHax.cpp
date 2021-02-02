@@ -623,6 +623,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	PatchFasterLipGen();
 
 	PatchCellExtraDataCrash();
+	// prevent geck from crashing when using search
+	// buffer too small, move to 16 megs - Kormakur
+	SafeWrite32(0x485865 + 1, 0x100000);
 
 	return true;
 }
