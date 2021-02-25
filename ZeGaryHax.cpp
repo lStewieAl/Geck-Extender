@@ -92,6 +92,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	bNavmeshFindCoverConfirmPrompt = GetOrCreateINIInt("General", "bNavmeshFindCoverConfirmPrompt", 0, iniName);
 	bFaceGenOnlyEdited = GetOrCreateINIInt("General", "bFaceGenOnlyEdited", 1, iniName);
 	bDisableTextureMirroring = GetOrCreateINIInt("General", "bDisableTextureMirroring", 0, iniName);
+	bObjectWindowOnlyShowEditedByDefault = GetOrCreateINIInt("General", "bObjectWindowOnlyShowEditedForms", 0, iniName);
 
 	bPatchScriptEditorFont = GetOrCreateINIInt("Script", "bPatchEditorFont", 1, iniName);
 	bScriptCompileWarningPopup = GetOrCreateINIInt("Script", "bScriptCompileWarningPopup", 0, iniName);

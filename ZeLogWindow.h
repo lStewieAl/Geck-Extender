@@ -46,6 +46,11 @@ HWND g_allowCellWindowLoadsButtonHwnd;
 HWND g_renderWindowShowWaterButtonHwnd;
 HWND g_renderWindowShowPortalsButtonHwnd;
 
+void RefreshObjectsWindow()
+{
+	((bool(__stdcall*)(HWND hWnd, UInt32 msg, WPARAM, LPARAM))(0x449E50))(NULL, 1042, NULL, NULL);
+}
+
 void ToggleNavmeshPlaceAboveOthers(bool isAllowed)
 {
 	//	Patch Navmesh editing to allow placing vertices over existing navmesh (disables line bisection)
@@ -63,9 +68,6 @@ void ToggleObjectWindowFilterUnedited(bool show)
 	{
 		WriteRelJump(0x439739, UInt32(ObjectWindowListFilterUneditedHook));
 	}
-
-	// refresh object window
-	((bool(__stdcall*)(HWND hWnd, UInt32 msg, WPARAM, LPARAM))(0x449E50))(NULL, 1042, NULL, NULL);
 }
 
 
@@ -291,6 +293,17 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 				SafeWrite16(0x5C4E3C, 0x4D6B);
 			}
 
+			if (bObjectWindowOnlyShowEditedByDefault)
+			{
+				ToggleObjectWindowFilterUnedited(false);
+
+				MENUITEMINFO menuInfo;
+				menuInfo.cbSize = sizeof(MENUITEMINFO);
+				menuInfo.fMask = MIIM_STATE;
+				menuInfo.fState = MFS_CHECKED;
+				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED, FALSE, &menuInfo);
+			}
+
 			MENUITEMINFO menuInfo;
 			menuInfo.cbSize = sizeof(MENUITEMINFO);
 			menuInfo.fMask = MIIM_STATE;
@@ -491,6 +504,8 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED, FALSE, &menuInfo);
 				ToggleObjectWindowFilterUnedited(false);
 			}
+
+			RefreshObjectsWindow();
 		}
 		return 0;
 
