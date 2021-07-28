@@ -222,7 +222,7 @@ void EditorUI_LogVa(const char* Format, va_list Va)
 	if (g_ConsoleHwnd)
 		PostMessageA(g_ConsoleHwnd, UI_CMD_ADDLOGTEXT, 0, (LPARAM)_strdup(buffer));
 
-	_MESSAGE(buffer);
+	_MESSAGE("%s", buffer);
 }
 
 void EditorUI_Log(const char* Format, ...)
