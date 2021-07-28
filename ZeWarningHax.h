@@ -413,7 +413,7 @@ __declspec(naked) void hk_UnableToFindLeveledObjectMsgHook()
 }
 
 void DoScriptErrorWarning(char* errorMsg) {
-	EditorUI_Log2(errorMsg);
+	EditorUI_Log2("%s", errorMsg);
 	if (bScriptCompileWarningPopup) {
 		MessageBoxExA(NULL, errorMsg, "Script Compile Error", MB_ICONWARNING, NULL);
 	}
