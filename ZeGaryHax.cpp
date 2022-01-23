@@ -631,6 +631,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// Remove script data size limit in GECK - Kormakur
 	WriteRelJump(0x5C92E6, UInt32(Hook_RemoveScriptDataLimit));
 
+	// make weapon mods in object window show the same information as misc items
+	SafeWrite8(0x438B94 + kFormType_ItemMod, 0x11);
+
 	return true;
 }
 
