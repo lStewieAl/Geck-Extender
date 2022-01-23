@@ -628,6 +628,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// buffer too small, move to 16 megs - Kormakur
 	SafeWrite32(0x485865 + 1, 0x100000);
 
+	// Remove script data size limit in GECK - Kormakur
+	WriteRelJump(0x5C92E6, UInt32(Hook_RemoveScriptDataLimit));
+
 	return true;
 }
 

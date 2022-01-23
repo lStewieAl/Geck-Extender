@@ -6,6 +6,8 @@
 #include <Psapi.h>
 #include <filesystem>
 #include <unordered_set>
+#include "NiNodes.h"
+#include "GameScript.h"
 
 #define GH_NAME				"ZeGaryHax"		// this is the string for IsPluginInstalled and GetPluginVersion (also shows in nvse.log)
 #define GH_VERSION			0				// set this to 0 to enable log output from _DMESSAGE (useful for debug traces)
@@ -1782,4 +1784,41 @@ __declspec(naked) void LoadCellCheckLinkedRefNullHook()
 void PatchCellExtraDataCrash()
 {
 	WriteRelCall(0x4B0025, UInt32(LoadCellCheckLinkedRefNullHook));
+}
+
+
+void* g_heapManager = reinterpret_cast<void*>(0xF21B5C);
+
+size_t Heap_MemorySize(void* memory)
+{
+	auto msize = ThisStdCall(0x854720, g_heapManager, memory);
+	return msize;
+}
+
+void __fastcall RemoveScriptDataSizeLimit(ScriptBuffer* scriptBuffer, ScriptLineBuffer* lineBuffer)
+{
+	size_t dataSize = Heap_MemorySize(scriptBuffer->scriptData);
+	if (scriptBuffer->dataOffset + lineBuffer->dataOffset + 10 < dataSize)
+		return;
+	const size_t newMemSize = dataSize * 2;
+	void* newMem = FormHeap_Allocate(newMemSize);
+	memset(newMem, 0, newMemSize);
+	memcpy(newMem, scriptBuffer->scriptData, scriptBuffer->dataOffset);
+	FormHeap_Free(scriptBuffer->scriptData);
+	scriptBuffer->scriptData = static_cast<UInt8*>(newMem);
+}
+
+__declspec(naked) void Hook_RemoveScriptDataLimit()
+{
+	__asm
+	{
+		mov eax, [edi + 0x24] // dataOffset_1 = scriptBuf->dataOffset
+		push eax
+		mov edx, esi // line buffer
+		mov ecx, edi // script buffer
+		call RemoveScriptDataSizeLimit
+		pop eax
+		mov ecx, 0x5C9551 // skip function return
+		jmp ecx
+	}
 }
