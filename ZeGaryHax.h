@@ -1812,12 +1812,11 @@ __declspec(naked) void Hook_RemoveScriptDataLimit()
 {
 	__asm
 	{
-		mov eax, [edi + 0x24] // dataOffset_1 = scriptBuf->dataOffset
-		push eax
 		mov edx, esi // line buffer
 		mov ecx, edi // script buffer
 		call RemoveScriptDataSizeLimit
-		pop eax
+
+		mov eax, [edi + 0x24] // dataOffset_1 = scriptBuf->dataOffset
 		mov ecx, 0x5C9551 // skip function return
 		jmp ecx
 	}
