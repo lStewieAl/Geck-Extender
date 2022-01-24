@@ -108,6 +108,7 @@ int bSnapToGridRotationUseDoublePrecision = 0;
 int bFaceGenOnlyEdited = 0;
 int bObjectWindowOnlyShowEditedByDefault = 0;
 int bDisableTextureMirroring = 1;
+int bPreventFaceAndBodyModExports = 0;
 
 int bUseAltShiftMultipliers = 1;
 float fMovementAltMultiplier = 0.15F;

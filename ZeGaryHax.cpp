@@ -93,6 +93,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	bFaceGenOnlyEdited = GetOrCreateINIInt("General", "bFaceGenOnlyEdited", 1, iniName);
 	bDisableTextureMirroring = GetOrCreateINIInt("General", "bDisableTextureMirroring", 0, iniName);
 	bObjectWindowOnlyShowEditedByDefault = GetOrCreateINIInt("General", "bObjectWindowOnlyShowEditedForms", 0, iniName);
+	bPreventFaceAndBodyModExports = GetOrCreateINIInt("General", "bFaceBodyExportPreventTGAFiles", 0, iniName);
 
 	bPatchScriptEditorFont = GetOrCreateINIInt("Script", "bPatchEditorFont", 1, iniName);
 	bScriptCompileWarningPopup = GetOrCreateINIInt("Script", "bScriptCompileWarningPopup", 0, iniName);
@@ -634,10 +635,13 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// make weapon mods in object window show the same information as misc items
 	SafeWrite8(0x438B94 + kFormType_ItemMod, 0x11);
 
-	// prevent .tga files when exporting
-	SafeWriteBuf(0x574A0F, "\x83\xC4\x0C\x90\x90", 5); // face mods
-	SafeWriteBuf(0x570D6B, "\x83\xC4\x0C\x90\x90", 5); // body mods
-	SafeWriteBuf(0x570C50, "\x83\xC4\x0C\x90\x90", 5); // body mods
+	if (bPreventFaceAndBodyModExports)
+	{
+		// prevent .tga files when exporting
+		SafeWriteBuf(0x574A0F, "\x83\xC4\x0C\x90\x90", 5); // face mods
+		SafeWriteBuf(0x570D6B, "\x83\xC4\x0C\x90\x90", 5); // body mods
+		SafeWriteBuf(0x570C50, "\x83\xC4\x0C\x90\x90", 5); // body mods
+	}
 	return true;
 }
 
