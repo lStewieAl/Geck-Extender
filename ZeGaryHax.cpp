@@ -94,6 +94,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	bDisableTextureMirroring = GetOrCreateINIInt("General", "bDisableTextureMirroring", 0, iniName);
 	bObjectWindowOnlyShowEditedByDefault = GetOrCreateINIInt("General", "bObjectWindowOnlyShowEditedForms", 0, iniName);
 	bPreventFaceAndBodyModExports = GetOrCreateINIInt("General", "bFaceBodyExportPreventTGAFiles", 0, iniName);
+	bIgnoreD3D9 = GetOrCreateINIInt("General", "bIgnoreD3D9", 1, iniName);
 
 	bPatchScriptEditorFont = GetOrCreateINIInt("Script", "bPatchEditorFont", 1, iniName);
 	bScriptCompileWarningPopup = GetOrCreateINIInt("Script", "bScriptCompileWarningPopup", 0, iniName);
@@ -642,6 +643,13 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		SafeWriteBuf(0x570D6B, "\x83\xC4\x0C\x90\x90", 5); // body mods
 		SafeWriteBuf(0x570C50, "\x83\xC4\x0C\x90\x90", 5); // body mods
 	}
+
+	if (bIgnoreD3D9)
+	{
+		// ignore the d3d9.dll from the game's folder since dxvk makes the geck super slow
+		SafeWrite32(0xD2318C, (UInt32)hook_LoadLibrary);
+	}
+
 	return true;
 }
 

@@ -109,6 +109,7 @@ int bFaceGenOnlyEdited = 0;
 int bObjectWindowOnlyShowEditedByDefault = 0;
 int bDisableTextureMirroring = 1;
 int bPreventFaceAndBodyModExports = 0;
+int bIgnoreD3D9 = 1;
 
 int bUseAltShiftMultipliers = 1;
 float fMovementAltMultiplier = 0.15F;
@@ -1821,4 +1822,15 @@ __declspec(naked) void Hook_RemoveScriptDataLimit()
 		mov ecx, 0x5C9551 // skip function return
 		jmp ecx
 	}
+}
+
+HMODULE WINAPI hook_LoadLibrary(LPCSTR filename)
+{
+	if (_strcmpi(filename, "d3d9.dll")) return LoadLibrary(filename);
+
+	char path[MAX_PATH];
+	GetSystemDirectory(path, MAX_PATH);
+	strncat(path, "\\d3d9.dll", sizeof(path));
+
+	return LoadLibrary(path);
 }
