@@ -10,7 +10,7 @@
 #include "GameScript.h"
 
 #define GH_NAME				"ZeGaryHax"		// this is the string for IsPluginInstalled and GetPluginVersion (also shows in nvse.log)
-#define GH_VERSION			0				// set this to 0 to enable log output from _DMESSAGE (useful for debug traces)
+#define GH_VERSION			0.38
 #define RES_HACKER_ADDR_TO_ACTUAL 0x4CF800
 
 HMODULE ZeGaryHaxHandle;
