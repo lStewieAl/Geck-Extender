@@ -650,6 +650,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		SafeWrite32(0xD2318C, (UInt32)hook_LoadLibrary);
 	}
 
+	// allow Telekinesis in base effect archtype dropdown
+	SafeWrite8(0xEA8EE8, 0x0);
+
 	return true;
 }
 
