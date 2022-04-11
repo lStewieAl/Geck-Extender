@@ -589,6 +589,11 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		SafeWrite8(patchAddr, 4);
 	}
 
+	// make the perk entries value use 4 decimal places
+	SafeWrite8(0x548A62, 4);
+	SafeWrite8(0x548A8C, 4);
+	SafeWrite32(0x548AEA, 0x00D5DB0C);
+
 	if (bSnapToGridRotationUseDoublePrecision)
 	{
 		// use double precision when calculating reference rotation to fix floating point errors
