@@ -134,7 +134,7 @@ void EndUIDefer()
 				auto& display = pair.first;
 				auto& value = pair.second;
 
-				LRESULT index = SendMessageA(control, CB_ADDSTRING, 0, (LPARAM)display);
+				LRESULT index = hk_SendMessageA(control, CB_ADDSTRING, 0, (LPARAM)display);
 				int lineSize = 0;
 
 				if (index != CB_ERR && index != CB_ERRSPACE)
@@ -204,7 +204,7 @@ void InsertComboBoxItem(HWND ComboBoxHandle, const char* DisplayText, void* Valu
 			}
 		}
 
-		LRESULT index = SendMessageA(ComboBoxHandle, CB_ADDSTRING, 0, (LPARAM)DisplayText);
+		LRESULT index = hk_SendMessageA(ComboBoxHandle, CB_ADDSTRING, 0, (LPARAM)DisplayText);
 
 		if (index != CB_ERR && index != CB_ERRSPACE)
 			SendMessageA(ComboBoxHandle, CB_SETITEMDATA, index, (LPARAM)Value);
