@@ -1875,3 +1875,45 @@ enum EffectType
 	kArchType_LimbCondition = 0x23,
 	kArchType_Turbo = 0x24,
 };
+
+
+struct EntryPointFieldInfo
+{
+	enum FieldType : UInt32
+	{
+		kFieldType_FunctionDataStatic1 = 0,    // dlgID: 998 ( 2456 )
+		kFieldType_FunctionDataStatic2 = 1,    // dlgID: 999 ( 2457 )
+		kFieldType_FunctionDataStatic3 = 2,    // dlgID: 99C ( 2460 )
+		kFieldType_Dropdown = 3, // dlgID: 496 ( 1174 )
+		kFieldType_Input1 = 4,   // dlgID: 99A ( 2458 )
+		kFieldType_Input2 = 5,   // dlgID: 99B ( 2459 )
+		kFieldType_Checkbox = 8,    // dlgID: 1407 ( 5127 )
+	};
+
+	enum DropdownContentType : UInt32
+	{
+		kDropdownContent_ActorValue = 0,
+		kDropdownContent_Quest = 1,
+		kDropdownContent_LeveledItem = 2,
+	};
+
+	FieldType fieldType;
+	DropdownContentType dropdownContentType;
+	UInt32 displayText;
+	UInt32 offsetX;
+	UInt32 offsetY;
+	UInt32 width;
+	UInt32 height;
+};
+
+struct EntryPointFieldTypeInfo
+{
+	UInt32 numParams;
+	EntryPointFieldInfo* fieldInfos;
+	UInt32 entryPointType;
+};
+
+struct EntryPointFieldTypeInfoArray
+{
+	EntryPointFieldTypeInfo infos[9];
+} *entryPointInfoArray = (EntryPointFieldTypeInfoArray*)0xE97D74;
