@@ -124,6 +124,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	bObjectPaletteAllowRandom = GetOrCreateINIInt("Object Palette", "bObjectPaletteAllowRandom", 1, iniName);
 	bObjectPaletteRandomByDefault = GetOrCreateINIInt("Object Palette", "bObjectPaletteRandomByDefault", 0, iniName) != 0;
 
+	bRemoveDialogSoundFilter = GetOrCreateINIInt("Dialog", "bRemoveDialogSoundFilter", 0, iniName) != 0;
+	bCacheComboboxes = GetOrCreateINIInt("Dialog", "bCacheComboboxes", 0, iniName) != 0;
+
 	//	stop geck crash with bUseMultibounds = 0 in exterior cells with multibounds - credit to roy
 	WriteRelCall(0x004CA48F, (UInt32)FixMultiBounds);
 	XUtil::PatchMemoryNop(0x004CA494, 0x05);
@@ -209,6 +212,17 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	//	fix WM_CLOSE in destruction data dialog - credit to roy
 	SafeWrite32(0x004E640F, (UInt32)hk_DialogProc);
 
+	//  removes sound filters that cause dailog window to take ages to load - credit to iranrmrf
+	if (bRemoveDialogSoundFilter)
+	{
+		SafeWriteBuf(0x0058E4F6, "\x83\xC4\x10\xB0\x01", 5);
+		SafeWriteBuf(0x0058E510, "\x83\xC4\x10\xB0\x01", 5);
+	}
+
+	if (bCacheComboboxes)
+	{
+		WriteRelCall(0x0057E5E1, (UInt32)hk_QuestWindowLoad);
+	}
 
 	if (bListEditFix)
 	{

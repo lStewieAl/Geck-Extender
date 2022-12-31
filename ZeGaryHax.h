@@ -110,6 +110,8 @@ int bObjectWindowOnlyShowEditedByDefault = 0;
 int bDisableTextureMirroring = 1;
 int bPreventFaceAndBodyModExports = 0;
 int bIgnoreD3D9 = 1;
+int bRemoveDialogSoundFilter = 0;
+int bCacheComboboxes = 0;
 
 int bUseAltShiftMultipliers = 1;
 float fMovementAltMultiplier = 0.15F;
@@ -129,6 +131,14 @@ static const char* geckwikiurl = "https://geckwiki.com/index.php/";
 static const char* geckwikiscriptingurl = "https://geckwiki.com/index.php/Category:Scripting";
 static const char* geckwikicommandsurl = "https://geckwiki.com/index.php/Category:Commands";
 static const char* geckwikifunctionsurl = "https://geckwiki.com/index.php/Category:Functions";
+
+#define ID_CMB_IDLE_SPEAKER 2170
+#define ID_CMB_IDLE_LISTENER 2173
+#define ID_CMB_SPEAKER 2564
+
+int cb_ids[3] = { ID_CMB_IDLE_SPEAKER, ID_CMB_IDLE_LISTENER, ID_CMB_SPEAKER };
+bool cb_filled[3] = { };
+bool cb_reset[3] = { };
 
 // From NVSE Hooks_Editor.cpp
 // Patch script window font
@@ -358,12 +368,23 @@ BOOL WINAPI hk_EndDialog(HWND hDlg, INT_PTR nResult)
 	return EndDialog(hDlg, nResult);
 }
 
+__declspec(naked) void hk_QuestWindowLoad()
+{
+	__asm
+	{
+		mov eax, dword ptr ds : [0x00ECC3C8]
+		mov cb_reset[0], 1
+		mov cb_reset[1], 1
+		mov cb_reset[2], 1
+		ret
+	}
+}
+
 LRESULT WINAPI hk_SendMessageA(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
 	if (hWnd && Msg == WM_DESTROY)
 	{
 		std::lock_guard<std::recursive_mutex> lock(g_DialogMutex);
-
 		// If this is a dialog, we can't call DestroyWindow on it
 		auto itr = g_DialogOverrides.find(hWnd);
 		if (itr != g_DialogOverrides.end())
@@ -375,6 +396,34 @@ LRESULT WINAPI hk_SendMessageA(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam
 		return 0;
 	}
 
+	if (bCacheComboboxes)
+	{
+		int id = GetDlgCtrlID(hWnd);
+		for (int i = 0; i < _countof(cb_ids); i++)
+		{
+			if (id == cb_ids[i])
+			{
+				if (Msg == CB_ADDSTRING)
+				{
+					if (cb_filled[i])
+					{
+						return CB_ERR;
+					}
+				}
+				else if (Msg == CB_RESETCONTENT)
+				{
+					if (!cb_reset[i])
+					{
+						cb_filled[i] = !!SendMessageA(hWnd, CB_GETCOUNT, NULL, NULL);
+						return CB_ERR;
+					}
+					cb_filled[i] = false;
+					cb_reset[i] = false;
+				}
+				break;
+			}
+		}
+	}
 	return SendMessageA(hWnd, Msg, wParam, lParam);
 }
 
