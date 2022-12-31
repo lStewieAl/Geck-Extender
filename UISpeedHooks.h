@@ -195,8 +195,11 @@ void WriteUIHooks() {
 	WriteRelCall(0x5979EF, UInt32(hk_sub_595800));
 
 	// speed up responses window by defering dropdown box rendering
-	WriteRelCall(0x56CC12, UInt32(hk_sub_56B270));
-	WriteRelCall(0x56CC52, UInt32(hk_sub_56B270));
+	if (!bCacheComboboxes)
+	{
+		WriteRelCall(0x56CC12, UInt32(hk_sub_56B270));
+		WriteRelCall(0x56CC52, UInt32(hk_sub_56B270));
+	}
 
 	// speed up weapons window
 	WriteRelCall(0x50A046, UInt32(hk_sub_47D910));
