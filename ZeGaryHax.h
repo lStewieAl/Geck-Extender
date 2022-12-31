@@ -401,7 +401,7 @@ LRESULT WINAPI hk_SendMessageA(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam
 		int id = GetDlgCtrlID(hWnd);
 		for (int i = 0; i < _countof(cb_ids); i++)
 		{
-			if (id = cb_ids[i])
+			if (id == cb_ids[i])
 			{
 				if (Msg == CB_ADDSTRING)
 				{
