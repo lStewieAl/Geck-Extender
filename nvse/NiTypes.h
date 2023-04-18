@@ -97,6 +97,15 @@ struct NiColorAlpha
 	float	g;
 	float	b;
 	float	a;
+
+	NiColorAlpha(float r, float g, float b, float a) : r(r), g(g), b(b), a(a) {};
+
+	void Scale(float fScale) {
+		r *= fScale;
+		g *= fScale;
+		b *= fScale;
+		a *= fScale;
+	};
 };
 
 // 10
