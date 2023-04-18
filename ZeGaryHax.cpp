@@ -673,6 +673,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// allow Telekinesis in base effect archtype dropdown
 	SafeWrite8(0xEA8EE8, 0x0);
 
+	WriteRelCall(0x596581, UInt32(ExportDialogueEndPlaySound));
 	return true;
 }
 

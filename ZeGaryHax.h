@@ -1965,3 +1965,9 @@ struct EntryPointFieldTypeInfoArray
 {
 	EntryPointFieldTypeInfo infos[9];
 } *entryPointInfoArray = (EntryPointFieldTypeInfoArray*)0xE97D74;
+
+void __cdecl ExportDialogueEndPlaySound(WPARAM wParam, LPARAM lParam)
+{
+	PlaySound("MouseClick", NULL, SND_ASYNC);
+	((void(__cdecl*)(WPARAM, LPARAM))(0x4657A0))(wParam, lParam);
+}
