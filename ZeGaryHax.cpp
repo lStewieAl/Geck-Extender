@@ -95,6 +95,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	bObjectWindowOnlyShowEditedByDefault = GetOrCreateINIInt("General", "bObjectWindowOnlyShowEditedForms", 0, iniName);
 	bPreventFaceAndBodyModExports = GetOrCreateINIInt("General", "bFaceBodyExportPreventTGAFiles", 0, iniName);
 	bIgnoreD3D9 = GetOrCreateINIInt("General", "bIgnoreD3D9", 1, iniName);
+	bAutoLightWarnings = GetOrCreateINIInt("General", "bAutoLightWarnings", 0, iniName);
 
 	bPatchScriptEditorFont = GetOrCreateINIInt("Script", "bPatchEditorFont", 1, iniName);
 	bScriptCompileWarningPopup = GetOrCreateINIInt("Script", "bScriptCompileWarningPopup", 0, iniName);

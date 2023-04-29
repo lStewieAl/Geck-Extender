@@ -110,6 +110,7 @@ int bObjectWindowOnlyShowEditedByDefault = 0;
 int bDisableTextureMirroring = 1;
 int bPreventFaceAndBodyModExports = 0;
 int bIgnoreD3D9 = 1;
+int bAutoLightWarnings = 0;
 int bRemoveDialogSoundFilter = 0;
 int bCacheComboboxes = 0;
 

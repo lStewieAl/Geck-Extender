@@ -125,17 +125,16 @@ _declspec(naked) void DebugShaderHook965B40()
 
 
 // TODO - Wall
-// Attach bAutoPreview to some button or a hotkey
+// Attach bAutoLightWarnings to some button or a hotkey
 // Finish Lighting30Shader variant
 
-static bool bAutoPreview = false;
 static bool bRenderModeChanged = false;
 static DebugRenderModes eLastRenderMode = DEBUG_NONE;
 
 void inline HandleDebugRender(DWORD* pShader, DWORD* pShaderProperty, DWORD* pRenderPass, DWORD* pGeometry, DWORD* pMaterialProperty, bool bIs30Shader) {
 	UInt32 uiLightCount = ThisStdCall(0x925830, pShaderProperty); // GetActiveLightCount
 
-	static bool bAutoColor = bAutoPreview && (uiLightCount > 6) && eDebugRenderMode != DEBUG_LIGHT_COUNT;
+	bool bAutoColor = bAutoLightWarnings && (uiLightCount > 6) && eDebugRenderMode != DEBUG_LIGHT_COUNT;
 
 	if (eLastRenderMode != eDebugRenderMode) {
 		bRenderModeChanged = true;
