@@ -95,7 +95,6 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	bObjectWindowOnlyShowEditedByDefault = GetOrCreateINIInt("General", "bObjectWindowOnlyShowEditedForms", 0, iniName);
 	bPreventFaceAndBodyModExports = GetOrCreateINIInt("General", "bFaceBodyExportPreventTGAFiles", 0, iniName);
 	bIgnoreD3D9 = GetOrCreateINIInt("General", "bIgnoreD3D9", 1, iniName);
-	bAutoLightWarnings = GetOrCreateINIInt("General", "bAutoLightWarnings", 0, iniName);
 
 	bPatchScriptEditorFont = GetOrCreateINIInt("Script", "bPatchEditorFont", 1, iniName);
 	bScriptCompileWarningPopup = GetOrCreateINIInt("Script", "bScriptCompileWarningPopup", 0, iniName);
@@ -112,6 +111,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	bShowTimeOfDaySlider = GetOrCreateINIInt("Render Window", "bShowTimeOfDaySlider", 1, iniName);
 	bNavmeshAllowPlaceAboveOthers = GetOrCreateINIInt("Render Window", "bNavmeshAllowPlaceAboveOthers", 1, iniName);
 	bSnapToGridRotationUseDoublePrecision = GetOrCreateINIInt("Render Window", "bSnapToGridRotationUseDoublePrecision", 0, iniName);
+	bAutoLightWarnings = GetOrCreateINIInt("Render Window", "bAutoLightWarnings", 0, iniName);
 
 	bSmoothFlycamRotation = GetOrCreateINIInt("Flycam", "bSmoothRotation", 1, iniName);
 	bFlycamUpDownRelativeToWorld = GetOrCreateINIInt("Flycam", "bFlycamUpDownRelativeToWorld", 1, iniName);
@@ -125,8 +125,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	bObjectPaletteAllowRandom = GetOrCreateINIInt("Object Palette", "bObjectPaletteAllowRandom", 1, iniName);
 	bObjectPaletteRandomByDefault = GetOrCreateINIInt("Object Palette", "bObjectPaletteRandomByDefault", 0, iniName) != 0;
 
-	bRemoveDialogSoundFilter = GetOrCreateINIInt("Dialog", "bRemoveDialogSoundFilter", 0, iniName) != 0;
-	bCacheComboboxes = GetOrCreateINIInt("Dialog", "bCacheComboboxes", 0, iniName) != 0;
+	bRemoveDialogSoundFilter = GetOrCreateINIInt("Dialog", "bRemoveDialogSoundFilter", 1, iniName) != 0;
+	bCacheComboboxes = GetOrCreateINIInt("Dialog", "bCacheComboboxes", 1, iniName) != 0;
 
 	//	stop geck crash with bUseMultibounds = 0 in exterior cells with multibounds - credit to roy
 	WriteRelCall(0x004CA48F, (UInt32)FixMultiBounds);
