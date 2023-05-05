@@ -188,8 +188,6 @@ void RestoreRenderWindowDebugShaders()
 	WriteRelCall(0x94FBAB, UInt32(ShadowLightShader_UpdateAmbientColorEx));
 	//WriteRelCall(0x966625, UInt32(Lighting30Shader_UpdateAmbientColor30Ex));
 
-#define RES_HACKER_ADDR_TO_ACTUAL 0x4CF800
-
 	// Set WS_VISIBLE on debug shader buttons - Stewie
 	SafeWrite8(RES_HACKER_ADDR_TO_ACTUAL + 0xC2DD97, 0x50);
 	SafeWrite8(RES_HACKER_ADDR_TO_ACTUAL + 0xC2DD97 + 0x30, 0x50);
