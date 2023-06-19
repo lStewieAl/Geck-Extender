@@ -58,8 +58,22 @@ bool NVSEPlugin_Query(const NVSEInterface* nvse, PluginInfo* info)
 	return (nvse->isEditor && nvse->nvseVersion >= NVSE_VERSION_INTEGER);
 }
 
+void CreateLogFile()
+{
+	// ensures the log file is created beside the EXE instead of the working directory...
+	char logPath[MAX_PATH];
+	GetModuleFileNameA(NULL, logPath, MAX_PATH);
+
+	char* last_slash = strrchr(logPath, '\\');
+
+	strncpy(last_slash, "\\EditorWarnings.log", sizeof(logPath) - (last_slash - logPath) - 1);
+	gLog.Open(logPath);
+}
+
 bool NVSEPlugin_Load(const NVSEInterface* nvse)
 {
+	CreateLogFile();
+
 	_DMESSAGE("Geck Extender Base Address: %08X", GetModuleHandle("ZeGaryHax.dll"));
 
 	//	ini thing - credit to carxt
@@ -677,9 +691,26 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	RestoreRenderWindowDebugShaders();
 
 	WriteRelCall(0x596581, UInt32(ExportDialogueEndPlaySound));
+
+	// allow opening meshes outside the Data\\Meshes\\ folder
+	SafeWrite8(0x410656, 0xEB);
+	SafeWrite8(0x410678, 0x56);
+	WriteRelCall(0x8A2CC8, UInt32(OnGetMeshPathModifyIfDragDrop));
+
+	// always show imposters
+	SafeWrite8(0x65688D, 0xEB);
+
+	// fix crash when clicking on 'Regions' without an esm loaded
+	WriteRelCall(0x743F8E, UInt32(OnLoadRegionsHook));
+
+#ifdef _DEBUG
+	while(!IsDebuggerPresent())
+	{
+		Sleep(1);
+	}
+#endif
 	return true;
 }
-
 
 static int konamiStage = 0;
 void doKonami(int key) {

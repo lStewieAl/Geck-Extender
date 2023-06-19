@@ -17,7 +17,7 @@ HMODULE ZeGaryHaxHandle;
 extern HWND g_trackBarHwnd;
 extern HWND g_timeOfDayTextHwnd;
 extern HWND g_allowCellWindowLoadsButtonHwnd;
-IDebugLog	gLog("EditorWarnings.log");
+IDebugLog	gLog;
 
 void EditorUI_Log(const char* Format, ...);
 BOOL __stdcall HavokPreviewCallback(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
@@ -1315,17 +1315,27 @@ LONG WINAPI DoCrashSave(EXCEPTION_POINTERS* info)
 	sprintf(buf, "%s\r\nedi: %08X", buf, contextRecord->Edi);
 	sprintf(buf, "%s\r\nesi: %08X", buf, contextRecord->Esi);
 	sprintf(buf, "%s\r\nebp: %08X", buf, contextRecord->Ebp);
+	sprintf(buf, "%s\r\nesp: %08X", buf, contextRecord->Esp);
 
 	UInt32* esp = (UInt32*)contextRecord->Esp;
 	sprintf(buf, "%s\r\n\r\nSTACK", buf);
-	sprintf(buf, "%s\r\n%08X |", buf, esp);
 
-	UInt32 i = 0;
-	do {
-		UInt32 p = esp[i];
-		sprintf(buf, "%s\r\n%08X |", buf, p);
-	} while (++i < 10);
+	char stack[0x1000];
+	*stack = 0;
+	__try
+	{
+		for (int row = 0; row < 16; ++row)
+		{
+			for (int col = 0; col < 4; ++col)
+			{
+				sprintf(stack, "%s%08X |", stack, esp[row * 4 + col]);
+			}
+			strcat(stack, "\r\n");
+		}
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER) {};
 
+	sprintf(buf, "%s\r\n%s", buf, stack);
 	_MESSAGE("%s", buf);
 	MessageBoxA(nullptr, buf, "Error", MB_ICONERROR | MB_OK);
 	
@@ -1971,4 +1981,39 @@ void __cdecl ExportDialogueEndPlaySound(WPARAM wParam, LPARAM lParam)
 {
 	PlaySound("MouseClick", NULL, SND_ASYNC);
 	((void(__cdecl*)(WPARAM, LPARAM))(0x4657A0))(wParam, lParam);
+}
+
+errno_t __cdecl OnGetMeshPathModifyIfDragDrop(char* Dst, rsize_t SizeInBytes, const char* Src)
+{
+	bool isDragDrop = *Src && Src[1] == ':' && Src[2] == '\\';
+	if (isDragDrop)
+	{
+		return ((errno_t(__cdecl*)(char* Dst, rsize_t SizeInBytes, const char* Src))(0xC5BE82))(Dst, SizeInBytes, Src); // strcpy_s
+	}
+	return ((errno_t(__cdecl*)(char* Dst, rsize_t SizeInBytes, const char* Src))(0xC5BEEA))(Dst, SizeInBytes, Src); // strcat_s
+}
+
+__declspec(naked) void OnLoadRegionsHook()
+{
+	_asm
+	{
+		cmp dword ptr ds : [esi + 0x10], ebx
+		je nullRegion
+		cmp ebp, -1
+		je noRegions
+
+		pop eax
+		mov eax, 0x743F9D
+		jmp eax
+
+	nullRegion:
+		ret
+
+	noRegions:
+		pop eax
+		pop ebp
+		pop esi
+		pop ebx
+		ret 4
+	}
 }
