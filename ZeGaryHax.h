@@ -113,6 +113,7 @@ int bIgnoreD3D9 = 1;
 int bAutoLightWarnings = 0;
 int bRemoveDialogSoundFilter = 0;
 int bCacheComboboxes = 0;
+int bNoRecordCompression = 1;
 
 int bUseAltShiftMultipliers = 1;
 float fMovementAltMultiplier = 0.15F;
