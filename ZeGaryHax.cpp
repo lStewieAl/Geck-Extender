@@ -109,6 +109,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	bObjectWindowOnlyShowEditedByDefault = GetOrCreateINIInt("General", "bObjectWindowOnlyShowEditedForms", 0, iniName);
 	bPreventFaceAndBodyModExports = GetOrCreateINIInt("General", "bFaceBodyExportPreventTGAFiles", 0, iniName);
 	bIgnoreD3D9 = GetOrCreateINIInt("General", "bIgnoreD3D9", 1, iniName);
+	bNoRecordCompression = GetOrCreateINIInt("General", "bNoRecordCompression", 1, iniName);
 
 	bPatchScriptEditorFont = GetOrCreateINIInt("Script", "bPatchEditorFont", 1, iniName);
 	bScriptCompileWarningPopup = GetOrCreateINIInt("Script", "bScriptCompileWarningPopup", 0, iniName);
@@ -702,6 +703,14 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	// fix crash when clicking on 'Regions' without an esm loaded
 	WriteRelCall(0x743F8E, UInt32(OnLoadRegionsHook));
+
+	if (bNoRecordCompression) {
+		// Remove record compression
+		XUtil::PatchMemoryNop(0x5726C9, 5); // TESNPC
+		SafeWrite8(0x5726C9, 0xC3);
+
+		XUtil::PatchMemoryNop(0x624632, 5); // TESObjectLAND
+	}
 
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
