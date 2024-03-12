@@ -2038,7 +2038,7 @@ namespace CustomFOV
 	STATIC_ASSERT(sizeof(NiCamera) == 0x114);
 	STATIC_ASSERT(offsetof(NiCamera, m_kViewFrustum) == 0xDC);
 
-	static float fFOV = 90.0F;
+	static float fFOVTan = 1.0F;
 	bool __fastcall NiWindow__UpdateCamera(void* window, void* edx, NiCamera* apCamera, UInt32 auiWidth, UInt32 auiHeight, float afEndClipDist)
 	{
 		if (!apCamera)
@@ -2049,13 +2049,10 @@ namespace CustomFOV
 		NiFrustum kNewFrustum = {};
 		float fAspectRatio = static_cast<float>(auiHeight) / auiWidth;
 
-		float fScaledFOV = fFOV * 0.01745329238474369 * 0.5;
-		float fTan = tan(fScaledFOV);
-
-		kNewFrustum.l = -fTan * 0.5;
-		kNewFrustum.r = fTan * 0.5;
-		kNewFrustum.b = -fTan * fAspectRatio * 0.5;
-		kNewFrustum.t = fTan * fAspectRatio * 0.5;
+		kNewFrustum.l = -fFOVTan * 0.5;
+		kNewFrustum.r = fFOVTan * 0.5;
+		kNewFrustum.b = -fFOVTan * fAspectRatio * 0.5;
+		kNewFrustum.t = fFOVTan * fAspectRatio * 0.5;
 
 		kNewFrustum.n = 10.0;
 		kNewFrustum.f = afEndClipDist;
@@ -2070,12 +2067,14 @@ namespace CustomFOV
 
 	void SetFOV(float aFOV)
 	{
-		fFOV = aFOV;
+		float fScaledFOV = aFOV * 0.01745329238474369 * 0.5;
+		fFOVTan = tan(fScaledFOV);
 	}
 
 	void InitHooks()
 	{
 		SafeWrite32(0xD2F100, UInt32(NiWindow__UpdateCamera));
+		SafeWrite32(0xD2F160, UInt32(&fFOVTan));
 	}
 }
 
