@@ -2078,3 +2078,12 @@ namespace CustomFOV
 		SafeWrite32(0xD2F100, UInt32(NiWindow__UpdateCamera));
 	}
 }
+
+int __stdcall OnMasterFileNotMatchedPopupSkipIfVersionControlDisabled(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType)
+{
+	if (!*(byte*)0xED045C) // bUseVersionControl:General
+	{
+		return IDNO;
+	}
+	return MessageBoxA(hWnd, lpText, lpCaption, uType);
+}

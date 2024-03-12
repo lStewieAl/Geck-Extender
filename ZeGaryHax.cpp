@@ -716,6 +716,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	CustomFOV::InitHooks(); // credits to WallSoGB
 	CustomFOV::SetFOV(renderFOV);
 
+	WriteRelCall(0x4DD437, UInt32(OnMasterFileNotMatchedPopupSkipIfVersionControlDisabled));
+	SafeWrite8(0x4DD437 + 5, 0x90);
+
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
 	{
