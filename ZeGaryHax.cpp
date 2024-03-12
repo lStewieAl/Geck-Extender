@@ -127,6 +127,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	bNavmeshAllowPlaceAboveOthers = GetOrCreateINIInt("Render Window", "bNavmeshAllowPlaceAboveOthers", 1, iniName);
 	bSnapToGridRotationUseDoublePrecision = GetOrCreateINIInt("Render Window", "bSnapToGridRotationUseDoublePrecision", 0, iniName);
 	bAutoLightWarnings = GetOrCreateINIInt("Render Window", "bAutoLightWarnings", 0, iniName);
+	int renderFOV = GetOrCreateINIInt("Render Window", "iFOV", 90, iniName);
 
 	bSmoothFlycamRotation = GetOrCreateINIInt("Flycam", "bSmoothRotation", 1, iniName);
 	bFlycamUpDownRelativeToWorld = GetOrCreateINIInt("Flycam", "bFlycamUpDownRelativeToWorld", 1, iniName);
@@ -711,6 +712,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 		XUtil::PatchMemoryNop(0x624632, 5); // TESObjectLAND
 	}
+
+	CustomFOV::InitHooks(); // credits to WallSoGB
+	CustomFOV::SetFOV(renderFOV);
 
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())

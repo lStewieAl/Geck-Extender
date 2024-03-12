@@ -762,3 +762,182 @@ public:
 			return -1;
 	}
 };
+
+template <typename T_Data> struct DListNode
+{
+public:
+	DListNode* next;
+	DListNode* prev;
+	T_Data* data;
+
+	DListNode* Advance(UInt32 times)
+	{
+		DListNode* result = this;
+		while (result && times)
+		{
+			times--;
+			result = result->next;
+		}
+		return result;
+	}
+
+	DListNode* Regress(UInt32 times)
+	{
+		DListNode* result = this;
+		while (result && times)
+		{
+			times--;
+			result = result->prev;
+		}
+		return result;
+	}
+
+	T_Data* GetAndAdvance()
+	{
+		T_Data* item = nullptr;
+		if (next)
+		{
+			item = next->data;
+			next = next->next;
+		}
+		return item;
+	}
+
+	T_Data* GetAndRegress()
+	{
+		T_Data* item = nullptr;
+		if (next)
+		{
+			item = next->data;
+			next = next->prev;
+		}
+		return item;
+	}
+};
+
+template <class Item> class DList
+{
+public:
+	typedef DListNode<Item> Node;
+
+	// Nested iterator class
+	class Iterator {
+		Node* current;
+	public:
+		Iterator(Node* node) : current(node) {}
+
+		Iterator& operator++() {
+			current = current->next;
+			return *this;
+		}
+
+		bool operator!=(const Iterator& other) const {
+			return current != other.current;
+		}
+
+		Item* operator*() const {
+			return current->data;
+		}
+	};
+
+private:
+	Node* first;
+	Node* last;
+	UInt32		count;
+
+public:
+	bool Empty() const { return !first; }
+	Node* Head() { return first; }
+	Node* Tail() { return last; }
+	UInt32 Size() const { return count; }
+	void SetHead(Node* head) { first = head; };
+	void Init() { first = nullptr; last = nullptr; count = 0; };
+	void Append(Item* item)
+	{
+		ThisCall(0x4ED8C0, this, &item);
+	}
+	Node* Remove(Item* item)
+	{
+		// return the item before the removed entry, or first if previous is null
+		Node* result = nullptr;
+
+		Node* node = Head();
+		if (!node) return result;
+
+		if (node->data == item)
+		{
+			first = node->next;
+			if (first)
+			{
+				first->prev = nullptr;
+			}
+			else
+			{
+				last = nullptr;
+			}
+
+			--count;
+			StdCall(0x4A49E0, node);
+			node = first;
+		}
+		else
+		{
+			node = node->next;
+		}
+
+		if (node)
+		{
+			do
+			{
+				if (node->data == item)
+				{
+					result = node->prev;
+
+					node->prev->next = node->next;
+					if (node->next)
+					{
+						node->next->prev = node->prev;
+					}
+					else
+					{
+						last = node->prev;
+					}
+					--count;
+					StdCall(0x4A49E0, node);
+				}
+			} while (node = node->next);
+		}
+
+		return result ? result : first;
+	}
+
+	void Sort(int (*compare)(Item* a, Item* b))
+	{
+		if (!first) return;
+		Node* current = first;
+		while (current->next)
+		{
+			Node* index = current->next;
+			while (index)
+			{
+				if (compare(current->data, index->data) > 0)
+				{
+					Item* temp = current->data;
+					current->data = index->data;
+					index->data = temp;
+				}
+				index = index->next;
+			}
+			current = current->next;
+		}
+	}
+
+	// begin and end functions for iterator support
+	Iterator begin() {
+		return Iterator(first);
+	}
+
+	Iterator end() {
+		return Iterator(nullptr); // end iterator points to nullptr
+	}
+};

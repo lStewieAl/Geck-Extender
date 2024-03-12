@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <unordered_set>
 #include "NiNodes.h"
+#include "NiObjects.h"
 #include "GameScript.h"
 
 #define GH_NAME				"ZeGaryHax"		// this is the string for IsPluginInstalled and GetPluginVersion (also shows in nvse.log)
@@ -2016,5 +2017,64 @@ __declspec(naked) void OnLoadRegionsHook()
 		pop esi
 		pop ebx
 		ret 4
+	}
+}
+
+namespace CustomFOV
+{
+	class NiCamera : public NiAVObject
+	{
+	public:
+		NiCamera();
+		~NiCamera();
+
+		float			m_kWorldToCam[4][4];// 09C
+		NiFrustum		m_kViewFrustum;		// 0DC
+		float			m_fMinNearPlaneDist;// 0F8
+		float			m_fMaxFarNearRatio;	// 0FC
+		NiViewport		m_kPort;			// 100
+		float			m_fLODAdjust;		// 110
+	};
+	STATIC_ASSERT(sizeof(NiCamera) == 0x114);
+	STATIC_ASSERT(offsetof(NiCamera, m_kViewFrustum) == 0xDC);
+
+	static float fFOV = 90.0F;
+	bool __fastcall NiWindow__UpdateCamera(void* window, void* edx, NiCamera* apCamera, UInt32 auiWidth, UInt32 auiHeight, float afEndClipDist)
+	{
+		if (!apCamera)
+			return false;
+		float fScaledRatio = apCamera->m_fMaxFarNearRatio * 10.0;
+		if (fScaledRatio < afEndClipDist)
+			apCamera->m_fMaxFarNearRatio = afEndClipDist / 10.0;
+		NiFrustum kNewFrustum = {};
+		float fAspectRatio = static_cast<float>(auiHeight) / auiWidth;
+
+		float fScaledFOV = fFOV * 0.01745329238474369 * 0.5;
+		float fTan = tan(fScaledFOV);
+
+		kNewFrustum.l = -fTan * 0.5;
+		kNewFrustum.r = fTan * 0.5;
+		kNewFrustum.b = -fTan * fAspectRatio * 0.5;
+		kNewFrustum.t = fTan * fAspectRatio * 0.5;
+
+		kNewFrustum.n = 10.0;
+		kNewFrustum.f = afEndClipDist;
+		apCamera->m_kViewFrustum = kNewFrustum;
+		apCamera->m_kPort.l = 0.f;
+		apCamera->m_kPort.r = 1.f;
+		apCamera->m_kPort.t = 1.f;
+		apCamera->m_kPort.b = 0.f;
+		((void (__thiscall*)(NiCamera*, NiUpdateData*))(0x80DD60))(apCamera, &DefaultNodeUpdateParams);
+		return 1;
+	}
+
+	void SetFOV(float aFOV)
+	{
+		fFOV = aFOV;
+	}
+
+	void InitHooks()
+	{
+		SafeWrite32(0xD2F100, UInt32(NiWindow__UpdateCamera));
 	}
 }
