@@ -214,8 +214,20 @@ __forceinline UInt32 ThisStdCall(UInt32 _f, void* _t, T1 a1, T2 a2, T3 a3, T4 a4
 	return ((T*)_t->*u.m)(a1, a2, a3, a4, a5, a6, a7);
 }
 
+template <typename T_Ret = UInt32, typename ...Args>
+__forceinline T_Ret ThisCall(UInt32 _addr, const void* _this, Args ...args)
+{
+	return ((T_Ret(__thiscall*)(const void*, Args...))_addr)(_this, std::forward<Args>(args)...);
+}
+
 template <typename T_Ret = void, typename ...Args>
 __forceinline T_Ret StdCall(UInt32 _addr, Args ...args)
 {
 	return ((T_Ret(__stdcall*)(Args...))_addr)(std::forward<Args>(args)...);
+}
+
+template <typename T_Ret = void, typename ...Args>
+__forceinline T_Ret CdeclCall(UInt32 _addr, Args ...args)
+{
+	return ((T_Ret(__cdecl*)(Args...))_addr)(std::forward<Args>(args)...);
 }

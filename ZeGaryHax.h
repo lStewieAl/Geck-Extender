@@ -2074,7 +2074,6 @@ namespace CustomFOV
 	void InitHooks()
 	{
 		SafeWrite32(0xD2F100, UInt32(NiWindow__UpdateCamera));
-		SafeWrite32(0xD2F160, UInt32(&fFOVTan));
 	}
 }
 
@@ -2085,4 +2084,75 @@ int __stdcall OnMasterFileNotMatchedPopupSkipIfVersionControlDisabled(HWND hWnd,
 		return IDNO;
 	}
 	return MessageBoxA(hWnd, lpText, lpCaption, uType);
+}
+
+bool bSelectedFormsListInUse;
+tList<TESForm> selectedForms;
+
+TESForm* GetNthListItem(HWND hWnd, int n)
+{
+	if (n == -1)
+	{
+		return 0;
+	}
+
+	LVITEMA itemA;
+	memset(&itemA, 0, sizeof(itemA));
+	itemA.iItem = n;
+	itemA.mask = 4;
+	SendMessageA(hWnd, LVM_GETITEMA, 0, (LPARAM)&itemA);
+	return (TESForm*)itemA.lParam;
+}
+
+TESForm* __cdecl OnCloseSelectFormsDialogPopulateList(HWND hWnd)
+{
+	if (!hWnd)
+	{
+		return 0;
+	}
+	unsigned int index = SendMessageA(hWnd, LVM_GETNEXTITEM, 0xFFFFFFFF, LVIS_SELECTED);
+
+	auto result = GetNthListItem(hWnd, index);
+	if (result && bSelectedFormsListInUse)
+	{
+		selectedForms.AddAt(result, -2);
+		do
+		{
+			auto startIndex = index;
+			index = SendMessageA(hWnd, LVM_GETNEXTITEM, startIndex, LVIS_SELECTED);
+
+			if (auto form = GetNthListItem(hWnd, index))
+			{
+				selectedForms.AddAt(form, -2);
+			}
+		} while (index != -1);
+	}
+	
+	return result;
+}
+
+TESForm* __cdecl OnMediaLocationControllerSelectForm(HWND hWndParent, TESForm* form, tList<TESForm>* list)
+{
+	selectedForms.RemoveAll();
+	bSelectedFormsListInUse = true;
+	auto result = CdeclCall<TESForm*>(0x485690, hWndParent, form, list);
+	bSelectedFormsListInUse = false;
+
+	auto listView = *(HWND*)0xED9884;
+
+	auto iter = selectedForms.Head();
+	do
+	{
+		if (auto form = iter->item)
+		{
+			if (CdeclCall<int>(0x41A0F0, listView, form) < 0)
+			{
+				CdeclCall(0x41A020, listView, form, 0, -1);
+				int index = CdeclCall<int>(0x41A0F0, listView, form);
+				CdeclCall(0x41A260, listView, index);
+			}
+		}
+	} while (iter = iter->next);
+	selectedForms.RemoveAll();
+	return result;
 }

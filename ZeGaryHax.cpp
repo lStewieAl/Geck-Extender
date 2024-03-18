@@ -719,6 +719,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x4DD437, UInt32(OnMasterFileNotMatchedPopupSkipIfVersionControlDisabled));
 	SafeWrite8(0x4DD437 + 5, 0x90);
 
+	WriteRelCall(0x4824D8, UInt32(OnCloseSelectFormsDialogPopulateList));
+	WriteRelCall(0x5B3661, UInt32(OnMediaLocationControllerSelectForm));
+
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
 	{
