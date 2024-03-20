@@ -692,15 +692,21 @@ BOOL __stdcall hk_LoadESPESMCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM 
 		doKonami(key);
 
 		HWND* pListView = *(HWND**)0xECF5C8;
-		if (key == VK_SPACE)
+		
+		bool isControlHeld = (GetKeyState(VK_CONTROL) & 0x8000);
+		if (isControlHeld)
 		{
-			ToggleSelectedFiles(pListView);
+			if (key == 'A')
+			{
+				SelectAllItemsInListView(*pListView);
+			}
 		}
-
-		if (key == 'A' && (GetKeyState(VK_CONTROL) & 0x8000))
+		else
 		{
-			SelectAllItemsInListView(*pListView);
-			return 0;
+			if (key == VK_SPACE)
+			{
+				ToggleSelectedFiles(pListView);
+			}
 		}
 	}
 	return ((WNDPROC)(0x432A80))(hDlg, msg, wParam, lParam);
