@@ -635,24 +635,27 @@ _declspec(naked) void RecompileAllWarningMainHook() {
 
 void ToggleNthFileSelected(HWND* pListView, int n)
 {
-	struct IndexHolder
+	if (n < 0)
 	{
-		UInt32 gap00;
-		UInt32 gap04;
-		UInt32 gap08;
-		UInt32 index;
-	};
-	IndexHolder ih;
-	ih.index = n;
+		return;
+	}
 
-	ThisCall(0x430E70, pListView, &ih);
-
-	if (auto file = ThisCall<ModInfo*>(0x4CF380, DataHandler::GetSingleton(), n))
+	if (auto file = DataHandler::GetSingleton()->GetNthFile(n))
 	{
-		if ((file->flags & 4) == 0 && file == *(ModInfo**)0xECF5D0)
+		bool isSelected = file->IsSelected();
+		file->SetSelected(!isSelected);
+
+		if (!file->IsSelected())
 		{
-			*(ModInfo**)0xECF5D0 = 0;
+			file->SetActive(false);
+
+			if (file == *(ModInfo**)0xECF5D0)
+			{
+				*(ModInfo**)0xECF5D0 = 0;
+			}
 		}
+
+		SendMessageA(*pListView, LVM_UPDATE, n, 0);
 	}
 }
 
