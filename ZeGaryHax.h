@@ -633,17 +633,75 @@ _declspec(naked) void RecompileAllWarningMainHook() {
 	}
 }
 
+void ToggleNthFileSelected(HWND* pListView, int n)
+{
+	struct IndexHolder
+	{
+		UInt32 gap00;
+		UInt32 gap04;
+		UInt32 gap08;
+		UInt32 index;
+	};
+	IndexHolder ih;
+	ih.index = n;
+
+	ThisCall(0x430E70, pListView, &ih);
+
+	if (auto file = ThisCall<ModInfo*>(0x4CF380, DataHandler::GetSingleton(), n))
+	{
+		if ((file->flags & 4) == 0 && file == *(ModInfo**)0xECF5D0)
+		{
+			*(ModInfo**)0xECF5D0 = 0;
+		}
+	}
+}
+
+void ToggleSelectedFiles(HWND* pListView)
+{
+	unsigned int index = -1;
+	do
+	{
+		index = SendMessageA(*pListView, LVM_GETNEXTITEM, index, LVIS_SELECTED);
+
+		if (index != -1)
+		{
+			ToggleNthFileSelected(pListView, index);
+		}
+	} while (index != -1);
+}
+
+void SelectAllItemsInListView(HWND listView)
+{
+	int itemCount = ListView_GetItemCount(listView);
+	for (int i = 0; i < itemCount; i++)
+	{
+		ListView_SetItemState(listView, i, LVIS_SELECTED, LVIS_SELECTED);
+	}
+}
+
 void doKonami(int);
 BOOL __stdcall hk_LoadESPESMCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
 	static RECT WindowSize;
 	if (msg == WM_NOTIFY && ((LPNMHDR)lParam)->code == LVN_KEYDOWN)
 	{
+		auto key = ((LPNMLVKEYDOWN)lParam)->wVKey;
 		/* small konami easter egg */
-		doKonami(((LPNMLVKEYDOWN)lParam)->wVKey);
+		doKonami(key);
+
+		HWND* pListView = *(HWND**)0xECF5C8;
+		if (key == VK_SPACE)
+		{
+			ToggleSelectedFiles(pListView);
+		}
+
+		if (key == 'A' && (GetKeyState(VK_CONTROL) & 0x8000))
+		{
+			SelectAllItemsInListView(*pListView);
+			return 0;
+		}
 	}
 	return ((WNDPROC)(0x432A80))(hDlg, msg, wParam, lParam);
 }
-
 BOOL __stdcall hk_SearchAndReplaceCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
 	return ((WNDPROC)(0x47C990))(hDlg, msg, wParam, lParam);
 }
