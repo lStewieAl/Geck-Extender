@@ -161,7 +161,7 @@ public:
 
 	bool IsInList(Item *item) const
 	{
-		Node *node = Head();
+		_Node*node = Head();
 		do
 		{
 			if (node->item == item) return true;
@@ -255,10 +255,12 @@ public:
 		return curIt;
 	}
 
+#if 0
 	const _Node* FindString(char* str, Iterator prev) const
 	{
 		return Find(StringFinder_CI(str), prev);
 	}
+#endif
 
 	template <class Op>
 	UInt32 CountIf(Op& op) const
@@ -281,9 +283,9 @@ public:
 		}
 	};
 
-	void RemoveAll() const
-	{
-		FreeNodes(const_cast<_Node*>(Head()), AcceptAll());
+	void RemoveAll() const {
+		AcceptAll accept = AcceptAll();
+		FreeNodes(const_cast<_Node*>(Head()), accept);
 	}
 
 	Item* RemoveNth(SInt32 n) 
@@ -688,10 +690,12 @@ public:
 		return Find(AcceptEqual(toMatch));
 	}
 
+#if 0
 	const Node* FindString(char* str, const Node* prev = NULL) const
 	{
 		return Find(StringFinder_CI(str), prev);
 	}
+#endif
 
 	template <class Op>
 	UInt32 CountIf(Op& op) const

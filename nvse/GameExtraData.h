@@ -421,8 +421,10 @@ public:
 
 	bool Accept(ExtraContainerChanges::EntryData* match)
 	{
-		if (match && match->extendData)
-			return match->extendData->GetIndexOf(ExtraDataListInExtendDataListMatcher(m_toMatch))>=0;
+		if (match && match->extendData) {
+			ExtraDataListInExtendDataListMatcher matcher = ExtraDataListInExtendDataListMatcher(m_toMatch);
+			return match->extendData->GetIndexOf(matcher) >= 0;
+		}
 		else
 			return false;
 	}
@@ -898,7 +900,7 @@ public:
 	UInt8			lockLevel;	// 0D unlocked: 0xFE
 	UInt16			pad;
 
-	static ExtraTerminalState* ExtraTerminalState::Create()
+	static ExtraTerminalState* Create()
 	{
 		return (ExtraTerminalState*)BSExtraData::Create(kExtraData_TerminalState, sizeof(ExtraTerminalState), 0x01015190);
 	}

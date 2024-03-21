@@ -521,7 +521,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		WriteRelJump(0x41EA30, UInt32(LipGenCountTopicsHook));
 
 		// replace the "Do you want to forcibly recreate all facial animation files?" to for the current plugin
-		static char* facialAnimationsPopupText = "Do you want to forcibly recreate all facial animation files for the current plugin?";
+		static const char* facialAnimationsPopupText = "Do you want to forcibly recreate all facial animation files for the current plugin?";
 		SafeWrite32(0x440C43, UInt32(facialAnimationsPopupText));
 	}
 
@@ -634,7 +634,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	if (bFaceGenOnlyEdited)
 	{
-		char* faceGenMessage = "Export mod face gen textures for all edited NPCs?";
+		const char* faceGenMessage = "Export mod face gen textures for all edited NPCs?";
 		WriteRelJump(0x442050, UInt32(ExportFaceGenCheckIsFormEdited));
 		SafeWrite32(0x442026, UInt32(faceGenMessage));
 	}

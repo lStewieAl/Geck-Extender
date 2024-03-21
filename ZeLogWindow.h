@@ -95,7 +95,7 @@ bool EditorUI_CreateExtensionMenu(HWND MainWindow, HMENU MainMenu)
 	menuInfo.fMask = MIIM_SUBMENU | MIIM_ID | MIIM_STRING;
 	menuInfo.hSubMenu = g_ExtensionMenu;
 	menuInfo.wID = UI_EXTMENU_ID;
-	menuInfo.dwTypeData = "Extensions";
+	menuInfo.dwTypeData = (char*)"Extensions";
 	menuInfo.cch = (uint32_t)strlen(menuInfo.dwTypeData);
 	result = result && InsertMenuItem(MainMenu, -1, TRUE, &menuInfo);
 

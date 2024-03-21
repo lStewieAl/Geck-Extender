@@ -266,7 +266,8 @@ public:
 VariableInfo* Script::GetVariableByName(const char* varName)
 {
 	VarListVisitor visitor(&varList);
-	const VarInfoEntry* varEntry = visitor.Find(ScriptVarFinder(varName));
+	ScriptVarFinder finder = ScriptVarFinder(varName);
+	const VarInfoEntry* varEntry = visitor.Find(finder);
 	if (varEntry)
 		return varEntry->data;
 	else
