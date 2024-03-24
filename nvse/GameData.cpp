@@ -21,7 +21,8 @@ public:
 
 const ModInfo * DataHandler::LookupModByName(const char * modName)
 {
-	return modList.modInfoList.Find(LoadedModFinder(modName));
+	LoadedModFinder finder = LoadedModFinder(modName);
+	return modList.modInfoList.Find(finder);
 }
 
 const ModInfo ** DataHandler::GetActiveModList()
@@ -44,7 +45,8 @@ const ModInfo ** DataHandler::GetActiveModList()
 
 UInt8 DataHandler::GetModIndex(const char* modName)
 {
-	return modList.modInfoList.GetIndexOf(LoadedModFinder(modName));
+	LoadedModFinder finder = LoadedModFinder(modName);
+	return modList.modInfoList.GetIndexOf(finder);
 }
 
 const char* DataHandler::GetNthModName(UInt32 modIndex)
@@ -70,7 +72,8 @@ struct IsModLoaded
 
 UInt8 DataHandler::GetActiveModCount() const
 {
-	UInt32 count = modList.modInfoList.CountIf(IsModLoaded());
+	IsModLoaded isLoaded = IsModLoaded();
+	UInt32 count = modList.modInfoList.CountIf(isLoaded);
 	return count;
 }
 

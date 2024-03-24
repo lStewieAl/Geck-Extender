@@ -1,5 +1,5 @@
 #pragma once
-void(__cdecl* SaveWindowPositionToINI)(HWND, char*) = ((void(__cdecl*)(HWND hWnd, char* Src))(0x43E170));
+void(__cdecl* SaveWindowPositionToINI)(HWND, const char*) = ((void(__cdecl*)(HWND hWnd, const char* Src))(0x43E170));
 
 struct NiPoint3
 {

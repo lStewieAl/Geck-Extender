@@ -47,7 +47,7 @@ std::recursive_mutex g_DialogMutex;
 std::unordered_map<HWND, DialogOverrideData> g_DialogOverrides;
 __declspec(thread) DialogOverrideData* DlgData;
 
-char* nvseMSG[20] =
+const char* nvseMSG[20] =
 {
 	"PostLoad",
 	"ExitGame",
@@ -115,6 +115,7 @@ int bAutoLightWarnings = 0;
 int bRemoveDialogSoundFilter = 0;
 int bCacheComboboxes = 0;
 int bNoRecordCompression = 1;
+int bNoFacegenCompression = 1;
 
 int bUseAltShiftMultipliers = 1;
 float fMovementAltMultiplier = 0.15F;
@@ -168,7 +169,7 @@ static LOGFONT editorFont =
 };
 
 #define INI_SETTING_NOT_FOUND -1
-int GetOrCreateINIInt(char* sectionName, char* keyName, int defaultValue, char* filename) {
+int GetOrCreateINIInt(const char* sectionName, const char* keyName, int defaultValue, const char* filename) {
 	int settingValue = GetPrivateProfileIntA(sectionName, keyName, INI_SETTING_NOT_FOUND, filename);
 	if (settingValue == INI_SETTING_NOT_FOUND) {
 		char arr[11];
@@ -614,7 +615,7 @@ _declspec(naked) void hk_PreviewWindowCheckForeground() {
 	}
 }
 
-char* recompileAllWarning = { "Are you sure you want to recompile every script in every plugin?\nYou should never need to do this." };
+const char* recompileAllWarning = { "Are you sure you want to recompile every script in every plugin?\nYou should never need to do this." };
 _declspec(naked) void RecompileAllWarningScriptHook() {
 	static const UInt32 retnAddr = 0x5C498A;
 	_asm {
@@ -1239,7 +1240,7 @@ void SaveScriptChangedType();
 
 _declspec(naked) void MultipleMasterLoadHook()
 {
-	static char* MultipleMastersMessage = "Multiple master files selected for load, do you wish to continue? (enable bAllowMultipleMasterLoads to remove this warning)";
+	static const char* MultipleMastersMessage = "Multiple master files selected for load, do you wish to continue? (enable bAllowMultipleMasterLoads to remove this warning)";
 	static const UInt32 continueLoadingAddr = 0x4DD394;
 	static const UInt32 stopLoadingAddr = 0x4DD2F9;
 	_asm
@@ -1350,7 +1351,7 @@ _declspec(naked) void NavMeshToolbarConfirmFindCover()
 void __cdecl CrashSaveSetName(char* dst, size_t size, char* format, void* DEFAULT)
 {
 	ModInfo* activeFile = DataHandler::GetSingleton()->activeFile;
-	char* modName = "DEFAULT.esp";
+	const char* modName = "DEFAULT.esp";
 	if (activeFile)
 	{
 		modName = activeFile->name;
@@ -1365,7 +1366,7 @@ LONG WINAPI DoCrashSave(EXCEPTION_POINTERS* info)
 	// create a save in the Data//CrashSaves folder called %s.esp
 	WriteRelCall(0x4DB07A, UInt32(CrashSaveSetName));
 
-	static char* path = "Data\\CrashSaves\\";
+	static const char* path = "Data\\CrashSaves\\";
 	SafeWrite32(0x4DB0AC, UInt32(path));
 
 	ThisStdCall(0x4DB020, DataHandler::GetSingleton()); // DoAutosave
@@ -1590,12 +1591,12 @@ void SetupHavokPreviewWindow()
 	//	AddAnimLengthColumnToHavokPreviewAnimsList();
 }
 
-void InsertListViewColumn(HWND hWnd, UInt32 index, char* text, int width)
+void InsertListViewColumn(HWND hWnd, UInt32 index, const char* text, int width)
 {
 	LVCOLUMN column;
 	column.mask = 0xF;
 	column.cx = width;
-	column.pszText = text;
+	column.pszText = (char*)text;
 	column.fmt = 0;
 	column.iSubItem = index;
 
@@ -1698,7 +1699,7 @@ _declspec(naked) void ExportFaceGenCheckIsFormEdited()
 	}
 }
 
-char* SpeedTreeGetTexturePath()
+const char* SpeedTreeGetTexturePath()
 {
 	return "Data\\Textures\\Trees\\Leaves";
 }
