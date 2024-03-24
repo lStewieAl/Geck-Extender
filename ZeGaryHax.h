@@ -445,16 +445,17 @@ HWND __stdcall AboutDialogHook(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND 
 	return hWnd;
 }
 
-void __stdcall hk_sub_4A1C10(HWND ListViewControl)
+void __stdcall ConditionDataDialog_SetupColumnHeaders(HWND ListViewControl)
 {
-	((void(__stdcall*)(HWND))(0x004A1C10))(ListViewControl);
+	StdCall(0x4A1C10, ListViewControl);
 
-	SendMessageA(ListViewControl, LVM_SETCOLUMNWIDTH, 0, LVSCW_AUTOSIZE_USEHEADER);
-	SendMessageA(ListViewControl, LVM_SETCOLUMNWIDTH, 1, LVSCW_AUTOSIZE_USEHEADER);
-	SendMessageA(ListViewControl, LVM_SETCOLUMNWIDTH, 2, LVSCW_AUTOSIZE_USEHEADER);
-	SendMessageA(ListViewControl, LVM_SETCOLUMNWIDTH, 3, LVSCW_AUTOSIZE_USEHEADER);
-	SendMessageA(ListViewControl, LVM_SETCOLUMNWIDTH, 4, LVSCW_AUTOSIZE_USEHEADER);
-	SendMessageA(ListViewControl, LVM_SETCOLUMNWIDTH, 5, LVSCW_AUTOSIZE_USEHEADER);
+	// set the list view headers to resize automatically
+	PostMessageA(ListViewControl, LVM_SETCOLUMNWIDTH, 0, LVSCW_AUTOSIZE_USEHEADER);
+	PostMessageA(ListViewControl, LVM_SETCOLUMNWIDTH, 1, LVSCW_AUTOSIZE_USEHEADER);
+	PostMessageA(ListViewControl, LVM_SETCOLUMNWIDTH, 2, LVSCW_AUTOSIZE_USEHEADER);
+	PostMessageA(ListViewControl, LVM_SETCOLUMNWIDTH, 3, LVSCW_AUTOSIZE_USEHEADER);
+	PostMessageA(ListViewControl, LVM_SETCOLUMNWIDTH, 4, LVSCW_AUTOSIZE_USEHEADER);
+	PostMessageA(ListViewControl, LVM_SETCOLUMNWIDTH, 5, LVSCW_AUTOSIZE_USEHEADER);
 }
 
 //	fix crash with esm as active file - credit to hlp
@@ -633,17 +634,84 @@ _declspec(naked) void RecompileAllWarningMainHook() {
 	}
 }
 
+void ToggleNthFileSelected(HWND* pListView, int n)
+{
+	if (n < 0)
+	{
+		return;
+	}
+
+	if (auto file = DataHandler::GetSingleton()->GetNthFile(n))
+	{
+		bool isSelected = file->IsSelected();
+		file->SetSelected(!isSelected);
+
+		if (!file->IsSelected())
+		{
+			file->SetActive(false);
+
+			if (file == *(ModInfo**)0xECF5D0)
+			{
+				*(ModInfo**)0xECF5D0 = 0;
+			}
+		}
+
+		SendMessageA(*pListView, LVM_UPDATE, n, 0);
+	}
+}
+
+void ToggleSelectedFiles(HWND* pListView)
+{
+	unsigned int index = -1;
+	do
+	{
+		index = SendMessageA(*pListView, LVM_GETNEXTITEM, index, LVIS_SELECTED);
+
+		if (index != -1)
+		{
+			ToggleNthFileSelected(pListView, index);
+		}
+	} while (index != -1);
+}
+
+void SelectAllItemsInListView(HWND listView)
+{
+	int itemCount = ListView_GetItemCount(listView);
+	for (int i = 0; i < itemCount; i++)
+	{
+		ListView_SetItemState(listView, i, LVIS_SELECTED, LVIS_SELECTED);
+	}
+}
+
 void doKonami(int);
 BOOL __stdcall hk_LoadESPESMCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
 	static RECT WindowSize;
 	if (msg == WM_NOTIFY && ((LPNMHDR)lParam)->code == LVN_KEYDOWN)
 	{
+		auto key = ((LPNMLVKEYDOWN)lParam)->wVKey;
 		/* small konami easter egg */
-		doKonami(((LPNMLVKEYDOWN)lParam)->wVKey);
+		doKonami(key);
+
+		HWND* pListView = *(HWND**)0xECF5C8;
+		
+		bool isControlHeld = (GetKeyState(VK_CONTROL) & 0x8000);
+		if (isControlHeld)
+		{
+			if (key == 'A')
+			{
+				SelectAllItemsInListView(*pListView);
+			}
+		}
+		else
+		{
+			if (key == VK_SPACE)
+			{
+				ToggleSelectedFiles(pListView);
+			}
+		}
 	}
 	return ((WNDPROC)(0x432A80))(hDlg, msg, wParam, lParam);
 }
-
 BOOL __stdcall hk_SearchAndReplaceCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
 	return ((WNDPROC)(0x47C990))(hDlg, msg, wParam, lParam);
 }
@@ -2074,7 +2142,6 @@ namespace CustomFOV
 	void InitHooks()
 	{
 		SafeWrite32(0xD2F100, UInt32(NiWindow__UpdateCamera));
-		SafeWrite32(0xD2F160, UInt32(&fFOVTan));
 	}
 }
 
@@ -2085,4 +2152,75 @@ int __stdcall OnMasterFileNotMatchedPopupSkipIfVersionControlDisabled(HWND hWnd,
 		return IDNO;
 	}
 	return MessageBoxA(hWnd, lpText, lpCaption, uType);
+}
+
+bool bSelectedFormsListInUse;
+tList<TESForm> selectedForms;
+
+TESForm* GetNthListItem(HWND hWnd, int n)
+{
+	if (n == -1)
+	{
+		return 0;
+	}
+
+	LVITEMA itemA;
+	memset(&itemA, 0, sizeof(itemA));
+	itemA.iItem = n;
+	itemA.mask = 4;
+	SendMessageA(hWnd, LVM_GETITEMA, 0, (LPARAM)&itemA);
+	return (TESForm*)itemA.lParam;
+}
+
+TESForm* __cdecl OnCloseSelectFormsDialogPopulateList(HWND hWnd)
+{
+	if (!hWnd)
+	{
+		return 0;
+	}
+	unsigned int index = SendMessageA(hWnd, LVM_GETNEXTITEM, 0xFFFFFFFF, LVIS_SELECTED);
+
+	auto result = GetNthListItem(hWnd, index);
+	if (result && bSelectedFormsListInUse)
+	{
+		selectedForms.AddAt(result, -2);
+		do
+		{
+			auto startIndex = index;
+			index = SendMessageA(hWnd, LVM_GETNEXTITEM, startIndex, LVIS_SELECTED);
+
+			if (auto form = GetNthListItem(hWnd, index))
+			{
+				selectedForms.AddAt(form, -2);
+			}
+		} while (index != -1);
+	}
+	
+	return result;
+}
+
+TESForm* __cdecl OnMediaLocationControllerSelectForm(HWND hWndParent, TESForm* form, tList<TESForm>* list)
+{
+	selectedForms.RemoveAll();
+	bSelectedFormsListInUse = true;
+	auto result = CdeclCall<TESForm*>(0x485690, hWndParent, form, list);
+	bSelectedFormsListInUse = false;
+
+	auto listView = *(HWND*)0xED9884;
+
+	auto iter = selectedForms.Head();
+	do
+	{
+		if (auto form = iter->item)
+		{
+			if (CdeclCall<int>(0x41A0F0, listView, form) < 0)
+			{
+				CdeclCall(0x41A020, listView, form, 0, -1);
+				int index = CdeclCall<int>(0x41A0F0, listView, form);
+				CdeclCall(0x41A260, listView, index);
+			}
+		}
+	} while (iter = iter->next);
+	selectedForms.RemoveAll();
+	return result;
 }

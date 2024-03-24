@@ -194,6 +194,30 @@ struct ModInfo		// referred to by game as TESFile
 	// In Editor: 430 = ONAM array and 434 ONAM array count. Allocated at 0438
 	
 	bool IsLoaded() const { return true; }
+	bool IsSelected() const { return flags & 4; }
+	void SetSelected(char isSelected)
+	{
+		if ((flags & 0x10) != 0 || !isSelected)
+		{
+			flags = flags & ~0xCu;
+		}
+		else
+		{
+			flags = flags | 4;
+		}
+	}
+
+	void SetActive(char isActive)
+	{
+		if (isActive)
+		{
+			flags |= 8u;
+		}
+		else
+		{
+			flags &= ~8u;
+		}
+	}
 
 #if !EDITOR
 	/*** used by TESForm::LoadForm() among others ***/
@@ -321,6 +345,8 @@ public:
 	UInt8 GetModIndex(const char* modName);
 	UInt8 GetActiveModCount() const;
 	const char* GetNthModName(UInt32 modIndex);
+	ModInfo* GetNthFile(int n);
+
 
 	MEMBER_FN_PREFIX(DataHandler);
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525

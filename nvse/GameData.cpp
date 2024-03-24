@@ -56,6 +56,11 @@ const char* DataHandler::GetNthModName(UInt32 modIndex)
 		return "";
 }
 
+ModInfo* DataHandler::GetNthFile(int n)
+{
+	return ThisCall<ModInfo*>(0x4CF380, DataHandler::GetSingleton(), n);
+}
+
 struct IsModLoaded
 {
 	bool Accept(ModInfo* pModInfo) const {

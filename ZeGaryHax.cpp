@@ -244,11 +244,11 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	if (bListEditFix)
 	{
 		//	fix windows 8/10 conditions collapsed column bug - credit to nukem
-		WriteRelCall(0x004A382D, (UInt32)hk_sub_4A1C10);
-		WriteRelCall(0x00765214, (UInt32)hk_sub_4A1C10);
-		WriteRelCall(0x00766A4D, (UInt32)hk_sub_4A1C10);
-		WriteRelCall(0x0076E195, (UInt32)hk_sub_4A1C10);
-		WriteRelCall(0x004A2791, (UInt32)hk_sub_4A1C10); // necessary, but causes a crash when viewing the anims list
+		WriteRelCall(0x004A382D, (UInt32)ConditionDataDialog_SetupColumnHeaders);
+		WriteRelCall(0x00765214, (UInt32)ConditionDataDialog_SetupColumnHeaders);
+		WriteRelCall(0x00766A4D, (UInt32)ConditionDataDialog_SetupColumnHeaders);
+		WriteRelCall(0x0076E195, (UInt32)ConditionDataDialog_SetupColumnHeaders);
+		WriteRelCall(0x004A2791, (UInt32)ConditionDataDialog_SetupColumnHeaders);
 	}
 
 	if (bExpandFormIDColumn)
@@ -718,6 +718,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	WriteRelCall(0x4DD437, UInt32(OnMasterFileNotMatchedPopupSkipIfVersionControlDisabled));
 	SafeWrite8(0x4DD437 + 5, 0x90);
+
+	WriteRelCall(0x4824D8, UInt32(OnCloseSelectFormsDialogPopulateList));
+	WriteRelCall(0x5B3661, UInt32(OnMediaLocationControllerSelectForm));
 
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
