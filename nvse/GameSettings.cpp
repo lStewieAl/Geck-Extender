@@ -1,9 +1,9 @@
 #include "GameTypes.h"
 #include "GameSettings.h"
 
-	GameSettingCollection ** g_GameSettingCollection = (GameSettingCollection**)0x011C8048;
-	IniSettingCollection ** g_IniSettingCollection = (IniSettingCollection**)0x011F96A0;
-	IniSettingCollection ** g_IniPrefCollection = (IniSettingCollection**)0x011F35A0;
+	GameSettingCollection ** g_GameSettingCollection = (GameSettingCollection**)0xF0647C;
+	IniSettingCollection ** g_IniSettingCollection = (IniSettingCollection**)0xF240B0;
+	IniSettingCollection ** g_IniPrefCollection = (IniSettingCollection**)0xF1EF78;
 
 UInt32 Setting::GetType()
 {

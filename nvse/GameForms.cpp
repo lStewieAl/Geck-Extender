@@ -14,9 +14,9 @@ static const ActorValueInfo** ActorValueInfoPointerArray = (const ActorValueInfo
 static const _GetActorValueInfo GetActorValueInfo = (_GetActorValueInfo)0x0066E480;	// See GetActorValueName
 BGSDefaultObjectManager ** g_defaultObjectManager = (BGSDefaultObjectManager**)0x011CA80C;
 #else
-static const ActorValueInfo** ActorValueInfoPointerArray = (const ActorValueInfo**)0;
-static const _GetActorValueInfo GetActorValueInfo = (_GetActorValueInfo)0;
-BGSDefaultObjectManager ** g_defaultObjectManager = (BGSDefaultObjectManager**)0x0;
+static const ActorValueInfo** ActorValueInfoPointerArray = (const ActorValueInfo**)0xED20A8;
+static const _GetActorValueInfo GetActorValueInfo = (_GetActorValueInfo)0x4912C0;
+BGSDefaultObjectManager ** g_defaultObjectManager = (BGSDefaultObjectManager**)0xED9650;
 #endif
 
 TESForm * TESForm::TryGetREFRParent(void)

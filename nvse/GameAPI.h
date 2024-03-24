@@ -106,8 +106,8 @@ void ShowCompilerError(ScriptLineBuffer* lineBuf, const char* fmt, ...);
 
 #else
 
-typedef TESForm * (__cdecl * _GetFormByID)(const char* editorID);
-extern const _GetFormByID GetFormByID;
+typedef TESForm * (__cdecl * _GetFormByName)(const char* editorID);
+extern const _GetFormByName GetFormByName;
 
 typedef void (__cdecl *_ShowCompilerError)(ScriptBuffer* Buffer, const char* format, ...);
 extern const _ShowCompilerError		ShowCompilerError;

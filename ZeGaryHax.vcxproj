@@ -148,16 +148,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="nvse\GameTiles.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="nvse\GameTypes.cpp" />
-    <ClCompile Include="nvse\GameUI.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="nvse\Hooks_DirectInput8Create.cpp" />
     <ClCompile Include="nvse\NiNodes.cpp" />
     <ClCompile Include="nvse\NiObjects.cpp" />
     <ClCompile Include="nvse\SafeWrite.cpp" />
@@ -176,7 +167,6 @@
     <ClInclude Include="nvse\GameEffects.h" />
     <ClInclude Include="nvse\GameExtraData.h" />
     <ClInclude Include="nvse\GameForms.h" />
-    <ClInclude Include="nvse\GameMenus.h" />
     <ClInclude Include="nvse\GameObjects.h" />
     <ClInclude Include="nvse\GameOSDepend.h" />
     <ClInclude Include="nvse\GameProcess.h" />
@@ -184,10 +174,7 @@
     <ClInclude Include="nvse\GameScript.h" />
     <ClInclude Include="nvse\GameSettings.h" />
     <ClInclude Include="nvse\GameTasks.h" />
-    <ClInclude Include="nvse\GameTiles.h" />
     <ClInclude Include="nvse\GameTypes.h" />
-    <ClInclude Include="nvse\GameUI.h" />
-    <ClInclude Include="nvse\Hooks_DirectInput8Create.h" />
     <ClInclude Include="nvse\NiNodes.h" />
     <ClInclude Include="nvse\NiObjects.h" />
     <ClInclude Include="nvse\NiTypes.h" />

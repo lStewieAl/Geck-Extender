@@ -481,5 +481,5 @@ public:
 	NavMeshInfoMap		*navMeshInfoMap;	// BC
 	LoadedAreaBound		*unkC0;				// C0
 
-	static TES* GetSingleton() { return *(TES**)0x011DEA10; }
+	static TES* GetSingleton() { return *(TES**)0xECF93C; }
 };
