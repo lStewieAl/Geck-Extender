@@ -20,10 +20,6 @@ class FunctionCaller;
 #include "ScriptTokens.h"
 #include <stack>
 
-#if RUNTIME
-#include <cstdarg>
-#endif
-
 extern ErrOutput g_ErrOut;
 
 // these are used in ParamInfo to specify expected Token_Type of args to commands taking NVSE expressions as args

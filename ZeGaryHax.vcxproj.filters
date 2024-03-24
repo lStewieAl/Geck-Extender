@@ -38,16 +38,7 @@
     <ClCompile Include="nvse\GameTasks.cpp">
       <Filter>nvse</Filter>
     </ClCompile>
-    <ClCompile Include="nvse\GameTiles.cpp">
-      <Filter>nvse</Filter>
-    </ClCompile>
     <ClCompile Include="nvse\GameTypes.cpp">
-      <Filter>nvse</Filter>
-    </ClCompile>
-    <ClCompile Include="nvse\GameUI.cpp">
-      <Filter>nvse</Filter>
-    </ClCompile>
-    <ClCompile Include="nvse\Hooks_DirectInput8Create.cpp">
       <Filter>nvse</Filter>
     </ClCompile>
     <ClCompile Include="nvse\NiNodes.cpp">
@@ -88,9 +79,6 @@
     <ClInclude Include="nvse\GameForms.h">
       <Filter>nvse</Filter>
     </ClInclude>
-    <ClInclude Include="nvse\GameMenus.h">
-      <Filter>nvse</Filter>
-    </ClInclude>
     <ClInclude Include="nvse\GameObjects.h">
       <Filter>nvse</Filter>
     </ClInclude>
@@ -112,16 +100,7 @@
     <ClInclude Include="nvse\GameTasks.h">
       <Filter>nvse</Filter>
     </ClInclude>
-    <ClInclude Include="nvse\GameTiles.h">
-      <Filter>nvse</Filter>
-    </ClInclude>
     <ClInclude Include="nvse\GameTypes.h">
-      <Filter>nvse</Filter>
-    </ClInclude>
-    <ClInclude Include="nvse\GameUI.h">
-      <Filter>nvse</Filter>
-    </ClInclude>
-    <ClInclude Include="nvse\Hooks_DirectInput8Create.h">
       <Filter>nvse</Filter>
     </ClInclude>
     <ClInclude Include="nvse\NiNodes.h">

@@ -36,15 +36,6 @@
 #else
 #error
 #endif
-static const UInt32 kg_Camera1st	= 0x011E07D0;
-static const UInt32 kg_Camera3rd	= 0x011E07D4;
-static const UInt32 kg_Bip			= 0x011E07D8;
-static const UInt8 kPlayerUpdate3DpatchFrom	= 0x0B6;
-static const UInt8 kPlayerUpdate3DpatchTo	= 0x0EB;
-
-static NiObject **	g_3rdPersonCameraNode =				(NiObject**)kg_Camera3rd;
-static NiObject **	g_1stPersonCameraBipedNode =		(NiObject**)kg_Bip;
-static NiObject **	g_1stPersonCameraNode =				(NiObject**)kg_Camera1st;
 
 ScriptEventList* TESObjectREFR::GetEventList() const
 {
@@ -57,18 +48,6 @@ ScriptEventList* TESObjectREFR::GetEventList() const
 	}
 
 	return 0;
-}
-
-static PlayerCharacter** g_thePlayer = (PlayerCharacter **)0x011DEA3C;
-
-PlayerCharacter* PlayerCharacter::GetSingleton()
-{
-	return *g_thePlayer;
-}
-
-QuestObjectiveTargets* PlayerCharacter::GetCurrentQuestObjectiveTargets()
-{
-	return (QuestObjectiveTargets *)ThisStdCall(s_PlayerCharacter_GetCurrentQuestTargets, this);
 }
 
 TESContainer* TESObjectREFR::GetContainer()
@@ -93,74 +72,8 @@ bool TESObjectREFR::IsMapMarker()
 	}
 }
 
-bool PlayerCharacter::SetSkeletonPath(const char* newPath)
-{
-	if (!bThirdPerson) {
-		// ###TODO: enable in first person
-		return false;
-	}
-
-#ifdef _DEBUG
-	// store parent of current niNode
-	NiNode* niParent = (NiNode*)(renderState->niNode->m_parent);
-
-	if (renderState->niNode) renderState->niNode->Dump(0, "");
-
-	// set niNode to NULL via BASE CLASS Set3D() method
-	ThisStdCall(s_TESObjectREFR_Set3D, this, NULL, true);
-
-	// modify model path
-	if (newPath) {
-		TESNPC* base = DYNAMIC_CAST(baseForm, TESForm, TESNPC);
-		base->model.SetPath(newPath);
-	}
-
-	// create new NiNode, add to parent
-	//*(g_bUpdatePlayerModel) = 1;
-
-	// s_PlayerCharacter_GenerateNiNode = (MobileObject::Func0053 in Oblivion)
-	NiNode* newNode = (NiNode*)ThisStdCall(s_PlayerCharacter_GenerateNiNode, this, false);	// got a body WITHOUT the head :)
-
-	if (newNode) newNode->Dump(0, "");
-
-	if (niParent)
-		niParent->AddObject(newNode, 1);	// no complaints
-	//*(g_bUpdatePlayerModel) = 0;
-
-	newNode->SetName("Player");	// no complaints
-
-	if (newNode) newNode->Dump(0, "");
-
-	if (playerNode) playerNode->Dump(0, "");
-
-	// get and store camera node
-	// ### TODO: pretty this up
-	UInt32 vtbl = *((UInt32*)newNode);				// ok
-	UInt32 vfunc = *((UInt32*)(vtbl + 0x9C));		// ok
-	NiObject* cameraNode = (NiObject*)ThisStdCall(vfunc, newNode, "Camera3rd");				// returns NULL !!!
-	*g_3rdPersonCameraNode = cameraNode;
-
-	cameraNode = (NiObject*)ThisStdCall(vfunc, (NiNode*)this->playerNode, "Camera1st");		// returns NULL !!!
-	*g_1stPersonCameraNode = cameraNode;
-
-	AnimateNiNode();
-#endif
-
-	return true;
-}
-
 bool TESObjectREFR::Update3D()
 {
-	if (this == *g_thePlayer) {
-#ifdef _DEBUG
-		TESModel* model = DYNAMIC_CAST(baseForm, TESForm, TESModel);
-		return (*g_thePlayer)->SetSkeletonPath(model->GetModelPath());
-#else
-		// Lets try to allow unloading the player3D never the less...
-		SafeWrite8(kPlayerUpdate3Dpatch, kPlayerUpdate3DpatchTo);
-#endif
-	}
-
 	Set3D(NULL, true);
 	ModelLoader::GetSingleton()->QueueReference(this, 1, false);
 	return true;
