@@ -194,10 +194,10 @@ struct ModInfo		// referred to by game as TESFile
 	// In Editor: 430 = ONAM array and 434 ONAM array count. Allocated at 0438
 	
 	bool IsLoaded() const { return true; }
-	bool IsSelected() const { return flags & 4; }
-	void SetSelected(char isSelected)
+	bool IsEnabled() const { return flags & 4; }
+	void SetEnabled(char bEnabled)
 	{
-		if ((flags & 0x10) != 0 || !isSelected)
+		if ((flags & 0x10) != 0 || !bEnabled)
 		{
 			flags = flags & ~0xCu;
 		}

@@ -635,7 +635,7 @@ _declspec(naked) void RecompileAllWarningMainHook() {
 	}
 }
 
-void ToggleNthFileSelected(HWND* pListView, int n)
+void SetNthFileEnabled(HWND* pListView, int n, bool bEnabled)
 {
 	if (n < 0)
 	{
@@ -644,10 +644,8 @@ void ToggleNthFileSelected(HWND* pListView, int n)
 
 	if (auto file = DataHandler::GetSingleton()->GetNthFile(n))
 	{
-		bool isSelected = file->IsSelected();
-		file->SetSelected(!isSelected);
-
-		if (!file->IsSelected())
+		file->SetEnabled(bEnabled);
+		if (!file->IsEnabled())
 		{
 			file->SetActive(false);
 
@@ -661,8 +659,30 @@ void ToggleNthFileSelected(HWND* pListView, int n)
 	}
 }
 
+bool AreAllFilesEnabled(HWND* pListView)
+{
+	unsigned int index = -1;
+	do
+	{
+		index = SendMessageA(*pListView, LVM_GETNEXTITEM, index, LVIS_SELECTED);
+
+		if (index >= 0)
+		{
+			if (auto file = DataHandler::GetSingleton()->GetNthFile(index))
+			{
+				if (!file->IsEnabled())
+				{
+					return false;
+				}
+			}
+		}
+	} while (index != -1);
+	return true;
+}
+
 void ToggleSelectedFiles(HWND* pListView)
 {
+	bool bEnabled = AreAllFilesEnabled(pListView);
 	unsigned int index = -1;
 	do
 	{
@@ -670,7 +690,7 @@ void ToggleSelectedFiles(HWND* pListView)
 
 		if (index != -1)
 		{
-			ToggleNthFileSelected(pListView, index);
+			SetNthFileEnabled(pListView, index, !bEnabled);
 		}
 	} while (index != -1);
 }
@@ -713,6 +733,49 @@ BOOL __stdcall hk_LoadESPESMCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM 
 	}
 	return ((WNDPROC)(0x432A80))(hDlg, msg, wParam, lParam);
 }
+
+void doKonami(int key) {
+	static int konamiStage = 0;
+	switch (konamiStage) {
+	case 0:
+		(key == VK_UP) ? konamiStage++ : konamiStage = 0;
+		break;
+	case 1:
+		(key == VK_UP) ? konamiStage++ : konamiStage = 0;
+		break;
+	case 2:
+		if (key == VK_DOWN) konamiStage++;
+		else if (key != VK_UP) konamiStage = 0;
+		break;
+	case 3:
+		(key == VK_DOWN) ? konamiStage++ : konamiStage = 0;
+		break;
+	case 4:
+		(key == VK_LEFT) ? konamiStage++ : konamiStage = 0;
+		break;
+	case 5:
+		(key == VK_RIGHT) ? konamiStage++ : konamiStage = 0;
+		break;
+	case 6:
+		(key == VK_LEFT) ? konamiStage++ : konamiStage = 0;
+		break;
+	case 7:
+		(key == VK_RIGHT) ? konamiStage++ : konamiStage = 0;
+		break;
+	case 8:
+		(key == 'B') ? konamiStage++ : konamiStage = 0;
+		break;
+	case 9:
+		if (key == 'A') {
+			EditorUI_Log("Konami!");
+		}
+		konamiStage = 0;
+		break;
+	}
+	/* handles the case where up is pressed in the middle of the sequence */
+	if (konamiStage == 0 && key == VK_UP) konamiStage++;
+}
+
 BOOL __stdcall hk_SearchAndReplaceCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
 	return ((WNDPROC)(0x47C990))(hDlg, msg, wParam, lParam);
 }
@@ -2224,4 +2287,21 @@ TESForm* __cdecl OnMediaLocationControllerSelectForm(HWND hWndParent, TESForm* f
 	} while (iter = iter->next);
 	selectedForms.RemoveAll();
 	return result;
+}
+
+void FixCommCtl32ScrollingBug()
+{
+	// stubs out ShouldScroll in comctl32 because it leads to a call to SetCursorPos which flings the mouse around
+	if (auto commCtrl = (UInt32)GetModuleHandleA("comctl32.dll"))
+	{
+		UInt32 offset = 0x3BCB2;
+		if (!memcmp((byte*)(commCtrl + offset), "\x08\x00\x00\x20\x00\x74\x1F", 7))
+		{
+			UInt32 patchAddr = commCtrl + offset - 0x11;
+			if (!memcmp((byte*)(patchAddr), "\x8B\xFF\x55\x8B\xEC", 5))
+			{
+				SafeWriteBuf(patchAddr, "\x33\xC0\xC2\x04\x00", 5);
+			}
+		}
+	}
 }

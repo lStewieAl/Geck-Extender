@@ -722,6 +722,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x4824D8, UInt32(OnCloseSelectFormsDialogPopulateList));
 	WriteRelCall(0x5B3661, UInt32(OnMediaLocationControllerSelectForm));
 
+	FixCommCtl32ScrollingBug();
+
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
 	{
@@ -729,48 +731,6 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	}
 #endif
 	return true;
-}
-
-static int konamiStage = 0;
-void doKonami(int key) {
-	switch (konamiStage) {
-	case 0:
-		(key == VK_UP) ? konamiStage++ : konamiStage = 0;
-		break;
-	case 1:
-		(key == VK_UP) ? konamiStage++ : konamiStage = 0;
-		break;
-	case 2:
-		if (key == VK_DOWN) konamiStage++;
-		else if (key != VK_UP) konamiStage = 0;
-		break;
-	case 3:
-		(key == VK_DOWN) ? konamiStage++ : konamiStage = 0;
-		break;
-	case 4:
-		(key == VK_LEFT) ? konamiStage++ : konamiStage = 0;
-		break;
-	case 5:
-		(key == VK_RIGHT) ? konamiStage++ : konamiStage = 0;
-		break;
-	case 6:
-		(key == VK_LEFT) ? konamiStage++ : konamiStage = 0;
-		break;
-	case 7:
-		(key == VK_RIGHT) ? konamiStage++ : konamiStage = 0;
-		break;
-	case 8:
-		(key == 'B') ? konamiStage++ : konamiStage = 0;
-		break;
-	case 9:
-		if (key == 'A') {
-			EditorUI_Log("Konami!");
-		}
-		konamiStage = 0;
-		break;
-	}
-	/* handles the case where up is pressed in the middle of the sequence */
-	if (konamiStage == 0 && key == VK_UP) konamiStage++;
 }
 
 void SaveWindowPositions() {
