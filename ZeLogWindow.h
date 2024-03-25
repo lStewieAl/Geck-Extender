@@ -281,7 +281,8 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 			}
 
 			g_MainMenu = createInfo->hMenu;
-			EnableMenuItem(g_MainMenu, MENUOPTION_RENDER_WINDOW, MF_DISABLED | MF_GRAYED);
+			EnableMenuItem(g_MainMenu, MENUOPTION_RENDER_WINDOW, MF_ENABLED);
+			CheckMenuItem(g_MainMenu, MENUOPTION_RENDER_WINDOW, MF_CHECKED);
 
 			if (!bAllowRecompileAll)
 			{
@@ -623,13 +624,14 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 				//	Hide window
 				menuInfo.fState = MFS_UNCHECKED;
 				SetMenuItemInfo(g_MainMenu, MENUOPTION_RENDER_WINDOW, FALSE, &menuInfo);
+				ShowWindow(RenderWindow::GetWindow(), false);
 			}
 			else
 			{
 				//	Show window
 				menuInfo.fState = MFS_CHECKED;
 				SetMenuItemInfo(g_MainMenu, MENUOPTION_RENDER_WINDOW, FALSE, &menuInfo);
-				ShowWindow(g_renderWindowHwnd, 1);
+				ShowWindow(RenderWindow::GetWindow(), true);
 			}
 		}
 		return 0;
