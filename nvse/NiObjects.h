@@ -575,6 +575,8 @@ public:
 	UInt8				pad12D[3];	// 12D
 };
 
+#endif
+
 // 124
 class NiCamera : public NiAVObject
 {
@@ -588,7 +590,14 @@ public:
 	float		m_fMaxFarNearRatio;			// 10C
 	NiViewport	m_kPort;					// 110
 	float		unk120;						// 120
+
+	bool WindowPointToRay(int x, int y, NiPoint3* origin, NiPoint3* direction, float width = 0.0F)
+	{
+		return ThisCall<bool>(0x817480, this, x, y, origin, direction, width);
+	}
 };
+
+#if 0
 
 // 150
 class BSCubeMapCamera : public NiCamera
@@ -795,3 +804,4 @@ public:
 };
 
 #endif
+class NiWindow;

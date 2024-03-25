@@ -1,83 +1,47 @@
 #pragma once
+#include "NiObjects.h"
 void(__cdecl* SaveWindowPositionToINI)(HWND, const char*) = ((void(__cdecl*)(HWND hWnd, const char* Src))(0x43E170));
 
-struct NiPoint3
+struct RenderData
 {
-	float x, y, z;
+	NiWindow* niWindow;
+	NiNode* pNode;
+	NiCamera* pCamera;
+
+	static RenderData* GetSingleton() { return *(RenderData**)0xED116C; };
 };
-
-struct ViewMatrix
-{
-	float x1, x2, x3, x4, x5, x6, x7, x8, x9;
-};
-
-struct posEtc {
-	void* unk0[0xD];
-	ViewMatrix viewMatrix; // 38
-	NiPoint3 pos; // 58
-	void* unk64[0xC];
-	NiPoint3 lastPos; // 8C
-};
-
-struct lpMem {
-	void* unk0;
-	posEtc* unk4;
-	posEtc* unk8;
-};
-
-
-lpMem* GetLPMem() {
-	return *(lpMem * *)(0xED116C);
-}
 
 // functions for getting and setting the render window camera
-void GetCameraViewMatrix(ViewMatrix* out) {
-	ViewMatrix* current = &GetLPMem()->unk4->viewMatrix;
-	out->x1 = current->x1;
-	out->x2 = current->x2;
-	out->x3 = current->x3;
-	out->x4 = current->x4;
-	out->x5 = current->x5;
-	out->x6 = current->x6;
-	out->x7 = current->x7;
-	out->x8 = current->x8;
-	out->x9 = current->x9;
+void GetCameraViewMatrix(NiMatrix33* out) {
+	auto current = &RenderData::GetSingleton()->pNode->m_localRotate;
+	*out = *current;
 }
 
-void SetCameraViewMatrix(ViewMatrix* newView) {
-	ViewMatrix* current = &GetLPMem()->unk4->viewMatrix;
-	current->x1 = newView->x1;
-	current->x2 = newView->x2;
-	current->x3 = newView->x3;
-	current->x4 = newView->x4;
-	current->x5 = newView->x5;
-	current->x6 = newView->x6;
-	current->x7 = newView->x7;
-	current->x8 = newView->x8;
-	current->x9 = newView->x9;
-
+void SetCameraViewMatrix(NiMatrix33* newView) {
+	auto current = &RenderData::GetSingleton()->pNode->m_localRotate;
+	*current = *newView;
 }
 
 void GetCameraPos(NiPoint3* outPosition) {
-	NiPoint3* currentPos = &GetLPMem()->unk4->pos;
+	NiVector3* currentPos = &RenderData::GetSingleton()->pNode->m_localTranslate;
 	outPosition->x = currentPos->x;
 	outPosition->y = currentPos->y;
 	outPosition->z = currentPos->z;
 }
 
 void SetCameraPos(NiPoint3* newPos) {
-	NiPoint3* currentPos = &GetLPMem()->unk4->pos;
+	NiVector3* currentPos = &RenderData::GetSingleton()->pNode->m_localTranslate;
 	currentPos->x = newPos->x;
 	currentPos->y = newPos->y;
 	currentPos->z = newPos->z;
 }
 
-void GetCamera(NiPoint3* outPosition, ViewMatrix* outDirection) {
+void GetCamera(NiPoint3* outPosition, NiMatrix33* outDirection) {
 	GetCameraPos(outPosition);
 	GetCameraViewMatrix(outDirection);
 }
 
-void SetCamera(NiPoint3* pos, ViewMatrix* direction) {
+void SetCamera(NiPoint3* pos, NiMatrix33* direction) {
 	SetCameraPos(pos);
 	SetCameraViewMatrix(direction);
 }
@@ -89,7 +53,7 @@ void SetTimeOfDay(float time) {
 	float* timeStruct = *(float**)(unknownStruct + 0x1A);
 	if (!timeStruct) return;
 
-	((void(__thiscall*)(float* timeStruct, float newTime))(0x44CD00))(timeStruct, time);
+	ThisCall(0x44CD00, timeStruct, time);
 }
 
 void ToggleRenderWindowAllowCellLoads(bool toggle) {
@@ -110,7 +74,7 @@ bool GetIsRenderWindowAllowCellLoads() {
 
 void SetIsShowWater(bool state) {
 	(*(byte*)(0xECEED4)) = state;
-	((void(*)(void))(0x4164D0))();
+	StdCall(0x4164D0);
 }
 
 bool GetIsShowWater() {
@@ -123,7 +87,7 @@ bool GetIsShowPortalsAndRooms() {
 
 void SetIsShowPortalsAndRooms(bool state) {
 	(*(byte*)(0xECEEF8)) = state;
-	((void(*)(void))(0x416590))();
+	StdCall(0x416590);
 }
 
 long GetPreviousRenderWindowSize() {
@@ -139,7 +103,7 @@ int GetPreviousRenderWindowHeight() {
 }
 
 void RefreshLightMarkers() {
-	((void(*)(void))(0x416490))();
+	StdCall(0x416490);
 }
 
 bool GetIsShowLightMarkers() {
@@ -152,7 +116,7 @@ void SetIsShowLightMarkers(bool state) {
 }
 
 void RefreshSoundMarkers() {
-	((void(*)(void))(0x4165B0))();
+	StdCall(0x4165B0);
 }
 
 bool GetIsShowSoundMarkers() {
@@ -165,14 +129,13 @@ void SetIsShowSoundMarkers(bool state) {
 }
 
 void SetFlycamMode(int state) {
-	((void(__cdecl*)(int state))(0x451EF0))(state);
+	CdeclCall(0x451EF0, state);
 }
 
 int GetFlycamMode() {
 	return (*(int*)(0xED11BC));
 }
 
-HWND g_renderWindowHwnd = (HWND)0xE0C1AA;
 HWND g_mainWindowToolbar = (HWND)0xECFC14;
 HWND g_objectWindowHwnd = (HWND)0xECFB70;
 
@@ -203,6 +166,50 @@ struct ObjectPalette
 	char* paletteName;					// 10
 
 	static ObjectPalette* GetSingleton() { return (ObjectPalette*)0xECE248; };
+};
+
+struct RenderWindow
+{
+	struct SelectedData
+	{
+		static SelectedData* GetSelected() { return *(SelectedData**)0xECFB8C; }
+		static SelectedData* GetClipboard() { return *(SelectedData**)0xECFB90; }
+
+		struct List
+		{
+			TESObjectREFR* ref;
+			List* prev;
+			List* next;
+		};
+
+		List* selectedForms;
+		UInt32 numItems;
+		NiPoint3 pos;
+		float maxDistFromCenter;
+	};
+
+	static HWND GetWindow() { return *(HWND*)0xECFB40; };
+	static bool GetMousePos(NiPoint3* aPosOut, NiPoint3* aRotOut = nullptr)
+	{
+		POINT point;
+		if (!GetCursorPos(&point)) {
+			return false;
+		}
+		ScreenToClient(GetWindow(), &point);
+
+		NiPoint3 pos;
+		NiPoint3 rot;
+		if (!aPosOut)
+		{
+			aPosOut = &pos;
+		}
+		if (!aRotOut)
+		{
+			aRotOut = &rot;
+		}
+
+		return RenderData::GetSingleton()->pCamera->WindowPointToRay(point.x, point.y, aPosOut, aRotOut);
+	}
 };
 
 struct HistoryManager
@@ -242,5 +249,6 @@ struct HistoryManager
 	HistoryManager::Element* current;
 
 	static HistoryManager* GetSingleton() { return *(HistoryManager **)0xECFDF4; };
-	void ClearHistoryForCurrentElement() { ((void(__thiscall*)(HistoryManager * thiss))(0x467CC0))(this); };
+	void ClearHistoryForCurrentElement() { ThisCall(0x467CC0, this); };
+	void AddAction(int aiActionType, RenderWindow::SelectedData* apSelectedForms) { ThisCall(0x465D90, this, aiActionType, apSelectedForms); };
 };

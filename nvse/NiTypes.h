@@ -34,6 +34,16 @@ struct NiVector4
 	float	x, y, z, w;
 };
 
+struct NiPoint3
+{
+	float x, y, z;
+};
+
+struct NiPoint4
+{
+	float x, y, z, r;
+};
+
 // 10 - always aligned?
 struct NiQuaternion
 {

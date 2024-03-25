@@ -38,7 +38,7 @@ HMENU g_MainMenu;
 WNDPROC OldEditorUI_WndProc;
 
 NiPoint3 savedRenderPos;
-ViewMatrix savedRenderDirection;
+NiMatrix33 savedRenderDirection;
 
 HWND g_trackBarHwnd;
 HWND g_timeOfDayTextHwnd;

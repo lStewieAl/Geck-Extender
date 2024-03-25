@@ -2,6 +2,7 @@
 
 #include "GameForms.h"
 #include "Utilities.h"
+#include "NiTypes.h"
 
 class TESReputation;
 class TESChallenge;
@@ -346,7 +347,7 @@ public:
 	UInt8 GetActiveModCount() const;
 	const char* GetNthModName(UInt32 modIndex);
 	ModInfo* GetNthFile(int n);
-
+	TESObjectREFR* CreateReferenceAtLocation(TESBoundObject* object, NiPoint3* aPos, NiPoint3* aRot, float radius);
 
 	MEMBER_FN_PREFIX(DataHandler);
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
