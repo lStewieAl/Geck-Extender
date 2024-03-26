@@ -55,6 +55,9 @@
     </ClCompile>
     <ClCompile Include="Editor.cpp" />
     <ClCompile Include="xutil.cpp" />
+    <ClCompile Include="nvse\NiTypes.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ZeGaryHax.h" />

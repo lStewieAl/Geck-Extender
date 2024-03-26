@@ -84,7 +84,7 @@ ModInfo::~ModInfo() {
 	//
 };
 
-TESObjectREFR* DataHandler::CreateReferenceAtLocation(TESBoundObject* object, NiPoint3* aPos, NiPoint3* aRot, float radius)
+TESObjectREFR* DataHandler::CreateReferenceAtLocation(TESBoundObject* object, const NiPoint3* aPos, const NiPoint3* aRot, float radius)
 {
 	return ThisCall<TESObjectREFR*>(0x4D0940, this, object, aPos, aRot, radius, 0, 0);
 }

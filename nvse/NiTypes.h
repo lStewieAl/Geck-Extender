@@ -37,6 +37,7 @@ struct NiVector4
 struct NiPoint3
 {
 	float x, y, z;
+	static const NiPoint3 ZERO;
 };
 
 struct NiPoint4

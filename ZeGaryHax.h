@@ -721,6 +721,7 @@ BOOL __stdcall hk_LoadESPESMCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM 
 			if (key == 'A')
 			{
 				SelectAllItemsInListView(*pListView);
+				return true;
 			}
 		}
 		else
@@ -728,6 +729,7 @@ BOOL __stdcall hk_LoadESPESMCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM 
 			if (key == VK_SPACE)
 			{
 				ToggleSelectedFiles(pListView);
+				return true;
 			}
 		}
 	}
@@ -1149,6 +1151,28 @@ void __fastcall PreferencesWindowApplyButtonHook(int* thiss, void* dummyEDX, int
 	SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_SETCHECK, GetIsRenderWindowAllowCellLoads(), NULL);
 }
 
+void PlaceXMarker()
+{
+	NiPoint3 pos, rot;
+	if (RenderWindow::GetMousePos(&pos, &rot))
+	{
+		TESObjectSTAT* xMarker = *(TESObjectSTAT**)0xEDDA54;
+		if (auto ref = DataHandler::GetSingleton()->CreateReferenceAtLocation(xMarker, &pos, &NiPoint3::ZERO, 0))
+		{
+			CdeclCall(0x44F470);
+			CdeclCall(0x44F260, ref); // RenderWindow::AddRef
+
+			HistoryManager::GetSingleton()->AddAction(2, RenderWindow::SelectedData::GetSelected());
+
+			if (*(byte*)0xECFB74) // CellView::bLoaded
+			{
+				auto pos = &RenderWindow::SelectedData::GetSelected()->pos;
+				CdeclCall(0x42E3C0, &pos, 1); // CellView::Refresh
+			}
+		}
+	}
+}
+
 BOOL __stdcall RenderWindowCallbackHook(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	if (msg == WM_KEYDOWN) {
 		switch (wParam) {
@@ -1159,6 +1183,10 @@ BOOL __stdcall RenderWindowCallbackHook(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 
 		case 'I':
 			SetIsShowLightMarkers(!GetIsShowLightMarkers());
+			break;
+
+		case 'O':
+			PlaceXMarker();
 			break;
 			/*
 					case 'S':
