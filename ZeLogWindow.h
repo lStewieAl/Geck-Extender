@@ -242,6 +242,21 @@ int __cdecl EditorUI_Log2(const char* Format, ...)
 	return 0;
 }
 
+void MoveChildWindow(HWND hwndChild, LPPOINT offset)
+{
+	// Get the current position of the child window
+	RECT rcChild;
+	GetWindowRect(hwndChild, &rcChild);
+	MapWindowPoints(HWND_DESKTOP, GetParent(hwndChild), (LPPOINT)&rcChild, 2); // Convert to parent-relative coordinates
+
+	// Calculate the new position
+	int newX = rcChild.left + offset->x;
+	int newY = rcChild.top + offset->y;
+
+	// Move the child window to the new position
+	SetWindowPos(hwndChild, NULL, newX, newY, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
+}
+
 LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	if (Message == WM_CREATE)
@@ -677,6 +692,30 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 			}
 			return 0;
 		}
+	} 
+	else if (Message == WM_MOVE)
+	{
+		static int prevX, prevY = 0;
+
+		// Extract the new position from lParam
+		int newX = (int)(short)LOWORD(lParam); // New x-coordinate
+		int newY = (int)(short)HIWORD(lParam); // New y-coordinate
+
+		if ((GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0)
+		{
+			// Calculate the offset based on the new and old positions
+			POINT offset = { newX - prevX, newY - prevY };
+
+			// pRenderWindow, pCellWindow, pObjectWindow
+			for (auto pWindow : { 0xECFB40, 0xECFB78, 0xECFB70 })
+			{
+				MoveChildWindow(*(HWND*)pWindow, &offset);
+			}
+		}
+
+		// Update the previous position for the next move
+		prevX = newX;
+		prevY = newY;
 	}
 
 	return CallWindowProc(OldEditorUI_WndProc, Hwnd, Message, wParam, lParam);
