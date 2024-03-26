@@ -212,6 +212,17 @@ struct RenderWindow
 	}
 };
 
+struct ObjectsView
+{
+	static HWND GetWindow() { return *(HWND*)0xECFB70; };
+	static void Refresh() { SendMessageA(GetWindow(), 1042, NULL, NULL); };
+};
+
+struct CellView
+{
+	static HWND GetWindow() { return *(HWND*)0xECFB78; };
+};
+
 struct HistoryManager
 {
 	enum UndoType

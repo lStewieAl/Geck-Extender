@@ -46,11 +46,6 @@ HWND g_allowCellWindowLoadsButtonHwnd;
 HWND g_renderWindowShowWaterButtonHwnd;
 HWND g_renderWindowShowPortalsButtonHwnd;
 
-void RefreshObjectsWindow()
-{
-	StdCall(0x449E50, NULL, 1042, NULL, NULL);
-}
-
 void ToggleNavmeshPlaceAboveOthers(bool isAllowed)
 {
 	//	Patch Navmesh editing to allow placing vertices over existing navmesh (disables line bisection)
@@ -521,7 +516,7 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 				ToggleObjectWindowFilterUnedited(false);
 			}
 
-			RefreshObjectsWindow();
+			ObjectsView::Refresh();
 		}
 		return 0;
 
@@ -706,10 +701,9 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 			// Calculate the offset based on the new and old positions
 			POINT offset = { newX - prevX, newY - prevY };
 
-			// pRenderWindow, pCellWindow, pObjectWindow
-			for (auto pWindow : { 0xECFB40, 0xECFB78, 0xECFB70 })
+			for (auto pWindow : { RenderWindow::GetWindow(), CellView::GetWindow(), ObjectsView::GetWindow()})
 			{
-				MoveChildWindow(*(HWND*)pWindow, &offset);
+				MoveChildWindow(pWindow, &offset);
 			}
 		}
 
