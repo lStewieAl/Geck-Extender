@@ -5,7 +5,7 @@
 void hk_UpdateCellViewListView(HWND ControlHandle, void* a2, void* a3)
 {
 	SendMessage(ControlHandle, WM_SETREDRAW, FALSE, 0);
-	((void(__cdecl*)(HWND ControlHandle, void* a2, void* a3))(0x0042DE00))(ControlHandle, a2, a3);
+	CdeclCall(0x0042DE00, ControlHandle, a2, a3);
 	SendMessage(ControlHandle, WM_SETREDRAW, TRUE, 0);
 	RedrawWindow(ControlHandle, nullptr, nullptr, RDW_ERASE | RDW_INVALIDATE | RDW_NOCHILDREN);
 }
@@ -15,7 +15,7 @@ LRESULT __fastcall hk_ObjectListViewListView(DWORD* thisptr, void* ignorethisthi
 {
 	HWND listWindow = GetDlgItem(*(HWND*)0x00ECFB70, 1041);
 	SendMessage(listWindow, WM_SETREDRAW, FALSE, 0);
-	((void(__thiscall*)(DWORD*, char*, char*))(0x439630))(thisptr, a2, a3);
+	ThisCall(0x439630, thisptr, a2, a3);
 	SendMessage(listWindow, WM_SETREDRAW, TRUE, 0);
 	RedrawWindow(listWindow, nullptr, nullptr, RDW_ERASE | RDW_INVALIDATE | RDW_NOCHILDREN);
 	return 0;
@@ -50,7 +50,7 @@ _declspec(naked) void DialogueListViewEndUI() {
 
 void __stdcall hk_sub_59C7B0(HWND hWnd) {
 	BeginUIDefer();
-	((void(__stdcall*)(HWND window))(0x59C7B0))(hWnd);
+	StdCall(0x59C7B0, hWnd);
 	EndUIDefer();
 }
 
@@ -59,21 +59,21 @@ It would be a lot faster with the BeginUIDefer calls, however it causes dirty ed
 */
 void __fastcall hk_sub_59C950(char* thiss, void* dummyEDX, int a2, HWND hDlg) {
 	SendMessage(hDlg, WM_SETREDRAW, FALSE, 0);
-	((char(__thiscall*)(char* str, int a2, HWND wnd))(0x59C950))(thiss, a2, hDlg);
+	ThisCall(0x59C950, thiss, a2, hDlg);
 	SendMessage(hDlg, WM_SETREDRAW, TRUE, 0);
 	RedrawWindow(hDlg, nullptr, nullptr, RDW_ERASE | RDW_INVALIDATE);
 }
 
 int* __cdecl hk_sub_595410(HWND hDlg, int a2, char a3) {
 	BeginUIDefer();
-	int* res = ((int* (__cdecl*)(HWND hDlg, int a2, char a3))(0x595410))(hDlg, a2, a3);
+	int* res = CdeclCall<int*>(0x595410, hDlg, a2, a3);
 	EndUIDefer();
 	return res;
 }
 
 char* __fastcall hk_sub_56B270(int* thiss, void* dummyEDX, HWND hWnd) {
 	BeginUIDefer();
-	char* res = ((char* (__thiscall*)(int* something, HWND wnd))(0x56B270))(thiss, hWnd);
+	char* res = ThisCall<char*>(0x56B270, thiss, hWnd);
 	EndUIDefer();
 	return res;
 }
@@ -83,65 +83,64 @@ hook to speed up Select Topic dialog
 */
 void __cdecl hk_sub_595800(HWND hDlg, int a2, int a3) {
 	BeginUIDefer();
-	((LRESULT(__cdecl*)(HWND hDlg, int a2, int a3))(0x595800))(hDlg, a2, a3);
+	CdeclCall(0x595800, hDlg, a2, a3);
 	EndUIDefer();
 }
 
 void __cdecl hk_sub_47D910(HWND hWnd, char a2, char a3, char a4) {
 	BeginUIDefer();
-	((void(_cdecl*)(HWND hWnd, char a2, char a3, char a4))(0x47D910))(hWnd, a2, a3, a4);
-	void __cdecl sub_47D910(HWND hWnd, char a2, char a3, char a4);
+	CdeclCall(0x47D910, hWnd, a2, a3, a4);
 	EndUIDefer();
 }
 
 void __cdecl hk_sub_47D330(HWND hWnd, char a2, char a3) {
 	BeginUIDefer();
-	((void(__cdecl*)(HWND hWnd, char a2, char a3))(0x47D330))(hWnd, a2, a3);
+	CdeclCall(0x47D330, hWnd, a2, a3);
 	EndUIDefer();
 }
 
 BOOL __fastcall hk_sub_49B260(int* thiss, void* dummyEDX, HWND hDlg) {
 	BeginUIDefer();
-	BOOL res = ((BOOL(__thiscall*)(int* thiss, HWND hDlg))(0x49B260))(thiss, hDlg);
+	BOOL res = ThisCall<BOOL>(0x49B260, thiss, hDlg);
 	EndUIDefer();
 	return res;
 }
 
 BOOL __fastcall hk_sub_4979F0(void* thiss, void* dummyEDX, HWND hDlg, int a3) {
 	BeginUIDefer();
-	BOOL res = ((BOOL(__thiscall*)(void* thiss, HWND hDlg, int a3))(0x4979F0))(thiss, hDlg, a3);
+	BOOL res = ThisCall<BOOL>(0x4979F0, thiss, hDlg, a3);
 	EndUIDefer();
 	return res;
 }
 
 void __fastcall hk_sub_4E3020(int* thiss, void* dummyEDX, HWND hDlg) {
 	BeginUIDefer();
-	((void(__thiscall*)(int* thiss, HWND hDlg))(0x4E3020))(thiss, hDlg);
+	ThisCall(0x4E3020, thiss, hDlg);
 	EndUIDefer();
 }
 
 void __fastcall hk_sub_4E8A20(int* thiss, void* dummyEDX, HWND hDlg) {
 	BeginUIDefer();
-	((void(__thiscall*)(int* thiss, HWND hDlg))(0x4E8A20))(thiss, hDlg);
+	ThisCall(0x4E8A20, thiss, hDlg);
 	EndUIDefer();
 }
 
 
 void __cdecl hk_sub_47F7A0(HWND hWnd, char a2, char a3, char a4, int a5, int a6) {
 	BeginUIDefer();
-	((void(__cdecl*)(HWND, char, char, char, int, int))(0x47F7A0))(hWnd, a2, a3, a4, a5, a6);
+	CdeclCall(0x47F7A0, hWnd, a2, a3, a4, a5, a6);
 	EndUIDefer();
 }
 
 void __cdecl hk_sub_47E0D0(HWND hWnd, char a2, int a3, char a4) {
 	BeginUIDefer();
-	((void(__cdecl*)(HWND hWnd, char a2, int a3, char a4))(0x47E0D0))(hWnd, a2, a3, a4);
+	CdeclCall(0x47E0D0, hWnd, a2, a3, a4);
 	EndUIDefer();
 }
 
-void __fastcall hk_sub_666C10(int thiss, void* dummyEDX, HWND hWnd, int a3) {
+void __fastcall hk_sub_666C10(int* thiss, void* dummyEDX, HWND hWnd, int a3) {
 	BeginUIDefer();
-	((void(__thiscall*)(int thiss, HWND hWnd, int a3))(0x666C10))(thiss, hWnd, a3);
+	ThisCall(0x666C10, thiss, hWnd, a3);
 	EndUIDefer();
 }
 void WriteUIHooks() {

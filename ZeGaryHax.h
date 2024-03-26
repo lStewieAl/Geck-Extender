@@ -278,7 +278,7 @@ BOOL WINAPI hk_DialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		DestroyWindow(hWnd);
 		return TRUE;
 	}
-	return ((WNDPROC)(0x004E5E30))(hWnd, uMsg, wParam, lParam);
+	return StdCall<LRESULT>(0x004E5E30, hWnd, uMsg, wParam, lParam);
 }
 
 //	fix handle memory leak - credit to nukem
@@ -733,7 +733,7 @@ BOOL __stdcall hk_LoadESPESMCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM 
 			}
 		}
 	}
-	return ((WNDPROC)(0x432A80))(hDlg, msg, wParam, lParam);
+	return StdCall<LRESULT>(0x432A80, hDlg, msg, wParam, lParam);
 }
 
 void doKonami(int key) {
@@ -779,7 +779,7 @@ void doKonami(int key) {
 }
 
 BOOL __stdcall hk_SearchAndReplaceCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
-	return ((WNDPROC)(0x47C990))(hDlg, msg, wParam, lParam);
+	return StdCall<LRESULT>(0x47C990, hDlg, msg, wParam, lParam);
 }
 
 _declspec(naked) void EndLoadingHook() {
@@ -882,7 +882,7 @@ _declspec(naked) void ScriptEditKeypressHook(HWND hWnd) {
 }
 
 bool __fastcall ScriptEdit__Save(byte* thiss, void* dummyEDX, HWND hDlg, char a3, char a4) {
-	bool saveSuccess = ((bool(__thiscall*)(byte * thiss, HWND hDlg, char a3, char a4))(0x5C2F40))(thiss, hDlg, a3, a4);
+	bool saveSuccess = ThisCall<bool>(0x5C2F40, thiss, hDlg, a3, a4);
 	if (saveSuccess) {
 		SendDlgItemMessageA(hDlg, 1166, EM_SETMODIFY, 0, 0);
 
@@ -913,15 +913,15 @@ char __cdecl hk_DoRenderPan(int a1, int a2, float a3) {
 	if (GetAsyncKeyState(VK_MENU) < 0) {
 		a3 *= fMovementAltMultiplier;
 	}
-	return ((char(__cdecl*)(int a1, int a2, float a3))(0x464210))(a1, a2, a3);
+	return CdeclCall<char>(0x464210, a1, a2, a3);
 }
 
 char __cdecl hk_DoRenderMousewheelScroll(int a1, int a2, float a3) {
-	return ((char(__cdecl*)(int a1, int a2, float a3))(0x464210))(a1, a2, a3 * GetRefSpeedMultiplier());
+	return CdeclCall<char>(0x464210, a1, a2, a3 * GetRefSpeedMultiplier());
 }
 
 double __fastcall hk_CalculateVectorMagnitude(float* vector, void* dummyEDX) {
-	return ((double(__thiscall*) (float* thiss))(0x40B3D0))(vector) * GetRefSpeedMultiplier();
+	return ThisCall<float>(0x40B3D0, vector) * GetRefSpeedMultiplier();
 }
 
 /* multiply the reference movement speed dependent */
@@ -1147,7 +1147,7 @@ _declspec(naked) void EmbeddedRenderWindowSoundNullCheck() {
 }
 
 void __fastcall PreferencesWindowApplyButtonHook(int* thiss, void* dummyEDX, int a2) {
-	((int(__thiscall*)(int* thiss, int a2))(0x855B30))(thiss, a2);
+	ThisCall(0x855B30, thiss, a2);
 	SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_SETCHECK, GetIsRenderWindowAllowCellLoads(), NULL);
 }
 
@@ -1200,7 +1200,7 @@ BOOL __stdcall RenderWindowCallbackHook(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 	else if (msg == WM_RBUTTONDOWN) {
 		SetFlycamMode(0);
 	}
-	return ((WNDPROC)(0x455AA0))(hWnd, msg, wParam, lParam);
+	return StdCall<LRESULT>(0x455AA0, hWnd, msg, wParam, lParam);
 }
 
 extern HWND g_MainHwnd;
@@ -1276,7 +1276,7 @@ _declspec(naked) void ObjectWindowListViewColumnSizeHook()
 
 void __cdecl InsertListViewHeaderSetSizeHook(HWND hWnd, WPARAM wParam, int a3, int a4, int a5)
 {
-	((LRESULT(_cdecl*)(HWND, WPARAM, int, int, int))(0x419F50))(hWnd, wParam, a3, a4, a5);
+	CdeclCall(0x419F50, hWnd, wParam, a3, a4, a5);
 	SendMessageA(hWnd, LVM_SETCOLUMNWIDTH, wParam, 65);
 }
 
@@ -1613,7 +1613,7 @@ BOOL __stdcall HavokPreviewCallback(HWND hWnd, UINT Message, WPARAM wParam, LPAR
 		WritePrivateProfileString("Preview Window", "iLandHeight", _itoa(landHeight, arr, 10), iniName);
 	}
 
-	return ((BOOL(__stdcall*)(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam))(0x4107F0))(hWnd, Message, wParam, lParam);
+	return StdCall<BOOL>(0x4107F0, hWnd, Message, wParam, lParam);
 }
 
 RECT* previousHavokWindowRect = (RECT*)0xECECBC;
@@ -1630,14 +1630,14 @@ void __cdecl HavokPreviewResize(HWND hWnd)
 	MoveDlgItem(hWnd, ID_ANIMATION_STATIC, deltaX / 2, deltaY);
 	InvalidateRect(hWnd, &clientRect, true);
 	// call original function
-	((void(__cdecl*)(HWND))(0x40F930))(hWnd);
+	CdeclCall(0x40F930, hWnd);
 }
 
 /* Need to figure how to fill out the "length" column with the animation length
 void __cdecl HavokPreviewAddColumns(HWND hWnd, WPARAM index, char* name, int width, int a5)
 {
-	((void(__cdecl*)(HWND, WPARAM, char*, int, int))(0x419F50))(hWnd, index, name, width, a5);
-	((void(__cdecl*)(HWND, WPARAM, char*, int, int))(0x419F50))(hWnd, index+1, "Length", width, a5);
+	CdeclCall(0x419F50, hWnd, index, name, width, a5);
+	CdeclCall(0x419F50, hWnd, index+1, "Length", width, a5);
 }
 
 void AddAnimLengthColumnToHavokPreviewAnimsList()
@@ -1945,7 +1945,7 @@ void __cdecl hk_call_sub_41E8F0(bool a1)
         }
     }
 
-    ((void(__cdecl *)(bool))(0x0041E8F0))(a1);
+	CdeclCall(0x0041E8F0, a1);
     FileCacheMap.clear();
 }
 
@@ -1955,7 +1955,7 @@ int __fastcall hk_sub_8A1FC0(void *thisptr, void *_EDX, const char *Path, const 
     if (!FileCacheMap.empty() && !FileCacheMap.count(Path))
         return 0;
 
-    return ((int(__thiscall *)(void *, const char *, const char *, int, int))(0x008A1FC0))(thisptr, Path, a2, a3, a4);
+    return ThisCall<int>(0x008A1FC0, thisptr, Path, a2, a3, a4);
 }
 
 void __declspec(naked) hk_call_41EBDE()
@@ -2142,7 +2142,7 @@ struct EntryPointFieldTypeInfoArray
 void __cdecl ExportDialogueEndPlaySound(WPARAM wParam, LPARAM lParam)
 {
 	PlaySound("MouseClick", NULL, SND_ASYNC);
-	((void(__cdecl*)(WPARAM, LPARAM))(0x4657A0))(wParam, lParam);
+	CdeclCall(0x4657A0, wParam, lParam);
 }
 
 errno_t __cdecl OnGetMeshPathModifyIfDragDrop(char* Dst, rsize_t SizeInBytes, const char* Src)
@@ -2150,9 +2150,9 @@ errno_t __cdecl OnGetMeshPathModifyIfDragDrop(char* Dst, rsize_t SizeInBytes, co
 	bool isDragDrop = *Src && Src[1] == ':' && Src[2] == '\\';
 	if (isDragDrop)
 	{
-		return ((errno_t(__cdecl*)(char* Dst, rsize_t SizeInBytes, const char* Src))(0xC5BE82))(Dst, SizeInBytes, Src); // strcpy_s
+		return CdeclCall<errno_t>(0xC5BE82, Dst, SizeInBytes, Src); // strcpy_s
 	}
-	return ((errno_t(__cdecl*)(char* Dst, rsize_t SizeInBytes, const char* Src))(0xC5BEEA))(Dst, SizeInBytes, Src); // strcat_s
+	return CdeclCall<errno_t>(0xC5BEEA, Dst, SizeInBytes, Src); // strcat_s
 }
 
 __declspec(naked) void OnLoadRegionsHook()
@@ -2221,7 +2221,7 @@ namespace CustomFOV
 		apCamera->m_kPort.r = 1.f;
 		apCamera->m_kPort.t = 1.f;
 		apCamera->m_kPort.b = 0.f;
-		((void (__thiscall*)(NiCamera*, NiUpdateData*))(0x80DD60))(apCamera, &DefaultNodeUpdateParams);
+		ThisCall(0x80DD60, apCamera, &DefaultNodeUpdateParams);
 		return 1;
 	}
 

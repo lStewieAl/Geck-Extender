@@ -35,7 +35,7 @@
 
 BOOL __stdcall ScriptEditCallback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	return ((WNDPROC)(0x5C3D40))(hWnd, msg, wParam, lParam);
+	return StdCall<LRESULT>(0x5C3D40, hWnd, msg, wParam, lParam);
 }
 
 extern "C"
@@ -750,7 +750,7 @@ void __fastcall FastExitHook(volatile LONG** thiss)
 {
 	SaveWindowPositions();
 	if (GetINIExists() && bFastExit) TerminateProcess(GetCurrentProcess(), 0);
-	((void(__thiscall*)(volatile LONG** thiss))(0x4CC540))(thiss);
+	ThisCall(0x4CC540, thiss);
 }
 
 void __stdcall BadFormPrintID(TESForm* form)

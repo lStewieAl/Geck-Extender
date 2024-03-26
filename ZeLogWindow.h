@@ -48,7 +48,7 @@ HWND g_renderWindowShowPortalsButtonHwnd;
 
 void RefreshObjectsWindow()
 {
-	((bool(__stdcall*)(HWND hWnd, UInt32 msg, WPARAM, LPARAM))(0x449E50))(NULL, 1042, NULL, NULL);
+	StdCall(0x449E50, NULL, 1042, NULL, NULL);
 }
 
 void ToggleNavmeshPlaceAboveOthers(bool isAllowed)
@@ -865,7 +865,9 @@ LRESULT CALLBACK EditorUI_LogWndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPA
 					__int32 form = (__int32)LookupFormByID(id);
 
 					if (form)
+					{
 						(*(void(__thiscall * *)(__int32, HWND, __int32, __int32))(*(__int32*)form + 0x164))(form, g_MainHwnd, 0, 1);
+					}
 				}
 			}
 		}

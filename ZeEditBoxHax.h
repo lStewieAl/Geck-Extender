@@ -162,7 +162,7 @@ BOOL __stdcall FormListCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 			return true;
 		}
 	}
-	return ((WNDPROC)(0x480110))(hDlg, msg, wParam, lParam);
+	return StdCall<LRESULT>(0x480110, hDlg, msg, wParam, lParam);
 }
 
 void ResizeObjectPalette(HWND hWnd, WORD newWidth, WORD newHeight)
@@ -198,7 +198,7 @@ BOOL __stdcall ObjectPaletteCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM 
 		WORD height = HIWORD(lParam);
 		ResizeObjectPalette(hDlg, width, height);
 	}
-	return ((WNDPROC)(0x40D190))(hDlg, msg, wParam, lParam);
+	return StdCall<LRESULT>(0x40D190, hDlg, msg, wParam, lParam);
 }
 
 #define USE_REPORT_USED_IN_THESE_CELLS_TEXT_ID 1102
@@ -245,5 +245,5 @@ BOOL __stdcall UseReportCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPar
 		WORD height = HIWORD(lParam);
 		ResizeUseReportWindow(hDlg, width, height);
 	}
-	return ((WNDPROC)(0x468860))(hDlg, msg, wParam, lParam);
+	return StdCall<LRESULT>(0x468860, hDlg, msg, wParam, lParam);
 }
