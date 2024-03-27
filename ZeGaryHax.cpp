@@ -722,6 +722,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x4824D8, UInt32(OnCloseSelectFormsDialogPopulateList));
 	WriteRelCall(0x5B3661, UInt32(OnMediaLocationControllerSelectForm));
 
+	static const char* RenderWindowLandscapeEditColorsSettingLabel = "Landscape: Toggle Edit Colors";
+	SafeWrite32(0xE8CB94, UInt32(RenderWindowLandscapeEditColorsSettingLabel));
+
 	FixCommCtl32ScrollingBug();
 
 #ifdef _DEBUG
