@@ -3,7 +3,6 @@
 #include "GECKUtility.h"
 #include "Editor.h"
 #include "resource.h"
-#include <Psapi.h>
 #include <filesystem>
 #include <unordered_set>
 #include "NiNodes.h"
@@ -1889,10 +1888,8 @@ void PatchRememberLandscapeEditSettingsWindowPosition()
 
 void ClearLandscapeUndosIfNearlyOutOfMemory()
 {
-	const UInt64 MAX_MEMORY = 2560L * (1024L * 1024L); // 2.5gb
-	PROCESS_MEMORY_COUNTERS procMem;
-	GetProcessMemoryInfo(GetCurrentProcess(), &procMem, sizeof(procMem));
-	if (procMem.WorkingSetSize > MAX_MEMORY)
+	constexpr size_t MAX_MEMORY = 2560 * (1024 * 1024); // 2.5gb
+	if (GetCurrentMemoryUsage() > MAX_MEMORY)
 	{
 		auto hist = HistoryManager::GetSingleton();
 		hist->ClearHistoryForCurrentElement();
@@ -2332,4 +2329,10 @@ void FixCommCtl32ScrollingBug()
 			}
 		}
 	}
+}
+
+void __cdecl FormatRenderWindowMemoryUsage(char* DstBuf, size_t SizeInBytes, char* Format, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11)
+{
+	int bytesWritten = CdeclCall<int>(0x401190, DstBuf, SizeInBytes, Format, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
+	CdeclCall<int>(0x401190, DstBuf + bytesWritten, SizeInBytes - bytesWritten, " (%d MB)", GetCurrentMemoryUsage() / (1024*1024));
 }

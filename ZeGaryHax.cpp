@@ -725,6 +725,12 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	static const char* RenderWindowLandscapeEditColorsSettingLabel = "Landscape: Toggle Edit Colors";
 	SafeWrite32(0xE8CB94, UInt32(RenderWindowLandscapeEditColorsSettingLabel));
 
+	WriteRelCall(0x465935, UInt32(FormatRenderWindowMemoryUsage));
+	WriteRelCall(0x465913, UInt32(FormatRenderWindowMemoryUsage));
+	WriteRelCall(0x4531E9, UInt32(FormatRenderWindowMemoryUsage));
+	WriteRelCall(0x4530BF, UInt32(FormatRenderWindowMemoryUsage));
+	WriteRelCall(0x45319B, UInt32(FormatRenderWindowMemoryUsage));
+
 	FixCommCtl32ScrollingBug();
 
 #ifdef _DEBUG
@@ -737,7 +743,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 }
 
 void SaveWindowPositions() {
-	SaveWindowPositionToINI(*(HWND*)(0xECFB40), "Render Window");
+	SaveWindowPositionToINI(RenderWindow::GetWindow(), "Render Window");
 
 	char buffer[8];
 

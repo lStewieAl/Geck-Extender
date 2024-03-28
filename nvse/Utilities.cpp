@@ -2,12 +2,7 @@
 #include "Utilities.h"
 #include "SafeWrite.h"
 #include <algorithm>
-
-#if RUNTIME
-#include "GameAPI.h"
-#include "GameForms.h"
-#include "GameScript.h"
-#endif
+#include <Psapi.h>
 
 void DumpClass(void * theClassPtr, UInt32 nIntsToDump)
 {
@@ -412,45 +407,6 @@ UInt32 Tokenizer::PrevToken(std::string& outStr)
 	return start + 1;
 }
 
-#if RUNTIME
-
-const char GetSeparatorChar(Script * script)
-{
-	if(IsConsoleMode())
-	{
-		if(script && script->GetModIndex() != 0xFF)
-			return '|';
-		else
-			return '@';
-	}
-	else
-		return '|';
-}
-
-const char * GetSeparatorChars(Script * script)
-{
-	if(IsConsoleMode())
-	{
-		if(script && script->GetModIndex() != 0xFF)
-			return "|";
-		else
-			return "@";
-	}
-	else
-		return "|";
-}
-
-void Console_Print_Long(const std::string& str)
-{
-	UInt32 numLines = str.length() / 500;
-	for (UInt32 i = 0; i < numLines; i++)
-		Console_Print("%s ...", str.substr(i*500, 500).c_str());
-
-	Console_Print("%s", str.substr(numLines*500, str.length() - numLines*500).c_str());
-}
-
-#endif
-
 struct ControlName
 {
 	UInt32		unk0;
@@ -520,22 +476,6 @@ void MakeLower(std::string& str)
 	std::transform(str.begin(), str.end(), str.begin(), tolower);
 }
 
-#if RUNTIME
-
-char* CopyCString(const char* src)
-{
-	UInt32 size = src ? strlen(src) : 0;
-	char* result = (char*)FormHeap_Allocate(size+1);
-	result[size] = 0;
-	if (size) {
-		strcpy_s(result, size+1, src);
-	}
-
-	return result;
-}
-
-#endif
-
 #pragma warning(push)
 #pragma warning(disable: 4996)	// warning about std::transform()
 
@@ -602,4 +542,11 @@ void ErrOutput::vShow(const char* msg, va_list args)
 	tempMsg.bDisabled = false;
 
 	vShow(&tempMsg, args);
+}
+
+size_t GetCurrentMemoryUsage()
+{
+	PROCESS_MEMORY_COUNTERS procMem;
+	GetProcessMemoryInfo(GetCurrentProcess(), &procMem, sizeof(procMem));
+	return procMem.WorkingSetSize;
 }
