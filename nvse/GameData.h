@@ -435,6 +435,7 @@ public:
 	float			posX;			// 14	worldX * 4096
 	float			posY;			// 18	worldY * 4096
 	UInt32			unk1C[3];		// 1C
+	TESObjectCELL* GetCell(int x, int y);
 };
 
 class BSTempNodeManager;

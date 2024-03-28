@@ -57,6 +57,7 @@ void Console_Print_Long(const std::string& str);
 #define STATIC_ASSERT(a)
 #endif	// RUNTIME
 
+#define ASSERT_SIZE(aClass, size) STATIC_ASSERT((sizeof(aClass) == size))
 #define SIZEOF_ARRAY(arrayName, elementType) (sizeof(arrayName) / sizeof(elementType))
 
 class TESForm;

@@ -8,6 +8,7 @@
 #include "NiNodes.h"
 #include "NiObjects.h"
 #include "GameScript.h"
+#include "GameSettings.h"
 
 #define GH_NAME				"ZeGaryHax"		// this is the string for IsPluginInstalled and GetPluginVersion (also shows in nvse.log)
 #define GH_VERSION			0.41
@@ -1172,6 +1173,51 @@ void PlaceXMarker()
 	}
 }
 
+void ToggleObjectVisibilityForCell(TESObjectCELL* cell)
+{
+	if (auto iter = cell->objectList.Head())
+	{
+		do
+		{
+			if (auto ref = iter->item)
+			{
+				if (auto node = ref->Get3D())
+				{
+					if (node = ThisCall<NiNode*>(0x68B370, node, 0xF1FDD4)) // NiRTTI::HasType(&NiNode::ms_RTTI);
+					{
+						node->SetAlphaRecurse(1.0F);
+						node->m_flags &= ~0x200001;
+						node->UpdatePropertiesUpward();
+					}
+				}
+			}
+		} while (iter = iter->next);
+	}
+}
+
+void ToggleAllObjectsVisible()
+{
+	auto tes = TES::GetSingleton();
+	if (auto cell = tes->currentInterior)
+	{
+		ToggleObjectVisibilityForCell(cell);
+	}
+	else
+	{
+		Setting* uGridsToLoad = (Setting*)0xED6550;
+		for (int x = 0, n = uGridsToLoad->data.uint; x < n; ++x)
+		{
+			for (int y = 0, n = uGridsToLoad->data.uint; y < n; ++y)
+			{
+				if (auto cell = tes->gridCellArray->GetCell(x, y))
+				{
+					ToggleObjectVisibilityForCell(cell);
+				}
+			}
+		}
+	}
+}
+
 BOOL __stdcall RenderWindowCallbackHook(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	if (msg == WM_KEYDOWN) {
 		switch (wParam) {
@@ -1186,6 +1232,10 @@ BOOL __stdcall RenderWindowCallbackHook(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 
 		case 'O':
 			PlaceXMarker();
+			break;
+
+		case 'P':
+			ToggleAllObjectsVisible();
 			break;
 			/*
 					case 'S':
@@ -1456,6 +1506,7 @@ LONG WINAPI DoCrashSave(EXCEPTION_POINTERS* info)
 	// create a save in the Data//CrashSaves folder called %s.esp
 	WriteRelCall(0x4DB07A, UInt32(CrashSaveSetName));
 
+	CreateDirectoryA("Data\\CrashSaves", 0);
 	static const char* path = "Data\\CrashSaves\\";
 	SafeWrite32(0x4DB0AC, UInt32(path));
 
@@ -1791,7 +1842,7 @@ _declspec(naked) void ExportFaceGenCheckIsFormEdited()
 
 const char* SpeedTreeGetTexturePath()
 {
-	return "Data\\Textures\\Trees\\Leaves";
+	return "Data\\Textures\\Trees\\Leaves\\";
 }
 
 typedef HRESULT(__stdcall* D3DXCreateTextureFromFileInMemoryEx_)(_In_    void* pDevice,

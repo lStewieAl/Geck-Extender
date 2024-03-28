@@ -88,3 +88,9 @@ TESObjectREFR* DataHandler::CreateReferenceAtLocation(TESBoundObject* object, co
 {
 	return ThisCall<TESObjectREFR*>(0x4D0940, this, object, aPos, aRot, radius, 0, 0);
 }
+
+TESObjectCELL* GridCellArray::GetCell(int x, int y)
+{
+	auto pCell = ThisCall<TESObjectCELL**>(0x5296F0, this, x, y);
+	return pCell ? *pCell : nullptr;
+}

@@ -32,69 +32,52 @@ public:
 	TESObjectREFR();
 	~TESObjectREFR();
 
-	virtual void		Unk_4E(void);	// GetStartingPosition(Position, Rotation, WorldOrCell)
-	virtual void		Unk_4F(void);
-	virtual void		Unk_50(void);
-	virtual void		Unk_51(void);
-	virtual bool		CastShadows(void);
-	virtual void		Unk_53(void);
-	virtual void		Unk_54(void);
-	virtual void		Unk_55(void);
-	virtual void		Unk_56(void);
-	virtual void		Unk_57(void);
-	virtual void		Unk_58(void);
-	virtual void		Unk_59(void);
-	virtual void		Unk_5A(void);
-	virtual void		Unk_5B(void);
-	virtual void		Unk_5C(void);
-	virtual void		Unk_5D(void);
 	virtual void		Unk_5E(void);
-	virtual TESObjectREFR*		RemoveItem(TESForm* toRemove, BaseExtraList* extraList, UInt32 count, UInt32 unk3, UInt32 unk4, TESObjectREFR* destRef, 
-		UInt32 unk6, UInt32 unk7, UInt32 unk8, UInt8 unk9);	// 40 unk2 quantity? Returns the reference assigned to the removed item.
+	virtual void		Unk_5F(void);
 	virtual void		Unk_60(void);
-	virtual bool		EquipArmor(TESForm *item, UInt32 count, ExtraDataList *xData, UInt32 arg4);
-	virtual void		Unk_62(void);	// Linked to Unequip (and or equip maybe)
+	virtual void		Unk_61(void);
+	virtual void		Unk_62(void);
 	virtual void		Unk_63(void);
-	virtual void		AddItem(TESForm *item, ExtraDataList *xDataList, UInt32 quantity);
+	virtual void		Unk_64(void);
 	virtual void		Unk_65(void);
 	virtual void		Unk_66(void);
 	virtual void		Unk_67(void);						// Actor: GetMagicEffectList
-	virtual bool		GetIsChildSize(bool checkHeight);	// 068 Actor: GetIsChildSize
-	virtual UInt32		GetActorUnk0148(void);				// result can be interchanged with baseForm, so TESForm* ?
-	virtual void		SetActorUnk0148(UInt32 arg0);
+	virtual void		Unk_68(void);						// Actor: GetMagicEffectList
+	virtual void		Unk_69(void);						// Actor: GetMagicEffectList
+	virtual void		Unk_6A(void);						// Actor: GetMagicEffectList
 	virtual void		Unk_6B(void);
 	virtual void		Unk_6C(void);	// REFR: GetBSFaceGenNiNodeSkinned
 	virtual void		Unk_6D(void);	// REFR: calls 006C
 	virtual void		Unk_6E(void);	// MobileActor: calls 006D then NiNode::Func0040
 	virtual void		Unk_6F(void);
-	virtual void		Unload3D(void);
-	virtual void		AnimateNiNode(void);					// same in FOSE ! identical to Func0052 in OBSE which says (inits animation-related data, and more)
-	virtual void		GenerateNiNode(bool arg0);				// same in FOSE !
-	virtual void		Set3D(NiNode* niNode, bool unloadArt);	// same in FOSE !
-	virtual NiNode *	GetNiNode(void);						// same in FOSE !
+	virtual void		Unk_70(void);
+	virtual void		Unk_71(void);
+	virtual void		Unk_72(void);
+	virtual void		Unk_73(void);
+	virtual void		Unk_74(void);
 	virtual void		Unk_75(void);
 	virtual void		Unk_76(void);
 	virtual void		Unk_77(void);
 	virtual void		Unk_78(void);
-	virtual Animation *	GetAnimation(void);			// 0079
-	virtual ValidBip01Names * GetValidBip01Names(void);	// 007A	Character only
-	virtual ValidBip01Names * CallGetValidBip01Names(void);
-	virtual void		SetValidBip01Names(ValidBip01Names validBip01Names);
-	virtual void		GetPos(void);				// GetPos or GetDistance
-	virtual void		Unk_7E(UInt32 arg0);
+	virtual void		Unk_79(void);
+	virtual void		Unk_7A(void);
+	virtual NiNode*		GenerateNiNode(void);
+	virtual void		Unk_7C(void);
+	virtual NiNode*		Get3D(void);
+	virtual void		Unk_7E(void);
 	virtual void		Unk_7F(void);
-	virtual void		Unk_80(UInt32 arg0);
-	virtual void		Unk_81(UInt32 arg0);
+	virtual void		Unk_80(void);
+	virtual void		Unk_81(void);
 	virtual void		Unk_82(void);
 	virtual UInt32		Unk_83(void);
 	virtual void		Unk_84(UInt32 arg0);
-	virtual UInt32		Unk_85(void);			// 0 or GetActor::Unk01AC
-	virtual bool		Unk_86(void);			// return false for Projectile, Actor and Creature, true for character and PlayerCharacter
-	virtual bool		Unk_87(void);			// seems to always return 0
-	virtual bool		Unk_88(void);			// seems to always return 0
-	virtual bool		IsProjectile();
-	virtual void		Unk_8A(void);			// SetParentCell (Interior only ?)
-	virtual bool		IsDead(bool arg0);			// IsDead = HasNoHealth (baseForm health <= 0 or Flags bit23 set)
+	virtual UInt32		Unk_85(void);
+	virtual NiPoint3*	GetPos(void);
+	virtual bool		Unk_87(void);
+	virtual bool		Unk_88(void);
+	virtual bool		Unk_89(void);
+	virtual void		Unk_8A(void);
+	virtual void		Unk_8B(void);
 	virtual bool		Unk_8C(void);
 	virtual bool		Unk_8D(void);
 	virtual void		Unk_8E(void);

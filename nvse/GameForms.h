@@ -205,97 +205,109 @@ struct PermanentClonedForm
 
 typedef tList<EffectItem> EffectList;
 
-// 018
+// 02C
 class TESForm : public BaseFormComponent
 {
 public:
 	TESForm();
 	~TESForm();
 
-	virtual void *		Destroy(bool noDealloc);			// func_00C in GECK ?? I think ??
-	virtual void		Unk_05(void);						// Might be set default value (called from constructor)
-	virtual void		Unk_06(void);						// Might be clear values
-	virtual bool		Unk_07(void);
-	virtual bool		LoadForm(ModInfo * modInfo);		// func_010 in GECK
-	virtual bool		Unk_09(void * arg);					// points to LoadForm on TESForm
-	virtual bool		AppendForm(ModInfo* modInfo);		// (ie SaveForm + append to modInfo)
-	virtual void		SaveForm(void);						// saves in same format as in .esp	//	func_013 in GECK
-															// data buffer and buffer size stored in globals when done, doesn't return anything
-	virtual bool		LoadForm2(ModInfo * modInfo);		// just calls LoadForm
-	virtual void		WriteFormInfo(ModInfo* modInfo);	// does some saving stuff, then calls Fn0A
-	virtual bool		Unk_0E(void * arg);					// prepares a GRUP formInfo
-	virtual bool		Sort(TESForm * form);				// returns if the argument is "greater or equal" to this form
-	virtual TESForm *	CreateForm(void * arg0, void * mapToAddTo);	// makes a new form, 
-	virtual void		Unk_11(void * arg);
-	virtual void		MarkAsModified(UInt32 changedFlags);		// enable changed flag?
-	virtual void		MarkAsUnmodified(UInt32 changedFlags);		// disable changed flag?
-	virtual UInt32		GetSaveSize(UInt32 changedFlags);	// bytes taken by the delta flags for this form, UNRELIABLE, not (always) overriden
-	virtual void		Unk_15(void * arg);					// collect referenced forms?
-	virtual void		SaveGame(UInt32 changedFlags);		// Used as part of CopyFromBase with LoadGame.
-	virtual void		LoadGame(void * arg);				// load from BGSLoadFormBuffer arg
-	virtual void		LoadGame2(UInt32 changedFlags);		// load from TESSaveLoadGame
-	virtual void		Unk_19(void * arg);
-	virtual void		Unk_1A(void * arg0, void * arg1);
-	virtual void		Unk_1B(void * arg0, void * arg1);
-	virtual void		Revert(UInt32 changedFlags);		// reset changes in form
-	virtual void		Unk_1D(void * arg);
-	virtual void		Unk_1E(void * arg);
-	virtual bool		Unk_1F(void * arg);
-	virtual void		Unk_20(void * arg);
-	virtual void		Unk_21(void * arg);
-	virtual void		InitItem(void);
-	virtual UInt32		GetTypeID(void);
-	virtual void		GetDebugName(String * dst);
-	virtual bool		IsQuestItem(void);
-										// Unk_26 though Unk_36 get or set flag bits
-	virtual bool		Unk_26(void);		// 00000040
-	virtual bool		Unk_27(void);		// 00010000
-	virtual bool		Unk_28(void);		// 00010000
-	virtual bool		Unk_29(void);		// 00020000
-	virtual bool		Unk_2A(void);		// 00020000
-	virtual bool		Unk_2B(void);		// 00080000
-	virtual bool		Unk_2C(void);		// 02000000
-	virtual bool		Unk_2D(void);		// 40000000
-	virtual bool		Unk_2E(void);		// 00000200
-	virtual void		Unk_2F(bool set);	// 00000200
-	virtual bool		Unk_30(void);		// returns false
-	virtual void		Unk_31(bool set);	// 00000020 then calls Fn12 MarkAsModified
-	virtual void		Unk_32(bool set);	// 00000002 with a lot of housekeeping
-	virtual void		SetQuestItem(bool set);	// 00000400 then calls Fn12 MarkAsModified
-	virtual void		Unk_34(bool set);	// 00000040 then calls Fn12 MarkAsModified
-	virtual void		Unk_35(bool set);	// 00010000 then calls Fn12 MarkAsModified
-	virtual void		Unk_36(bool set);	// 00020000
-	virtual void		Unk_37(void);		// write esp format
-	virtual void		readOBNDSubRecord(ModInfo * modInfo);	// read esp format
-	virtual bool		Unk_39(void);
-	virtual bool		Unk_3A(void);
-	virtual bool		Unk_3B(void);
-	virtual bool		IsReference();
-	virtual bool		IsArmorAddon();
-	virtual bool		Unk_3E(void);
-	virtual bool		Unk_3F(void);	// returnTrue for refr whose baseForm is a TESActorBase
-	virtual bool		IsActor(void);
-	virtual UInt32		Unk_41(void);
-	virtual void		CopyFrom(const TESForm * form);
-	virtual bool		Compare(TESForm * form);
-	virtual bool		CheckFormGRUP(void * arg);	// Checks the group is valid for the form
-	virtual void		InitFormGRUP(void * dst, void * arg1);	// Fills the groupInfo with info valid for the form
-	virtual bool		Unk_46(void);
-	virtual bool		Unk_47(void);
-	virtual bool		Unk_48(UInt32 formType);	// returns if the same FormType is passed in
-	virtual bool		Unk_49(void * arg0, void * arg1, void * arg2, void * arg3, void * arg4);	// looks to be func33 in Oblivion
-	virtual void		SetRefID(UInt32 refID, bool generateID);
-	virtual char *		GetName2(void);	// GetName as in OBSE ?
-	virtual char *		GetName(void);	// GetEditorID as in OBSE ?
-	virtual bool		SetEditorID(const char * edid);		// simply returns true at run-time
-	// 4E
+	virtual void		Unk_04();
+	virtual void		Unk_05();
+	virtual void		Unk_06();
+	virtual void		Unk_07();
+	virtual void		DialogHas_IDC_ID_Control(HWND hWnd);
+	virtual void		Unk_09();
+	virtual void		Unk_0A();
+	virtual void		Unk_0B();
+	virtual void		Destroy(bool bDoFree);
+	virtual void		Unk_0D();
+	virtual void		Unk_0E();
+	virtual void		Unk_0F();
+	virtual void		Unk_10();
+	virtual void		Unk_11();
+	virtual void		Unk_12();
+	virtual void		Unk_13();
+	virtual void		Unk_14();
+	virtual void		Unk_15();
+	virtual void		Unk_16();
+	virtual void		Unk_17();
+	virtual void		Unk_18();
+	virtual void		Unk_19();
+	virtual void		InitItem();
+	virtual void		Unk_1B();
+	virtual void		GetDebugString(char* dst);
+	virtual bool		IsPersistent();
+	virtual void		Unk_1E();
+	virtual void		Unk_1F();
+	virtual void		Unk_20();
+	virtual void		Unk_21();
+	virtual void		Unk_22();
+	virtual void		Unk_23();
+	virtual void		Unk_24();
+	virtual void		Unk_25();
+	virtual void		Unk_26();
+	virtual void		Unk_27();
+	virtual void		Unk_28();
+	virtual void		Unk_29();
+	virtual void		Unk_2A();
+	virtual void		Unk_2B();
+	virtual void		Unk_2C();
+	virtual void		Unk_2D();
+	virtual void		Unk_2E();
+	virtual void		Unk_2F();
+	virtual void		Unk_30();
+	virtual void		Unk_31();
+	virtual void		Unk_32();
+	virtual void		Unk_33();
+	virtual void		Unk_34();
+	virtual void		Unk_35();
+	virtual void		Unk_36();
+	virtual void		Unk_37();
+	virtual void		Unk_38();
+	virtual void		Unk_39();
+	virtual void		Unk_3A();
+	virtual void		Unk_3B();
+	virtual void		Unk_3C();
+	virtual void		Unk_3D();
+	virtual void		Unk_3E();
+	virtual void		Unk_3F();
+	virtual void		Unk_40();
+	virtual void		Unk_41();
+	virtual void		Unk_42();
+	virtual void		Unk_43();
+	virtual void		Unk_44();
+	virtual void		Unk_45();
+	virtual void		Unk_46();
+	virtual void		Unk_47();
+	virtual void		Unk_48();
+	virtual void		Unk_49();
+	virtual void		Unk_4A();
+	virtual void		Unk_4B();
+	virtual void		Unk_4C();
+	virtual void		Unk_4D();
+	virtual void		Unk_4E(void);
+	virtual void		Unk_4F(void);
+	virtual void		Unk_50(void);
+	virtual void		Unk_51(void);
+	virtual bool		Unk_52(void);
+	virtual void		Unk_53(void);
+	virtual bool		DialogCallback(HWND hDlg, int a3, int a4, int a5, void* a6);
+	virtual void		Unk_55(void);
+	virtual void		Unk_56(void);
+	virtual void		Unk_57(void);
+	virtual void		Unk_58(void);
+	virtual void		OpenDialog(HWND hWndParent, char a3, char a4);
+	virtual void		Unk_5A(void);
+	virtual void		Unk_5B(void);
+	virtual signed int 	Compare(TESForm* to, int compareType);
+	virtual void		Unk_5D(void);
 
 	struct EditorData {
 		String		editorID;			// 00
 		UInt32		vcMasterFormID;		// 08 - Version control 1 (looks to be a refID inside the Version Control master)
 		UInt32		vcRevision;			// 0C
 	};
-	// 10
 
 	enum
 	{
@@ -315,13 +327,10 @@ public:
 	UInt8	typeIDPad[3];			// 005
 	UInt32	flags;					// 008
 	UInt32	refID;					// 00C
-#ifdef EDITOR
 	EditorData	editorData;			// +10
-#endif
 	tList<ModInfo> mods;			// 010 ModReferenceList in Oblivion	
-	// 018 / 028
-
-	// Looks like there is another DWord here, used as a byte: LastLoaded or Active or Selected ? 
+	UInt8 byte28;
+	UInt8 gap29[3];
 
 	TESForm *		TryGetREFRParent(void);
 	UInt8			GetModIndex() const;
@@ -334,24 +343,9 @@ public:
 	bool IsAmmo() { return typeID == kFormType_Ammo; }
 	bool IsIngestible() { return typeID == kFormType_AlchemyItem; }
 
-	// adds a new form to the game (from CloneForm or LoadForm)
-	void DoAddForm(TESForm* newForm, bool bPersist = true, bool record = true) const;
-	// return a new base form which is the clone of this form
-	TESForm* CloneForm(bool bPersist = true) const;
-	bool     IsInventoryObject() const;
-//	bool	 IsReference()	{return typeID >= kFormType_Reference && typeID <= kFormType_ACRE;}
-
 	MEMBER_FN_PREFIX(TESForm);
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
-	DEFINE_MEMBER_FN(MarkAsTemporary, void, 0x00484490);	// probably a member of TESForm
-#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-	DEFINE_MEMBER_FN(MarkAsTemporary, void, 0x00485480);	// probably a member of TESForm
-#elif EDITOR
-#else
-#error
-#endif
-
 };
+STATIC_ASSERT(sizeof(TESForm) == 0x2C);
 
 struct ColorRGB
 {
@@ -367,22 +361,22 @@ public:
 	TESObject();
 	~TESObject();
 
-	virtual UInt32	Unk_4E(void);
-	virtual bool	Unk_4F(void);
-	virtual UInt32	Unk_50(void);
-	virtual bool	Unk_51(void);
-	virtual void	Unk_52(void * arg);
-	virtual NiNode	* Unk_53(TESObjectREFR * refr, void * arg1);
-	virtual void	Unk_54(void * arg);
-	virtual bool	IsInternal(void);
-	virtual bool	IsInternalMarker(void);
-	virtual void	Unk_57(void);
-	virtual bool	Unk_58(void);	// BoundObject: Calls Unk_5F on the object model
-	virtual bool	Unk_59(void * arg);
-	virtual void	Unk_5A(void * arg0, void * arg1);
-	virtual UInt32	Unk_5B(void);
-	virtual UInt32	Unk_5C(void);
-	virtual bool	Unk_5D(TESObjectREFR * refr);	// if false, no NiNode gets returned by Unk_53, true for NPC
+	virtual void		Unk_5E(void);
+	virtual void		Unk_5F(void);
+	virtual void		Unk_60(void);
+	virtual void		Unk_61(void);
+	virtual void		Unk_62(void);
+	virtual void		Unk_63(void);
+	virtual void		Unk_64(void);
+	virtual void		Unk_65(void);
+	virtual void		Unk_66(void);
+	virtual void		Unk_67(void);						// Actor: GetMagicEffectList
+	virtual void		Unk_68(void);						// Actor: GetMagicEffectList
+	virtual void		Unk_69(void);						// Actor: GetMagicEffectList
+	virtual void		Unk_6A(void);						// Actor: GetMagicEffectList
+	virtual void		Unk_6B(void);
+	virtual void		Unk_6C(void);	// REFR: GetBSFaceGenNiNodeSkinned
+	virtual void		Unk_6D(void);
 };
 
 // 30
@@ -392,8 +386,10 @@ public:
 	TESBoundObject();
 	~TESBoundObject();
 
-	virtual NiNode	* CreateNiNode(TESObjectREFR * refr);	// calls Fn53, for NPC calls ReadBones, for LevelledActor level them if necessary
-	virtual bool	Unk_5F(void);
+	virtual void		Unk_6E(void);
+	virtual void		Unk_6F(void);
+	virtual void		Unk_70(void);
+	virtual void		Unk_71(void);
 
 	BoundObjectListHead		* head;		// 018
 	TESBoundObject			* prev;		// 01C
@@ -1871,7 +1867,6 @@ public:
 	}
 	void SetFlag(UInt32 flag, bool bMod) {
 		factionFlags = bMod ? (factionFlags | flag) : (factionFlags & ~flag);
-		MarkAsModified(kModified_FactionFlags);
 	}
 	bool IsHidden()
 	{	return IsFlagSet(kFlag_HiddenFromPC);	}
@@ -3651,10 +3646,9 @@ public:
 	~TESRegionList();
 };
 
-// NavMeshInfoMap (40)
 class NavMeshInfoMap;
+class NavMesh;
 
-// TESObjectCELL (E0)
 class TESObjectCELL : public TESForm
 {
 public:
@@ -3668,39 +3662,60 @@ public:
 		UInt32	y;
 	}; // Exterior is 3 DWord, Interior is 5 DWord and 5 floats
 
-	TESFullName				fullName;			// 018	// 030 in GECK
-	UInt8					isInterior;			// 024
-	UInt8					unk025;				// 025
-	UInt8					unk026;				// 026	// 5 or 6 would mean cell is loaded
-	UInt8					unk027;				// 027
-	ExtraDataList			extraDataList;		// 028
-	CellCoordinates			* coords;			// 048
-	TESObjectLAND			* land;				// 04C
-	float					waterHeight;		// 050
-	TESTexture				texture054;			// 054
-	void					* NavMeshArray;		// 060	?$BSSimpleArray@VNavMeshPtr@@$0EAA@@@
-	UInt32					unk064[(0x0A4-0x064) >> 2];	// 064	080 is CellRefLock semaphore
-	UInt32					actorCount;			// 0A4
-	UInt16					countVisibleWhenDistant;	// 0A8
-	UInt16					unk0AA;				// 0AA
-	RefList					objectList;			// 0AC
-	NiNode					* niNode0B4;		// 0B4
-	NiNode					* niNode0B8;		// 0B8
-	UInt32					unk0BC;				// 0BC
-	TESWorldSpace			* worldSpace;		// 0C0
-	NiNode					* unk0C4;			// 0C4	structure (NiNode) containing at 20 a vector XYZT, 4C a list of scripted references, 5C a list of refer with activateRefChildren
-	float					unk0C8;				// 0C8
-	UInt32					unk0CC;				// 0CC
-	UInt32					unk0D0;				// 0D0
-	BSPortalGraph			* portalGraph;		// 0D4
-	BGSLightingTemplate		* lightingTemplate;	// 0D8 LTMP
-	UInt32					inheritFlags;		// 0DC LNAM
+	struct LOADED_CELL_DATA
+	{
+		NiNode* masterNode;
+		tList<TESObjectREFR> refList04;
+		NiTMapBase<TESObjectREFR*, NiNode*> refNodeMap0C;
+		NiTMapBase < void*, void*> formRefMap1C;
+		NiTMapBase < void*, void*> formNodeMap2C;
+		NiTMapBase < void*, void*> refMultiBoundNodeMap3C;
+		tList<TESObjectREFR> scriptedRefs;
+		tList<TESObjectREFR> activateRefChildren;
+		tList<TESObjectREFR> placeableWatersList;
+	};
 
-	bool IsInterior() { return worldSpace == NULL; }
+	TESFullName fullName;
+	UInt8 cellFlags;
+	UInt8 cellState;
+	UInt8 byte3B;
+	UInt8 gap3C;
+	ExtraDataList extraDataList;
+	CellCoordinates coords;
+	TESObjectLAND* land;
+	float waterHeight;
+	UInt8 bAutoWaterLoaded;
+	UInt8 gap69[3];
+	TESTexture noiseTexture;
+	NavMesh** navMeshArray;
+	UInt32 unk80[8];
+	RTL_CRITICAL_SECTION refLockSemaphore;
+	UInt32 unkB8;
+	UInt32 unkBC;
+	SInt32 numNonActorRefs;
+	SInt32 numRefs;
+	UInt16 countVisibleDistant;
+	UInt16 visibleWhenDistantCountLoaded;
+	tList<TESObjectREFR> objectList;
+	NiNode* niNodeD4;
+	NiNode* niNodeD8;
+	UInt32 unkDC;
+	LOADED_CELL_DATA* renderData;
+	float unkE4;
+	UInt8 byteE8;
+	UInt8 byteE9;
+	UInt8 byteEA;
+	UInt8 byteEB;
+	UInt8 byteEC;
+	UInt8 byteED;
+	UInt8 byteEE;
+	UInt8 byteEF;
+	BSPortalGraph* portalGraph;
+	UInt32 unkF4;
+	UInt32 inheritFlags;
+	BGSLightingTemplate* lightingTemplate;
 };
-STATIC_ASSERT(offsetof(TESObjectCELL, NavMeshArray) == 0x060);
-STATIC_ASSERT(offsetof(TESObjectCELL, objectList) == 0x0AC);
-STATIC_ASSERT(sizeof(TESObjectCELL) == 0xE0);
+STATIC_ASSERT(sizeof(TESObjectCELL) == 0x100);
 
 // TESObjectREFR (60) - see GameObjects.h
 
@@ -3940,16 +3955,8 @@ public:
 	TESPackage();
 	~TESPackage();
 
-	virtual void	Unk_4E();
-	virtual void	Unk_4F();
-	virtual void	Unk_50();
-	virtual void	Unk_51();
-	virtual void	Unk_52();
-	virtual void	Unk_53();
-	virtual void	Unk_54();
-	virtual void	Unk_55();
-	virtual void	Unk_56();
-	virtual void	Unk_57();
+	virtual void	Unk_5D();
+	virtual void	Unk_5E();
 
 	enum	// From OBSE and FNVEdit
 	{

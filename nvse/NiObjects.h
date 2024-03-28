@@ -168,6 +168,7 @@ public:
 	void SetVisible(bool visible) { visible ? (m_flags &= ~kNiFlag_Culled) : (m_flags |= kNiFlag_Culled); };
 	bool IsVisible() { return !(m_flags & kNiFlag_Culled); }
 	bool IsSelectiveUpdate() { return m_flags & kNiFlag_SelectiveUpdate; };
+	void UpdatePropertiesUpward() { ThisCall(0x80E140, this); };
 };
 STATIC_ASSERT(sizeof(NiAVObject) == 0x9C);
 
@@ -326,6 +327,8 @@ public:
 	UInt32						unk0094;	// 094
 	UInt32						unk0098;	// 098
 	NiTArray <NiAVObject *>		m_children;	// 09C
+
+	void SetAlphaRecurse(float alpha) { CdeclCall(0x90A1C0, this, alpha); };
 
 };	// 0AC
 
