@@ -1842,7 +1842,7 @@ _declspec(naked) void ExportFaceGenCheckIsFormEdited()
 
 const char* SpeedTreeGetTexturePath()
 {
-	return "Data\\Textures\\Trees\\Leaves\\";
+	return "Data\\Textures\\Trees\\Leaves";
 }
 
 typedef HRESULT(__stdcall* D3DXCreateTextureFromFileInMemoryEx_)(_In_    void* pDevice,
