@@ -731,6 +731,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x4530BF, UInt32(FormatRenderWindowMemoryUsage));
 	WriteRelCall(0x45319B, UInt32(FormatRenderWindowMemoryUsage));
 
+	WriteRelCall(0x57484D, UInt32(OnFaceGen_PeriodicCleanup));
+	WriteRelCall(0x574A40, UInt32(OnFaceGen_PeriodicCleanup));
+
 	FixCommCtl32ScrollingBug();
 
 #ifdef _DEBUG

@@ -483,4 +483,5 @@ public:
 	LoadedAreaBound		*unkC0;				// C0
 
 	static TES* GetSingleton() { return *(TES**)0xECF93C; }
+	void CleanUpUnusedTextures(bool bEmergencyTextureRelease = false) { ThisCall(0x4C7D70, this, bEmergencyTextureRelease); };
 };

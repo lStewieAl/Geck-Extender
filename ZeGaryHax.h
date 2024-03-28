@@ -2336,3 +2336,26 @@ void __cdecl FormatRenderWindowMemoryUsage(char* DstBuf, size_t SizeInBytes, cha
 	int bytesWritten = CdeclCall<int>(0x401190, DstBuf, SizeInBytes, Format, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
 	CdeclCall<int>(0x401190, DstBuf + bytesWritten, SizeInBytes - bytesWritten, " (%d MB)", GetCurrentMemoryUsage() / (1024*1024));
 }
+
+void CleanupFaceGenMap()
+{
+	// 0x44F180 but without clearing the cell data, lights or navmesh
+
+	CdeclCall(0x9DEC60, 0); // NiObjectGarbage::ClearAll
+	CdeclCall(0x68C790); // BSFaceGenManager::ClearModelCache
+	CdeclCall(0x68C8B0); // BSFaceGenManager::ClearModelStrings
+	ThisCall(0x4C5250, *(UInt32**)0xED36A0, 0); // ModelLoader::ClearUnusedModels
+	*(UInt32*)0xEB452C = 0x7FFFFFFF;
+	TES::GetSingleton()->CleanUpUnusedTextures();
+	CdeclCall(0x81AF10); // NiGlobalStringTable::FreeUnusedStrings
+}
+
+void __fastcall OnFaceGen_PeriodicCleanup(void* sfg)
+{
+	static int numNPCsProcessed;
+	if (++numNPCsProcessed % 100)
+	{
+		CleanupFaceGenMap();
+	}
+	ThisCall(0x573480, sfg);
+}
