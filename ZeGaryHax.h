@@ -2433,3 +2433,47 @@ __declspec(naked) void RetnGlobalDialogIDHook()
 		 ret
 	}
 }
+
+struct EditResponseData
+{
+	struct RecordingPopup
+	{
+		HWND hWnd;
+	};
+
+	UInt32 windowTitle;
+	UInt32 maxResponseLength;
+	UInt32 ptr08;
+	UInt32 ptr0C;
+	RecordingPopup* pRecordingPopup;
+	tList<void> list14;
+	UInt32 unk1C;
+	UInt32 unk20;
+	UInt32 unk24;
+	UInt32 unk28;
+
+	static EditResponseData* GetSingleton() { return *(EditResponseData**)0xED9214; };
+};
+
+void __fastcall StopSound_ResetRecordAudioPopupIfInvalid(HWND parent)
+{
+	CdeclCall(0x5CB360);
+	
+	if (auto data = EditResponseData::GetSingleton())
+	{
+		if (!data->pRecordingPopup || !IsWindow(data->pRecordingPopup->hWnd))
+		{
+			data->pRecordingPopup = (EditResponseData::RecordingPopup*)FormHeap_Allocate(sizeof(EditResponseData::RecordingPopup));
+			ThisCall(0x42C910, data->pRecordingPopup, parent);
+		}
+	}
+}
+
+__declspec(naked) void StopSound_ResetRecordAudioPopupIfInvalidHook()
+{
+	_asm
+	{
+		mov ecx, edi
+		jmp StopSound_ResetRecordAudioPopupIfInvalid
+	}
+}

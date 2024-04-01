@@ -746,6 +746,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// open the 'Globals' window when clicking 'New' in the objects window
 	SafeWrite32(0x47A094 + 4 * (kFormType_Global), UInt32(RetnGlobalDialogIDHook));
 
+	// fix freeze when clicking on 'Record Audio' twice in the dialogue editor
+	WriteRelCall(0x58F495, UInt32(StopSound_ResetRecordAudioPopupIfInvalid));
+
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
 	{
