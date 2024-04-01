@@ -629,6 +629,10 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// make the 'regen rate' use 4 decimal places
 	SafeWrite8(0x604BAE, 4);
 
+	// fix body part debris scale to use 4 decimal places
+	WriteRelCall(0x54498B, UInt32(OnInitDebrisScaleHook));
+	SafeWrite8(0x54498B + 5, 0x90);
+
 	if (bSnapToGridRotationUseDoublePrecision)
 	{
 		// use double precision when calculating reference rotation to fix floating point errors

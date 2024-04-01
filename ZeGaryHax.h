@@ -1234,7 +1234,7 @@ BOOL __stdcall RenderWindowCallbackHook(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 			PlaceXMarker();
 			break;
 
-		case 'P':
+		case VK_OEM_4:
 			ToggleAllObjectsVisible();
 			break;
 			/*
@@ -2409,4 +2409,18 @@ void __fastcall OnFaceGen_PeriodicCleanup(void* sfg)
 		CleanupFaceGenMap();
 	}
 	ThisCall(0x573480, sfg);
+}
+
+void __fastcall OnInitDebrisScale(float& pDebrisScale, void* edx, HWND hDlg, int nIDDlgItem, UINT uValue, BOOL bSigned)
+{
+	CdeclCall(0x41AB10, hDlg, nIDDlgItem, pDebrisScale, 4);
+}
+
+__declspec(naked) void OnInitDebrisScaleHook()
+{
+	_asm
+	{
+		lea ecx, [edi + 0x98]
+		jmp OnInitDebrisScale
+	}
 }
