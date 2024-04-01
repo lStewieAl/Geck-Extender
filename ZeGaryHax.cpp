@@ -743,6 +743,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	FixCommCtl32ScrollingBug();
 
+	// open the 'Globals' window when clicking 'New' in the objects window
+	SafeWrite32(0x47A094 + 4 * (kFormType_Global), UInt32(RetnGlobalDialogIDHook));
+
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
 	{

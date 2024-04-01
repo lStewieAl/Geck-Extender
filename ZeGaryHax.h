@@ -2424,3 +2424,12 @@ __declspec(naked) void OnInitDebrisScaleHook()
 		jmp OnInitDebrisScale
 	}
 }
+
+__declspec(naked) void RetnGlobalDialogIDHook()
+{
+	_asm
+	{
+		 mov eax, 192
+		 ret
+	}
+}
