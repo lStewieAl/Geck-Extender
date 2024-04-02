@@ -117,6 +117,7 @@ int bCacheComboboxes = 0;
 int bNoRecordCompression = 1;
 int bNoFacegenCompression = 1;
 int bPreserveTimestamps = 1;
+int bNoDirtyCellWhenNonPersistentRefsDeleted = 0;
 
 int bUseAltShiftMultipliers = 1;
 float fMovementAltMultiplier = 0.15F;

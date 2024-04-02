@@ -111,6 +111,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	bIgnoreD3D9 = GetOrCreateINIInt("General", "bIgnoreD3D9", 1, iniName);
 	bNoRecordCompression = GetOrCreateINIInt("General", "bNoRecordCompression", 1, iniName);
 	bPreserveTimestamps = GetOrCreateINIInt("General", "bPreserveTimestamps", 0, iniName);
+	bNoDirtyCellWhenNonPersistentRefsDeleted = GetOrCreateINIInt("Experimental", "bNoDirtyCellWhenNonPersistentRefsDeleted", 0, iniName);
 
 	bPatchScriptEditorFont = GetOrCreateINIInt("Script", "bPatchEditorFont", 1, iniName);
 	bScriptCompileWarningPopup = GetOrCreateINIInt("Script", "bScriptCompileWarningPopup", 0, iniName);
@@ -764,6 +765,12 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		WriteRelCall(0x4DA14D, UInt32(PostSaveRestoreFileTime));
 	}
 
+	if (bNoDirtyCellWhenNonPersistentRefsDeleted)
+	{
+		// prevent cells getting marked as modified when temp refs are deleted
+		SafeWrite8(0x63255F, 0xEB); // credits to ShadeMe
+	}
+	
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
 	{
