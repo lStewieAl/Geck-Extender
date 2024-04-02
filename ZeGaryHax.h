@@ -2524,3 +2524,9 @@ __declspec(naked) void OnTESModelTextureSwapDialogCallbackHook()
 		jmp ecx
 	}
 }
+
+void __stdcall OnUpdateColor_Repaint(HWND hWnd, UINT Msg, WPARAM colorRectangleId, LPARAM lParam)
+{
+	SendMessageA(hWnd, Msg, colorRectangleId, lParam);
+	PostMessageA(hWnd, WM_PAINT, colorRectangleId, NULL);
+}

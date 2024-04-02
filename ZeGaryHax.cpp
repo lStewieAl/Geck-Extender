@@ -752,6 +752,10 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// skip checking weapon mod models if the weapon mod tab isn't active
 	WriteRelJump(0x605D53, UInt32(OnTESModelTextureSwapDialogCallbackHook));
 
+	// fix EffectShader form not updating the color preview rectangle
+	WriteRelCall(0x479449, UInt32(OnUpdateColor_Repaint));
+	SafeWrite8(0x479449 + 5, 0x90);
+
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
 	{
