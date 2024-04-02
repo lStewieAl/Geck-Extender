@@ -110,6 +110,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	bPreventFaceAndBodyModExports = GetOrCreateINIInt("General", "bFaceBodyExportPreventTGAFiles", 0, iniName);
 	bIgnoreD3D9 = GetOrCreateINIInt("General", "bIgnoreD3D9", 1, iniName);
 	bNoRecordCompression = GetOrCreateINIInt("General", "bNoRecordCompression", 1, iniName);
+	bPreserveTimestamps = GetOrCreateINIInt("General", "bPreserveTimestamps", 0, iniName);
 
 	bPatchScriptEditorFont = GetOrCreateINIInt("Script", "bPatchEditorFont", 1, iniName);
 	bScriptCompileWarningPopup = GetOrCreateINIInt("Script", "bScriptCompileWarningPopup", 0, iniName);
@@ -755,6 +756,13 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// fix EffectShader form not updating the color preview rectangle
 	WriteRelCall(0x479449, UInt32(OnUpdateColor_Repaint));
 	SafeWrite8(0x479449 + 5, 0x90);
+
+	if (bPreserveTimestamps)
+	{
+		// preserve file times when saving
+		WriteRelCall(0x4D9A0E, UInt32(PreSaveStoreFileTime));
+		WriteRelCall(0x4DA14D, UInt32(PostSaveRestoreFileTime));
+	}
 
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())

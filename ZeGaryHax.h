@@ -116,6 +116,7 @@ int bRemoveDialogSoundFilter = 0;
 int bCacheComboboxes = 0;
 int bNoRecordCompression = 1;
 int bNoFacegenCompression = 1;
+int bPreserveTimestamps = 1;
 
 int bUseAltShiftMultipliers = 1;
 float fMovementAltMultiplier = 0.15F;
@@ -2529,4 +2530,61 @@ void __stdcall OnUpdateColor_Repaint(HWND hWnd, UINT Msg, WPARAM colorRectangleI
 {
 	SendMessageA(hWnd, Msg, colorRectangleId, lParam);
 	PostMessageA(hWnd, WM_PAINT, colorRectangleId, NULL);
+}
+
+void PreserveTESFileTimeStamp(ModInfo* apFile, bool State)
+{
+	// credits to ShadeMe
+	static FILETIME SavedTimestamp = { 0 };
+
+	if (apFile == nullptr)
+	{
+		return;
+	}
+
+	char filePath[0x200]; *filePath = '\0';
+	snprintf(filePath, sizeof(filePath), "%s\\%s", apFile->filepath, apFile->name);
+
+	HANDLE SaveFile = CreateFile(filePath, GENERIC_READ | GENERIC_WRITE, NULL, nullptr, OPEN_EXISTING, 0, nullptr);
+	if (SaveFile == INVALID_HANDLE_VALUE)
+	{
+		return;
+	}
+
+	if (State)
+	{
+		ZeroMemory(&SavedTimestamp, sizeof(FILETIME));
+		GetFileTime(SaveFile, nullptr, nullptr, &SavedTimestamp);
+	}
+	else
+	{
+		if (SavedTimestamp.dwHighDateTime || SavedTimestamp.dwLowDateTime)
+		{
+			SetFileTime(SaveFile, nullptr, nullptr, &SavedTimestamp);
+		}
+	}
+
+	CloseHandle(SaveFile);
+}
+
+void SaveFileTime(ModInfo* apFile)
+{
+	PreserveTESFileTimeStamp(apFile, true);
+}
+
+void RestoreFileTime(ModInfo* apFile)
+{
+	PreserveTESFileTimeStamp(apFile, false);
+}
+
+void __fastcall PreSaveStoreFileTime(ModInfo* apFile)
+{
+	SaveFileTime(apFile);
+	ThisCall(0x4DE610, apFile);
+}
+
+void __cdecl PostSaveRestoreFileTime(void* a1)
+{
+	CdeclCall(0x851810, a1);
+	RestoreFileTime(DataHandler::GetSingleton()->activeFile);
 }
