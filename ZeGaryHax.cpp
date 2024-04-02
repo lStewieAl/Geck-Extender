@@ -749,6 +749,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// fix freeze when clicking on 'Record Audio' twice in the dialogue editor
 	WriteRelCall(0x58F495, UInt32(StopSound_ResetRecordAudioPopupIfInvalid));
 
+	// skip checking weapon mod models if the weapon mod tab isn't active
+	WriteRelJump(0x605D53, UInt32(OnTESModelTextureSwapDialogCallbackHook));
+
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
 	{

@@ -2477,3 +2477,50 @@ __declspec(naked) void StopSound_ResetRecordAudioPopupIfInvalidHook()
 		jmp StopSound_ResetRecordAudioPopupIfInvalid
 	}
 }
+
+class DialogExtraSubWindow : BSExtraData
+{
+	struct ExtraSubWindow
+	{
+		UInt32 unk00;
+		UInt32 unk04;
+		HWND parent;
+		UInt32 _hInstance;
+		UInt32 posX;
+		UInt32 posY;
+		HWND unkDlgItem;
+		HWND dialogWindow;
+	};
+
+public:
+	ExtraSubWindow* subWindow;
+	UInt32 menuID;
+};
+
+bool __fastcall IsWeaponModSubViewActive(HWND hWnd)
+{
+	if (auto xSubWindow = CdeclCall< DialogExtraSubWindow*>(0x47AB70, hWnd, 4))
+	{
+		return xSubWindow->menuID != 3327;
+	}
+	return false;
+}
+
+__declspec(naked) void OnTESModelTextureSwapDialogCallbackHook()
+{
+	_asm
+	{
+		mov ecx, esi
+		call IsWeaponModSubViewActive
+		test al, al
+		jne noSkip
+		mov eax, 0x605E72
+		jmp eax
+
+	noSkip:
+		mov edx, dword ptr ss : [esp + 0x14]
+		mov eax, dword ptr ds : [edi + 0x2E8]
+		mov ecx, 0x605D5D
+		jmp ecx
+	}
+}
