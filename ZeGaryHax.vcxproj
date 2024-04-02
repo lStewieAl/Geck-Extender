@@ -117,6 +117,10 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CreatureMarkerSwapper.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Editor.cpp" />
     <ClCompile Include="nvse\GameAPI.cpp" />
     <ClCompile Include="nvse\GameBSExtraData.cpp">
@@ -158,9 +162,14 @@
     <ClCompile Include="ZeGaryHax.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CreatureMarkerSwapper.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="DebugCellShaders.h" />
     <ClInclude Include="Editor.h" />
     <ClInclude Include="GECKUtility.h" />
+    <ClInclude Include="libs\nlohmann\json.hpp" />
     <ClInclude Include="nvse\CommandTable.h" />
     <ClInclude Include="nvse\GameAPI.h" />
     <ClInclude Include="nvse\GameBSExtraData.h" />

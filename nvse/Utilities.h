@@ -158,8 +158,41 @@ public:
 	void vShow(const char* msg, va_list args);
 };
 
-
 size_t GetCurrentMemoryUsage();
+
+class DirectoryIterator
+{
+	HANDLE				handle;
+	WIN32_FIND_DATA		fndData;
+
+public:
+	DirectoryIterator(const char* path) : handle(FindFirstFile(path, &fndData)) {}
+	~DirectoryIterator() { Close(); }
+
+	bool IsFile() const { return !(fndData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY); }
+	bool IsFolder() const
+	{
+		if (IsFile())
+			return false;
+		if (fndData.cFileName[0] != '.')
+			return true;
+		if (fndData.cFileName[1] != '.')
+			return fndData.cFileName[1] != 0;
+		return fndData.cFileName[2] != 0;
+	}
+	const char* Get() const { return fndData.cFileName; }
+	void Close()
+	{
+		if (handle != INVALID_HANDLE_VALUE)
+		{
+			FindClose(handle);
+			handle = INVALID_HANDLE_VALUE;
+		}
+	}
+
+	explicit operator bool() const { return handle != INVALID_HANDLE_VALUE; }
+	void operator++() { if (!FindNextFile(handle, &fndData)) Close(); }
+};
 
 // thread-safe template versions of ThisStdCall()
 
@@ -235,3 +268,5 @@ __forceinline T_Ret CdeclCall(UInt32 _addr, Args ...args)
 {
 	return ((T_Ret(__cdecl*)(Args...))_addr)(std::forward<Args>(args)...);
 }
+
+char* GameHeapStrdup(const char* src);

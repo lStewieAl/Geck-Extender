@@ -32,6 +32,7 @@
 #include "UISpeedHooks.h"
 #include "DebugCellShaders.h"
 #include "ZeEditBoxHax.h"
+#include "CreatureMarkerSwapper.h"
 
 BOOL __stdcall ScriptEditCallback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -770,6 +771,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		// prevent cells getting marked as modified when temp refs are deleted
 		SafeWrite8(0x63255F, 0xEB); // credits to ShadeMe
 	}
+
+	CreatureMarkerSwapper::Init();
 	
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())

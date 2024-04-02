@@ -3,6 +3,7 @@
 #include "SafeWrite.h"
 #include <algorithm>
 #include <Psapi.h>
+#include "GameTypes.h"
 
 void DumpClass(void * theClassPtr, UInt32 nIntsToDump)
 {
@@ -549,4 +550,14 @@ size_t GetCurrentMemoryUsage()
 	PROCESS_MEMORY_COUNTERS procMem;
 	GetProcessMemoryInfo(GetCurrentProcess(), &procMem, sizeof(procMem));
 	return procMem.WorkingSetSize;
+}
+
+
+char* GameHeapStrdup(const char* src)
+{
+	if (!src) return nullptr;
+	auto len = strlen(src);
+	char* result = (char*)FormHeap_Allocate(len + 1);
+	memcpy(result, src, len + 1);
+	return result;
 }

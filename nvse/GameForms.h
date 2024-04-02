@@ -271,7 +271,7 @@ public:
 	virtual void		Unk_3C();
 	virtual void		Unk_3D();
 	virtual void		Unk_3E();
-	virtual void		Unk_3F();
+	virtual const char*	GetEditorID();
 	virtual void		Unk_40();
 	virtual void		Unk_41();
 	virtual void		Unk_42();

@@ -58,6 +58,7 @@
     <ClCompile Include="nvse\NiTypes.cpp">
       <Filter>nvse</Filter>
     </ClCompile>
+    <ClCompile Include="CreatureMarkerSwapper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ZeGaryHax.h" />
@@ -131,6 +132,10 @@
     <ClInclude Include="GECKUtility.h" />
     <ClInclude Include="DebugCellShaders.h" />
     <ClInclude Include="ZeEditBoxHax.h" />
+    <ClInclude Include="libs\nlohmann\json.hpp">
+      <Filter>libs</Filter>
+    </ClInclude>
+    <ClInclude Include="CreatureMarkerSwapper.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
@@ -138,6 +143,9 @@
   <ItemGroup>
     <Filter Include="nvse">
       <UniqueIdentifier>{79efc7aa-28af-4ae9-851d-47eb371006d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libs">
+      <UniqueIdentifier>{2bac986a-47af-4ff1-8f78-5a189736d77f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
