@@ -34,11 +34,6 @@
 #include "ZeEditBoxHax.h"
 #include "CreatureMarkerSwapper.h"
 
-BOOL __stdcall ScriptEditCallback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	return StdCall<LRESULT>(0x5C3D40, hWnd, msg, wParam, lParam);
-}
-
 extern "C"
 {
 	BOOL WINAPI DllMain(HANDLE  hDllHandle, DWORD dwReason, LPVOID lpreserved)
@@ -782,91 +777,3 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 #endif
 	return true;
 }
-
-void SaveWindowPositions() {
-	SaveWindowPositionToINI(RenderWindow::GetWindow(), "Render Window");
-
-	char buffer[8];
-
-	WINDOWPLACEMENT pos;
-	GetWindowPlacement(g_ConsoleHwnd, &pos);
-	WritePrivateProfileString("Log", "iWindowPosX", _itoa(pos.rcNormalPosition.left, buffer, 10), iniName);
-	WritePrivateProfileString("Log", "iWindowPosY", _itoa(pos.rcNormalPosition.top, buffer, 10), iniName);
-	WritePrivateProfileString("Log", "iWindowPosDX", _itoa(pos.rcNormalPosition.right - pos.rcNormalPosition.left, buffer, 10), iniName);
-	WritePrivateProfileString("Log", "iWindowPosDY", _itoa(pos.rcNormalPosition.bottom - pos.rcNormalPosition.top, buffer, 10), iniName);
-}
-
-void __fastcall FastExitHook(volatile LONG** thiss)
-{
-	SaveWindowPositions();
-	if (GetINIExists() && bFastExit) TerminateProcess(GetCurrentProcess(), 0);
-	ThisCall(0x4CC540, thiss);
-}
-
-void __stdcall BadFormPrintID(TESForm* form)
-{
-	EditorUI_Log("FORMS: Bad form %08X could not be removed from the file.", form->refID);
-}
-
-_declspec(naked) void BadFormLoadHook()
-{
-	static const UInt32 retnAddr = 0x4D957C;
-	_asm
-	{
-		push esi
-		call BadFormPrintID
-		
-		//	originalCode
-		mov byte ptr ss : [esp + 0x1A] , 0x1 // wasBadFormEncountered
-		jmp retnAddr
-	}
-}
-
-char** scriptTypes = (char**)0xE9BC6C;
-void __cdecl PrintScriptTypeChangedMessage(UInt32 script, UInt8 newType)
-{
-
-	UInt8 scriptType = *(UInt8*)(script + 0x3C);
-	char* previousTypeStr = scriptTypes[scriptType];
-	char* newTypeStr = scriptTypes[newType];
-
-	char errorMsg[100];
-	sprintf(errorMsg, "Script Type Changed, Previous: %s - New: %s", previousTypeStr, newTypeStr);
-	MessageBoxA(nullptr, errorMsg, "Warning", MB_ICONWARNING);
-}
-
-_declspec(naked) void SaveScriptChangedType()
-{
-	_asm
-	{
-		push ecx
-		push esi
-		call PrintScriptTypeChangedMessage
-		pop esi
-		pop ecx
-		mov byte ptr ss : [esp + 0x15] , 1
-		ret
-	}
-}
-
-/* TODO
-Creature + Leveled creature/character windows
-NPC
-GameEffects->BaseEffect
-Items->Ammo
-Items->LeveledItem
-Items->Weapon
-SpecialEffects->Explosion
-WorldObjects->Container
-
-Dirty editors:
-ActorData->Race
-Audio->Media Location
-Audio->Media Set
-Items->ArmorAddon
-Items->Weapon
-
-MultiCombo Boxes
-0x6017A0
-0x49A091
-*/
