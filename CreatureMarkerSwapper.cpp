@@ -2,8 +2,7 @@
 #include "nvse/GameForms.h"
 #include "nvse/GameObjects.h"
 #include "Utilities.h"
-
-void EditorUI_Log(const char* Format, ...);
+#include "ZeLogWindow.h"
 
 #include "libs/nlohmann/json.hpp"
 #include <fstream>

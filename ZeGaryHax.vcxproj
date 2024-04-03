@@ -122,6 +122,11 @@
       </SubType>
     </ClCompile>
     <ClCompile Include="Editor.cpp" />
+    <ClCompile Include="ExtensionsMenu.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="GeckUtility.cpp" />
     <ClCompile Include="nvse\GameAPI.cpp" />
     <ClCompile Include="nvse\GameBSExtraData.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -160,6 +165,7 @@
     <ClCompile Include="nvse\Utilities.cpp" />
     <ClCompile Include="xutil.cpp" />
     <ClCompile Include="ZeGaryHax.cpp" />
+    <ClCompile Include="ZeLogWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CreatureMarkerSwapper.h">
@@ -168,6 +174,10 @@
     </ClInclude>
     <ClInclude Include="DebugCellShaders.h" />
     <ClInclude Include="Editor.h" />
+    <ClInclude Include="ExtensionsMenu.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="GECKUtility.h" />
     <ClInclude Include="libs\nlohmann\json.hpp" />
     <ClInclude Include="nvse\CommandTable.h" />

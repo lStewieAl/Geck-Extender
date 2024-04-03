@@ -9,6 +9,7 @@
 #include "NiObjects.h"
 #include "GameScript.h"
 #include "GameSettings.h"
+#include "ZeLogWindow.h"
 
 #define GH_NAME				"ZeGaryHax"		// this is the string for IsPluginInstalled and GetPluginVersion (also shows in nvse.log)
 #define GH_VERSION			0.41
@@ -20,7 +21,6 @@ extern HWND g_timeOfDayTextHwnd;
 extern HWND g_allowCellWindowLoadsButtonHwnd;
 IDebugLog	gLog;
 
-void EditorUI_Log(const char* Format, ...);
 BOOL __stdcall HavokPreviewCallback(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
 extern "C" IMAGE_DOS_HEADER __ImageBase;
 
@@ -169,6 +169,11 @@ static LOGFONT editorFont =
 	49,			// lfPitchAndFamily
 	"Consolas"	// lfFaceName[LF_FACESIZE]
 };
+
+LPLOGFONT GetEditorFont()
+{
+	return &editorFont;
+}
 
 #define INI_SETTING_NOT_FOUND -1
 int GetOrCreateINIInt(const char* sectionName, const char* keyName, int defaultValue, const char* filename) {
@@ -1272,26 +1277,6 @@ _declspec(naked) void SaveFailureHook()
 		jmp retnAddr
 	}
 }
-
-_declspec(naked) void ObjectWindowListFilterUneditedHook()
-{
-	static const UInt32 skipAddr = 0x439793;
-	static const UInt32 retnAddr = 0x43973F;
-	_asm {
-		// esi contains TESForm
-		test byte ptr ss : [esi + 8] , 2 /// form->flags & kModified
-		jne editedForm
-		jmp skipAddr
-
-	editedForm :
-		mov eax, dword ptr ss : [esp + 0x1C]
-		test eax, eax
-		jmp retnAddr
-	}
-}
-
-
-void __fastcall FastExitHook(volatile LONG** thiss);
 
 _declspec(naked) void CellViewListViewCreateFormIDColumnHook()
 {

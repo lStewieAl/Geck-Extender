@@ -59,6 +59,9 @@
       <Filter>nvse</Filter>
     </ClCompile>
     <ClCompile Include="CreatureMarkerSwapper.cpp" />
+    <ClCompile Include="ExtensionsMenu.cpp" />
+    <ClCompile Include="ZeLogWindow.cpp" />
+    <ClCompile Include="GeckUtility.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ZeGaryHax.h" />
@@ -136,6 +139,7 @@
       <Filter>libs</Filter>
     </ClInclude>
     <ClInclude Include="CreatureMarkerSwapper.h" />
+    <ClInclude Include="ExtensionsMenu.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

@@ -26,6 +26,7 @@
 
 #include "ZeGaryHax.h"
 #include "ZeLogWindow.h"
+#include "ExtensionsMenu.h"
 #include "ZeWarningPatches.h"
 #include "ZeWarningHax.h"
 #include "Editor.h"
@@ -658,8 +659,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		MessageBoxA(nullptr, "Failed to create console log window", "Error", MB_ICONERROR);
 	}
 
-	SafeWrite32(0x0044612D, (UInt32)EditorUI_WndProc);
-	OldEditorUI_WndProc = (WNDPROC)0x00440780;
+	ExtensionsMenu_InitHooks();
 
 	PatchRememberLandscapeEditSettingsWindowPosition();
 
