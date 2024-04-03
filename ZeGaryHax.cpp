@@ -768,6 +768,11 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	}
 
 	CreatureMarkerSwapper::Init();
+
+	// add null checks to fix the F10 ShowSceneGraph
+	WriteRelCall(0x530126, UInt32(NiTreeCtrl_CreateTreeRecursiveHook));
+	WriteRelCall(0x530508, UInt32(NiTreeCtrl_CreateTreeRecursiveHook2));
+	WriteRelCall(0x80F145, UInt32(NiAVObject_GetViewerStringsHook));
 	
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())

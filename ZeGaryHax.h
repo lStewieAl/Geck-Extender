@@ -2646,3 +2646,55 @@ BOOL __stdcall ScriptEditCallback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
 {
 	return StdCall<LRESULT>(0x5C3D40, hWnd, msg, wParam, lParam);
 }
+
+__declspec(naked) void NiTreeCtrl_CreateTreeRecursiveHook()
+{
+	_asm
+	{
+	loopIter:
+		mov ecx, [eax + 8]
+		test ecx, ecx
+		je skip
+		ret
+	skip:
+		mov eax, [eax]
+		test eax, eax
+		jne loopIter
+
+		pop eax
+		mov eax, 0x53013E
+		jmp eax
+	}
+}
+
+__declspec(naked) void NiTreeCtrl_CreateTreeRecursiveHook2()
+{
+	_asm
+	{
+		test edi, edi
+		je skip
+		mov eax, [edi]
+		ret
+	skip:
+		pop eax
+		mov ebp, [ebp]
+		mov eax, 0x5304FD
+		jmp eax
+	}
+}
+
+__declspec(naked) void NiAVObject_GetViewerStringsHook()
+{
+	_asm
+	{
+		test edi, edi
+		je skip
+		mov eax, [edi]
+		ret
+	skip:
+		pop eax
+		mov ebp, [ebp]
+		mov eax, 0x80F13A
+		jmp eax
+	}
+}
