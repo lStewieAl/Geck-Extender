@@ -143,6 +143,44 @@ void __fastcall hk_sub_666C10(int* thiss, void* dummyEDX, HWND hWnd, int a3) {
 	ThisCall(0x666C10, thiss, hWnd, a3);
 	EndUIDefer();
 }
+
+void* __fastcall SearchAndReplaceBeginUI(void** boundObjectList, HWND hDlg)
+{
+	auto searchForDropdown = GetDlgItem(hDlg, 1439);
+	SendMessage(searchForDropdown, WM_SETREDRAW, FALSE, 0);
+	SendMessage(searchForDropdown, CB_INITSTORAGE, 30000, 600000); // pre-allocate the storage to the rounded vanilla item count and total string length
+
+	auto replaceWithDropdown = GetDlgItem(hDlg, 1440);
+	SendMessage(replaceWithDropdown, WM_SETREDRAW, FALSE, 0);
+	SendMessage(replaceWithDropdown, CB_INITSTORAGE, 30000, 600000);
+	return boundObjectList[1];
+}
+
+void* __fastcall SearchAndReplaceEndUI(void** selectedForms, HWND hDlg)
+{
+	SendMessage(GetDlgItem(hDlg, 1439), WM_SETREDRAW, TRUE, 0);
+	SendMessage(GetDlgItem(hDlg, 1440), WM_SETREDRAW, TRUE, 0);
+	return *selectedForms;
+}
+
+__declspec(naked) void SearchAndReplaceBeginUIHook()
+{
+	_asm
+	{
+		mov edx, ebp
+		jmp SearchAndReplaceBeginUI
+	}
+}
+
+__declspec(naked) void SearchAndReplaceEndUIHook()
+{
+	_asm
+	{
+		mov edx, ebp
+		jmp SearchAndReplaceEndUI
+	}
+}
+
 void WriteUIHooks() {
 	//	Fix list view lag when changing cells in the render window - credit to nukem
 	WriteRelCall(0x0042F5A4, (UInt32)hk_UpdateCellViewListView);
@@ -164,6 +202,10 @@ void WriteUIHooks() {
 
 	// speed up worldspace list view
 	WriteRelCall(0x47A652, UInt32(hk_sub_666C10));
+
+	// speed up the search and replace dialog
+	WriteRelCall(0x47D010, UInt32(SearchAndReplaceBeginUIHook));
+	WriteRelCall(0x47D18B, UInt32(SearchAndReplaceEndUIHook));
 
 	if (!bUISpeedHooks) return;
 

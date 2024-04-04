@@ -564,7 +564,7 @@ void __declspec(naked) hk_SearchDestroyHook()
 
 	_asm
 	{
-		call dword ptr ds : [0x00D2353C]
+		call dword ptr ds : [0x00D2353C] // MessageBoxA
 		jmp kRetnAddr
 	}
 }
