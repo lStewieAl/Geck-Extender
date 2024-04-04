@@ -790,6 +790,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SafeWrite32(0x47F287, 0);
 
 	EasterEggs::Init();
+
+	// fix the 'IsEdited' flag getting reset when canceling the ESP/ESM dialog
+	SafeWrite8(0x441942, 0xAE);
 	
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
