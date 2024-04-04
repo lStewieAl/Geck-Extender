@@ -93,6 +93,7 @@ int bShowTimeOfDaySlider = 1;
 int bSkipVanillaLipGen = 0;
 int bShowAdditionalToolbarButtons = 0;
 int bAllowMultipleSearchAndReplace = 0;
+int bCacheSearchAndReplaceWindow = 0;
 int bNoFactionReactionMessage = 0;
 int bUISpeedHooks = 1;
 int bLibdeflate = 0;
@@ -557,15 +558,51 @@ __declspec(naked) void hk_SpellCheck()
 
 }
 
-// make search and replace window stay open unless explicitly close - credit to StewieA
+// make search and replace window stay open unless explicitly closed - credit to StewieA
 void __declspec(naked) hk_SearchDestroyHook()
 {
-	static const UINT32 kRetnAddr = 0x0047CE8C;
-
 	_asm
 	{
-		call dword ptr ds : [0x00D2353C] // MessageBoxA
-		jmp kRetnAddr
+		push 0x47CE8C
+		jmp dword ptr ds : [0x00D2353C] // MessageBoxA
+	}
+}
+
+BOOL IsWindowHidden(HWND hWnd)
+{
+	return !(GetWindowLong(hWnd, GWL_STYLE) & WS_VISIBLE);
+}
+
+HWND cachedSearchAndReplaceWindow;
+void __stdcall OnCreateSearchAndReplaceWindow(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc, LPARAM dwInitParam)
+{
+	if (cachedSearchAndReplaceWindow && IsWindow(cachedSearchAndReplaceWindow))
+	{
+		if (IsWindowHidden(cachedSearchAndReplaceWindow))
+		{
+			ShowWindow(cachedSearchAndReplaceWindow, SW_SHOW);
+		}
+		else
+		{
+			// create a new dialog (case where there's multiple search dialogs opened)
+			CreateDialogParamA(hInstance, lpTemplateName, hWndParent, lpDialogFunc, dwInitParam);
+		}
+	}
+	else
+	{
+		cachedSearchAndReplaceWindow = CreateDialogParamA(hInstance, lpTemplateName, hWndParent, lpDialogFunc, dwInitParam);
+	}
+}
+
+void __stdcall OnDestroySearchAndReplaceWindow(HWND hWnd)
+{
+	if (hWnd == cachedSearchAndReplaceWindow)
+	{
+		ShowWindow(hWnd, SW_HIDE);
+	}
+	else
+	{
+		DestroyWindow(hWnd);
 	}
 }
 

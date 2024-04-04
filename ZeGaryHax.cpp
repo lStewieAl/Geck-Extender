@@ -94,6 +94,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	bSkipVanillaLipGen = GetPrivateProfileIntA("General", "bSkipVanillaLipGen", 0, iniName);
 	bShowAdditionalToolbarButtons = GetOrCreateINIInt("General", "bShowAdditionalToolbarButtons", 0, iniName);
 	bAllowMultipleSearchAndReplace = GetOrCreateINIInt("General", "bAllowMultipleSearchAndReplace", 0, iniName);
+	bCacheSearchAndReplaceWindow = GetOrCreateINIInt("General", "bCacheSearchAndReplaceWindow", 1, iniName);
 	bNoFactionReactionMessage = GetOrCreateINIInt("General", "bNoFactionReactionMessage", 0, iniName);
 	bUISpeedHooks = GetOrCreateINIInt("General", "bUISpeedHooks", 1, iniName);
 	bLibdeflate = GetOrCreateINIInt("General", "bLibDeflate", 0, iniName);
@@ -334,8 +335,17 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	//	Make search and replace window stay open unless explicitly close - credit to StewieA
 	if (bAllowMultipleSearchAndReplace) {
-		WriteRelJump(0x0047CE7F, (UINT32)hk_SearchDestroyHook);
-		SafeWrite8(0x0047CE84, 0x90);
+		WriteRelJump(0x47CE7F, (UINT32)hk_SearchDestroyHook);
+		SafeWrite8(0x47CE7F + 5, 0x90);
+	}
+
+	if (bCacheSearchAndReplaceWindow)
+	{
+		WriteRelCall(0x44118B, UInt32(OnCreateSearchAndReplaceWindow));
+		SafeWrite8(0x44118B + 5, 0x90);
+
+		WriteRelCall(0x47CE86, UInt32(OnDestroySearchAndReplaceWindow));
+		SafeWrite8(0x47CE86 + 5, 0x90);
 	}
 
 	// Make the "Do" button of "Reference Batch Action" not grayed out if an action is already selected when initialising the dialog
