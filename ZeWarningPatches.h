@@ -1114,13 +1114,13 @@ static const UInt32 kPatch_Warnings4[] =
 	0x004DD682,	//	Too many selected files to compile!
 	0x0050284E,	//	Model: '%s'\t\tTexture: '%s'
 	0x0052449E,	//	%s
-	0x005244BC,	//	Computer Name: %s
+//	0x005244BC,	//	Computer Name: %s
 	0x005B1783,	//	%s
 	0x005B1CD1,	//	%s
 	0x005B1D02,	//	%s
 	0x005B1D33,	//	%s
-	0x005C5384,	//	The script function list doesn't have all the names filled in.\r\n
-	0x005C539D,	//	The script console-command list doesn't have all the names filled in.\r\n
+//	0x005C5384,	//	The script function list doesn't have all the names filled in.\r\n
+//	0x005C539D,	//	The script console-command list doesn't have all the names filled in.\r\n
 	0x00725CF9,	//	BAD TYPE DATA: GROUP=%i TYPE PTR=%p
 	0x007263DE,	//	Added new group %i, type=%i/%i, ptr=%p
 	0x00726533,	//	Added new type %i, ptr=%p
