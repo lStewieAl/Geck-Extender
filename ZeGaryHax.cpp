@@ -34,6 +34,7 @@
 #include "DebugCellShaders.h"
 #include "ZeEditBoxHax.h"
 #include "CreatureMarkerSwapper.h"
+#include "EasterEggs.h"
 
 extern "C"
 {
@@ -787,6 +788,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// remove a useless dialog callback as it caused the mesh selection dialog
 	// to fallback on the old windows explorer
 	SafeWrite32(0x47F287, 0);
+
+	EasterEggs::Init();
 	
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())

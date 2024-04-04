@@ -121,6 +121,10 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="EasterEggs.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Editor.cpp" />
     <ClCompile Include="ExtensionsMenu.cpp">
       <SubType>
@@ -173,6 +177,10 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="DebugCellShaders.h" />
+    <ClInclude Include="EasterEggs.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="Editor.h" />
     <ClInclude Include="ExtensionsMenu.h">
       <SubType>
