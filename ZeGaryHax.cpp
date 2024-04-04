@@ -793,6 +793,12 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	// fix the 'IsEdited' flag getting reset when canceling the ESP/ESM dialog
 	SafeWrite8(0x441942, 0xAE);
+
+	// fix ESP/ESM window counting clicking on the 'Summary' field as modifying it
+	SafeWrite32(0x432DDE, EN_CHANGE); // fix the summary field detecting spurious changes due to use of EN_UPDATE
+	WriteRelCall(0x432BAE, UInt32(OnLoadEspEsmSetupDetailsText)); // don't count changing files as changing the summary
+	WriteRelCall(0x432DE4, UInt32(OnLoadEspEsmSetSummaryModifiedHook));
+	SafeWrite16(0x432DE9, 0x9066);
 	
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())

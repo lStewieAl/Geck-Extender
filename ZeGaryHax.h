@@ -2735,3 +2735,24 @@ __declspec(naked) void NiAVObject_GetViewerStringsHook()
 		jmp eax
 	}
 }
+
+bool bInSetupDetailsText;
+void __cdecl OnLoadEspEsmSetupDetailsText(HWND hDlg, ModInfo* file)
+{
+	bInSetupDetailsText = true;
+	CdeclCall(0x432730, hDlg, file);
+	bInSetupDetailsText = false;
+}
+
+__declspec(naked) void OnLoadEspEsmSetSummaryModifiedHook()
+{
+	_asm
+	{
+		cmp bInSetupDetailsText, 0
+		jne skip
+
+		mov byte ptr ds : [0xECF5C2], 1
+	skip:
+		ret
+	}
+}
