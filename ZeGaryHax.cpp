@@ -773,6 +773,10 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x530126, UInt32(NiTreeCtrl_CreateTreeRecursiveHook));
 	WriteRelCall(0x530508, UInt32(NiTreeCtrl_CreateTreeRecursiveHook2));
 	WriteRelCall(0x80F145, UInt32(NiAVObject_GetViewerStringsHook));
+
+	// remove a useless dialog callback as it caused the mesh selection dialog
+	// to fallback on the old windows explorer
+	SafeWrite32(0x47F287, 0);
 	
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
