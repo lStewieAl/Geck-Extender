@@ -5,6 +5,7 @@
 #include "SafeWrite.h"
 #include "resource.h"
 #include "ZeLogWindow.h"
+#include "FormSearch.h"
 
 #define UI_EXTMENU_ID			51001
 #define UI_EXTMENU_SHOWLOG		51002
@@ -18,6 +19,7 @@
 #define UI_EXTMENU_SAVEPOSITION 51010
 #define UI_EXTMENU_LOADPOSITION 51011
 #define UI_EXTMENU_TOGGLENAVEMESHBISECT 51018
+#define UI_EXTMENU_LOOKUPFORM 51019
 #define ID_TRACKBAR				51012
 #define ID_TIMEOFDAYTEXT		51013
 #define ID_RENDERWINDOWCELLLOADS_CHECKBOX 51014
@@ -118,6 +120,9 @@ bool EditorUI_CreateExtensionMenu(HWND MainWindow, HMENU MainMenu)
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_PREVIEW, "Preview Window Uncap (requires restart)");
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED, "Object Window - Only Show Edited");
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_TOGGLENAVEMESHBISECT, "Allow Placement Of Navmesh Node Above Others");
+	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_SEPARATOR, (UINT_PTR)UI_EXTMENU_SPACER, "");
+	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_LOOKUPFORM, "Lookup Form");
+
 
 	MENUITEMINFO menuInfo;
 	memset(&menuInfo, 0, sizeof(MENUITEMINFO));
@@ -383,6 +388,12 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 		case UI_EXTMENU_CLEARLOG:
 		{
 			PostMessageA(g_ConsoleHwnd, UI_CMD_CLEARLOGTEXT, 0, 0);
+		}
+		return 0;
+
+		case UI_EXTMENU_LOOKUPFORM:
+		{
+			FormSearch::Show();
 		}
 		return 0;
 
