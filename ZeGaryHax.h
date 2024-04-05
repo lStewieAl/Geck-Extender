@@ -2756,3 +2756,31 @@ __declspec(naked) void OnLoadEspEsmSetSummaryModifiedHook()
 		ret
 	}
 }
+
+void __fastcall OnObjectWindowNew(int* pFormType, HWND hDlg)
+{
+	bool bInAllForms = *pFormType == 0;
+	if (bInAllForms)
+	{
+		auto listView = GetDlgItem(hDlg, 1041);
+		if (auto form = CdeclCall<TESForm*>(0x41A390, listView))
+		{
+			*pFormType = form->typeID;
+		}
+	}
+	ThisCall(0x437840, pFormType);
+
+	if (bInAllForms)
+	{
+		*pFormType = 0;
+	}
+}
+
+__declspec(naked) void OnObjectWindowNewHook()
+{
+	_asm
+	{
+		mov edx, ebp
+		jmp OnObjectWindowNew
+	}
+}

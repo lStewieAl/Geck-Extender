@@ -799,6 +799,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x432BAE, UInt32(OnLoadEspEsmSetupDetailsText)); // don't count changing files as changing the summary
 	WriteRelCall(0x432DE4, UInt32(OnLoadEspEsmSetSummaryModifiedHook));
 	SafeWrite16(0x432DE9, 0x9066);
+
+	// add support for right clicking and doing 'New' in the 'All' tab of the Objects window
+	WriteRelCall(0x44B05A, UInt32(OnObjectWindowNewHook));
 	
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
