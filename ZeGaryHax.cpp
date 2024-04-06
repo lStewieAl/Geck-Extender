@@ -803,6 +803,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	// add support for right clicking and doing 'New' in the 'All' tab of the Objects window
 	WriteRelCall(0x44B05A, UInt32(OnObjectWindowNewHook));
+	originalObjectWindowCallback = *(WNDPROC*)0x4416A3;
+	SafeWrite32(0x4416A3, UInt32(ObjectWindowCallback));
 	
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())

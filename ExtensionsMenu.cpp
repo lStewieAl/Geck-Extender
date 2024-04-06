@@ -726,6 +726,6 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 
 void ExtensionsMenu_InitHooks()
 {
+	originalMainWindowCallback = *(WNDPROC*)0x0044612D;
 	SafeWrite32(0x0044612D, (UInt32)MainWindowCallback);
-	originalMainWindowCallback = (WNDPROC)0x00440780;
 }
