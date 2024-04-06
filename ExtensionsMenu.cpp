@@ -36,7 +36,7 @@ HWND g_MainHwnd;
 extern HWND g_ConsoleHwnd;
 HMENU g_ExtensionMenu;
 HMENU g_MainMenu;
-WNDPROC OldEditorUI_WndProc;
+WNDPROC originalMainWindowCallback;
 
 NiPoint3 savedRenderPos;
 NiMatrix33 savedRenderDirection;
@@ -257,7 +257,7 @@ void MoveChildWindow(HWND hwndChild, LPPOINT offset)
 	SetWindowPos(hwndChild, NULL, newX, newY, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
 }
 
-LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	if (Message == WM_CREATE)
 	{
@@ -671,7 +671,7 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 		char customTitle[256];
 		sprintf_s(customTitle, "%s -= GECK Extender Rev. 0.41 =-", (const char*)lParam);
 
-		return CallWindowProc(OldEditorUI_WndProc, Hwnd, Message, wParam, (LPARAM)customTitle);
+		return CallWindowProc(originalMainWindowCallback, Hwnd, Message, wParam, (LPARAM)customTitle);
 	}
 	else if (Message == WM_HSCROLL && bShowTimeOfDaySlider)
 	{
@@ -721,11 +721,11 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 		prevY = newY;
 	}
 
-	return CallWindowProc(OldEditorUI_WndProc, Hwnd, Message, wParam, lParam);
+	return CallWindowProc(originalMainWindowCallback, Hwnd, Message, wParam, lParam);
 }
 
 void ExtensionsMenu_InitHooks()
 {
-	SafeWrite32(0x0044612D, (UInt32)EditorUI_WndProc);
-	OldEditorUI_WndProc = (WNDPROC)0x00440780;
+	SafeWrite32(0x0044612D, (UInt32)MainWindowCallback);
+	originalMainWindowCallback = (WNDPROC)0x00440780;
 }
