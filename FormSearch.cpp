@@ -84,7 +84,7 @@ namespace FormSearch
 
     void ShowInputDialog(HINSTANCE hInstance, HWND hwndParent) {
         // Create the dialog window
-        HWND hwndDlg = CreateWindowEx(WS_EX_DLGMODALFRAME | WS_EX_TOPMOST,
+        HWND hwndDlg = CreateWindowEx(WS_EX_DLGMODALFRAME,
             WC_DIALOG, "Lookup Form",
             WS_VISIBLE | WS_CAPTION | WS_SYSMENU,
             CW_USEDEFAULT, CW_USEDEFAULT, 200, 100,
