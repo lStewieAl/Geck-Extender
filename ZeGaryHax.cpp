@@ -809,6 +809,10 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// fix the undo menu button for NavMesh
 	WriteRelCall(0x44104A, UInt32(OnMainWindowUndo));
 
+	// fix the Text Search not updating Z position after loading a cell
+	WriteRelCall(0x48706C, UInt32(OnTextViewLoadCell));
+	WriteRelCall(0x486FE1, UInt32(OnTextViewLoadCell));
+
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
 	{

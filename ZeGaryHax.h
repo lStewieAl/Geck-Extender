@@ -2825,3 +2825,13 @@ void __fastcall OnMainWindowUndo(HistoryManager* historyMgr, void* edx, int form
 		historyMgr->Undo();
 	}
 }
+
+void __cdecl OnTextViewLoadCell(NiPoint3* pos, TESObjectCELL* cell)
+{
+	CdeclCall(0x465490, pos, cell);
+	if (!cell->IsInterior())
+	{
+		cell->GetLandHeight(pos, &pos->z);
+		CdeclCall(0x4652D0, pos);
+	}
+}
