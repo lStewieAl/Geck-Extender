@@ -2789,15 +2789,59 @@ __declspec(naked) void OnObjectWindowNewHook()
 WNDPROC originalObjectWindowListViewProc;
 LRESULT CALLBACK ObjectWindowListViewCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
-	if (Message == WM_KEYDOWN && GetAsyncKeyState(VK_CONTROL) < 0)
+	if (Message == WM_KEYDOWN)
 	{
-		if (wParam == 'G')
+		if (GetAsyncKeyState(VK_CONTROL) < 0)
 		{
-			FormSearch::Show();
+			if (wParam == 'G')
+			{
+				FormSearch::Show();
+				return TRUE;
+			}
+			else if (wParam == 'F')
+			{
+				SetFocus(GetDlgItem(GetParent(Hwnd), 2557));
+				return TRUE;
+			}
+		}
+		else if (wParam == VK_RETURN)
+		{
+			SInt32 index = SendMessageA(Hwnd, LVM_GETNEXTITEM, -1, LVIS_SELECTED);
+			struct
+			{
+				UInt32 pad[3];
+				SInt32 iItem;
+				SInt32 iSubItem;
+			} item;
+			item.iItem = index;
+			item.iSubItem = 0;
+
+			int** nodeDatas = (int**)0xED0778;
+			int iCurrentNode = *(int*)0xED0770;
+			ThisCall(0x437540, nodeDatas[iCurrentNode], &item);
 			return TRUE;
 		}
 	}
 	return CallWindowProc(originalObjectWindowListViewProc, Hwnd, Message, wParam, lParam);
+}
+
+WNDPROC originalObjectWindowFilterFieldProc;
+LRESULT CALLBACK ObjectWindowFilterFieldCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+{
+	if (Message == WM_KEYDOWN && GetAsyncKeyState(VK_CONTROL) < 0)
+	{
+		if (wParam == 'A')
+		{
+			SendMessage(Hwnd, EM_SETSEL, 0, -1);
+			return TRUE;
+		}
+		else if (wParam == 'F')
+		{
+			SetFocus(GetDlgItem(GetParent(Hwnd), 1041));
+			return TRUE;
+		}
+	}
+	return CallWindowProc(originalObjectWindowFilterFieldProc, Hwnd, Message, wParam, lParam);
 }
 
 WNDPROC originalObjectWindowCallback;
@@ -2809,6 +2853,11 @@ LRESULT CALLBACK ObjectWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LP
 		if (!originalObjectWindowListViewProc)
 		{
 			originalObjectWindowListViewProc = (WNDPROC)SetWindowLongPtr(listView, GWLP_WNDPROC, (LONG_PTR)ObjectWindowListViewCallback);
+		}
+		HWND filterField = GetDlgItem(Hwnd, 2557);
+		if (!originalObjectWindowFilterFieldProc)
+		{
+			originalObjectWindowFilterFieldProc = (WNDPROC)SetWindowLongPtr(filterField, GWLP_WNDPROC, (LONG_PTR)ObjectWindowFilterFieldCallback);
 		}
 	}
 	return CallWindowProc(originalObjectWindowCallback, Hwnd, Message, wParam, lParam);
