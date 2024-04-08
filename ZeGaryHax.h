@@ -10,6 +10,7 @@
 #include "GameScript.h"
 #include "GameSettings.h"
 #include "ZeLogWindow.h"
+#include "FormSearch.h"
 
 #define GH_NAME				"ZeGaryHax"		// this is the string for IsPluginInstalled and GetPluginVersion (also shows in nvse.log)
 #define GH_VERSION			0.41
@@ -2783,4 +2784,32 @@ __declspec(naked) void OnObjectWindowNewHook()
 		mov edx, ebp
 		jmp OnObjectWindowNew
 	}
+}
+
+WNDPROC originalObjectWindowListViewProc;
+LRESULT CALLBACK ObjectWindowListViewCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+{
+	if (Message == WM_KEYDOWN && GetAsyncKeyState(VK_CONTROL) < 0)
+	{
+		if (wParam == 'G')
+		{
+			FormSearch::Show();
+			return TRUE;
+		}
+	}
+	return CallWindowProc(originalObjectWindowListViewProc, Hwnd, Message, wParam, lParam);
+}
+
+WNDPROC originalObjectWindowCallback;
+LRESULT CALLBACK ObjectWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+{
+	if (Message == WM_INITDIALOG)
+	{
+		HWND listView = GetDlgItem(Hwnd, 1041);
+		if (!originalObjectWindowListViewProc)
+		{
+			originalObjectWindowListViewProc = (WNDPROC)SetWindowLongPtr(listView, GWLP_WNDPROC, (LONG_PTR)ObjectWindowListViewCallback);
+		}
+	}
+	return CallWindowProc(originalObjectWindowCallback, Hwnd, Message, wParam, lParam);
 }

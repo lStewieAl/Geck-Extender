@@ -63,6 +63,7 @@
     <ClCompile Include="ZeLogWindow.cpp" />
     <ClCompile Include="GeckUtility.cpp" />
     <ClCompile Include="EasterEggs.cpp" />
+    <ClCompile Include="FormSearch.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ZeGaryHax.h" />
@@ -142,6 +143,7 @@
     <ClInclude Include="CreatureMarkerSwapper.h" />
     <ClInclude Include="ExtensionsMenu.h" />
     <ClInclude Include="EasterEggs.h" />
+    <ClInclude Include="FormSearch.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

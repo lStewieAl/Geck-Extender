@@ -5,6 +5,7 @@
 #include "SafeWrite.h"
 #include "resource.h"
 #include "ZeLogWindow.h"
+#include "FormSearch.h"
 
 #define UI_EXTMENU_ID			51001
 #define UI_EXTMENU_SHOWLOG		51002
@@ -18,6 +19,7 @@
 #define UI_EXTMENU_SAVEPOSITION 51010
 #define UI_EXTMENU_LOADPOSITION 51011
 #define UI_EXTMENU_TOGGLENAVEMESHBISECT 51018
+#define UI_EXTMENU_LOOKUPFORM 51019
 #define ID_TRACKBAR				51012
 #define ID_TIMEOFDAYTEXT		51013
 #define ID_RENDERWINDOWCELLLOADS_CHECKBOX 51014
@@ -34,7 +36,7 @@ HWND g_MainHwnd;
 extern HWND g_ConsoleHwnd;
 HMENU g_ExtensionMenu;
 HMENU g_MainMenu;
-WNDPROC OldEditorUI_WndProc;
+WNDPROC originalMainWindowCallback;
 
 NiPoint3 savedRenderPos;
 NiMatrix33 savedRenderDirection;
@@ -118,6 +120,9 @@ bool EditorUI_CreateExtensionMenu(HWND MainWindow, HMENU MainMenu)
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_PREVIEW, "Preview Window Uncap (requires restart)");
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED, "Object Window - Only Show Edited");
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_TOGGLENAVEMESHBISECT, "Allow Placement Of Navmesh Node Above Others");
+	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_SEPARATOR, (UINT_PTR)UI_EXTMENU_SPACER, "");
+	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_LOOKUPFORM, "Lookup Form");
+
 
 	MENUITEMINFO menuInfo;
 	memset(&menuInfo, 0, sizeof(MENUITEMINFO));
@@ -252,7 +257,7 @@ void MoveChildWindow(HWND hwndChild, LPPOINT offset)
 	SetWindowPos(hwndChild, NULL, newX, newY, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
 }
 
-LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	if (Message == WM_CREATE)
 	{
@@ -383,6 +388,12 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 		case UI_EXTMENU_CLEARLOG:
 		{
 			PostMessageA(g_ConsoleHwnd, UI_CMD_CLEARLOGTEXT, 0, 0);
+		}
+		return 0;
+
+		case UI_EXTMENU_LOOKUPFORM:
+		{
+			FormSearch::Show();
 		}
 		return 0;
 
@@ -660,7 +671,7 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 		char customTitle[256];
 		sprintf_s(customTitle, "%s -= GECK Extender Rev. 0.41 =-", (const char*)lParam);
 
-		return CallWindowProc(OldEditorUI_WndProc, Hwnd, Message, wParam, (LPARAM)customTitle);
+		return CallWindowProc(originalMainWindowCallback, Hwnd, Message, wParam, (LPARAM)customTitle);
 	}
 	else if (Message == WM_HSCROLL && bShowTimeOfDaySlider)
 	{
@@ -710,11 +721,11 @@ LRESULT CALLBACK EditorUI_WndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM
 		prevY = newY;
 	}
 
-	return CallWindowProc(OldEditorUI_WndProc, Hwnd, Message, wParam, lParam);
+	return CallWindowProc(originalMainWindowCallback, Hwnd, Message, wParam, lParam);
 }
 
 void ExtensionsMenu_InitHooks()
 {
-	SafeWrite32(0x0044612D, (UInt32)EditorUI_WndProc);
-	OldEditorUI_WndProc = (WNDPROC)0x00440780;
+	originalMainWindowCallback = *(WNDPROC*)0x0044612D;
+	SafeWrite32(0x0044612D, (UInt32)MainWindowCallback);
 }
