@@ -35,7 +35,6 @@
 #include "ZeEditBoxHax.h"
 #include "CreatureMarkerSwapper.h"
 #include "EasterEggs.h"
-#include "FormSearch.h"
 
 extern "C"
 {

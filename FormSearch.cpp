@@ -1,4 +1,6 @@
 #include "GameAPI.h"
+#include "GameForms.h"
+#include "GameData.h"
 #include <CommCtrl.h>
 extern HWND g_MainHwnd;
 
@@ -6,6 +8,20 @@ namespace FormSearch
 {
     constexpr int IDD_INPUTDIALOG = 101;
     constexpr int IDC_INPUTEDIT = 1001;
+
+    void GetCellCoords(NiPoint3& pos, TESObjectCELL* cell)
+    {
+        if (cell->IsInterior())
+        {
+            pos = NiPoint3::ZERO;
+        }
+        else
+        {
+            pos.x = 2048 + (cell->GetPosX() << 12);
+            pos.y = 2048 + (cell->GetPosY() << 12);
+            pos.z = 0;
+        }
+    }
 
     bool DoLookupForm(HWND hwndDlg)
     {
@@ -26,7 +42,24 @@ namespace FormSearch
 
             if (form)
             {
-                (*(void(__thiscall**)(__int32, HWND, __int32, __int32))(*(__int32*)form + 0x164))((__int32)form, g_MainHwnd, 0, 1);
+                if (form->typeID == kFormType_Cell || form->typeID == kFormType_Land)
+                {
+                    TESObjectCELL* cell = form->typeID == kFormType_Land
+                        ? (TESObjectCELL*)(UInt32(form) + 0x34) : (TESObjectCELL*)form;
+
+                    NiPoint3 pos;
+                    GetCellCoords(pos, cell);
+                    CdeclCall(0x465490, &pos, cell);
+                    if (!cell->IsInterior())
+                    {
+                        cell->GetLandHeight(&pos, &pos.z);
+                        CdeclCall(0x4652D0, &pos);
+                    }
+                }
+                else
+                {
+                    (*(void(__thiscall**)(__int32, HWND, __int32, __int32))(*(__int32*)form + 0x164))((__int32)form, g_MainHwnd, 0, 1);
+                }
             }
             else
             {

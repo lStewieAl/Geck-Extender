@@ -485,4 +485,5 @@ public:
 
 	static TES* GetSingleton() { return *(TES**)0xECF93C; }
 	void CleanUpUnusedTextures(bool bEmergencyTextureRelease = false) { ThisCall(0x4C7D70, this, bEmergencyTextureRelease); };
+	bool GetLandHeight(NiPoint3* cameraPos, float* heightOut);
 };

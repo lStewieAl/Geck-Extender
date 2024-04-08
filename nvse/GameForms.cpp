@@ -868,4 +868,3 @@ Script* EffectSetting::	RemoveScript()
 {
 	return SetScript(NULL);
 };
-

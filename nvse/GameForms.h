@@ -3648,6 +3648,7 @@ public:
 
 class NavMeshInfoMap;
 class NavMesh;
+class TESObjectLAND;
 
 class TESObjectCELL : public TESForm
 {
@@ -3714,6 +3715,15 @@ public:
 	UInt32 unkF4;
 	UInt32 inheritFlags;
 	BGSLightingTemplate* lightingTemplate;
+
+	SInt32 GetPosX() { return ThisCall<SInt32>(0x625A70, this); };
+	SInt32 GetPosY() { return ThisCall<SInt32>(0x625A90, this); };
+	bool IsInterior() { return cellFlags & 1; };
+	bool GetLandHeight(NiPoint3* pos, float* heightOut)
+	{
+		auto land = ThisCall<TESObjectLAND*>(0x627140, this);
+		return ThisCall<bool>(0x61A810, land, pos, heightOut);
+	}
 };
 STATIC_ASSERT(sizeof(TESObjectCELL) == 0x100);
 

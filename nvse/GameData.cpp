@@ -94,3 +94,5 @@ TESObjectCELL* GridCellArray::GetCell(int x, int y)
 	auto pCell = ThisCall<TESObjectCELL**>(0x5296F0, this, x, y);
 	return pCell ? *pCell : nullptr;
 }
+
+bool TES::GetLandHeight(NiPoint3* cameraPos, float* heightOut) { return ThisCall<bool>(0x4C9A00, this, cameraPos, heightOut); };
