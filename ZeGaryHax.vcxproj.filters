@@ -64,6 +64,7 @@
     <ClCompile Include="GeckUtility.cpp" />
     <ClCompile Include="EasterEggs.cpp" />
     <ClCompile Include="FormSearch.cpp" />
+    <ClCompile Include="OutOfMemoryHelper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ZeGaryHax.h" />
@@ -144,6 +145,7 @@
     <ClInclude Include="ExtensionsMenu.h" />
     <ClInclude Include="EasterEggs.h" />
     <ClInclude Include="FormSearch.h" />
+    <ClInclude Include="OutOfMemoryHelper.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

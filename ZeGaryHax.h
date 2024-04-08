@@ -1526,7 +1526,7 @@ void __cdecl CrashSaveSetName(char* dst, size_t size, char* format, void* DEFAUL
 
 LPTOP_LEVEL_EXCEPTION_FILTER s_originalFilter = nullptr;
 
-LONG WINAPI DoCrashSave(EXCEPTION_POINTERS* info)
+void CreateCrashSave()
 {
 	// create a save in the Data//CrashSaves folder called %s.esp
 	WriteRelCall(0x4DB07A, UInt32(CrashSaveSetName));
@@ -1539,6 +1539,11 @@ LONG WINAPI DoCrashSave(EXCEPTION_POINTERS* info)
 
 	// restore original path (Data\\Backup\\)
 	SafeWrite32(0x4DB0AC, 0xD415C4);
+}
+
+LONG WINAPI DoCrashSave(EXCEPTION_POINTERS* info)
+{
+	CreateCrashSave();
 
 	char buf[0x1000];
 

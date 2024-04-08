@@ -171,6 +171,10 @@
     <ClCompile Include="nvse\NiTypes.cpp" />
     <ClCompile Include="nvse\SafeWrite.cpp" />
     <ClCompile Include="nvse\Utilities.cpp" />
+    <ClCompile Include="OutOfMemoryHelper.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="xutil.cpp" />
     <ClCompile Include="ZeGaryHax.cpp" />
     <ClCompile Include="ZeLogWindow.cpp" />
@@ -216,6 +220,10 @@
     <ClInclude Include="nvse\NiTypes.h" />
     <ClInclude Include="nvse\SafeWrite.h" />
     <ClInclude Include="nvse\Utilities.h" />
+    <ClInclude Include="OutOfMemoryHelper.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="resource.h" />
     <ClInclude Include="UISpeedHooks.h" />
     <ClInclude Include="xutil.h" />

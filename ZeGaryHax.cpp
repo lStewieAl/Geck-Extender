@@ -35,6 +35,7 @@
 #include "ZeEditBoxHax.h"
 #include "CreatureMarkerSwapper.h"
 #include "EasterEggs.h"
+#include "OutOfMemoryHelper.h"
 
 extern "C"
 {
@@ -816,6 +817,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// prevent the script save confirmation if the script is new but empty
 	WriteRelCall(0x5C303F, UInt32(OnScriptConfirmCloseHook));
 	SafeWrite8(0x5C303F + 5, 0x90);
+
+	OutOfMemoryHelper::Init();
 
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
