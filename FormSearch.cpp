@@ -47,12 +47,20 @@ namespace FormSearch
                 if (DoLookupForm(parent))
                 {
                     EndDialog(parent, IDOK);
+                    return TRUE;
                 }
                 return FALSE;
             }
             else if (wParam == VK_ESCAPE)
             {
                 EndDialog(GetParent(hwnd), IDCANCEL);
+                return TRUE;
+            }
+            else if (wParam == 'A' && GetKeyState(VK_CONTROL) < 0)
+            {
+                // Select All
+                SendMessage(hwnd, EM_SETSEL, 0, -1);
+                return TRUE;
             }
         }
         return CallWindowProc(originalEditProc, hwnd, msg, wParam, lParam);
@@ -68,13 +76,13 @@ namespace FormSearch
             {
                 if (DoLookupForm(hwndDlg))
                 {
-                    EndDialog(hwndDlg, IDOK);
+                    DestroyWindow(hwndDlg);
                 }
                 return TRUE;
             }
             case IDCANCEL:
             {
-                EndDialog(hwndDlg, IDCANCEL);
+                DestroyWindow(hwndDlg);
                 return TRUE;
             }
             }

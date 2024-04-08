@@ -2786,15 +2786,29 @@ __declspec(naked) void OnObjectWindowNewHook()
 	}
 }
 
-WNDPROC originalObjectWindowCallback;
-LRESULT CALLBACK ObjectWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+WNDPROC originalObjectWindowListViewProc;
+LRESULT CALLBACK ObjectWindowListViewCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	if (Message == WM_KEYDOWN && GetAsyncKeyState(VK_CONTROL) < 0)
 	{
-		// TODO figure the correct message to listen for
 		if (wParam == 'G')
 		{
-//			FormSearch::Show();
+			FormSearch::Show();
+			return TRUE;
+		}
+	}
+	return CallWindowProc(originalObjectWindowListViewProc, Hwnd, Message, wParam, lParam);
+}
+
+WNDPROC originalObjectWindowCallback;
+LRESULT CALLBACK ObjectWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+{
+	if (Message == WM_INITDIALOG)
+	{
+		HWND listView = GetDlgItem(Hwnd, 1041);
+		if (!originalObjectWindowListViewProc)
+		{
+			originalObjectWindowListViewProc = (WNDPROC)SetWindowLongPtr(listView, GWLP_WNDPROC, (LONG_PTR)ObjectWindowListViewCallback);
 		}
 	}
 	return CallWindowProc(originalObjectWindowCallback, Hwnd, Message, wParam, lParam);
