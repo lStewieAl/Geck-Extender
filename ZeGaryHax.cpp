@@ -807,6 +807,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	originalObjectWindowCallback = *(WNDPROC*)0x4416A3;
 	SafeWrite32(0x4416A3, UInt32(ObjectWindowCallback));
 
+	// fix the undo menu button for NavMesh
+	WriteRelCall(0x44104A, UInt32(OnMainWindowUndo));
+
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
 	{

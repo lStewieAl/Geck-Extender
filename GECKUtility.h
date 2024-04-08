@@ -107,6 +107,7 @@ struct HistoryManager
 	static HistoryManager* GetSingleton();
 	void ClearHistoryForCurrentElement();
 	void AddAction(int aiActionType, RenderWindow::SelectedData* apSelectedForms);
+	void Undo();
 };
 
 struct RenderData
@@ -143,3 +144,85 @@ bool GetIsShowSoundMarkers();
 void SetIsShowSoundMarkers(bool state);
 void SetFlycamMode(int state);
 int GetFlycamMode();
+
+
+class PathingSolution;
+class NavMesh;
+class NavMeshEditVertex;
+class NavMeshEditTriangle;
+class NavMeshEditEdge;
+struct NavMeshManager
+{
+	struct UndoStack
+	{
+		struct NavMeshUndoData
+		{
+			BSSimpleArray<void> navMeshModifyUndoArray;
+			BSSimpleArray<void> navMeshMoveUndoArray;
+			BSSimpleArray<NavMesh> navMeshArray;
+			UInt8 byte30;
+		};
+
+		NavMeshUndoData* items[30];
+		UInt32 numItems;
+	};
+
+	struct VertexTriangleEdgeArrays
+	{
+		BSSimpleArray<NavMeshEditVertex> vertices;
+		BSSimpleArray<NavMeshEditTriangle> triangles;
+		BSSimpleArray<NavMeshEditEdge> edges;
+	};
+
+
+	UInt32 unk000;
+	UInt8 isSelectVertices;
+	UInt8 isSelectTriangles;
+	UInt8 isSelectEdges;
+	UInt8 byte007;
+	VertexTriangleEdgeArrays arrayData;
+	UInt32 unk038;
+	UInt32 unk03C;
+	NiPoint3 pt040;
+	NiPoint3 pt04C;
+	NavMeshManager::UndoStack undoStack;
+	UInt32 unk0D4;
+	UInt32 unk0D8;
+	UInt32 unk0DC;
+	UInt32 unk0E0;
+	UInt32 unk0E4;
+	UInt32 unk0E8;
+	UInt32 unk0EC;
+	UInt32 unk0F0;
+	UInt32 unk0F4;
+	UInt32 unk0F8;
+	UInt32 unk0FC;
+	UInt32 unk100;
+	UInt32 unk104;
+	UInt32 unk108;
+	UInt32 unk10C;
+	UInt32 unk110;
+	UInt32 unk114;
+	UInt32 unk118;
+	UInt32 unk11C;
+	UInt32 unk120;
+	PathingSolution* pPathingSolution;
+	UInt32 unk128;
+	UInt32 flags;
+	UInt32 unk130;
+	UInt8 byte134;
+	UInt8 byte135;
+	UInt8 byte136;
+	UInt8 bSingleCellViewMode;
+	UInt32 unk138;
+	UInt32 unk13C;
+	BSSimpleArray<void> pointArray140;
+	BSSimpleArray<void> navMeshWarningDataArray;
+	UInt32 unk160;
+	UInt8 byte164;
+
+	void Undo();
+
+	static NavMeshManager* GetSingleton();
+	static bool IsActive();
+};

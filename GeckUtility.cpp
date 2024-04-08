@@ -163,6 +163,12 @@ HWND CellView::GetWindow() { return *(HWND*)0xECFB78; };
 
 HistoryManager* HistoryManager::GetSingleton() { return *(HistoryManager**)0xECFDF4; };
 void HistoryManager::ClearHistoryForCurrentElement() { ThisCall(0x467CC0, this); };
+void HistoryManager::Undo() { ThisCall(0x4665C0, this, 0); };
 void HistoryManager::AddAction(int aiActionType, RenderWindow::SelectedData* apSelectedForms) { ThisCall(0x465D90, this, aiActionType, apSelectedForms); };
 
 RenderData* RenderData::GetSingleton() { return *(RenderData**)0xED116C; };
+
+NavMeshManager* NavMeshManager::GetSingleton() { return (NavMeshManager*)0xECEFF8; }
+
+bool NavMeshManager::IsActive() { return *(bool**)0xED1412; }
+void NavMeshManager::Undo() { ThisCall(0x4249F0, this); }

@@ -2813,3 +2813,15 @@ LRESULT CALLBACK ObjectWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LP
 	}
 	return CallWindowProc(originalObjectWindowCallback, Hwnd, Message, wParam, lParam);
 }
+
+void __fastcall OnMainWindowUndo(HistoryManager* historyMgr, void* edx, int formal)
+{
+	if (NavMeshManager::IsActive())
+	{
+		NavMeshManager::GetSingleton()->Undo();
+	}
+	else
+	{
+		historyMgr->Undo();
+	}
+}
