@@ -2884,3 +2884,22 @@ void __cdecl OnTextViewLoadCell(NiPoint3* pos, TESObjectCELL* cell)
 		CdeclCall(0x4652D0, pos);
 	}
 }
+
+int __fastcall OnScriptConfirmClose(Script* script, HWND textEdit, HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType)
+{
+	if (!*script->GetEditorID() && !GetWindowTextLengthA(textEdit))
+	{
+		return IDNO;
+	}
+	return MessageBoxA(hWnd, lpText, lpCaption, uType);
+}
+
+__declspec(naked) void OnScriptConfirmCloseHook()
+{
+	_asm
+	{
+		mov ecx, esi // script
+		mov edx, ebp // textEdit
+		jmp OnScriptConfirmClose
+	}
+}

@@ -813,6 +813,10 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x48706C, UInt32(OnTextViewLoadCell));
 	WriteRelCall(0x486FE1, UInt32(OnTextViewLoadCell));
 
+	// prevent the script save confirmation if the script is new but empty
+	WriteRelCall(0x5C303F, UInt32(OnScriptConfirmCloseHook));
+	SafeWrite8(0x5C303F + 5, 0x90);
+
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
 	{
