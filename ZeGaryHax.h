@@ -3033,3 +3033,8 @@ __declspec(naked) void OnDestroyAllWindowsHook()
 		jmp DestroyWindowOrDialog
 	}
 }
+
+void __stdcall OnTAllocZeroMemory(int* pMemory, int size, int numAllocs, void* initFn, void* destroyFn)
+{
+	memset(pMemory, 0, 4 * numAllocs);
+}

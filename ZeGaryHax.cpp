@@ -834,6 +834,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelJump(0x4778A9, 0x4778CC); // All windows
 	WriteRelJump(0x477902, 0x4778CC); // Selected Window
 
+	SafeWrite16(0x6C07D8, 0x07EB); // fix unnecessary duplicate function call in NavMeshRender::AttachEdge
+	WriteRelCall(0x6778C2, UInt32(OnTAllocZeroMemory)); // microoptimize TAlloc::Allocate
+
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
 	{
