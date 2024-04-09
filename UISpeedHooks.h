@@ -21,6 +21,15 @@ LRESULT __fastcall hk_ObjectListViewListView(DWORD* thisptr, void* ignorethisthi
 	return 0;
 }
 
+
+void __cdecl OnPopulateFloatingObjectsList(HWND listWindow, tList<TESForm>* list, unsigned __int8(__cdecl* filterFn)(TESForm*, int), int filterData)
+{
+	SendMessage(listWindow, WM_SETREDRAW, FALSE, 0);
+	CdeclCall(0x47E410, listWindow, list, filterFn, filterData);
+	SendMessage(listWindow, WM_SETREDRAW, TRUE, 0);
+	RedrawWindow(listWindow, nullptr, nullptr, RDW_ERASE | RDW_INVALIDATE | RDW_NOCHILDREN);
+}
+
 _declspec(naked) void DialogueListViewBeginUI() {
 	static const UInt32 retnAddr = 0x592EB4;
 	static const UInt32 skipAddr = 0x592FB8;
@@ -279,4 +288,7 @@ void WriteUIHooks() {
 
 	// speed up object palette
 	WriteRelCall(0x40CF05, UInt32(hk_sub_47E0D0));
+
+	// speed up the floating objects list
+	WriteRelCall(0x4838C1, UInt32(OnPopulateFloatingObjectsList));
 }

@@ -18,6 +18,21 @@ namespace BetterFloatingFormList
 		return index != -1;
 	}
 
+	void SetDeferListUpdate(HWND hWnd, bool bDefer = true)
+	{
+		if (bDefer)
+		{
+			SendMessage(hWnd, WM_SETREDRAW, FALSE, 0);
+		}
+		else
+		{
+			SendMessage(hWnd, WM_SETREDRAW, TRUE, 0);
+			RedrawWindow(hWnd, nullptr, nullptr, RDW_ERASE | RDW_INVALIDATE | RDW_NOCHILDREN);
+			InvalidateRect(hWnd, NULL, TRUE);
+			UpdateWindow(hWnd);
+		}
+	}
+
 	LRESULT CALLBACK SubclassedListViewProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
 	{
 		switch (uMsg)
@@ -25,15 +40,14 @@ namespace BetterFloatingFormList
 		case WM_KEYDOWN:
 			if (wParam == VK_DELETE)
 			{
+				SetDeferListUpdate(hWnd, true);
 				int iSelected = -1;
 				while ((iSelected = ListView_GetNextItem(hWnd, iSelected, LVNI_SELECTED)) != -1)
 				{
 					ListView_DeleteItem(hWnd, iSelected);
 					iSelected--; // because the indices shift after deletion, decrement iSelected to ensure no item is skipped
 				}
-
-				InvalidateRect(hWnd, NULL, TRUE);
-				UpdateWindow(hWnd);
+				SetDeferListUpdate(hWnd, false);
 			}
 			else if (wParam == 'A' && GetAsyncKeyState(VK_CONTROL) < 0)
 			{
@@ -83,7 +97,9 @@ namespace BetterFloatingFormList
 					}
 				} while (selectedFormIter = selectedFormIter->next);
 
+				SetDeferListUpdate(listView, true);
 				CdeclCall(0x47E410, listView, &formsList, nullptr, nullptr);
+				SetDeferListUpdate(listView, false);
 
 				formsList.RemoveAll();
 			}
