@@ -411,31 +411,34 @@ LRESULT WINAPI hk_SendMessageA(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam
 		return 0;
 	}
 
-	if (bCacheComboboxes)
+	if (Msg == CB_ADDSTRING || Msg == CB_RESETCONTENT)
 	{
-		int id = GetDlgCtrlID(hWnd);
-		for (int i = 0; i < _countof(cb_ids); i++)
+		if (bCacheComboboxes)
 		{
-			if (id == cb_ids[i])
+			int id = GetDlgCtrlID(hWnd);
+			for (int i = 0; i < _countof(cb_ids); i++)
 			{
-				if (Msg == CB_ADDSTRING)
+				if (id == cb_ids[i])
 				{
-					if (cb_filled[i])
+					if (Msg == CB_ADDSTRING)
 					{
-						return CB_ERR;
+						if (cb_filled[i])
+						{
+							return CB_ERR;
+						}
 					}
-				}
-				else if (Msg == CB_RESETCONTENT)
-				{
-					if (!cb_reset[i])
+					else if (Msg == CB_RESETCONTENT)
 					{
-						cb_filled[i] = !!SendMessageA(hWnd, CB_GETCOUNT, NULL, NULL);
-						return CB_ERR;
+						if (!cb_reset[i])
+						{
+							cb_filled[i] = !!SendMessageA(hWnd, CB_GETCOUNT, NULL, NULL);
+							return CB_ERR;
+						}
+						cb_filled[i] = false;
+						cb_reset[i] = false;
 					}
-					cb_filled[i] = false;
-					cb_reset[i] = false;
+					break;
 				}
-				break;
 			}
 		}
 	}
