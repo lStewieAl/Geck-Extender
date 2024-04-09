@@ -70,13 +70,19 @@ namespace BetterFloatingFormList
 		switch (Message)
 		{
 		case WM_INITDIALOG:
-			SubclassListView(GetDlgItem(Hwnd, 1018));
+		{
+			auto listView = GetDlgItem(Hwnd, 1018);
+			SubclassListView(listView);
+			ListView_SetExtendedListViewStyleEx(listView, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
 			DragAcceptFiles(Hwnd, TRUE);
 			break;
+		}
 
 		case BSMsg_AcceptsDropType:
+		{
 			SetWindowLong(Hwnd, DWL_MSGRESULT, wParam != kFormType_Reference);
 			return TRUE;
+		}
 
 		case BSMsg_HandleDrop:
 		{
