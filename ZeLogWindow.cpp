@@ -187,11 +187,9 @@ LRESULT CALLBACK EditorUI_LogWndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPA
 					//	Parse to integer, then bring up the menu
 					uint32_t id = strtoul(sm[1].str().c_str(), nullptr, 16);
 					TESForm* (*LookupFormByID)(UInt32 formID) = (TESForm * (*)(UInt32))0x4F9620;
-					__int32 form = (__int32)LookupFormByID(id);
-
-					if (form)
+					if (auto form = LookupFormByID(id))
 					{
-						(*(void(__thiscall**)(__int32, HWND, __int32, __int32))(*(__int32*)form + 0x164))(form, g_MainHwnd, 0, 1);
+						form->OpenDialog(g_MainHwnd, 0, 1);
 					}
 				}
 			}

@@ -65,6 +65,7 @@
     <ClCompile Include="EasterEggs.cpp" />
     <ClCompile Include="FormSearch.cpp" />
     <ClCompile Include="OutOfMemoryHelper.cpp" />
+    <ClCompile Include="BetterFloatingFormList.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ZeGaryHax.h" />
@@ -146,6 +147,7 @@
     <ClInclude Include="EasterEggs.h" />
     <ClInclude Include="FormSearch.h" />
     <ClInclude Include="OutOfMemoryHelper.h" />
+    <ClInclude Include="BetterFloatingFormList.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

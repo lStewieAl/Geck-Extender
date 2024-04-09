@@ -119,6 +119,10 @@ copy "$(TargetPath)" "$(FalloutNVPath)\Data\nvse\plugins\$(TargetFileName)"
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BetterFloatingFormList.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="CreatureMarkerSwapper.cpp">
       <SubType>
       </SubType>
@@ -182,6 +186,10 @@ copy "$(TargetPath)" "$(FalloutNVPath)\Data\nvse\plugins\$(TargetFileName)"
     <ClCompile Include="ZeLogWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BetterFloatingFormList.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="CreatureMarkerSwapper.h">
       <SubType>
       </SubType>

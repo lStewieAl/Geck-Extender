@@ -58,7 +58,7 @@ namespace FormSearch
                 }
                 else
                 {
-                    (*(void(__thiscall**)(__int32, HWND, __int32, __int32))(*(__int32*)form + 0x164))((__int32)form, g_MainHwnd, 0, 1);
+					form->OpenDialog(g_MainHwnd, 0, 1);
                 }
             }
             else

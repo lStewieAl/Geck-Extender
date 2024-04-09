@@ -226,3 +226,8 @@ struct NavMeshManager
 	static bool IsActive();
 };
 
+enum WindowMessages
+{
+	BSMsg_HandleDrop = 0x407,
+	BSMsg_AcceptsDropType = 0x408,
+};

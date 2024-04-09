@@ -36,6 +36,7 @@
 #include "CreatureMarkerSwapper.h"
 #include "EasterEggs.h"
 #include "OutOfMemoryHelper.h"
+#include "BetterFloatingFormList.h"
 
 extern "C"
 {
@@ -821,6 +822,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	OutOfMemoryHelper::Init();
 
 	WriteRelCall(0x44B294, UInt32(OnSetupObjectWindowRightClickMenu));
+
+	BetterFloatingFormList::Init();
 
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
