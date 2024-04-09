@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <Psapi.h>
 #include "GameTypes.h"
+#include <commctrl.h>
 
 void DumpClass(void * theClassPtr, UInt32 nIntsToDump)
 {
@@ -598,4 +599,13 @@ BOOL CopyTextToClipboard(const char* text) {
 	CloseClipboard();
 
 	return TRUE;
+}
+
+void SelectAllItemsInListView(HWND listView)
+{
+	int itemCount = ListView_GetItemCount(listView);
+	for (int i = 0; i < itemCount; i++)
+	{
+		ListView_SetItemState(listView, i, LVIS_SELECTED, LVIS_SELECTED);
+	}
 }

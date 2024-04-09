@@ -180,6 +180,11 @@ public:
 		return pos.node->Item();
 	}
 
+	void Insert(Item* item)
+	{
+		AddAt(item, 0);
+	}
+
 	SInt32 AddAt(Item* item, SInt32 index) {
 		if (!m_listHead.item) {
 			m_listHead.item = item;

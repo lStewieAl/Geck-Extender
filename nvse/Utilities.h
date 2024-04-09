@@ -271,5 +271,6 @@ __forceinline T_Ret CdeclCall(UInt32 _addr, Args ...args)
 
 char* GameHeapStrdup(const char* src);
 
-
 BOOL CopyTextToClipboard(const char* text);
+
+void SelectAllItemsInListView(HWND listView);

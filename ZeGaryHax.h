@@ -742,15 +742,6 @@ void ToggleSelectedFiles(HWND* pListView)
 	} while (index != -1);
 }
 
-void SelectAllItemsInListView(HWND listView)
-{
-	int itemCount = ListView_GetItemCount(listView);
-	for (int i = 0; i < itemCount; i++)
-	{
-		ListView_SetItemState(listView, i, LVIS_SELECTED, LVIS_SELECTED);
-	}
-}
-
 void doKonami(int);
 BOOL __stdcall hk_LoadESPESMCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
 	static RECT WindowSize;
