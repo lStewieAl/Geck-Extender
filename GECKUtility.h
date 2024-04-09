@@ -2,7 +2,6 @@
 #include "NiObjects.h"
 extern void(__cdecl* SaveWindowPositionToINI)(HWND, const char*);
 extern HWND g_mainWindowToolbar;
-extern HWND g_objectWindowHwnd;
 
 struct ObjectPalette
 {
@@ -226,3 +225,4 @@ struct NavMeshManager
 	static NavMeshManager* GetSingleton();
 	static bool IsActive();
 };
+

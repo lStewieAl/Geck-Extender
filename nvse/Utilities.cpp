@@ -561,3 +561,41 @@ char* GameHeapStrdup(const char* src)
 	memcpy(result, src, len + 1);
 	return result;
 }
+
+BOOL CopyTextToClipboard(const char* text) {
+	// Open the clipboard
+	if (!OpenClipboard(NULL)) {
+		return FALSE;
+	}
+
+	// Empty the clipboard
+	if (!EmptyClipboard()) {
+		CloseClipboard();
+		return FALSE;
+	}
+
+	// Allocate a global memory object for the text
+	HGLOBAL hglbCopy = GlobalAlloc(GMEM_MOVEABLE, (strlen(text) + 1) * sizeof(char));
+	if (hglbCopy == NULL) {
+		CloseClipboard();
+		return FALSE;
+	}
+
+	// Lock the handle and copy the text to the buffer
+	char* lptstrCopy = (char*)GlobalLock(hglbCopy);
+	memcpy(lptstrCopy, text, strlen(text) + 1);
+	GlobalUnlock(hglbCopy);
+
+	// Place the handle on the clipboard
+	if (SetClipboardData(CF_TEXT, hglbCopy) == NULL) {
+		// If SetClipboardData failed, we need to free the memory ourselves.
+		GlobalFree(hglbCopy);
+		CloseClipboard();
+		return FALSE;
+	}
+
+	// Close the clipboard
+	CloseClipboard();
+
+	return TRUE;
+}

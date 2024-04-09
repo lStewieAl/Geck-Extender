@@ -5,6 +5,8 @@
 #include "resource.h"
 #include <filesystem>
 #include <unordered_set>
+#include <functional>
+
 #include "NiNodes.h"
 #include "NiObjects.h"
 #include "GameScript.h"
@@ -1969,7 +1971,7 @@ void PatchRememberLandscapeEditSettingsWindowPosition()
 
 void ClearLandscapeUndosIfNearlyOutOfMemory()
 {
-	constexpr size_t MAX_MEMORY = 2560 * (1024 * 1024); // 2.5gb
+	constexpr size_t MAX_MEMORY = 2560u * (1024u * 1024u); // 2.5gb
 	if (GetCurrentMemoryUsage() > MAX_MEMORY)
 	{
 		auto hist = HistoryManager::GetSingleton();
@@ -2337,7 +2339,7 @@ TESForm* GetNthListItem(HWND hWnd, int n)
 	LVITEMA itemA;
 	memset(&itemA, 0, sizeof(itemA));
 	itemA.iItem = n;
-	itemA.mask = 4;
+	itemA.mask = LVIS_CUT;
 	SendMessageA(hWnd, LVM_GETITEMA, 0, (LPARAM)&itemA);
 	return (TESForm*)itemA.lParam;
 }
@@ -2811,7 +2813,7 @@ LRESULT CALLBACK ObjectWindowListViewCallback(HWND Hwnd, UINT Message, WPARAM wP
 		}
 		else if (wParam == VK_RETURN)
 		{
-			SInt32 index = SendMessageA(Hwnd, LVM_GETNEXTITEM, -1, LVIS_SELECTED);
+			SInt32 index = SendMessageA(Hwnd, LVM_GETNEXTITEM, -1, LVNI_SELECTED);
 			struct
 			{
 				UInt32 pad[3];
@@ -2849,6 +2851,65 @@ LRESULT CALLBACK ObjectWindowFilterFieldCallback(HWND Hwnd, UINT Message, WPARAM
 	return CallWindowProc(originalObjectWindowFilterFieldProc, Hwnd, Message, wParam, lParam);
 }
 
+void RemoveSubMenuByHandle(HMENU parentMenu, HMENU submenuHandle) {
+	UINT itemCount = GetMenuItemCount(parentMenu);
+	for (UINT i = 0; i < itemCount; i++) {
+		HMENU hSubMenu = GetSubMenu(parentMenu, i);
+		if (hSubMenu == submenuHandle) {
+			// Found the submenu by its HMENU, now remove it
+			RemoveMenu(parentMenu, i, MF_BYPOSITION);
+			DestroyMenu(submenuHandle);
+			break;
+		}
+	}
+}
+
+constexpr UInt32 COPY_MENU_ID = 0x10001;
+constexpr UInt32 COPY_EDITOR_ID_MENUID = 0x10002;
+constexpr UInt32 COPY_REF_ID_MENUID = 0x10003;
+constexpr UInt32 COPY_XEDIT_ID_MENUID = 0x10004;
+void __cdecl OnSetupObjectWindowRightClickMenu(HMENU menu, LPPOINT cursorPos, HWND hWnd, HWND listView)
+{
+	HMENU hCopySubMenu = CreatePopupMenu();
+
+	InsertMenuA(hCopySubMenu, 0xFFFFFFFF, MF_BYPOSITION, COPY_EDITOR_ID_MENUID, "Copy EditorID");
+	InsertMenuA(hCopySubMenu, 0xFFFFFFFF, MF_BYPOSITION, COPY_REF_ID_MENUID, "Copy RefID");
+	InsertMenuA(hCopySubMenu, 0xFFFFFFFF, MF_BYPOSITION, COPY_XEDIT_ID_MENUID, "Copy xEdit ID");
+
+	InsertMenuA(menu, 0xFFFFFFFF, MF_BYPOSITION | MF_POPUP, (UINT_PTR)hCopySubMenu, "Copy");
+
+	CdeclCall(0x47F3B0, menu, cursorPos, hWnd, listView);
+
+	RemoveSubMenuByHandle(menu, hCopySubMenu);
+}
+
+void CopySelectedListViewItemData(HWND listView, std::function<void(std::string&, TESForm*)> aggregator)
+{
+	int index = -1;
+	std::string aggregatedText;
+
+	// Iterate over all selected items
+	while ((index = SendMessageA(listView, LVM_GETNEXTITEM, index, LVNI_SELECTED)) != -1)
+	{
+		if (auto form = GetNthListItem(listView, index))
+		{
+			aggregator(aggregatedText, form);
+		}
+	}
+
+	// Remove the last newline if there is one
+	if (!aggregatedText.empty() && aggregatedText.back() == '\n')
+	{
+		aggregatedText.pop_back();
+	}
+
+	// Copy the aggregated text to the clipboard
+	if (!aggregatedText.empty())
+	{
+		CopyTextToClipboard(aggregatedText.c_str());
+	}
+}
+
 WNDPROC originalObjectWindowCallback;
 LRESULT CALLBACK ObjectWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
@@ -2863,6 +2924,44 @@ LRESULT CALLBACK ObjectWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LP
 		if (!originalObjectWindowFilterFieldProc)
 		{
 			originalObjectWindowFilterFieldProc = (WNDPROC)SetWindowLongPtr(filterField, GWLP_WNDPROC, (LONG_PTR)ObjectWindowFilterFieldCallback);
+		}
+	}
+	else if (Message == WM_COMMAND)
+	{
+		if (wParam == COPY_EDITOR_ID_MENUID)
+		{
+			HWND listView = GetDlgItem(Hwnd, 1041);
+			CopySelectedListViewItemData(listView, [](std::string& currentText, TESForm* form)
+				{
+					currentText += form->GetEditorID();
+					currentText += "\n";
+				}
+			);
+		}
+		else if (wParam == COPY_REF_ID_MENUID)
+		{
+			HWND listView = GetDlgItem(Hwnd, 1041);
+			CopySelectedListViewItemData(listView, [](std::string& currentText, TESForm* form)
+				{
+					currentText += std::format("{:X}\n", form->refID);
+				}
+			);
+		}
+		else if (wParam == COPY_XEDIT_ID_MENUID)
+		{
+			HWND listView = GetDlgItem(Hwnd, 1041);
+			CopySelectedListViewItemData(listView, [](std::string& currentText, TESForm* form)
+				{
+					// e.g. DLC03LvlEnclaveSquad01 "Enclave Squad Sigma" [NPC_:090057BE]
+					auto editorID = form->GetEditorID();
+					auto formName = form->GetTheName();
+					auto formTypeNames = (const char**)0xE94404;
+					auto formTypeName = formTypeNames[form->typeID * 3];
+					auto refID = form->refID;
+
+					currentText += std::format("{} \"{}\" [{}:{:08X}]\n", editorID, formName, formTypeName, refID);
+				}
+			);
 		}
 	}
 	return CallWindowProc(originalObjectWindowCallback, Hwnd, Message, wParam, lParam);

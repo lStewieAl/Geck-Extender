@@ -113,7 +113,9 @@
     </Link>
     <PostBuildEvent>
       <Message>Installing DLL...</Message>
-      <Command>copy "$(TargetPath)" "$(FalloutNVPath)\Data\nvse\plugins\$(TargetFileName)"</Command>
+      <Command>taskkill /F /IM x32dbg.exe 2&gt;nul
+copy "$(TargetPath)" "$(FalloutNVPath)\Data\nvse\plugins\$(TargetFileName)"
+"$(MO2Path)\ModOrganizer.exe" "moshortcut://:GECK x32dbg"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

@@ -820,6 +820,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	OutOfMemoryHelper::Init();
 
+	WriteRelCall(0x44B294, UInt32(OnSetupObjectWindowRightClickMenu));
+
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
 	{

@@ -2,7 +2,6 @@
 
 void(__cdecl* SaveWindowPositionToINI)(HWND, const char*) = ((void(__cdecl*)(HWND hWnd, const char* Src))(0x43E170));
 HWND g_mainWindowToolbar = (HWND)0xECFC14;
-HWND g_objectWindowHwnd = (HWND)0xECFB70;
 
 // functions for getting and setting the render window camera
 void GetCameraViewMatrix(NiMatrix33* out) {

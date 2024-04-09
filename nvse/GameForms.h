@@ -335,7 +335,7 @@ public:
 	TESForm *		TryGetREFRParent(void);
 	UInt8			GetModIndex() const;
 	TESFullName*	GetFullName();
-	const char*		GetTheName();
+	const char* GetTheName() { return CdeclCall <const char*>(0x437DB0, this); };
 	bool			IsCloned() const;
 
 	bool IsWeapon() { return typeID == kFormType_Weapon; }
