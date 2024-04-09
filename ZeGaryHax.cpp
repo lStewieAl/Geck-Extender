@@ -825,6 +825,15 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	BetterFloatingFormList::Init();
 
+	// make the 'Open Windows' view call EndDialog instead of DestroyWindow on dialogs
+	WriteRelCall(0x4775FE, UInt32(DestroySelectedWindowOrDialog));
+	SafeWrite8(0x4775FE + 5, 0x90);
+	WriteRelJump(0x4777A6, UInt32(OnDestroyAllWindowsHook));
+
+	// refresh the list after destroying windows
+	WriteRelJump(0x4778A9, 0x4778CC); // All windows
+	WriteRelJump(0x477902, 0x4778CC); // Selected Window
+
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
 	{

@@ -231,3 +231,8 @@ enum WindowMessages
 	BSMsg_HandleDrop = 0x407,
 	BSMsg_AcceptsDropType = 0x408,
 };
+
+struct OpenWindows
+{
+	static tList<HWND>* GetWindowList();
+};

@@ -185,6 +185,11 @@ public:
 		AddAt(item, 0);
 	}
 
+	void Append(Item* item)
+	{
+		AddAt(item, eListEnd);
+	}
+
 	SInt32 AddAt(Item* item, SInt32 index) {
 		if (!m_listHead.item) {
 			m_listHead.item = item;
@@ -290,6 +295,22 @@ public:
 
 	void RemoveAll() const {
 		AcceptAll accept = AcceptAll();
+		FreeNodes(const_cast<_Node*>(Head()), accept);
+	}
+
+	class MatchesItem {
+		Item* m_item;
+	public:
+		MatchesItem(Item* item) : m_item(item) {}
+		bool Accept(Item* item)
+		{
+			return item == m_item;
+		}
+	};
+
+	void Remove(Item* item)
+	{
+		MatchesItem accept = MatchesItem(item);
 		FreeNodes(const_cast<_Node*>(Head()), accept);
 	}
 

@@ -274,3 +274,4 @@ char* GameHeapStrdup(const char* src);
 BOOL CopyTextToClipboard(const char* text);
 
 void SelectAllItemsInListView(HWND listView);
+bool IsDialog(HWND hWnd);

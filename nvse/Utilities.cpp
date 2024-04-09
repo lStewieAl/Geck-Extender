@@ -609,3 +609,8 @@ void SelectAllItemsInListView(HWND listView)
 		ListView_SetItemState(listView, i, LVIS_SELECTED, LVIS_SELECTED);
 	}
 }
+
+bool IsDialog(HWND hWnd)
+{
+	return WC_DIALOG == MAKEINTATOM(GetClassLong(hWnd, GCW_ATOM));
+}

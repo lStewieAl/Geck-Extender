@@ -171,3 +171,5 @@ NavMeshManager* NavMeshManager::GetSingleton() { return (NavMeshManager*)0xECEFF
 
 bool NavMeshManager::IsActive() { return *(bool**)0xED1412; }
 void NavMeshManager::Undo() { ThisCall(0x4249F0, this); }
+
+tList<HWND>* OpenWindows::GetWindowList() { return (tList<HWND>*)0xED033C; }

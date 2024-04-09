@@ -75,6 +75,10 @@ namespace BetterFloatingFormList
 			SubclassListView(listView);
 			ListView_SetExtendedListViewStyleEx(listView, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
 			DragAcceptFiles(Hwnd, TRUE);
+
+			// allow the window to be closed from the 'Open Windows' menu
+			auto openWindowsList = OpenWindows::GetWindowList();
+			openWindowsList->Append((HWND*)Hwnd);
 			break;
 		}
 

@@ -2998,3 +2998,35 @@ __declspec(naked) void OnScriptConfirmCloseHook()
 		jmp OnScriptConfirmClose
 	}
 }
+
+void __stdcall DestroyWindowOrDialog(HWND hWnd)
+{
+	// ensure dialogs are closed with EndDialog instead of DestroyWindow
+	if (IsDialog(hWnd))
+	{
+		EndDialog(hWnd, 0);
+	}
+	else
+	{
+		DestroyWindow(hWnd);
+	}
+}
+
+void __stdcall DestroySelectedWindowOrDialog(HWND hWnd)
+{
+	// fix the open window not getting removed from the windows list after getting destroyed...
+	auto openWindowsList = OpenWindows::GetWindowList();
+	openWindowsList->Remove((HWND*)hWnd);
+
+	DestroyWindowOrDialog(hWnd);
+}
+
+__declspec(naked) void OnDestroyAllWindowsHook()
+{
+	_asm
+	{
+		push esi
+		push 0x477780
+		jmp DestroyWindowOrDialog
+	}
+}
