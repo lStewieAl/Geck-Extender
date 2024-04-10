@@ -6,6 +6,7 @@
 #include "resource.h"
 #include "ZeLogWindow.h"
 #include "FormSearch.h"
+#include "ModifiedFormViewer.h"
 
 #define UI_EXTMENU_ID			51001
 #define UI_EXTMENU_SHOWLOG		51002
@@ -18,14 +19,15 @@
 #define UI_EXTMENU_LAUNCHGAME   51009
 #define UI_EXTMENU_SAVEPOSITION 51010
 #define UI_EXTMENU_LOADPOSITION 51011
-#define UI_EXTMENU_TOGGLENAVEMESHBISECT 51018
-#define UI_EXTMENU_LOOKUPFORM 51019
 #define ID_TRACKBAR				51012
 #define ID_TIMEOFDAYTEXT		51013
 #define ID_RENDERWINDOWCELLLOADS_CHECKBOX 51014
 #define ID_RENDERWINDOW_SHOWWATER_CHECKBOX	51015
 #define ID_RENDERWINDOW_SHOWPORTALS_CHECKBOX	51016
 #define UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED	51017
+#define UI_EXTMENU_TOGGLENAVEMESHBISECT 51018
+#define UI_EXTMENU_LOOKUPFORM 51019
+#define UI_EXTMENU_VIEW_MODIFIED_FORMS 51020
 #define MAIN_WINDOW_CALLBACK 0xFEED
 
 // unused button in vanilla menu
@@ -122,6 +124,7 @@ bool EditorUI_CreateExtensionMenu(HWND MainWindow, HMENU MainMenu)
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_TOGGLENAVEMESHBISECT, "Allow Placement Of Navmesh Node Above Others");
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_SEPARATOR, (UINT_PTR)UI_EXTMENU_SPACER, "");
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_LOOKUPFORM, "Lookup Form");
+	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_VIEW_MODIFIED_FORMS, "View Modified Forms");
 
 
 	MENUITEMINFO menuInfo;
@@ -394,6 +397,12 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 		case UI_EXTMENU_LOOKUPFORM:
 		{
 			FormSearch::Show();
+		}
+		return 0;
+
+		case UI_EXTMENU_VIEW_MODIFIED_FORMS:
+		{
+			ModifiedFormViewer::Show();
 		}
 		return 0;
 

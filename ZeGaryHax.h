@@ -147,8 +147,8 @@ static const char* geckwikifunctionsurl = "https://geckwiki.com/index.php/Catego
 #define ID_CMB_SPEAKER 2564
 
 int cb_ids[3] = { ID_CMB_IDLE_SPEAKER, ID_CMB_IDLE_LISTENER, ID_CMB_SPEAKER };
-bool cb_filled[3] = { };
-bool cb_reset[3] = { };
+bool cb_filled[_countof(cb_ids)] = { };
+bool cb_reset[_countof(cb_ids)] = { };
 
 // From NVSE Hooks_Editor.cpp
 // Patch script window font

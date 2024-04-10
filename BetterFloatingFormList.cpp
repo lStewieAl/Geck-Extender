@@ -146,6 +146,14 @@ namespace BetterFloatingFormList
 		CdeclCall(0x419F50, hWnd, index, pszText, width, format);
 	}
 
+	void __cdecl InitFormIdNameAndFormTypeColumns(HWND hWnd, WPARAM index, char* pszText, int width, int format)
+	{
+		width = 64;
+		CdeclCall(0x419F50, hWnd, index, pszText, width, format);
+		CdeclCall(0x419F50, hWnd, 2, "Name", width, format);
+		CdeclCall(0x419F50, hWnd, 3, "Type", width, format);
+	}
+
 	void Init()
 	{
 		// don't close the list view when clicking on an item
@@ -155,7 +163,7 @@ namespace BetterFloatingFormList
 		SafeWrite32(0x44BB19, UInt32(WindowCallback));
 
 		// adjust default column sizes
-		WriteRelCall(0x48387D, UInt32(InitFormNameColumn)); // Form
-		SafeWrite32(0x483888, 0x40); // ID
+		WriteRelCall(0x48387D, UInt32(InitFormNameColumn));
+		WriteRelCall(0x48389C, UInt32(InitFormIdNameAndFormTypeColumns));
 	}
 }
