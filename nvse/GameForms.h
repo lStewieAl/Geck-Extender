@@ -5,6 +5,7 @@
 #include "Utilities.h"
 #include "GameTypes.h"
 #include "GameBSExtraData.h"
+#include "commctrl.h"
 
 enum FormType 
 {
@@ -298,9 +299,9 @@ public:
 	virtual void		Unk_57(void);
 	virtual void		Unk_58(void);
 	virtual void		OpenDialog(HWND hWndParent, char a3, char a4);
-	virtual void		Unk_5A(void);
-	virtual void		Unk_5B(void);
+	virtual void		SetupListViewDisplayInfo(LPNMLVDISPINFOA displayInfo);
 	virtual signed int 	Compare(TESForm* to, int compareType);
+	virtual void		Unk_5C(void);
 	virtual void		Unk_5D(void);
 
 	struct EditorData {

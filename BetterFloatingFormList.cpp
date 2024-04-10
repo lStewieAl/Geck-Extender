@@ -74,6 +74,9 @@ namespace BetterFloatingFormList
 			auto listView = GetDlgItem(Hwnd, 1018);
 			SubclassListView(listView);
 			ListView_SetExtendedListViewStyleEx(listView, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
+			LONG_PTR style = GetWindowLongPtr(listView, GWL_STYLE);
+			SetWindowLongPtr(listView, GWL_STYLE, style & ~LVS_EDITLABELS);
+
 			DragAcceptFiles(Hwnd, TRUE);
 
 			// allow the window to be closed from the 'Open Windows' menu
@@ -146,12 +149,54 @@ namespace BetterFloatingFormList
 		CdeclCall(0x419F50, hWnd, index, pszText, width, format);
 	}
 
+	enum
+	{
+		COLUMN_TYPE = 3
+	};
+
 	void __cdecl InitFormIdNameAndFormTypeColumns(HWND hWnd, WPARAM index, char* pszText, int width, int format)
 	{
 		width = 64;
 		CdeclCall(0x419F50, hWnd, index, pszText, width, format);
 		CdeclCall(0x419F50, hWnd, 2, "Name", width, format);
-		CdeclCall(0x419F50, hWnd, 3, "Type", width, format);
+		CdeclCall(0x419F50, hWnd, COLUMN_TYPE, "Type", width, format);
+	}
+
+	const char* FormToTypeStr(TESForm* form)
+	{
+		auto formTypeNames = (const char**)0xE94404;
+		return formTypeNames[form->typeID * 3];
+	}
+
+	int CompareTypes(TESForm* a1, TESForm* a2)
+	{
+		return _stricmp(FormToTypeStr(a1), FormToTypeStr(a2));
+	}
+
+	int __stdcall CompareForms(TESForm* a1, TESForm* a2, int a3)
+	{
+		int column = abs(a3) - 1;
+		if (column == COLUMN_TYPE)
+		{
+			int result = CompareTypes(a1, a2);
+			return (a3 < 0) ? -result : result;
+		}
+		else
+		{
+			return StdCall<int>(0x47B1E0, a1, a2, a3);
+		}
+	}
+
+	void __fastcall SetupRow(TESForm* form, void* edx, LPNMLVDISPINFOA displayInfo)
+	{
+		if (displayInfo->item.mask & 1)
+		{
+			if (displayInfo->item.iSubItem == COLUMN_TYPE)
+			{
+				sprintf(displayInfo->item.pszText, FormToTypeStr(form));
+			}
+		}
+		return form->SetupListViewDisplayInfo(displayInfo);
 	}
 
 	void Init()
@@ -165,5 +210,13 @@ namespace BetterFloatingFormList
 		// adjust default column sizes
 		WriteRelCall(0x48387D, UInt32(InitFormNameColumn));
 		WriteRelCall(0x48389C, UInt32(InitFormIdNameAndFormTypeColumns));
+
+		// add support for sorting the 'Type' column
+		SafeWrite32(0x48368A, UInt32(CompareForms));
+
+		// support displaying the type column
+		SafeWrite8(0x4836AD, 0xB8);
+		SafeWrite32(0x4836AD + 1, UInt32(SetupRow));
+		SafeWrite8(0x4836AD + 1 + 4, 0x90);
 	}
 }
