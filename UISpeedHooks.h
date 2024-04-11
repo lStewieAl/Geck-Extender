@@ -216,7 +216,7 @@ void WriteUIHooks() {
 	WriteRelCall(0x47D010, UInt32(SearchAndReplaceBeginUIHook));
 	WriteRelCall(0x47D18B, UInt32(SearchAndReplaceEndUIHook));
 
-	if (!bUISpeedHooks) return;
+	if (!config.bUISpeedHooks) return;
 
 	WriteRelCall(0x59CCB3, UInt32(hk_sub_59C7B0)); // combo box item, required to fix multiple insertions tripping the assertion 
 	WriteRelCall(0x409C08, UInt32(hk_sub_59C950));
@@ -245,7 +245,7 @@ void WriteUIHooks() {
 	WriteRelCall(0x5979EF, UInt32(hk_sub_595800));
 
 	// speed up responses window by defering dropdown box rendering
-	if (!bCacheComboboxes)
+	if (!config.bCacheComboboxes)
 	{
 		WriteRelCall(0x56CC12, UInt32(hk_sub_56B270));
 		WriteRelCall(0x56CC52, UInt32(hk_sub_56B270));

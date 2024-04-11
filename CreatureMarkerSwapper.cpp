@@ -1,8 +1,6 @@
-#include "SafeWrite.h"
 #include "nvse/GameForms.h"
 #include "nvse/GameObjects.h"
 #include "Utilities.h"
-#include "ZeLogWindow.h"
 
 #include "libs/nlohmann/json.hpp"
 #include <fstream>
@@ -16,7 +14,7 @@ namespace CreatureMarkerSwapper
 	bool SwapMarkerModel(TESActorBase* actorBase, TESObjectREFR* ref, char* dst, size_t sizeInBytes)
 	{
 #if _DEBUG
-		EditorUI_Log("ActorBase: %s (%08X) - Ref: %s (%08X)",
+		Console_Print("ActorBase: %s (%08X) - Ref: %s (%08X)",
 			actorBase->GetEditorID(),
 			actorBase->refID,
 			ref ? ref->GetEditorID() : "NULL",
@@ -27,7 +25,7 @@ namespace CreatureMarkerSwapper
 		if (iter != idToMeshPath.end())
 		{
 #if _DEBUG
-			EditorUI_Log("Swapped %s with %s", actorBase->GetEditorID(), iter._Ptr->_Myval.second);
+			Console_Print("Swapped %s with %s", actorBase->GetEditorID(), iter._Ptr->_Myval.second);
 #endif
 			strncpy(dst, iter._Ptr->_Myval.second.c_str(), sizeInBytes - 1);
 			dst[sizeInBytes - 1] = '\0';
@@ -78,7 +76,7 @@ namespace CreatureMarkerSwapper
 				{
 					if (!elem.is_object())
 					{
-						EditorUI_Log("JSON error: expected object with EditorID and MeshPath fields.");
+						Console_Print("JSON error: expected object with EditorID and MeshPath fields.");
 						continue;
 					}
 
@@ -89,8 +87,8 @@ namespace CreatureMarkerSwapper
 		}
 		catch (nlohmann::json::exception& e)
 		{
-			EditorUI_Log("The JSON is incorrectly formatted! It will not be applied.");
-			EditorUI_Log("JSON error: %s", e.what());
+			Console_Print("The JSON is incorrectly formatted! It will not be applied.");
+			Console_Print("JSON error: %s", e.what());
 		}
 	}
 
@@ -103,7 +101,7 @@ namespace CreatureMarkerSwapper
 		memcpy(namePtr, "*.json", 7);
 
 #if _DEBUG
-		EditorUI_Log("CreatureMarkerSwapper loading: %s", jsonPath);
+		Console_Print("CreatureMarkerSwapper loading: %s", jsonPath);
 #endif
 		for (DirectoryIterator dirIter(jsonPath); dirIter; ++dirIter)
 		{

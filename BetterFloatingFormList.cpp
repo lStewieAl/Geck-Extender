@@ -1,7 +1,4 @@
 #include <commctrl.h>
-
-#include "SafeWrite.h"
-#include "ZeLogWindow.h"
 #include "GameObjects.h"
 #include "GECKUtility.h"
 #include "Utilities.h"

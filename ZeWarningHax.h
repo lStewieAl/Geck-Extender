@@ -164,7 +164,7 @@ __declspec(naked) void hk_UnableToFindPackageReferenceMsgHook()
 __declspec(naked) void hk_UnableToFindPackageLocationMsgHook()
 {
 	static const char* messageFormat = "MASTERFILE: Unable to find Package Location Reference (%08X) on owner object \"%s\" (%08X).";
-	static const UInt32 kCallAddr = (UInt32)EditorUI_Log2;
+	static const UInt32 kCallAddr = (UInt32)Console_Print2;
 	static const UInt32 kRetnAddr = 0x0049FCFB;
 
 	__asm
@@ -413,8 +413,8 @@ __declspec(naked) void hk_UnableToFindLeveledObjectMsgHook()
 }
 
 void DoScriptErrorWarning(char* errorMsg) {
-	EditorUI_Log2("%s", errorMsg);
-	if (bScriptCompileWarningPopup) {
+	Console_Print2("%s", errorMsg);
+	if (config.bScriptCompileWarningPopup) {
 		MessageBoxExA(NULL, errorMsg, "Script Compile Error", MB_ICONWARNING, NULL);
 	}
 }
@@ -533,27 +533,27 @@ void WriteErrorMessageHooks() {
 
 	//	patch warning messages - credit to jazzisparis
 	for (UInt32 patchAddr : kPatch_Warnings1)
-		SafeWrite32(patchAddr + 1, (UInt32)EditorUI_Log2);
+		SafeWrite32(patchAddr + 1, (UInt32)Console_Print2);
 
 	for (UInt32 patchAddr : kPatch_Warnings2)
-		SafeWrite32(patchAddr + 6, (UInt32)EditorUI_Log2);
+		SafeWrite32(patchAddr + 6, (UInt32)Console_Print2);
 
 	for (UInt32 patchAddr : kPatch_Warnings3)
-		WriteRelCall(patchAddr, (UInt32)EditorUI_Log2);
+		WriteRelCall(patchAddr, (UInt32)Console_Print2);
 
 	for (UInt32 patchAddr : kPatch_Warnings4)
-		WriteRelCall(patchAddr, (UInt32)EditorUI_Log);
+		WriteRelCall(patchAddr, (UInt32)Console_Print);
 
-	SafeWrite32(0x00C1A543 + 4, (UInt32)EditorUI_Log2);
-	SafeWrite32(0x00C1A6DC + 1, (UInt32)EditorUI_Log2);
+	SafeWrite32(0x00C1A543 + 4, (UInt32)Console_Print2);
+	SafeWrite32(0x00C1A6DC + 1, (UInt32)Console_Print2);
 
-	if (bNoLODMeshMessage) {
+	if (config.bNoLODMeshMessage) {
 		// remove the MODELS: LOD Mesh ... messages
 		XUtil::PatchMemoryNop(0x659DC8, 5);
 		XUtil::PatchMemoryNop(0x659E05, 5);
 	}
 
-	if (bNoFactionReactionMessage) {
+	if (config.bNoFactionReactionMessage) {
 		//	DEFAULT: (Faction Reaction Error) Faction '%s' (%08X) is a Friend or Ally of Faction '%s' (%08X), but Faction '%s' (%08X) is not a Friend or Ally of Faction '%s' (%08X). 
 		XUtil::PatchMemoryNop(0x00568979, 5);
 	}

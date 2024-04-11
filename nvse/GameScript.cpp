@@ -159,7 +159,7 @@ Script::RefVariable* ScriptBuffer::ResolveRef(const char* refName)
 	}
 	else		// is it a form or global?
 	{
-		TESForm* form = GetFormByName(refName);
+		TESForm* form = LookupFormByName(refName);
 		if (form)
 		{
 			TESObjectREFR* refr = DYNAMIC_CAST(form, TESForm, TESObjectREFR);

@@ -1,4 +1,3 @@
-#include "SafeWrite.h"
 namespace EasterEggs
 {
 	bool IsAprilFoolsDay()

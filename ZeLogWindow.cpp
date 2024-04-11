@@ -5,15 +5,12 @@
 #include "ZeLogWindow.h"
 #include <Richedit.h>
 #include <regex>
+#include "Settings.h"
 
 HWND g_ConsoleHwnd;
 extern HWND g_MainHwnd;
-extern int bAutoScroll;
-extern char iniName[];
 
-int GetOrCreateINIInt(const char* sectionName, const char* keyName, int defaultValue, const char* filename);
-
-void EditorUI_LogVa(const char* Format, va_list Va)
+void Console_PrintVa(const char* Format, va_list Va)
 {
 	char buffer[2048];
 	int len = _vsnprintf_s(buffer, _TRUNCATE, Format, Va);
@@ -30,19 +27,19 @@ void EditorUI_LogVa(const char* Format, va_list Va)
 	_MESSAGE("%s", buffer);
 }
 
-void EditorUI_Log(const char* Format, ...)
+void Console_Print(const char* Format, ...)
 {
 	va_list va;
 	va_start(va, Format);
-	EditorUI_LogVa(Format, va);
+	Console_PrintVa(Format, va);
 	va_end(va);
 }
 
-int __cdecl EditorUI_Log2(const char* Format, ...)
+int __cdecl Console_Print2(const char* Format, ...)
 {
 	va_list va;
 	va_start(va, Format);
-	EditorUI_LogVa(Format, va);
+	Console_PrintVa(Format, va);
 	va_end(va);
 	return 0;
 }
@@ -54,7 +51,7 @@ void AddLogText(LPARAM lParam, HWND richEditHwnd, bool doFree)
 	//	Save old position if not scrolling
 	POINT scrollRange;
 
-	if (!bAutoScroll)
+	if (!config.bAutoScroll)
 	{
 		SendMessageA(richEditHwnd, WM_SETREDRAW, FALSE, 0);
 		SendMessageA(richEditHwnd, EM_GETSCROLLPOS, 0, (WPARAM)&scrollRange);
@@ -68,7 +65,7 @@ void AddLogText(LPARAM lParam, HWND richEditHwnd, bool doFree)
 	SendMessageA(richEditHwnd, EM_EXSETSEL, 0, (LPARAM)&range);
 	SendMessageA(richEditHwnd, EM_REPLACESEL, FALSE, (LPARAM)textData);
 
-	if (!bAutoScroll)
+	if (!config.bAutoScroll)
 	{
 		SendMessageA(richEditHwnd, EM_SETSCROLLPOS, 0, (WPARAM)&scrollRange);
 		SendMessageA(richEditHwnd, WM_SETREDRAW, TRUE, 0);
@@ -104,14 +101,14 @@ LRESULT CALLBACK EditorUI_LogWndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPA
 		format.dwMask = CFM_FACE | CFM_SIZE | CFM_WEIGHT;
 
 		// Convert Twips to points (1 point = 20 Twips)
-		int pointSize = GetOrCreateINIInt("Log", "FontSize", 10, iniName) * 20;
+		int pointSize = GetOrCreateINIInt("Log", "FontSize", 10, IniPath) * 20;
 		format.yHeight = pointSize;
 
 		char fontNameBuf[32];
-		GetPrivateProfileStringA("Log", "Font", "Consolas", fontNameBuf, 31, iniName);
+		GetPrivateProfileStringA("Log", "Font", "Consolas", fontNameBuf, 31, IniPath);
 		mbstowcs(format.szFaceName, fontNameBuf, 31);
 
-		format.wWeight = (WORD)GetOrCreateINIInt("Log", "FontWeight", FW_MEDIUM, iniName);
+		format.wWeight = (WORD)GetOrCreateINIInt("Log", "FontWeight", FW_MEDIUM, IniPath);
 		SendMessageA(richEditHwnd, EM_SETCHARFORMAT, SCF_ALL, (LPARAM)&format);
 
 		//	Subscribe to EN_MSGFILTER and EN_SELCHANGE
@@ -221,9 +218,9 @@ LRESULT CALLBACK EditorUI_LogWndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPA
 
 	case UI_CMD_AUTOSCROLL:
 	{
-		bAutoScroll = wParam;
+		config.bAutoScroll = wParam;
 		char buffer[8];
-		WritePrivateProfileString("Log", "bAutoScroll", _itoa(bAutoScroll, buffer, 2), iniName);
+		WritePrivateProfileString("Log", "bAutoScroll", _itoa(config.bAutoScroll, buffer, 2), IniPath);
 	}
 	return 0;
 
@@ -252,10 +249,10 @@ bool EditorUI_CreateLogWindow()
 		return false;
 
 	// get previous stored position
-	int posX = GetPrivateProfileIntA("Log", "iWindowPosX", 64, iniName);
-	int posY = GetPrivateProfileIntA("Log", "iWindowPosY", 64, iniName);
-	int width = GetPrivateProfileIntA("Log", "iWindowPosDX", 1024, iniName);
-	int height = GetPrivateProfileIntA("Log", "iWindowPosDY", 768, iniName);
+	int posX = GetPrivateProfileIntA("Log", "iWindowPosX", 64, IniPath);
+	int posY = GetPrivateProfileIntA("Log", "iWindowPosY", 64, IniPath);
+	int width = GetPrivateProfileIntA("Log", "iWindowPosDX", 1024, IniPath);
+	int height = GetPrivateProfileIntA("Log", "iWindowPosDY", 768, IniPath);
 
 	g_ConsoleHwnd = CreateWindowExA(0, "RTEDITLOG", "Message Log", WS_OVERLAPPEDWINDOW, posX, posY, width, height, nullptr, nullptr, instance, nullptr);
 

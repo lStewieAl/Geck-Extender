@@ -134,7 +134,7 @@ static DebugRenderModes eLastRenderMode = DEBUG_NONE;
 void inline HandleDebugRender(DWORD* pShader, DWORD* pShaderProperty, DWORD* pRenderPass, DWORD* pGeometry, DWORD* pMaterialProperty, bool bIs30Shader) {
 	UInt32 uiLightCount = ThisStdCall(0x925830, pShaderProperty); // GetActiveLightCount
 
-	bool bAutoColor = bAutoLightWarnings && (uiLightCount > 6) && eDebugRenderMode != DEBUG_LIGHT_COUNT;
+	bool bAutoColor = config.bAutoLightWarnings && (uiLightCount > 6) && eDebugRenderMode != DEBUG_LIGHT_COUNT;
 
 	if (eLastRenderMode != eDebugRenderMode) {
 		bRenderModeChanged = true;

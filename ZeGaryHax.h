@@ -11,8 +11,8 @@
 #include "NiObjects.h"
 #include "GameScript.h"
 #include "GameSettings.h"
-#include "ZeLogWindow.h"
 #include "FormSearch.h"
+#include "Settings.h"
 
 #define GH_NAME				"ZeGaryHax"		// this is the string for IsPluginInstalled and GetPluginVersion (also shows in nvse.log)
 #define GH_VERSION			0.41
@@ -72,71 +72,6 @@ const char* nvseMSG[20] =
 	"RenameNewGameName",
 };
 
-int bPatchScriptEditorFont = 0;
-int bHighResLandscapeLOD = 0;
-int bListEditFix = 0;
-int bVersionControlMode = 0;
-int bFastExit = 0;
-int bIgnoreNAMFiles = 0;
-int bEnableSpellChecker = 1;
-int bAutoScroll = 1;
-int bRenderWindowUncap = 1;
-int bPreviewWindowUncap = 1;
-int bRemoveStatusBarLoadingText = 1;
-int bPlaySoundEndOfLoading = 1;
-int bNoDXSoundCaptureErrorPopup = 0;
-int bNoPreviewWindowAutoFocus = 1;
-int bNoLODMeshMessage = 0;
-int bSwapRenderCYKeys = 0;
-int bAutoLoadFiles = 0;
-int bShowLoadFilesAtStartup = 0;
-int bScriptCompileWarningPopup = 0;
-int bNoVersionControlWarning = 0;
-int bShowTimeOfDaySlider = 1;
-int bSkipVanillaLipGen = 0;
-int bShowAdditionalToolbarButtons = 0;
-int bAllowMultipleSearchAndReplace = 0;
-int bCacheSearchAndReplaceWindow = 0;
-int bNoFactionReactionMessage = 0;
-int bUISpeedHooks = 1;
-int bLibdeflate = 0;
-int bExpandFormIDColumn = 0;
-int bAllowEditLandEdges = 0;
-int bNavmeshAllowPlaceAboveOthers = 0;
-int bAllowRecompileAll = 0;
-int bNavmeshFindCoverConfirmPrompt = 0;
-int bShowScriptChangeTypeWarning = 0;
-int bAppendAnimLengthToName = 0;
-int bObjectPaletteAllowRandom = 0;
-bool bObjectPaletteRandomByDefault = 0;
-int bSnapToGridRotationUseDoublePrecision = 0;
-int bFaceGenOnlyEdited = 0;
-int bObjectWindowOnlyShowEditedByDefault = 0;
-int bDisableTextureMirroring = 1;
-int bPreventFaceAndBodyModExports = 0;
-int bIgnoreD3D9 = 1;
-int bAutoLightWarnings = 0;
-int bRemoveDialogSoundFilter = 0;
-int bCacheComboboxes = 0;
-int bNoRecordCompression = 1;
-int bNoFacegenCompression = 1;
-int bPreserveTimestamps = 1;
-int bNoDirtyCellWhenNonPersistentRefsDeleted = 0;
-
-int bUseAltShiftMultipliers = 1;
-float fMovementAltMultiplier = 0.15F;
-float fMovementShiftMultiplier = 2.0F;
-
-int bSmoothFlycamRotation = 1;
-int bFlycamUpDownRelativeToWorld = 0;
-float fFlycamRotationSpeed;
-float fFlycamNormalMovementSpeed;
-float fFlycamShiftMovementSpeed;
-float fFlycamAltMovementSpeed;
-
-UInt8 g_iPreviewWindowRed, g_iPreviewWindowGreen, g_iPreviewWindowBlue;
-
-char iniName[MAX_PATH];
 static const char* geckwikiurl = "https://geckwiki.com/index.php/";
 static const char* geckwikiscriptingurl = "https://geckwiki.com/index.php/Category:Scripting";
 static const char* geckwikicommandsurl = "https://geckwiki.com/index.php/Category:Commands";
@@ -179,18 +114,6 @@ LPLOGFONT GetEditorFont()
 	return &editorFont;
 }
 
-#define INI_SETTING_NOT_FOUND -1
-int GetOrCreateINIInt(const char* sectionName, const char* keyName, int defaultValue, const char* filename) {
-	int settingValue = GetPrivateProfileIntA(sectionName, keyName, INI_SETTING_NOT_FOUND, filename);
-	if (settingValue == INI_SETTING_NOT_FOUND) {
-		char arr[11];
-		WritePrivateProfileString(sectionName, keyName, _itoa(defaultValue, arr, 10), filename);
-		settingValue = defaultValue;
-	}
-	return settingValue;
-}
-#undef INI_SETTING_NOT_FOUND
-
 void MoveDlgItem(HWND hWnd, int ID, int deltaX, int deltaY)
 {
 	RECT rect;
@@ -207,9 +130,9 @@ static void DoModScriptWindow(HWND wnd)
 {
 	SendMessage(wnd, EM_EXLIMITTEXT, 0, 0x00FFFFFF);
 
-	GetPrivateProfileStringA("Script", "Font", "Consolas", editorFont.lfFaceName, 31, iniName);
-	editorFont.lfHeight = GetOrCreateINIInt("Script", "FontSize", 13, iniName);
-	editorFont.lfWeight = GetOrCreateINIInt("Script", "FontWeight", FW_MEDIUM, iniName);
+	GetPrivateProfileStringA("Script", "Font", "Consolas", editorFont.lfFaceName, 31, IniPath);
+	editorFont.lfHeight = GetOrCreateINIInt("Script", "FontSize", 13, IniPath);
+	editorFont.lfWeight = GetOrCreateINIInt("Script", "FontWeight", FW_MEDIUM, IniPath);
 
 	// try something nice, otherwise fall back on SYSTEM_FIXED_FONT
 	fontHandle = CreateFontIndirect(&editorFont);
@@ -413,7 +336,7 @@ LRESULT WINAPI hk_SendMessageA(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam
 
 	if (Msg == CB_ADDSTRING || Msg == CB_RESETCONTENT)
 	{
-		if (bCacheComboboxes)
+		if (config.bCacheComboboxes)
 		{
 			int id = GetDlgCtrlID(hWnd);
 			for (int i = 0; i < _countof(cb_ids); i++)
@@ -553,7 +476,7 @@ __declspec(naked) void hk_SpellCheck()
 
 	__asm
 	{
-		cmp		bEnableSpellChecker, 0
+		cmp		config.bEnableSpellChecker, 0
 		je		AwwGary
 		call	dword ptr ds : [0x00D23548]	//	GetDlgItem
 		jmp		kRetnAddrYes
@@ -810,7 +733,7 @@ void doKonami(int key) {
 		break;
 	case 9:
 		if (key == 'A') {
-			EditorUI_Log("Konami!");
+			Console_Print("Konami!");
 		}
 		konamiStage = 0;
 		break;
@@ -842,14 +765,14 @@ _declspec(naked) void FlycamMovementSpeedMultiplierHook() {
 		pushad
 	}
 	static const UInt32 retnAddr = 0x455D17;
-	*(float*)(0xED12C0) = fFlycamNormalMovementSpeed;
+	*(float*)(0xED12C0) = config.fFlycamNormalMovementSpeed;
 
 	if (GetAsyncKeyState(VK_SHIFT) < 0) {
-		*(float*)(0xED12C0) *= fFlycamShiftMovementSpeed;
+		*(float*)(0xED12C0) *= config.fFlycamShiftMovementSpeed;
 	}
 
 	if (GetAsyncKeyState(VK_MENU) < 0) {
-		*(float*)(0xED12C0) *= fFlycamAltMovementSpeed;
+		*(float*)(0xED12C0) *= config.fFlycamAltMovementSpeed;
 	}
 
 	/* fix flycam speed being dependent on framerate by slowing down movement if framerate is greater than 30fps (33ms/frame)*/
@@ -880,11 +803,11 @@ _declspec(naked) void FlycamRotationSpeedMultiplierHook() {
 		fild dword ptr ss : [esp]
 		add esp, 4
 
-		fmul fFlycamRotationSpeed
+		fmul config.fFlycamRotationSpeed
 		fstp dword ptr ss : [esp + 0xF0]
 
 		fild dword ptr ss : [esp + 0x324]
-		fmul fFlycamRotationSpeed
+		fmul config.fFlycamRotationSpeed
 		fstp dword ptr ss : [esp + 0x18]
 		jmp retnAddr
 	}
@@ -942,17 +865,17 @@ bool __fastcall ScriptEdit__Save(byte* thiss, void* dummyEDX, HWND hDlg, char a3
 float GetRefSpeedMultiplier() {
 	float multiplier = 1.0F;
 	if (GetAsyncKeyState(VK_SHIFT) < 0) {
-		multiplier *= fMovementShiftMultiplier;
+		multiplier *= config.fMovementShiftMultiplier;
 	}
 	if (GetAsyncKeyState(VK_MENU) < 0) {
-		multiplier *= fMovementAltMultiplier;
+		multiplier *= config.fMovementAltMultiplier;
 	}
 	return multiplier;
 }
 
 char __cdecl hk_DoRenderPan(int a1, int a2, float a3) {
 	if (GetAsyncKeyState(VK_MENU) < 0) {
-		a3 *= fMovementAltMultiplier;
+		a3 *= config.fMovementAltMultiplier;
 	}
 	return CdeclCall<char>(0x464210, a1, a2, a3);
 }
@@ -982,7 +905,7 @@ _declspec(naked) void RenderWindowReferenceMovementSpeedHook() {
 
 float GetOrthoSpeedMultiplier() {
 	if (GetAsyncKeyState(VK_MENU) < 0) {
-		return fMovementAltMultiplier;
+		return config.fMovementAltMultiplier;
 	}
 	return 1.0F;
 }
@@ -1594,9 +1517,9 @@ void SetCrashSaveHandler()
 
 void __fastcall InitPreviewWindowBackgroundColor(void* window, void* edx, UInt32 unusedColor)
 {
-	UInt8 r = g_iPreviewWindowRed;
-	UInt8 g = g_iPreviewWindowGreen;
-	UInt8 b = g_iPreviewWindowBlue;
+	UInt8 r = config.iPreviewWindowRed;
+	UInt8 g = config.iPreviewWindowGreen;
+	UInt8 b = config.iPreviewWindowBlue;
 	UInt32 color = r + (g << 8) + (b << 16);
 	ThisStdCall(0x4793D0, window, color);
 }
@@ -1667,10 +1590,10 @@ BOOL __stdcall HavokPreviewCallback(HWND hWnd, UINT Message, WPARAM wParam, LPAR
 		SendMessageA(trackbar, TBM_SETTICFREQ, 10, 0);
 		SendDlgItemMessageA(hWnd, ID_ANIMATIONSPEED_EDIT, WM_SETTEXT, NULL, (LPARAM)"1.00");
 
-		g_iPreviewWindowRed = GetOrCreateINIInt("Preview Window", "iBackgroundRed", 127, iniName);
-		g_iPreviewWindowGreen = GetOrCreateINIInt("Preview Window", "iBackgroundGreen", 127, iniName);
-		g_iPreviewWindowBlue = GetOrCreateINIInt("Preview Window", "iBackgroundBlue", 127, iniName);
-		int landHeight = GetOrCreateINIInt("Preview Window", "iLandHeight", 50, iniName);
+		config.iPreviewWindowRed = GetOrCreateINIInt("Preview Window", "iBackgroundRed", 127, IniPath);
+		config.iPreviewWindowGreen = GetOrCreateINIInt("Preview Window", "iBackgroundGreen", 127, IniPath);
+		config.iPreviewWindowBlue = GetOrCreateINIInt("Preview Window", "iBackgroundBlue", 127, IniPath);
+		int landHeight = GetOrCreateINIInt("Preview Window", "iLandHeight", 50, IniPath);
 
 		SendDlgItemMessageA(hWnd, 2543, TBM_SETPOS, 1u, landHeight);
 
@@ -1681,12 +1604,12 @@ BOOL __stdcall HavokPreviewCallback(HWND hWnd, UINT Message, WPARAM wParam, LPAR
 		int green = GetDlgItemInt(hWnd, 1033, 0, 0);
 		int blue = GetDlgItemInt(hWnd, 1111, 0, 0);
 		char arr[11];
-		WritePrivateProfileString("Preview Window", "iBackgroundRed", _itoa(red, arr, 10), iniName);
-		WritePrivateProfileString("Preview Window", "iBackgroundGreen", _itoa(green, arr, 10), iniName);
-		WritePrivateProfileString("Preview Window", "iBackgroundBlue", _itoa(blue, arr, 10), iniName);
+		WritePrivateProfileString("Preview Window", "iBackgroundRed", _itoa(red, arr, 10), IniPath);
+		WritePrivateProfileString("Preview Window", "iBackgroundGreen", _itoa(green, arr, 10), IniPath);
+		WritePrivateProfileString("Preview Window", "iBackgroundBlue", _itoa(blue, arr, 10), IniPath);
 
 		int landHeight = SendDlgItemMessageA(hWnd, 2543, TBM_GETPOS, 0, 0);
-		WritePrivateProfileString("Preview Window", "iLandHeight", _itoa(landHeight, arr, 10), iniName);
+		WritePrivateProfileString("Preview Window", "iLandHeight", _itoa(landHeight, arr, 10), IniPath);
 	}
 
 	return StdCall<BOOL>(0x4107F0, hWnd, Message, wParam, lParam);
@@ -1753,7 +1676,7 @@ void SetupHavokPreviewWindow()
 	// skip setting ground height taskbar pos as it's done in the callback instead
 	SafeWrite16(0x40FF78, 0x13EB);
 
-	if (bAppendAnimLengthToName)	HavokPreview_AddAnimLengthToName();
+	if (config.bAppendAnimLengthToName)	HavokPreview_AddAnimLengthToName();
 
 	//	AddAnimLengthColumnToHavokPreviewAnimsList();
 }
@@ -1798,7 +1721,7 @@ _declspec(naked) void RefreshCellHook()
 UInt32 __fastcall PlaceOPALObjectHook(ObjectPalette::Object* current, void* edx, float* point1, float* point2)
 {
 	ObjectPalette::Object* toPlace = current;
-	if ((GetAsyncKeyState(VK_CAPITAL) < 0) ^ bObjectPaletteRandomByDefault)
+	if ((GetAsyncKeyState(VK_CAPITAL) < 0) ^ config.bObjectPaletteRandomByDefault)
 	{
 		ObjectPalette* opal = ObjectPalette::GetSingleton();
 
@@ -1934,8 +1857,8 @@ BOOL __stdcall LandscapeEditCallback(HWND hWnd, UINT Message, WPARAM wParam, LPA
 		savedLandscapeEditPos.x = x;
 		savedLandscapeEditPos.y = y;
 
-		WritePrivateProfileString("Landscape Editor", "iWindowPosX", _itoa(x, buffer, 10), iniName);
-		WritePrivateProfileString("Landscape Editor", "iWindowPosY", _itoa(y, buffer, 10), iniName);
+		WritePrivateProfileString("Landscape Editor", "iWindowPosX", _itoa(x, buffer, 10), IniPath);
+		WritePrivateProfileString("Landscape Editor", "iWindowPosY", _itoa(y, buffer, 10), IniPath);
 	}
 	else if (Message == WM_INITDIALOG)
 	{
@@ -1947,8 +1870,8 @@ BOOL __stdcall LandscapeEditCallback(HWND hWnd, UINT Message, WPARAM wParam, LPA
 
 HWND __stdcall CreateLandscapeEditHook(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, WNDPROC lpDialogFunc, LPARAM dwInitParam)
 {
-	long posX = GetPrivateProfileIntA("Landscape Editor", "iWindowPosX", 0, iniName);
-	long posY = GetPrivateProfileIntA("Landscape Editor", "iWindowPosY", 0, iniName);
+	long posX = GetPrivateProfileIntA("Landscape Editor", "iWindowPosX", 0, IniPath);
+	long posY = GetPrivateProfileIntA("Landscape Editor", "iWindowPosY", 0, IniPath);
 
 	savedLandscapeEditPos.x = posX;
 	savedLandscapeEditPos.y = posY;
@@ -1970,7 +1893,7 @@ void ClearLandscapeUndosIfNearlyOutOfMemory()
 	{
 		auto hist = HistoryManager::GetSingleton();
 		hist->ClearHistoryForCurrentElement();
-		EditorUI_Log("2.5gb memory usage exceeded, clearing land edit history.");
+		Console_Print("2.5gb memory usage exceeded, clearing land edit history.");
 	}
 }
 
@@ -2622,22 +2545,22 @@ void SaveWindowPositions() {
 
 	WINDOWPLACEMENT pos;
 	GetWindowPlacement(g_ConsoleHwnd, &pos);
-	WritePrivateProfileString("Log", "iWindowPosX", _itoa(pos.rcNormalPosition.left, buffer, 10), iniName);
-	WritePrivateProfileString("Log", "iWindowPosY", _itoa(pos.rcNormalPosition.top, buffer, 10), iniName);
-	WritePrivateProfileString("Log", "iWindowPosDX", _itoa(pos.rcNormalPosition.right - pos.rcNormalPosition.left, buffer, 10), iniName);
-	WritePrivateProfileString("Log", "iWindowPosDY", _itoa(pos.rcNormalPosition.bottom - pos.rcNormalPosition.top, buffer, 10), iniName);
+	WritePrivateProfileString("Log", "iWindowPosX", _itoa(pos.rcNormalPosition.left, buffer, 10), IniPath);
+	WritePrivateProfileString("Log", "iWindowPosY", _itoa(pos.rcNormalPosition.top, buffer, 10), IniPath);
+	WritePrivateProfileString("Log", "iWindowPosDX", _itoa(pos.rcNormalPosition.right - pos.rcNormalPosition.left, buffer, 10), IniPath);
+	WritePrivateProfileString("Log", "iWindowPosDY", _itoa(pos.rcNormalPosition.bottom - pos.rcNormalPosition.top, buffer, 10), IniPath);
 }
 
 void __fastcall FastExitHook(volatile LONG** thiss)
 {
 	SaveWindowPositions();
-	if (GetINIExists() && bFastExit) TerminateProcess(GetCurrentProcess(), 0);
+	if (GetINIExists() && config.bFastExit) TerminateProcess(GetCurrentProcess(), 0);
 	ThisCall(0x4CC540, thiss);
 }
 
 void __stdcall BadFormPrintID(TESForm* form)
 {
-	EditorUI_Log("FORMS: Bad form %08X could not be removed from the file.", form->refID);
+	Console_Print("FORMS: Bad form %08X could not be removed from the file.", form->refID);
 }
 
 _declspec(naked) void BadFormLoadHook()

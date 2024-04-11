@@ -19,7 +19,7 @@ bool extraTraces = false;
 typedef void * (* _GetSingleton)(bool canCreateNew);
 
 const _LookupFormByID LookupFormByID = (_LookupFormByID)0x004F9620;	// Call between third reference to RTTI_TESWorldspace and RuntimeDynamicCast
-const _GetFormByName GetFormByName = (_GetFormByName)(0x004F9650); // Search for aNonPersistentR and aPlayer (third call below aPlayer, second is LookupFomrByID)
+const _LookupFormByName LookupFormByName = (_LookupFormByName)(0x004F9650); // Search for aNonPersistentR and aPlayer (third call below aPlayer, second is LookupFomrByID)
 const _FormHeap_Allocate FormHeap_Allocate = (_FormHeap_Allocate)0x00401000;
 const _FormHeap_Free FormHeap_Free = (_FormHeap_Free)0x0000401180;
 const _ShowCompilerError ShowCompilerError = (_ShowCompilerError)0x005C5730;	// Called with aNonPersistentR (still same sub as the other one)

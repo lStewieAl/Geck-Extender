@@ -30,7 +30,7 @@ namespace FormSearch
 
         if (*formName)
         {
-            auto form = GetFormByName(formName);
+            auto form = LookupFormByName(formName);
             if (!form)
             {
                 char* endPtr = nullptr;

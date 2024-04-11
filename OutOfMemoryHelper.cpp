@@ -1,4 +1,3 @@
-#include "SafeWrite.h"
 #include "Utilities.h"
 
 void CreateCrashSave();

@@ -185,6 +185,10 @@ copy "$(TargetPath)" "$(FalloutNVPath)\Data\nvse\plugins\$(TargetFileName)"
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="Settings.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="xutil.cpp" />
     <ClCompile Include="ZeGaryHax.cpp" />
     <ClCompile Include="ZeLogWindow.cpp" />
@@ -236,6 +240,7 @@ copy "$(TargetPath)" "$(FalloutNVPath)\Data\nvse\plugins\$(TargetFileName)"
     <ClInclude Include="nvse\NiNodes.h" />
     <ClInclude Include="nvse\NiObjects.h" />
     <ClInclude Include="nvse\NiTypes.h" />
+    <ClInclude Include="nvse\prefix.h" />
     <ClInclude Include="nvse\SafeWrite.h" />
     <ClInclude Include="nvse\Utilities.h" />
     <ClInclude Include="OutOfMemoryHelper.h">
@@ -243,6 +248,10 @@ copy "$(TargetPath)" "$(FalloutNVPath)\Data\nvse\plugins\$(TargetFileName)"
       </SubType>
     </ClInclude>
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Settings.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="UISpeedHooks.h" />
     <ClInclude Include="xutil.h" />
     <ClInclude Include="ZeEditBoxHax.h" />

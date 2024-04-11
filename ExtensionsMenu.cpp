@@ -2,11 +2,10 @@
 #include <CommCtrl.h>
 #include "GECKUtility.h"
 #include "ExtensionsMenu.h"
-#include "SafeWrite.h"
 #include "resource.h"
-#include "ZeLogWindow.h"
 #include "FormSearch.h"
 #include "ModifiedFormViewer.h"
+#include "Settings.h"
 
 #define UI_EXTMENU_ID			51001
 #define UI_EXTMENU_SHOWLOG		51002
@@ -53,18 +52,6 @@ static HANDLE	fontHandle;
 static LOGFONT	fontInfo;
 extern LOGFONT  editorFont;
 
-extern int bNavmeshAllowPlaceAboveOthers;
-extern int bShowAdditionalToolbarButtons;
-extern int bShowTimeOfDaySlider;
-extern int bAutoScroll;
-extern int bObjectWindowOnlyShowEditedByDefault;
-extern int bAllowRecompileAll;
-extern int bEnableSpellChecker;
-extern int bRenderWindowUncap;
-extern int bPreviewWindowUncap;
-extern int bShowLoadFilesAtStartup;
-extern char iniName[];
-
 extern HMODULE ZeGaryHaxHandle;
 
 LPLOGFONT GetEditorFont();
@@ -73,7 +60,7 @@ void ToggleNavmeshPlaceAboveOthers(bool isAllowed)
 {
 	//	Patch Navmesh editing to allow placing vertices over existing navmesh (disables line bisection)
 	SafeWrite16(0x0045C590, isAllowed ? 0x9090 : 0x4675);
-	bNavmeshAllowPlaceAboveOthers = isAllowed;
+	config.bNavmeshAllowPlaceAboveOthers = isAllowed;
 }
 
 _declspec(naked) void ObjectWindowListFilterUneditedHook()
@@ -280,12 +267,12 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 
 			EditorUI_CreateExtensionMenu(Hwnd, createInfo->hMenu);
 
-			if (bShowTimeOfDaySlider) {
+			if (config.bShowTimeOfDaySlider) {
 				EditorUI_AddSliderToToolbar(Hwnd, createInfo->hInstance);
 				EditorUI_AddTimeOfDayTextToToolbar(Hwnd, createInfo->hInstance);
 			}
 
-			if (bShowAdditionalToolbarButtons) {
+			if (config.bShowAdditionalToolbarButtons) {
 				EditorUI_AddAllowRenderWindowCellLoadsCheckbox(Hwnd, createInfo->hInstance);
 				EditorUI_AddRenderWindowShowWaterCheckbox(Hwnd, createInfo->hInstance);
 				EditorUI_AddRenderWindowShowPortalsCheckbox(Hwnd, createInfo->hInstance);
@@ -293,7 +280,7 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 
 			// insert a Launch Game button if an executable was specified in the ini
 			char buf[MAX_PATH];
-			if (GetPrivateProfileStringA("Launch Game", "ExecutableName", "", buf, MAX_PATH, iniName))
+			if (GetPrivateProfileStringA("Launch Game", "ExecutableName", "", buf, MAX_PATH, IniPath))
 			{
 				InsertMenu(createInfo->hMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_LAUNCHGAME, "Launch Game");
 			}
@@ -302,7 +289,7 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 			EnableMenuItem(g_MainMenu, MENUOPTION_RENDER_WINDOW, MF_ENABLED);
 			CheckMenuItem(g_MainMenu, MENUOPTION_RENDER_WINDOW, MF_CHECKED);
 
-			if (!bAllowRecompileAll)
+			if (!config.bAllowRecompileAll)
 			{
 				EnableMenuItem(g_MainMenu, MENUOPTION_RECOMPILE_ALL, MF_DISABLED | MF_GRAYED);
 				// patch switch table offset for recompile all menu button
@@ -312,7 +299,7 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 				SafeWrite16(0x5C4E3C, 0x4D6B);
 			}
 
-			if (bObjectWindowOnlyShowEditedByDefault)
+			if (config.bObjectWindowOnlyShowEditedByDefault)
 			{
 				ToggleObjectWindowFilterUnedited(false);
 
@@ -327,7 +314,7 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 			menuInfo.cbSize = sizeof(MENUITEMINFO);
 			menuInfo.fMask = MIIM_STATE;
 
-			if (!bAutoScroll == 0)
+			if (!config.bAutoScroll == 0)
 			{
 				//	Enable scroll
 				menuInfo.fState = MFS_CHECKED;
@@ -335,7 +322,7 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 				PostMessageA(g_ConsoleHwnd, UI_CMD_AUTOSCROLL, (WPARAM)true, 0);
 			}
 
-			if (!bEnableSpellChecker == 0)
+			if (!config.bEnableSpellChecker == 0)
 			{
 				//	Enable spellchecker
 				menuInfo.fState = MFS_CHECKED;
@@ -343,7 +330,7 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 				PostMessageA(g_ConsoleHwnd, UI_EXTMENU_SPELLCHECK, (WPARAM)true, 0);
 			}
 
-			if (!bRenderWindowUncap == 0)
+			if (!config.bRenderWindowUncap == 0)
 			{
 				//	Enable Render Uncap
 				menuInfo.fState = MFS_CHECKED;
@@ -351,7 +338,7 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 				PostMessageA(g_ConsoleHwnd, UI_EXTMENU_RENDER, (WPARAM)true, 0);
 			}
 
-			if (!bPreviewWindowUncap == 0)
+			if (!config.bPreviewWindowUncap == 0)
 			{
 				//	Enable Preview Uncap
 				menuInfo.fState = MFS_CHECKED;
@@ -359,14 +346,14 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 				PostMessageA(g_ConsoleHwnd, UI_EXTMENU_PREVIEW, (WPARAM)true, 0);
 			}
 
-			if (!bShowLoadFilesAtStartup == 0) {
+			if (!config.bShowLoadFilesAtStartup == 0) {
 				// open esm/esp selection window at startup
 				if (*(BYTE*)(0xECFE16) != 1) { // is not NIF mode
 					PostMessageA(g_MainHwnd, WM_COMMAND, 0x9CD1, 0);
 				}
 			}
 
-			if (!bNavmeshAllowPlaceAboveOthers == 0)
+			if (!config.bNavmeshAllowPlaceAboveOthers == 0)
 			{
 				menuInfo.fState = MFS_CHECKED;
 				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLENAVEMESHBISECT, FALSE, &menuInfo);
@@ -442,18 +429,18 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 				//	Disable Spell Check
 				menuInfo.fState = MFS_UNCHECKED;
 				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_SPELLCHECK, FALSE, &menuInfo);
-				bEnableSpellChecker = 0;
+				config.bEnableSpellChecker = 0;
 				char buffer[8];
-				WritePrivateProfileString("General", "bEnableSpellChecker", _itoa(bEnableSpellChecker, buffer, 2), iniName);
+				WritePrivateProfileString("General", "bEnableSpellChecker", _itoa(config.bEnableSpellChecker, buffer, 2), IniPath);
 			}
 			else
 			{
 				//	Enable Spell Check
 				menuInfo.fState = MFS_CHECKED;
 				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_SPELLCHECK, FALSE, &menuInfo);
-				bEnableSpellChecker = 1;
+				config.bEnableSpellChecker = 1;
 				char buffer[8];
-				WritePrivateProfileString("General", "bEnableSpellChecker", _itoa(bEnableSpellChecker, buffer, 2), iniName);
+				WritePrivateProfileString("General", "bEnableSpellChecker", _itoa(config.bEnableSpellChecker, buffer, 2), IniPath);
 			}
 		}
 		return 0;
@@ -470,18 +457,18 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 				//	Disable Render Uncap
 				menuInfo.fState = MFS_UNCHECKED;
 				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_RENDER, FALSE, &menuInfo);
-				bRenderWindowUncap = 0;
+				config.bRenderWindowUncap = 0;
 				char buffer[8];
-				WritePrivateProfileString("General", "bRenderWindowUncap", _itoa(bRenderWindowUncap, buffer, 2), iniName);
+				WritePrivateProfileString("General", "bRenderWindowUncap", _itoa(config.bRenderWindowUncap, buffer, 2), IniPath);
 			}
 			else
 			{
 				//	Enable Render Uncap
 				menuInfo.fState = MFS_CHECKED;
 				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_RENDER, FALSE, &menuInfo);
-				bRenderWindowUncap = 1;
+				config.bRenderWindowUncap = 1;
 				char buffer[8];
-				WritePrivateProfileString("General", "bRenderWindowUncap", _itoa(bRenderWindowUncap, buffer, 2), iniName);
+				WritePrivateProfileString("General", "bRenderWindowUncap", _itoa(config.bRenderWindowUncap, buffer, 2), IniPath);
 			}
 		}
 		return 0;
@@ -498,18 +485,18 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 				//	Disable Preview Uncap
 				menuInfo.fState = MFS_UNCHECKED;
 				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_PREVIEW, FALSE, &menuInfo);
-				bPreviewWindowUncap = 0;
+				config.bPreviewWindowUncap = 0;
 				char buffer[8];
-				WritePrivateProfileString("General", "bPreviewWindowUncap", _itoa(bPreviewWindowUncap, buffer, 2), iniName);
+				WritePrivateProfileString("General", "bPreviewWindowUncap", _itoa(config.bPreviewWindowUncap, buffer, 2), IniPath);
 			}
 			else
 			{
 				//	Enable Preview Uncap
 				menuInfo.fState = MFS_CHECKED;
 				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_PREVIEW, FALSE, &menuInfo);
-				bPreviewWindowUncap = 1;
+				config.bPreviewWindowUncap = 1;
 				char buffer[8];
-				WritePrivateProfileString("General", "bPreviewWindowUncap", _itoa(bPreviewWindowUncap, buffer, 2), iniName);
+				WritePrivateProfileString("General", "bPreviewWindowUncap", _itoa(config.bPreviewWindowUncap, buffer, 2), IniPath);
 			}
 		}
 		return 0;
@@ -547,7 +534,7 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 			strcat(falloutNVPath, "\\");
 
 			char nvExeName[MAX_PATH];
-			GetPrivateProfileStringA("Launch Game", "ExecutableName", "FalloutNV.exe", nvExeName, MAX_PATH, iniName);
+			GetPrivateProfileStringA("Launch Game", "ExecutableName", "FalloutNV.exe", nvExeName, MAX_PATH, IniPath);
 			strcat(falloutNVPath, nvExeName);
 
 			ShellExecuteA(0, 0, falloutNVPath, 0, 0, 1);
@@ -589,7 +576,7 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 
 			// save state to ini
 			char buffer[8];
-			WritePrivateProfileString("Render Window", "bNavmeshAllowPlaceAboveOthers", _itoa(bNavmeshAllowPlaceAboveOthers, buffer, 2), iniName);
+			WritePrivateProfileString("Render Window", "bNavmeshAllowPlaceAboveOthers", _itoa(config.bNavmeshAllowPlaceAboveOthers, buffer, 2), IniPath);
 		}
 		return 0;
 
@@ -611,7 +598,7 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 
 		case ID_RENDERWINDOWCELLLOADS_CHECKBOX:
 		{
-			if (HIWORD(wParam) == BN_CLICKED && bShowAdditionalToolbarButtons)
+			if (HIWORD(wParam) == BN_CLICKED && config.bShowAdditionalToolbarButtons)
 			{
 				bool newButtonState = !SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_GETCHECK, 0, 0);
 				SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_SETCHECK, newButtonState, 0);
@@ -622,7 +609,7 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 
 		case ID_RENDERWINDOW_SHOWWATER_CHECKBOX:
 		{
-			if (HIWORD(wParam) == BN_CLICKED && bShowAdditionalToolbarButtons)
+			if (HIWORD(wParam) == BN_CLICKED && config.bShowAdditionalToolbarButtons)
 			{
 				bool newButtonState = !SendMessageA(g_renderWindowShowWaterButtonHwnd, BM_GETCHECK, 0, 0);
 				SendMessageA(g_renderWindowShowWaterButtonHwnd, BM_SETCHECK, newButtonState, 0);
@@ -633,7 +620,7 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 
 		case ID_RENDERWINDOW_SHOWPORTALS_CHECKBOX:
 		{
-			if (HIWORD(wParam) == BN_CLICKED && bShowAdditionalToolbarButtons)
+			if (HIWORD(wParam) == BN_CLICKED && config.bShowAdditionalToolbarButtons)
 			{
 				bool newButtonState = !SendMessageA(g_renderWindowShowPortalsButtonHwnd, BM_GETCHECK, 0, 0);
 				SendMessageA(g_renderWindowShowPortalsButtonHwnd, BM_SETCHECK, newButtonState, 0);
@@ -682,7 +669,7 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 
 		return CallWindowProc(originalMainWindowCallback, Hwnd, Message, wParam, (LPARAM)customTitle);
 	}
-	else if (Message == WM_HSCROLL && bShowTimeOfDaySlider)
+	else if (Message == WM_HSCROLL && config.bShowTimeOfDaySlider)
 	{
 		if ((HWND)lParam == g_trackBarHwnd)
 		{

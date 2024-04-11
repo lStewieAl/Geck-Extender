@@ -41,14 +41,14 @@ public:
 	virtual void		Unk_64(void);
 	virtual void		Unk_65(void);
 	virtual void		Unk_66(void);
-	virtual void		Unk_67(void);						// Actor: GetMagicEffectList
-	virtual void		Unk_68(void);						// Actor: GetMagicEffectList
-	virtual void		Unk_69(void);						// Actor: GetMagicEffectList
-	virtual void		Unk_6A(void);						// Actor: GetMagicEffectList
+	virtual void		Unk_67(void);
+	virtual void		Unk_68(void);
+	virtual void		Unk_69(void);
+	virtual void		Unk_6A(void);
 	virtual void		Unk_6B(void);
-	virtual void		Unk_6C(void);	// REFR: GetBSFaceGenNiNodeSkinned
-	virtual void		Unk_6D(void);	// REFR: calls 006C
-	virtual void		Unk_6E(void);	// MobileActor: calls 006D then NiNode::Func0040
+	virtual void		Unk_6C(void);
+	virtual void		Unk_6D(void);
+	virtual void		Unk_6E(void);
 	virtual void		Unk_6F(void);
 	virtual void		Unk_70(void);
 	virtual void		Unk_71(void);
@@ -85,7 +85,7 @@ public:
 
 	enum {
 		kFlags_Unk00000002			= 0x00000002,
-		kFlags_Deleted				= 0x00000020,		// refr removed from .esp or savegame
+		kFlags_Deleted				= 0x00000020,		// refr removed from .esp
 		kFlags_Taken				= kFlags_Deleted | kFlags_Unk00000002,
 		kFlags_Persistent			= 0x00000400,		//shared bit with kFormFlags_QuestItem
 		kFlags_Temporary			= 0x00004000,
@@ -93,39 +93,28 @@ public:
 		kFlags_Destroyed			= 0x00800000,
 		kChanged_Inventory			= 0x08000000,
 	};
-
-	struct RenderState
+	struct LoadedRefData
 	{
-		UInt32	unk00;
-		UInt32	unk04;
-		float	waterLevel;		// 08 //
-		float	unk0C;
-		UInt32	unk10;		// flags most likely
-		NiNode	* niNode;	// same in FOSE
-		//NiNode	* niNode2;
-		// possibly more, need to find alloc
+		TESObjectREFR* pCurrentWaterType;
+		UInt32 iUnderwaterCount;
+		float fRelevantWaterHeight;
+		float revealDistance;
+		UInt32 flags;
 	};
 
-	struct EditorData {
-		UInt32	unk00;	// 00
-	};
-	// 0C
+	TESChildCell	childCell;				// 02C
+	TESSound* loopSound;			// 030
+	TESForm* baseForm;				// 034
 
-#ifdef EDITOR
-	EditorData	editorData;			// +04
-#endif
+	float			rotX, rotY, rotZ;		// 038
+	float			posX, posY, posZ;		// 044
+	float			scale;					// 050 
 
-	TESChildCell	childCell;				// 018
-	TESSound		* loopSound;			// 01C
-	TESForm			* baseForm;				// 020
-	
-	float			rotX, rotY, rotZ;		// 024 - either public or accessed via simple inline accessor common to all child classes
-	float			posX, posY, posZ;		// 030 - seems to be private
-	float			scale;					// 03C 
-
-	TESObjectCELL	* parentCell;			// 040
-	ExtraDataList	extraDataList;			// 044
-	RenderState		* renderState;			// 064	- (05C in FOSE)
+	TESObjectCELL* parentCell;			// 054
+	ExtraDataList	extraDataList;			// 058
+	void* unk78;				// 078
+	float			unk7C;					// 07C
+	LoadedRefData* pLoadedData;
 
 	ScriptEventList *	GetEventList() const;
 
@@ -139,38 +128,15 @@ public:
 	TESContainer* GetContainer();
 	bool IsMapMarker();
 
-	ExtraContainerChanges::EntryData *GetItemEntry(TESForm *item);
-	SInt32 GetItemCount(TESForm *form);
-	void AddItemAlt(TESForm *item, UInt32 count, float condition);
-	void RemoveItemTarget(TESForm *form, TESObjectREFR *target, SInt32 quantity, bool clrOwner);
-	void DropItemAlt(TESForm *form, SInt32 quantity, bool clrOwner);
-	bool GetInventoryItems(UInt8 typeID);
-	TESObjectCELL *GetParentCell();
-	float GetDistance(TESObjectREFR *target);
-	bool MoveToCell(TESForm *worldOrCell, float *posVector);
-	TESObjectREFR *GetMerchantContainer();
-	bool SetLinkedRef(TESObjectREFR *linkObj, UInt8 modIdx);
-
-	static TESObjectREFR* Create(bool bTemp = false);
 
 	MEMBER_FN_PREFIX(TESObjectREFR);
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
-	DEFINE_MEMBER_FN(Activate, bool, 0x00573170, TESObjectREFR*, UInt32, UInt32, UInt32);	// Usage Activate(actionRef, 0, 0, 1); found inside Cmd_Activate_Execute as the last call (190 bytes)
-	DEFINE_MEMBER_FN(Set3D, void, 0x0094EB40, NiNode*, bool);	// Usage Set3D(niNode, true); virtual func 0073
-#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-	DEFINE_MEMBER_FN(Activate, bool, 0x00573430, TESObjectREFR*, UInt32, UInt32, UInt32);	// Usage Activate(actionRef, 0, 0, 1); found inside Cmd_Activate_Execute
-	DEFINE_MEMBER_FN(Set3D, void, 0x005705A0, NiNode*, bool);	// Usage Set3D(niNode, true); virtual func 0073
-#elif EDITOR
-#else
-#error
-#endif
 };
 
 TESForm* GetPermanentBaseForm(TESObjectREFR* thisObj);	// For LevelledForm, find real baseForm, not temporary one.
 
-STATIC_ASSERT(offsetof(TESObjectREFR, baseForm) == 0x020);
-STATIC_ASSERT(offsetof(TESObjectREFR, extraDataList) == 0x044);
-STATIC_ASSERT(sizeof(TESObjectREFR) == 0x068);
+STATIC_ASSERT(offsetof(TESObjectREFR, baseForm) == 0x034);
+STATIC_ASSERT(offsetof(TESObjectREFR, extraDataList) == 0x058);
+STATIC_ASSERT(sizeof(TESObjectREFR) == 0x084);
 
 class BaseProcess;
 
@@ -197,7 +163,7 @@ public:
 	virtual void		Unk_9D(void);
 	virtual void		Unk_9E(void);
 	virtual void		Unk_9F(void);
-	virtual void		Unk_A0(void);	// StartConversation(targetActor, subjectLocationData, targetLocationData, headTrack, allowMovement, arg, topicID, arg, arg
+	virtual void		Unk_A0(void);
 	virtual void		Unk_A1(void);
 	virtual void		Unk_A2(void);
 	virtual void		Unk_A3(void);

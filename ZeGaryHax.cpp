@@ -20,12 +20,11 @@
 #include "nvse/GameForms.h"
 #include "nvse/GameObjects.h"
 #include "nvse/GameRTTI.h"
-#include "nvse/SafeWrite.h"
 #include "nvse/ParamInfos.h"
+#include "nvse/nvse_version.h"
 #include "xutil.h"
 
 #include "ZeGaryHax.h"
-#include "ZeLogWindow.h"
 #include "ExtensionsMenu.h"
 #include "ZeWarningPatches.h"
 #include "ZeWarningHax.h"
@@ -37,6 +36,7 @@
 #include "EasterEggs.h"
 #include "OutOfMemoryHelper.h"
 #include "BetterFloatingFormList.h"
+#include "Settings.h"
 
 extern "C"
 {
@@ -75,77 +75,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	CreateLogFile();
 
 	_DMESSAGE("Geck Extender Base Address: %08X", GetModuleHandle("ZeGaryHax.dll"));
-
-	//	ini thing - credit to carxt
-	GetModuleFileNameA(NULL, iniName, MAX_PATH);
-	strcpy((char*)(strrchr(iniName, '\\') + 1), "Data\\nvse\\plugins\\geckextender.ini");
-
-	bEnableSpellChecker = GetOrCreateINIInt("General", "bEnableSpellChecker", 0, iniName);
-	bFastExit = GetOrCreateINIInt("General", "bFastExit", 1, iniName);
-	bListEditFix = GetOrCreateINIInt("General", "bListEditFix", 0, iniName);
-	bIgnoreNAMFiles = GetOrCreateINIInt("General", "bIgnoreNAMFiles", 1, iniName);
-	bVersionControlMode = GetOrCreateINIInt("General", "bVersionControlMode", 0, iniName);
-	bHighResLandscapeLOD = GetOrCreateINIInt("General", "bHighResLandscapeLOD", 0, iniName);
-	bRemoveStatusBarLoadingText = GetOrCreateINIInt("General", "bRemoveLoadingText", 1, iniName);
-	bPlaySoundEndOfLoading = GetOrCreateINIInt("General", "bPlaySoundEndOfLoading", 1, iniName);
-	bNoDXSoundCaptureErrorPopup = GetOrCreateINIInt("General", "bNoDXSoundCaptureErrorPopup", 0, iniName);
-	bNoPreviewWindowAutoFocus = GetOrCreateINIInt("General", "bNoPreviewWindowAutoFocus", 1, iniName);
-	bNoLODMeshMessage = GetOrCreateINIInt("General", "bNoLODMeshMessage", 0, iniName);
-	bAutoLoadFiles = GetOrCreateINIInt("General", "bAutoLoadFiles", 0, iniName);
-	bShowLoadFilesAtStartup = GetOrCreateINIInt("General", "bShowLoadFilesAtStartup", 0, iniName) | bAutoLoadFiles;
-	bNoVersionControlWarning = GetOrCreateINIInt("General", "bNoVersionControlWarning", 0, iniName);
-	bSkipVanillaLipGen = GetPrivateProfileIntA("General", "bSkipVanillaLipGen", 0, iniName);
-	bShowAdditionalToolbarButtons = GetOrCreateINIInt("General", "bShowAdditionalToolbarButtons", 0, iniName);
-	bAllowMultipleSearchAndReplace = GetOrCreateINIInt("General", "bAllowMultipleSearchAndReplace", 0, iniName);
-	bCacheSearchAndReplaceWindow = GetOrCreateINIInt("General", "bCacheSearchAndReplaceWindow", 1, iniName);
-	bNoFactionReactionMessage = GetOrCreateINIInt("General", "bNoFactionReactionMessage", 0, iniName);
-	bUISpeedHooks = GetOrCreateINIInt("General", "bUISpeedHooks", 1, iniName);
-	bLibdeflate = GetOrCreateINIInt("General", "bLibDeflate", 0, iniName);
-	bExpandFormIDColumn = GetOrCreateINIInt("General", "bExpandFormIDColumn", 0, iniName);
-	bAllowEditLandEdges = GetOrCreateINIInt("General", "bAllowEditLandEdges", 0, iniName);
-	bAllowRecompileAll = GetOrCreateINIInt("General", "bAllowRecompileAll", 0, iniName);
-	bNavmeshFindCoverConfirmPrompt = GetOrCreateINIInt("General", "bNavmeshFindCoverConfirmPrompt", 0, iniName);
-	bFaceGenOnlyEdited = GetOrCreateINIInt("General", "bFaceGenOnlyEdited", 1, iniName);
-	bDisableTextureMirroring = GetOrCreateINIInt("General", "bDisableTextureMirroring", 0, iniName);
-	bObjectWindowOnlyShowEditedByDefault = GetOrCreateINIInt("General", "bObjectWindowOnlyShowEditedForms", 0, iniName);
-	bPreventFaceAndBodyModExports = GetOrCreateINIInt("General", "bFaceBodyExportPreventTGAFiles", 0, iniName);
-	bIgnoreD3D9 = GetOrCreateINIInt("General", "bIgnoreD3D9", 1, iniName);
-	bNoRecordCompression = GetOrCreateINIInt("General", "bNoRecordCompression", 1, iniName);
-	bPreserveTimestamps = GetOrCreateINIInt("General", "bPreserveTimestamps", 0, iniName);
-	bNoDirtyCellWhenNonPersistentRefsDeleted = GetOrCreateINIInt("Experimental", "bNoDirtyCellWhenNonPersistentRefsDeleted", 0, iniName);
-
-	bPatchScriptEditorFont = GetOrCreateINIInt("Script", "bPatchEditorFont", 1, iniName);
-	bScriptCompileWarningPopup = GetOrCreateINIInt("Script", "bScriptCompileWarningPopup", 0, iniName);
-	bShowScriptChangeTypeWarning = GetOrCreateINIInt("Script", "bShowChangeScriptTypeWarning", 0, iniName);
-
-	bAutoScroll = GetOrCreateINIInt("Log", "bAutoScroll", 1, iniName);
-
-	bRenderWindowUncap = GetOrCreateINIInt("Render Window", "bRenderWindowUncap", 1, iniName);
-	bPreviewWindowUncap = GetOrCreateINIInt("Render Window", "bPreviewWindowUncap", 1, iniName);
-	bSwapRenderCYKeys = GetOrCreateINIInt("Render Window", "bSwapCandYKeys", 0, iniName);
-	bUseAltShiftMultipliers = GetOrCreateINIInt("Render Window", "bUseAltShiftMultipliers", 1, iniName);
-	fMovementAltMultiplier = GetOrCreateINIInt("Render Window", "iAltSpeedPct", 15, iniName) / 100.0F;
-	fMovementShiftMultiplier = GetOrCreateINIInt("Render Window", "iShiftSpeedPct", 200, iniName) / 100.0F;
-	bShowTimeOfDaySlider = GetOrCreateINIInt("Render Window", "bShowTimeOfDaySlider", 1, iniName);
-	bNavmeshAllowPlaceAboveOthers = GetOrCreateINIInt("Render Window", "bNavmeshAllowPlaceAboveOthers", 1, iniName);
-	bSnapToGridRotationUseDoublePrecision = GetOrCreateINIInt("Render Window", "bSnapToGridRotationUseDoublePrecision", 0, iniName);
-	bAutoLightWarnings = GetOrCreateINIInt("Render Window", "bAutoLightWarnings", 0, iniName);
-	int renderFOV = GetOrCreateINIInt("Render Window", "iFOV", 90, iniName);
-
-	bSmoothFlycamRotation = GetOrCreateINIInt("Flycam", "bSmoothRotation", 1, iniName);
-	bFlycamUpDownRelativeToWorld = GetOrCreateINIInt("Flycam", "bFlycamUpDownRelativeToWorld", 1, iniName);
-	fFlycamRotationSpeed = GetOrCreateINIInt("Flycam", "iRotationSpeedPct", 100, iniName) * -0.001F;
-	fFlycamNormalMovementSpeed = GetOrCreateINIInt("Flycam", "iMovementSpeed", 10, iniName) * 3.0F;
-	fFlycamShiftMovementSpeed = GetOrCreateINIInt("Flycam", "iRunMovementSpeedPct", 300, iniName) / 100.0F;
-	fFlycamAltMovementSpeed = GetOrCreateINIInt("Flycam", "iWalkMovementSpeedPct", 20, iniName) / 100.0F;
-
-	bAppendAnimLengthToName = GetOrCreateINIInt("Preview Window", "bAppendAnimLengthToName", 0, iniName);
-
-	bObjectPaletteAllowRandom = GetOrCreateINIInt("Object Palette", "bObjectPaletteAllowRandom", 1, iniName);
-	bObjectPaletteRandomByDefault = GetOrCreateINIInt("Object Palette", "bObjectPaletteRandomByDefault", 0, iniName) != 0;
-
-	bRemoveDialogSoundFilter = GetOrCreateINIInt("Dialog", "bRemoveDialogSoundFilter", 1, iniName) != 0;
-	bCacheComboboxes = GetOrCreateINIInt("Dialog", "bCacheComboboxes", 1, iniName) != 0;
+	ReadAllSettings();
 
 	//	stop geck crash with bUseMultibounds = 0 in exterior cells with multibounds - credit to roy
 	WriteRelCall(0x004CA48F, (UInt32)FixMultiBounds);
@@ -169,7 +99,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SafeWrite8(0x00419557, 0xEB);
 
 	//	enable 512px landscape LOD textures and normals - credit to roy
-	if (bHighResLandscapeLOD)
+	if (config.bHighResLandscapeLOD)
 	{
 		SafeWrite8(0x00728A3C, 0x02);
 		SafeWrite8(0x00728A41, 0x02);
@@ -179,7 +109,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		SafeWrite8(0x0072F095, 0x02);
 	}
 
-	// increase landscape edit settings max icon size to 4096x4096 from 512x512
+	// increase landscape edit config max icon size to 4096x4096 from 512x512
 	SafeWrite8(0x448AA3, 0x10);
 
 	//	change help urls to our wiki - credit to roy
@@ -189,7 +119,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SafeWrite32(0x005C4B43, (UInt32)geckwikifunctionsurl);
 
 	//	force patch script editor font - credit to nvse team
-	if (bPatchScriptEditorFont)
+	if (config.bPatchScriptEditorFont)
 	{
 		FixEditorFont();
 	}
@@ -211,13 +141,13 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SafeWrite32(0x492D0C, 0x410);
 
 	//	uncap framerate on render window - credit to shademe
-	if (bRenderWindowUncap)
+	if (config.bRenderWindowUncap)
 	{
 		SafeWrite8(0x0045911B, 0x0A);
 	}
 
 	//	uncap framerate on preview window - credit to shademe
-	if (bPreviewWindowUncap)
+	if (config.bPreviewWindowUncap)
 	{
 		SafeWrite8(0x004100E5, 0x0A);
 	}
@@ -233,18 +163,18 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SafeWrite32(0x004E640F, (UInt32)hk_DialogProc);
 
 	//  removes sound filters that cause dailog window to take ages to load - credit to iranrmrf
-	if (bRemoveDialogSoundFilter)
+	if (config.bRemoveDialogSoundFilter)
 	{
 		SafeWriteBuf(0x0058E4F6, "\x83\xC4\x10\xB0\x01", 5);
 		SafeWriteBuf(0x0058E510, "\x83\xC4\x10\xB0\x01", 5);
 	}
 
-	if (bCacheComboboxes)
+	if (config.bCacheComboboxes)
 	{
 		WriteRelCall(0x0057E5E1, (UInt32)hk_QuestWindowLoad);
 	}
 
-	if (bListEditFix)
+	if (config.bListEditFix)
 	{
 		//	fix windows 8/10 conditions collapsed column bug - credit to nukem
 		WriteRelCall(0x004A382D, (UInt32)ConditionDataDialog_SetupColumnHeaders);
@@ -254,7 +184,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		WriteRelCall(0x004A2791, (UInt32)ConditionDataDialog_SetupColumnHeaders);
 	}
 
-	if (bExpandFormIDColumn)
+	if (config.bExpandFormIDColumn)
 	{
 		// fix FormID column being collapsed
 		WriteRelJump(0x42EFBB, UInt32(CellViewListViewCreateFormIDColumnHook));
@@ -266,12 +196,12 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	}
 
 	//	ignore .nam Files - initial credit to roy
-	if (bIgnoreNAMFiles)
+	if (config.bIgnoreNAMFiles)
 	{
 		SafeWriteBuf(0xD412C1, "GAL", 3); // replace NAM extension with GAL ('Geck Auto-Load')
 	}
 
-	if (bVersionControlMode == 0)
+	if (config.bVersionControlMode == 0)
 	{
 		//	enable esm as active file - credit to hlp
 		XUtil::PatchMemoryNop(0x00430F07, 0x09);
@@ -337,12 +267,12 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SafeWriteBuf(0x592F4A, "\x10\x90\x90\x90", 4); // above removes pushed args, so need to change mov offset and nop the add esp
 
 	//	Make search and replace window stay open unless explicitly close - credit to StewieA
-	if (bAllowMultipleSearchAndReplace) {
+	if (config.bAllowMultipleSearchAndReplace) {
 		WriteRelJump(0x47CE7F, (UINT32)hk_SearchDestroyHook);
 		SafeWrite8(0x47CE7F + 5, 0x90);
 	}
 
-	if (bCacheSearchAndReplaceWindow)
+	if (config.bCacheSearchAndReplaceWindow)
 	{
 		WriteRelCall(0x44118B, UInt32(OnCreateSearchAndReplaceWindow));
 		SafeWrite8(0x44118B + 5, 0x90);
@@ -358,7 +288,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	XUtil::PatchMemoryNop(0x411CFA, 8);
 
 	//	Replace zlib with libinflate - credit to nukem/StewieA
-	if (bLibdeflate)
+	if (config.bLibdeflate)
 	{
 		WriteRelCall(0x004DFB34, (UInt32)hk_inflateInit);
 		WriteRelCall(0x004DFB9E, (UInt32)hk_inflate);
@@ -378,15 +308,15 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SafeWrite8(0x009D407B, 0xF9);
 
 	// stop the Preview Object window taking focus when hovered over (unless the parent window is focussed)
-	if (bNoPreviewWindowAutoFocus) {
+	if (config.bNoPreviewWindowAutoFocus) {
 		WriteRelJump(0x48CAC9, UInt32(hk_PreviewWindowCheckForeground));
 	}
 	// no "DirectSoundCaptureCreate Error: No sound driver is available for use" popup
-	if (bNoDXSoundCaptureErrorPopup) {
-		WriteRelCall(0x42B6E0, UInt32(EditorUI_Log));
+	if (config.bNoDXSoundCaptureErrorPopup) {
+		WriteRelCall(0x42B6E0, UInt32(Console_Print));
 	}
 
-	if (bRemoveStatusBarLoadingText) {
+	if (config.bRemoveStatusBarLoadingText) {
 		// patch additional loading messages to the bottom status bar
 		XUtil::PatchMemoryNop(0x4DCC24, 5);
 		XUtil::PatchMemoryNop(0x4DC96F, 5);
@@ -396,7 +326,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		SafeWriteBuf(0x4BFFA2, "\xF7\xC3\x7F\x00\x00\x00\x74\x3C\xEB\x68", 10); // replaces a test ebx, ebx with test ebx, 0x7F
 	}
 
-	if (bPlaySoundEndOfLoading) {
+	if (config.bPlaySoundEndOfLoading) {
 		WriteRelJump(0x464D32, UInt32(EndLoadingHook));
 	}
 
@@ -424,12 +354,12 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// make holding shift slow down the flycam movement by 80%
 	WriteRelJump(0x455D12, UInt32(FlycamMovementSpeedMultiplierHook));
 
-	if (bSmoothFlycamRotation) {
+	if (config.bSmoothFlycamRotation) {
 		WriteRelJump(0x45D3A3, UInt32(FlycamRotationSpeedMultiplierHook));
 		WriteRelJump(0x456A9F, 0x456AE6); // skip call to SetCursorPos when changing to flycam mode
 	}
 
-	if (bSwapRenderCYKeys) {
+	if (config.bSwapRenderCYKeys) {
 		// set C as hotkey for restricting movement to Y direction
 		SafeWrite8(0x462D8B, 0x6); // (patch a switch table offset)
 		SafeWrite8(0x462F5B, 0xF); // (patch a switch table offset)
@@ -457,7 +387,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// Fix for crash (invalid parameter termination) when the "Unable to find variable" warning would exceed the buffer size, credits to nukem
 	XUtil::PatchMemory(0xD59DCC, (PBYTE)", Text \"%.240s\"", strlen(", Text \"%.240s\"") + 1);
 
-	if (bUseAltShiftMultipliers) {
+	if (config.bUseAltShiftMultipliers) {
 		// Scroll wheel and pan speed affected by shift/alt
 		WriteRelCall(0x48B8C5, UInt32(hk_DoRenderMousewheelScroll)); // preview window
 		WriteRelCall(0x48B74C, UInt32(hk_DoRenderMousewheelScroll)); // preview window
@@ -482,26 +412,26 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		WriteRelJump(0x4523C2, UInt32(RenderWindowHandlesRefRotationHook));
 	}
 
-	if (bNoVersionControlWarning) {
+	if (config.bNoVersionControlWarning) {
 		// Don't show "Version control is currently disabled. Would you like to continue without version control?" prompt
 		SafeWrite8(0x43F854, 0xEB);
 	}
 
-	if (bAutoLoadFiles) {
+	if (config.bAutoLoadFiles) {
 		// makes the load files prompt jump to OK if it's the first time it's opened
 		WriteRelJump(0x432CC2, UInt32(hk_LoadFilesInit));
 	}
 
 	// add Q/E keys for up/down movement in flycam mode for render window
 	// if the movment is applied Post transform, it will be relative to the world
-	if (bFlycamUpDownRelativeToWorld) {
+	if (config.bFlycamUpDownRelativeToWorld) {
 		WriteRelJump(0x455DC9, UInt32(RenderWindowFlycamPostTransformMovementHook));
 	}
 	else {
 		WriteRelJump(0x455DAB, UInt32(RenderWindowFlycamPreTransformMovementHook));
 	}
 
-	if (bShowTimeOfDaySlider) {
+	if (config.bShowTimeOfDaySlider) {
 		// hook for setting main menu scrollbar position when changed in the preferences pane
 		WriteRelCall(0x44DD69, UInt32(UpdateTimeOfDayScrollbarHook));
 		XUtil::PatchMemoryNop(0x44DD69 + 5, 1);
@@ -511,7 +441,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		XUtil::PatchMemoryNop(0x44D04B + 5, 1);
 	}
 
-	if (bShowAdditionalToolbarButtons) {
+	if (config.bShowAdditionalToolbarButtons) {
 		// hook preferences window apply button to update the "allow render window cell loads" toolbar button
 		WriteRelCall(0x44EA74, UInt32(PreferencesWindowApplyButtonHook));
 	}
@@ -525,7 +455,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// fix missing null check in embedded render window when checking a sound form
 	WriteRelJump(0x893576, UInt32(EmbeddedRenderWindowSoundNullCheck));
 
-	if (bSkipVanillaLipGen) {
+	if (config.bSkipVanillaLipGen) {
 		// skip topics that aren't modified
 		WriteRelJump(0x41EA7B, UInt32(LipGenLoopHook));
 
@@ -551,7 +481,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// fix null pointer with checking edges when using landscape editor
 	WriteRelJump(0x61CA59, UInt32(EditLandCheckLandIsNull));
 
-	if (bAllowEditLandEdges)
+	if (config.bAllowEditLandEdges)
 	{
 		// changes: for(int i = 1; i < uGridsToLoad - 1; ++i);
 		// to :		for(int i = 0; i < uGridsToLoad; ++i);
@@ -587,14 +517,14 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// add option to continue loading if multiple master files are selected
 	WriteRelJump(0x4DD2E6, UInt32(MultipleMasterLoadHook));
 
-	if (bNavmeshFindCoverConfirmPrompt)
+	if (config.bNavmeshFindCoverConfirmPrompt)
 	{
 		WriteRelJump(0x456F22, UInt32(RenderWindowNavMeshConfirmFindCover));
 		WriteRelJump(0x444511, UInt32(MainWindowNavMeshConfirmFindCover));
 		WriteRelJump(0x40AC6F, UInt32(NavMeshToolbarConfirmFindCover)); // skip 0x40AC87, retn 0x40AC7B
 	}
 
-	if (bShowScriptChangeTypeWarning)
+	if (config.bShowScriptChangeTypeWarning)
 	{
 		WriteRelCall(0x5C2FC2, UInt32(SaveScriptChangedType));
 	}
@@ -622,12 +552,12 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	}
 
 	// add modifier CAPSLOCK for placing a random object from the objects palette 
-	if (bObjectPaletteAllowRandom)
+	if (config.bObjectPaletteAllowRandom)
 	{
 		WriteRelCall(0x45A6B8, UInt32(PlaceOPALObjectHook));
 	}
 
-	// make the preferences window use 4 decimal places for settings
+	// make the preferences window use 4 decimal places for config
 	for (UInt32 patchAddr : {0x44DC03, 0x44DC1D, 0x44DC51, 0x44D483, 0x44D4D5, 0x44D573, 0x44D58D, 0x44D5C1, 0x44D5DB})
 	{
 		SafeWrite8(patchAddr, 4);
@@ -645,13 +575,13 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x54498B, UInt32(OnInitDebrisScaleHook));
 	SafeWrite8(0x54498B + 5, 0x90);
 
-	if (bSnapToGridRotationUseDoublePrecision)
+	if (config.bSnapToGridRotationUseDoublePrecision)
 	{
 		// use double precision when calculating reference rotation to fix floating point errors
 		WriteRelJump(0x4523E2, UInt32(RenderWindowHandleRefRotationHook));
 	}
 
-	if (bFaceGenOnlyEdited)
+	if (config.bFaceGenOnlyEdited)
 	{
 		const char* faceGenMessage = "Export mod face gen textures for all edited NPCs?";
 		WriteRelJump(0x442050, UInt32(ExportFaceGenCheckIsFormEdited));
@@ -662,7 +592,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	InitCommonControls();
 	LoadLibraryA("MSFTEDIT.dll");
 
-	if (bDisableTextureMirroring)
+	if (config.bDisableTextureMirroring)
 	{
 		patchTextureMemoryAllocator();
 	}
@@ -691,7 +621,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// make weapon mods in object window show the same information as misc items
 	SafeWrite8(0x438B94 + kFormType_ItemMod, 0x11);
 
-	if (bPreventFaceAndBodyModExports)
+	if (config.bPreventFaceAndBodyModExports)
 	{
 		// prevent .tga files when exporting
 		SafeWriteBuf(0x574A0F, "\x83\xC4\x0C\x90\x90", 5); // face mods
@@ -699,7 +629,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		SafeWriteBuf(0x570C50, "\x83\xC4\x0C\x90\x90", 5); // body mods
 	}
 
-	if (bIgnoreD3D9)
+	if (config.bIgnoreD3D9)
 	{
 		// ignore the d3d9.dll from the game's folder since dxvk makes the geck super slow
 		SafeWrite32(0xD2318C, (UInt32)hook_LoadLibrary);
@@ -723,7 +653,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// fix crash when clicking on 'Regions' without an esm loaded
 	WriteRelCall(0x743F8E, UInt32(OnLoadRegionsHook));
 
-	if (bNoRecordCompression) {
+	if (config.bNoRecordCompression) {
 		// Remove record compression
 		XUtil::PatchMemoryNop(0x5726C9, 5); // TESNPC
 		SafeWrite8(0x5726C9, 0xC3);
@@ -732,7 +662,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	}
 
 	CustomFOV::InitHooks(); // credits to WallSoGB
-	CustomFOV::SetFOV(renderFOV);
+	CustomFOV::SetFOV(config.iRenderFOV);
 
 	WriteRelCall(0x4DD437, UInt32(OnMasterFileNotMatchedPopupSkipIfVersionControlDisabled));
 	SafeWrite8(0x4DD437 + 5, 0x90);
@@ -767,14 +697,14 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x479449, UInt32(OnUpdateColor_Repaint));
 	SafeWrite8(0x479449 + 5, 0x90);
 
-	if (bPreserveTimestamps)
+	if (config.bPreserveTimestamps)
 	{
 		// preserve file times when saving
 		WriteRelCall(0x4D9A0E, UInt32(PreSaveStoreFileTime));
 		WriteRelCall(0x4DA14D, UInt32(PostSaveRestoreFileTime));
 	}
 
-	if (bNoDirtyCellWhenNonPersistentRefsDeleted)
+	if (config.bNoDirtyCellWhenNonPersistentRefsDeleted)
 	{
 		// prevent cells getting marked as modified when temp refs are deleted
 		SafeWrite8(0x63255F, 0xEB); // credits to ShadeMe

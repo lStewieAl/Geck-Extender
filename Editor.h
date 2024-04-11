@@ -1,5 +1,4 @@
 #pragma once
-#include <nvse\SafeWrite.h> 
 #include "xutil.h"
 
 void InsertListViewItem(HWND ListViewHandle, void* Parameter, bool UseImage, int ItemIndex);

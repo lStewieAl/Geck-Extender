@@ -67,6 +67,7 @@
     <ClCompile Include="OutOfMemoryHelper.cpp" />
     <ClCompile Include="BetterFloatingFormList.cpp" />
     <ClCompile Include="ModifiedFormViewer.cpp" />
+    <ClCompile Include="Settings.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ZeGaryHax.h" />
@@ -150,6 +151,8 @@
     <ClInclude Include="OutOfMemoryHelper.h" />
     <ClInclude Include="BetterFloatingFormList.h" />
     <ClInclude Include="ModifiedFormViewer.h" />
+    <ClInclude Include="nvse\prefix.h" />
+    <ClInclude Include="Settings.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
