@@ -38,6 +38,9 @@
 #include "BetterFloatingFormList.h"
 #include "Settings.h"
 
+#include "Events/EventManager.h"
+#include "Events/Events.h"
+
 extern "C"
 {
 	BOOL WINAPI DllMain(HANDLE  hDllHandle, DWORD dwReason, LPVOID lpreserved)
@@ -76,11 +79,11 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	_DMESSAGE("Geck Extender Base Address: %08X", GetModuleHandle("ZeGaryHax.dll"));
 	ReadAllSettings();
+	EventManager::InitHooks();
 
 	//	stop geck crash with bUseMultibounds = 0 in exterior cells with multibounds - credit to roy
 	WriteRelCall(0x004CA48F, (UInt32)FixMultiBounds);
 	XUtil::PatchMemoryNop(0x004CA494, 0x05);
-
 
 	// fix various file path vtable entries to exclude the "//" in the path - credit to roy
 	SafeWrite32(0x00D39FB0, 0x004FE910);	// skills icon in actor values
@@ -771,6 +774,11 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SafeWrite8(0x6BF799, 1); // sets bFirstAvail to true
 	SafeWrite8(0x6C06F7, 1);
 	SafeWrite8(0x6C20CF, 1);
+
+	if (config.bPlaySoundEndOfLoading)
+	{
+		DataLoadEvent::RegisterCallback(PlayMouseClickSound);
+	}
 
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())

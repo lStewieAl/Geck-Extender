@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <functional>
 class Script;
 
 void DumpClass(void * theClassPtr, UInt32 nIntsToDump = 512);
@@ -275,3 +276,5 @@ BOOL CopyTextToClipboard(const char* text);
 
 void SelectAllItemsInListView(HWND listView);
 bool IsDialog(HWND hWnd);
+
+void ForEachFileInPath(const char* path, const char* typeMatch, std::function<void(const char*)> callback);

@@ -1201,13 +1201,6 @@ BOOL __stdcall RenderWindowCallbackHook(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 		case VK_OEM_4:
 			ToggleAllObjectsVisible();
 			break;
-			/*
-					case 'S':
-						if (GetFlycamMode() == 0) {
-							SetIsShowSoundMarkers(!GetIsShowSoundMarkers());
-						}
-						break;
-						*/
 		}
 	}
 	else if (msg == WM_RBUTTONDOWN) {
@@ -2960,4 +2953,9 @@ __declspec(naked) void OnDestroyAllWindowsHook()
 void __stdcall OnTAllocZeroMemory(int* pMemory, int size, int numAllocs, void* initFn, void* destroyFn)
 {
 	memset(pMemory, 0, 4 * numAllocs);
+}
+
+void PlayMouseClickSound()
+{
+	PlaySound("MouseClick", NULL, SND_ASYNC);
 }

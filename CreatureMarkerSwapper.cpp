@@ -92,25 +92,6 @@ namespace CreatureMarkerSwapper
 		}
 	}
 
-	void ProcessJSONsForPath(const char* path)
-	{
-		char jsonPath[MAX_PATH];
-		GetModuleFileNameA(NULL, jsonPath, MAX_PATH);
-		int pathLen = strlen(path);
-		char* namePtr = strncpy((char*)(strrchr(jsonPath, '\\') + 1), path, pathLen) + pathLen; // keep pointer "namePtr" to the end of the string
-		memcpy(namePtr, "*.json", 7);
-
-#if _DEBUG
-		Console_Print("CreatureMarkerSwapper loading: %s", jsonPath);
-#endif
-		for (DirectoryIterator dirIter(jsonPath); dirIter; ++dirIter)
-		{
-			if (!dirIter.IsFile()) continue;
-			strcpy(namePtr, dirIter.Get());
-			ReadJSON(jsonPath);
-		}
-	}
-
 	void Init()
 	{
 		WriteRelCall(0x564FD9, UInt32(LoadCreatureMarkerHook));
@@ -118,6 +99,6 @@ namespace CreatureMarkerSwapper
 		WriteRelCall(0x5728E9, UInt32(LoadNPCMarkerHook));
 		SafeWriteBuf(0x5728E9 + 5, "\x0F\x1F\x00", 3);
 
-		ProcessJSONsForPath("Data\\NVSE\\Plugins\\GeckExtender\\CreatureSwapper\\");
+		ForEachFileInPath("Data\\NVSE\\Plugins\\GeckExtender\\CreatureSwapper\\", "*.json", ReadJSON);
 	}
 }

@@ -5,6 +5,7 @@
 #include <Psapi.h>
 #include "GameTypes.h"
 #include <commctrl.h>
+#include <functional>
 
 void DumpClass(void * theClassPtr, UInt32 nIntsToDump)
 {
@@ -613,4 +614,20 @@ void SelectAllItemsInListView(HWND listView)
 bool IsDialog(HWND hWnd)
 {
 	return WC_DIALOG == MAKEINTATOM(GetClassLong(hWnd, GCW_ATOM));
+}
+
+void ForEachFileInPath(const char* path, const char* typeMatch, std::function<void(const char*)> callback)
+{
+	char jsonPath[MAX_PATH];
+	GetModuleFileNameA(NULL, jsonPath, MAX_PATH);
+	int pathLen = strlen(path);
+	char* namePtr = strncpy((char*)(strrchr(jsonPath, '\\') + 1), path, pathLen) + pathLen; // keep pointer "namePtr" to the end of the string
+	strcpy(namePtr, typeMatch);
+
+	for (DirectoryIterator dirIter(jsonPath); dirIter; ++dirIter)
+	{
+		if (!dirIter.IsFile()) continue;
+		strcpy(namePtr, dirIter.Get());
+		callback(jsonPath);
+	}
 }
