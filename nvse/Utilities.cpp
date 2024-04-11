@@ -611,6 +611,21 @@ void SelectAllItemsInListView(HWND listView)
 	}
 }
 
+void SetDeferListUpdate(HWND hWnd, bool bDefer)
+{
+	if (bDefer)
+	{
+		SendMessage(hWnd, WM_SETREDRAW, FALSE, 0);
+	}
+	else
+	{
+		SendMessage(hWnd, WM_SETREDRAW, TRUE, 0);
+		RedrawWindow(hWnd, nullptr, nullptr, RDW_ERASE | RDW_INVALIDATE | RDW_NOCHILDREN);
+		InvalidateRect(hWnd, NULL, TRUE);
+		UpdateWindow(hWnd);
+	}
+}
+
 bool IsDialog(HWND hWnd)
 {
 	return WC_DIALOG == MAKEINTATOM(GetClassLong(hWnd, GCW_ATOM));

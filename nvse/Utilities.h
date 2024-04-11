@@ -275,6 +275,8 @@ char* GameHeapStrdup(const char* src);
 BOOL CopyTextToClipboard(const char* text);
 
 void SelectAllItemsInListView(HWND listView);
+void SetDeferListUpdate(HWND hWnd, bool bDefer = true);
 bool IsDialog(HWND hWnd);
 
 void ForEachFileInPath(const char* path, const char* typeMatch, std::function<void(const char*)> callback);
+
