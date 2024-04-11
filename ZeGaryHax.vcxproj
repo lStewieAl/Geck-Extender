@@ -145,6 +145,10 @@ copy "$(TargetPath)" "$(FalloutNVPath)\Data\nvse\plugins\$(TargetFileName)"
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="NavMeshPickPreventer.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="nvse\GameAPI.cpp" />
     <ClCompile Include="nvse\GameBSExtraData.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -190,8 +194,8 @@ copy "$(TargetPath)" "$(FalloutNVPath)\Data\nvse\plugins\$(TargetFileName)"
       </SubType>
     </ClCompile>
     <ClCompile Include="xutil.cpp" />
-    <ClCompile Include="ZeGaryHax.cpp" />
-    <ClCompile Include="ZeLogWindow.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="LogWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BetterFloatingFormList.h">
@@ -219,6 +223,10 @@ copy "$(TargetPath)" "$(FalloutNVPath)\Data\nvse\plugins\$(TargetFileName)"
     <ClInclude Include="GECKUtility.h" />
     <ClInclude Include="libs\nlohmann\json.hpp" />
     <ClInclude Include="ModifiedFormViewer.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="NavMeshPickPreventer.h">
       <SubType>
       </SubType>
     </ClInclude>
@@ -254,11 +262,11 @@ copy "$(TargetPath)" "$(FalloutNVPath)\Data\nvse\plugins\$(TargetFileName)"
     </ClInclude>
     <ClInclude Include="UISpeedHooks.h" />
     <ClInclude Include="xutil.h" />
-    <ClInclude Include="ZeEditBoxHax.h" />
-    <ClInclude Include="ZeGaryHax.h" />
-    <ClInclude Include="ZeLogWindow.h" />
-    <ClInclude Include="ZeWarningHax.h" />
-    <ClInclude Include="ZeWarningPatches.h" />
+    <ClInclude Include="DialogResizing.h" />
+    <ClInclude Include="Main.h" />
+    <ClInclude Include="LogWindow.h" />
+    <ClInclude Include="WarningHooks.h" />
+    <ClInclude Include="WarningPatches.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

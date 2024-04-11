@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="ZeGaryHax.cpp" />
+    <ClCompile Include="Main.cpp" />
     <ClCompile Include="nvse\GameAPI.cpp">
       <Filter>nvse</Filter>
     </ClCompile>
@@ -60,7 +60,7 @@
     </ClCompile>
     <ClCompile Include="CreatureMarkerSwapper.cpp" />
     <ClCompile Include="ExtensionsMenu.cpp" />
-    <ClCompile Include="ZeLogWindow.cpp" />
+    <ClCompile Include="LogWindow.cpp" />
     <ClCompile Include="GeckUtility.cpp" />
     <ClCompile Include="EasterEggs.cpp" />
     <ClCompile Include="FormSearch.cpp" />
@@ -68,9 +68,10 @@
     <ClCompile Include="BetterFloatingFormList.cpp" />
     <ClCompile Include="ModifiedFormViewer.cpp" />
     <ClCompile Include="Settings.cpp" />
+    <ClCompile Include="NavMeshPickPreventer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ZeGaryHax.h" />
+    <ClInclude Include="Main.h" />
     <ClInclude Include="nvse\CommandTable.h">
       <Filter>nvse</Filter>
     </ClInclude>
@@ -131,16 +132,16 @@
     <ClInclude Include="nvse\Utilities.h">
       <Filter>nvse</Filter>
     </ClInclude>
-    <ClInclude Include="ZeWarningHax.h" />
-    <ClInclude Include="ZeWarningPatches.h" />
-    <ClInclude Include="ZeLogWindow.h" />
+    <ClInclude Include="WarningHooks.h" />
+    <ClInclude Include="WarningPatches.h" />
+    <ClInclude Include="LogWindow.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="xutil.h" />
     <ClInclude Include="Editor.h" />
     <ClInclude Include="UISpeedHooks.h" />
     <ClInclude Include="GECKUtility.h" />
     <ClInclude Include="DebugCellShaders.h" />
-    <ClInclude Include="ZeEditBoxHax.h" />
+    <ClInclude Include="DialogResizing.h" />
     <ClInclude Include="libs\nlohmann\json.hpp">
       <Filter>libs</Filter>
     </ClInclude>
@@ -153,6 +154,7 @@
     <ClInclude Include="ModifiedFormViewer.h" />
     <ClInclude Include="nvse\prefix.h" />
     <ClInclude Include="Settings.h" />
+    <ClInclude Include="NavMeshPickPreventer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

@@ -2,4 +2,4 @@
 
 #include "common/IPrefix.h"
 #include "SafeWrite.h"
-#include "ZeLogWindow.h"
+#include "LogWindow.h"

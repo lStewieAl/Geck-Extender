@@ -2,7 +2,7 @@
 #pragma comment(lib, "comctl32.lib")
 #include "GameAPI.h"
 #include "GameForms.h"
-#include "ZeLogWindow.h"
+#include "LogWindow.h"
 #include <Richedit.h>
 #include <regex>
 #include "Settings.h"
