@@ -837,6 +837,11 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SafeWrite16(0x6C07D8, 0x07EB); // fix unnecessary duplicate function call in NavMeshRender::AttachEdge
 	WriteRelCall(0x6778C2, UInt32(OnTAllocZeroMemory)); // microoptimize TAlloc::Allocate
 
+	// fix NavMeshRenderer creating a new child slot whenever attaching children
+	SafeWrite8(0x6BF799, 1); // sets bFirstAvail to true
+	SafeWrite8(0x6C06F7, 1);
+	SafeWrite8(0x6C20CF, 1);
+
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
 	{
