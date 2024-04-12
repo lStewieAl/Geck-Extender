@@ -1,3 +1,4 @@
+#include "BetterFloatingFormList.h"
 #include "GameTypes.h"
 #include "GameObjects.h"
 #include "GameAPI.h"
@@ -12,6 +13,8 @@ extern HWND g_MainHwnd;
 namespace NavMeshPickPreventer
 {
 	char IniPath[MAX_PATH];
+
+	void WriteINI();
 
 	tList<UInt32> ignoredRefs;
 	UInt32 lastPickedRefID;
@@ -41,6 +44,17 @@ namespace NavMeshPickPreventer
 		return false;
 	}
 
+	bool AddFormToIgnoredList(TESForm* form)
+	{
+		UInt32* refID = (UInt32*)form->refID;
+		if (!ignoredRefs.IsInList(refID))
+		{
+			ignoredRefs.Insert(refID);
+			return true;
+		}
+		return false;
+	}
+
 	void AddLastRefToIgnoredList()
 	{
 		if (auto ref = LookupFormByID(lastPickedBaseFormID))
@@ -61,9 +75,9 @@ namespace NavMeshPickPreventer
 		}
 	}
 
-	LRESULT CALLBACK SubclassedListViewProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
+	LRESULT CALLBACK SubclassedListViewProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
 	{
-		if (uMsg == WM_KEYDOWN)
+		if (Message == WM_KEYDOWN)
 		{
 			if (wParam == 'A' && GetAsyncKeyState(VK_CONTROL) < 0)
 			{
@@ -71,21 +85,45 @@ namespace NavMeshPickPreventer
 			}
 			else if (wParam == VK_DELETE)
 			{
+				bool bFormsDeleted = false;
 				int iSelected = -1;
 				while ((iSelected = ListView_GetNextItem(hWnd, iSelected, LVNI_SELECTED)) != -1)
 				{
 					if (auto form = GetNthListForm(hWnd, iSelected))
 					{
 						ignoredRefs.Remove((UInt32*)form->refID);
+						bFormsDeleted = true;
 					}
 					ListView_DeleteItem(hWnd, iSelected);
 					iSelected--; // because the indices shift after deletion, decrement iSelected to ensure no item is skipped
 				}
+
+				if (bFormsDeleted)
+				{
+					WriteINI();
+				}
+
 				return true;
 			}
 		}
+		else if (Message == BetterFloatingFormList::BFL_ADDED_ITEMS)
+		{
+			auto formList = (tList<TESForm>*)wParam;
+			if (formList && formList->Head())
+			{
+				auto iter = formList->Head();
+				do
+				{
+					if (auto form = iter->item)
+					{
+						AddFormToIgnoredList(form);
+					}
+				} while (iter = iter->next);
 
-		return DefSubclassProc(hWnd, uMsg, wParam, lParam);
+				WriteINI();
+			}
+		}
+		return DefSubclassProc(hWnd, Message, wParam, lParam);
 	}
 
 	void SubclassListView(HWND hListView)
@@ -110,7 +148,20 @@ namespace NavMeshPickPreventer
 	{
 		originalWindowCallback = *(WNDPROC*)0x44BB19;
 		HINSTANCE hInstance = (HINSTANCE)GetModuleHandle(nullptr);
-		auto hWnd = CreateDialogParamA(hInstance, (LPCSTR)189, g_MainHwnd, (DLGPROC)WindowCallback, (LPARAM)((char*)(&ignoredRefs)) - 0xC);
+
+		tList<TESForm> ignoredForms;
+		ignoredForms.Init();
+
+		auto iter = ignoredRefs.Head();
+		do
+		{
+			if (auto form = LookupFormByID((UInt32)iter->item))
+			{
+				ignoredForms.Insert(form);
+			}
+		} while (iter = iter->next);
+
+		auto hWnd = CreateDialogParamA(hInstance, (LPCSTR)189, g_MainHwnd, (DLGPROC)WindowCallback, (LPARAM)((char*)(&ignoredForms)) - 0xC);
 		SendMessageA(hWnd, WM_SETTEXT, 0, (LPARAM)"Ignored Forms");
 	}
 
