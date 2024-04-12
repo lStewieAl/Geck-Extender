@@ -17,6 +17,7 @@ namespace NavMeshPickPreventer
 	void WriteINI();
 
 	tList<UInt32> ignoredRefs;
+	std::vector<std::string> failedToResolveIds; // editorIDs not found in the loaded plugins
 	UInt32 lastPickedRefID;
 	UInt32 lastPickedBaseFormID;
 	bool __fastcall OnPickNavMeshNodeGetShouldSkip(TESObjectREFR* ref)
@@ -184,6 +185,16 @@ namespace NavMeshPickPreventer
 			}
 		} while (iter = iter->next);
 
+		for (const std::string& id : failedToResolveIds)
+		{
+			if (!isFirstItem)
+			{
+				concatenatedIDs << ',';
+			}
+			isFirstItem = false;
+			concatenatedIDs << id;
+		}
+
 		return concatenatedIDs.str();
 	}
 
@@ -213,6 +224,7 @@ namespace NavMeshPickPreventer
 	void ReadINI()
 	{
 		ignoredRefs.RemoveAll();
+		failedToResolveIds.clear();
 
 		auto ids = ReadIDs();
 		for (const std::string& id : ids)
@@ -223,6 +235,7 @@ namespace NavMeshPickPreventer
 			}
 			else
 			{
+				failedToResolveIds.push_back(id);
 				Console_Print("NavMeshPickPreventer: Failed to find form: %s", id.c_str());
 			}
 		}
