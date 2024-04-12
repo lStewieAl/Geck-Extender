@@ -262,7 +262,9 @@ namespace NavMeshPickPreventer
 			else
 			{
 				failedToResolveIds.push_back(id);
+#ifdef _DEBUG
 				Console_Print("NavMeshPickPreventer: Failed to find form: %s", id.c_str());
+#endif
 			}
 		}
 	}
