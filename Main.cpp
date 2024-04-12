@@ -83,6 +83,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	ReadAllSettings();
 	EventManager::InitHooks();
 
+	DisableProcessWindowsGhosting();
+
 	//	stop geck crash with bUseMultibounds = 0 in exterior cells with multibounds - credit to roy
 	WriteRelCall(0x004CA48F, (UInt32)FixMultiBounds);
 	XUtil::PatchMemoryNop(0x004CA494, 0x05);
