@@ -15,21 +15,6 @@ namespace BetterFloatingFormList
 		return index != -1;
 	}
 
-	void SetDeferListUpdate(HWND hWnd, bool bDefer = true)
-	{
-		if (bDefer)
-		{
-			SendMessage(hWnd, WM_SETREDRAW, FALSE, 0);
-		}
-		else
-		{
-			SendMessage(hWnd, WM_SETREDRAW, TRUE, 0);
-			RedrawWindow(hWnd, nullptr, nullptr, RDW_ERASE | RDW_INVALIDATE | RDW_NOCHILDREN);
-			InvalidateRect(hWnd, NULL, TRUE);
-			UpdateWindow(hWnd);
-		}
-	}
-
 	LRESULT CALLBACK SubclassedListViewProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
 	{
 		switch (uMsg)
