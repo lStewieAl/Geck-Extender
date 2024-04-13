@@ -676,6 +676,10 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	static const char* RenderWindowLandscapeEditColorsSettingLabel = "Landscape: Toggle Edit Colors";
 	SafeWrite32(0xE8CB94, UInt32(RenderWindowLandscapeEditColorsSettingLabel));
+	SafeWrite8(0xD2D21D, 'h');
+
+	// fix the render preferences window losing sort when assigning a hotkey
+	WriteRelCall(0x413463, UInt32(RenderPreferences_PostSetHotkey));
 
 	WriteRelCall(0x465935, UInt32(FormatRenderWindowMemoryUsage));
 	WriteRelCall(0x465913, UInt32(FormatRenderWindowMemoryUsage));
