@@ -74,6 +74,10 @@
     <ClCompile Include="Events\DataLoadEvent.cpp">
       <Filter>Events</Filter>
     </ClCompile>
+    <ClCompile Include="CustomRenderWindowHotkeys.cpp" />
+    <ClCompile Include="RenderWindowHotkeyEvent.cpp">
+      <Filter>Events</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Main.h" />
@@ -166,6 +170,10 @@
       <Filter>Events</Filter>
     </ClInclude>
     <ClInclude Include="Events\DataLoadEvent.h">
+      <Filter>Events</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomRenderWindowHotkeys.h" />
+    <ClInclude Include="RenderWindowHotkeyEvent.h">
       <Filter>Events</Filter>
     </ClInclude>
   </ItemGroup>

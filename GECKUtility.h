@@ -236,3 +236,121 @@ struct OpenWindows
 {
 	static tList<HWND>* GetWindowList();
 };
+
+struct RenderWindowHotkey
+{
+	enum eKeys
+	{
+		kRenderHotkey_ToggleFlyCam = 0x0,
+		kRenderHotkey_ToggleBatchDialog = 0x1,
+		kRenderHotkey_ToggleOrthographicMode = 0x2,
+		kRenderHotkey_Navmesh_FinalizeCell = 0x3,
+		kRenderHotkey_ShowHideSelectedObjectS = 0x4,
+		kRenderHotkey_ShowHideEnableStateParents = 0x5,
+		kRenderHotkey_ShowHideEnableStateOppositeParents = 0x6,
+		kRenderHotkey_Navmesh_FindCover = 0x7,
+		kRenderHotkey_Navmesh_OpenStandardGenerationDialog = 0x8,
+		kRenderHotkey_FreezeCamera = 0x9,
+		kRenderHotkey_Navmesh_OpenAdvancedGenerationDialog = 0xA,
+		kRenderHotkey_ToggleDebugGeometry = 0xB,
+		kRenderHotkey_Navmesh_AddATriangleOrQuad = 0xC,
+		kRenderHotkey_ToggleBrightLights = 0xD,
+		kRenderHotkey_FindBadBound = 0xE,
+		kRenderHotkey_CreateMultiboundRef = 0xF,
+		kRenderHotkey_ShowLandBorders = 0x10,
+		kRenderHotkey_CycleThroughViews = 0x11,
+		kRenderHotkey_ToggleSelectionCulling = 0x12,
+		kRenderHotkey_ToggleNonLandCulling = 0x13,
+		kRenderHotkey_Copy = 0x14,
+		kRenderHotkey_DropCamera = 0x15,
+		kRenderHotkey_Navmesh_ClearSelection = 0x16,
+		kRenderHotkey_CloneCopyAndPaste = 0x17,
+		kRenderHotkey_ClearSelection = 0x18,
+		kRenderHotkey_ToggleEditColors = 0x19,
+		kRenderHotkey_ToggleNavmeshEdit = 0x1A,
+		kRenderHotkey_Navmesh_OpenEdgePropertiesDialog = 0x1B,
+		kRenderHotkey_Navmesh_SelectTriangleByIndex = 0x1C,
+		kRenderHotkey_Navmesh_DropVertices = 0x1D,
+		kRenderHotkey_SearchAndReplace = 0x1E,
+		kRenderHotkey_DropSelection = 0x1F,
+		kRenderHotkey_RaiseSelection = 0x20,
+		kRenderHotkey_Navmesh_ToggleEdgeSelectMode = 0x21,
+		kRenderHotkey_Navmesh_UnhideAllNavmeshes = 0x22,
+		kRenderHotkey_Navmesh_HideSelectedNavmeshes = 0x23,
+		kRenderHotkey_ToggleMeshEditingMode = 0x24,
+		kRenderHotkey_Navmesh_InverseFloodFill = 0x25,
+		kRenderHotkey_OpenTextureUseDialog = 0x26,
+		kRenderHotkey_GetObjectData = 0x27,
+		kRenderHotkey_LoadCellForSelectedObject = 0x28,
+		kRenderHotkey_ToggleLandCulling = 0x29,
+		kRenderHotkey_ToggleLightRadius = 0x2A,
+		kRenderHotkey_Navmesh_MergeSelectedVertices = 0x2B,
+		kRenderHotkey_Navmesh_MergeSelectedVerticesAlt = 0x2C,
+		kRenderHotkey_MoveClipboardReferences = 0x2D,
+		kRenderHotkey_ToggleMarkers = 0x2E,
+		kRenderHotkey_Navmesh_ToggleSingleCellViewMode = 0x2F,
+		kRenderHotkey_Navmesh_ToggleWater = 0x30,
+		kRenderHotkey_Navmesh_ToggleNoLargeCreature = 0x31,
+		kRenderHotkey_Navmesh_TogglePreferred = 0x32,
+		kRenderHotkey_PortalMode = 0x33,
+		kRenderHotkey_SaveLocalMapSnapshot = 0x34,
+		kRenderHotkey_ToggleLocationSnap = 0x35,
+		kRenderHotkey_ToggleRotationSnap = 0x36,
+		kRenderHotkey_ToggleReferenceSnap = 0x37,
+		kRenderHotkey_Navmesh_DeleteSelection = 0x38,
+		kRenderHotkey_RenameSoundFiles = 0x39,
+		kRenderHotkey_ScaleSelected = 0x3A,
+		kRenderHotkey_Navmesh_SwapEdge = 0x3B,
+		kRenderHotkey_Navmesh_ToggleSelectableTriangles = 0x3C,
+		kRenderHotkey_PlaceCameraAboveSelection = 0x3D,
+		kRenderHotkey_ToggleOcclusionPlanes = 0x3E,
+		kRenderHotkey_Navmesh_ToggleSelectableVertices = 0x3F,
+		kRenderHotkey_Paste = 0x40,
+		kRenderHotkey_PasteInPlace = 0x41,
+		kRenderHotkey_Navmesh_ChangeDrawMode = 0x42,
+		kRenderHotkey_ToggleWaterCulling = 0x43,
+		kRenderHotkey_ToggleWireframe = 0x44,
+		kRenderHotkey_SwapEditorWater = 0x45,
+		kRenderHotkey_GroupStaticRefs = 0x46,
+		kRenderHotkey_COUNT = 0x47,
+	};
+
+	enum eRenderWindowHotkeyCategory : UInt32
+	{
+		kRenderHotkeyCategory_General = 0x0,
+		kRenderHotkeyCategory_Navmesh = 0x1,
+		kRenderHotkeyCategory_Camera = 0x2,
+		kRenderHotkeyCategory_Visibility = 0x3,
+		kRenderHotkeyCategory_Clipboard = 0x4,
+	};
+
+	enum RenderWindowHotkeyFlag : unsigned __int8
+	{
+		kRenderWindowPreferenceFlag_NONE = 0,
+		kRenderWindowPreferenceFlag_Shift = 0x1,
+		kRenderWindowPreferenceFlag_Ctrl = 0x2,
+		kRenderWindowPreferenceFlag_Alt = 0x4,
+		kRenderWindowPreferenceFlag_Z = 0x8,
+		kRenderWindowPreferenceFlag_Navmesh = 0x40,
+	};
+
+	const char* name;
+	const char* internalName;
+	eRenderWindowHotkeyCategory category;
+	UInt8 byte0C;
+	UInt8 byte0D;
+	UInt8 key;
+	RenderWindowHotkeyFlag flags;
+	UInt32 bIsEditAllowed;
+	RenderWindowHotkey(const char* name,
+		const char* internalName = "",
+		eRenderWindowHotkeyCategory category = kRenderHotkeyCategory_General,
+		UInt8 key = 0,
+		RenderWindowHotkeyFlag flags = kRenderWindowPreferenceFlag_NONE,
+		UInt32 bIsEditAllowed = 1,
+		UInt8 byte0C = 0,
+		UInt8 byte0D = 0)
+		: name(name), internalName(internalName), category(category), byte0C(byte0C), byte0D(byte0D),
+		key(key), flags(flags), bIsEditAllowed(bIsEditAllowed) {};
+};
+STATIC_ASSERT(sizeof(RenderWindowHotkey) == 0x14);
