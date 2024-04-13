@@ -789,7 +789,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x413653, UInt32(OnInsertRenderPreferencesComboHotkey));
 	WriteRelJump(0x412E6E, UInt32(OnSelectRenderPreferencesComboHook));
 
-	CustomRenderWindowHotkeys::InitHooks();
+	CustomRenderWindowHotkeys::Init();
 
 	if (config.bPlaySoundEndOfLoading)
 	{

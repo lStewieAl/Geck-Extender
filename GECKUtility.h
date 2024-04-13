@@ -334,23 +334,34 @@ struct RenderWindowHotkey
 		kRenderWindowPreferenceFlag_Navmesh = 0x40,
 	};
 
-	const char* name;
-	const char* internalName;
-	eRenderWindowHotkeyCategory category;
-	UInt8 byte0C;
-	UInt8 byte0D;
-	UInt8 key;
-	RenderWindowHotkeyFlag flags;
+	struct __declspec(align(2)) KeyCombo
+	{
+		union
+		{
+			struct
+			{
+				UInt8 key;
+				RenderWindowHotkeyFlag flags;
+			};
+			unsigned short data;
+		};
+
+		KeyCombo(UInt8 key, RenderWindowHotkeyFlag flags) : key(key), flags(flags) {};
+	};
+
+	const char* sName;
+	const char* sInternalName;
+	eRenderWindowHotkeyCategory uiCategory;
+	KeyCombo kDefaultCombo;
+	KeyCombo kCombo;
 	UInt32 bIsEditAllowed;
 	RenderWindowHotkey(const char* name,
 		const char* internalName = "",
+		UInt8 defaultKey = 0,
+		RenderWindowHotkeyFlag defaultFlags = kRenderWindowPreferenceFlag_NONE,
 		eRenderWindowHotkeyCategory category = kRenderHotkeyCategory_General,
-		UInt8 key = 0,
-		RenderWindowHotkeyFlag flags = kRenderWindowPreferenceFlag_NONE,
-		UInt32 bIsEditAllowed = 1,
-		UInt8 byte0C = 0,
-		UInt8 byte0D = 0)
-		: name(name), internalName(internalName), category(category), byte0C(byte0C), byte0D(byte0D),
-		key(key), flags(flags), bIsEditAllowed(bIsEditAllowed) {};
+		UInt32 bIsEditAllowed = 1)
+		: sName(name), sInternalName(internalName), uiCategory(category),
+		bIsEditAllowed(bIsEditAllowed), kDefaultCombo(defaultKey, defaultFlags), kCombo(defaultKey, defaultFlags) {};
 };
 STATIC_ASSERT(sizeof(RenderWindowHotkey) == 0x14);

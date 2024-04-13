@@ -197,10 +197,6 @@ copy "$(TargetPath)" "$(FalloutNVPath)\Data\nvse\plugins\$(TargetFileName)"
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="RenderWindowHotkeyEvent.cpp">
-      <SubType>
-      </SubType>
-    </ClCompile>
     <ClCompile Include="Settings.cpp">
       <SubType>
       </SubType>
@@ -273,10 +269,6 @@ copy "$(TargetPath)" "$(FalloutNVPath)\Data\nvse\plugins\$(TargetFileName)"
     <ClInclude Include="nvse\SafeWrite.h" />
     <ClInclude Include="nvse\Utilities.h" />
     <ClInclude Include="OutOfMemoryHelper.h">
-      <SubType>
-      </SubType>
-    </ClInclude>
-    <ClInclude Include="RenderWindowHotkeyEvent.h">
       <SubType>
       </SubType>
     </ClInclude>

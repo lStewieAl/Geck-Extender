@@ -1,5 +1,5 @@
 #pragma once
 namespace CustomRenderWindowHotkeys
 {
-	void InitHooks();
+	void Init();
 }
