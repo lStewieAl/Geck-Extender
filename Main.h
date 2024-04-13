@@ -3006,3 +3006,36 @@ __declspec(naked) void OnShowSearchAndReplaceWindowHook()
 		jmp OnShowSearchAndReplaceWindow
 	}
 }
+
+void __cdecl OnInsertRenderPreferencesComboHotkey(HWND hWnd, const CHAR* text, LPARAM item, char bUpdateExtents)
+{
+	CdeclCall(0x419BC0, hWnd, text, item, bUpdateExtents);
+	CdeclCall(0x419BC0, hWnd, "Z", 8, bUpdateExtents);
+}
+
+__declspec(naked) void OnSelectRenderPreferencesComboHook()
+{
+	_asm
+	{
+		test bl, 8
+		je done
+
+		neg ebp
+		sbb ebp, ebp
+		push 8
+		add ebp, 0x14AA
+		push ebp
+		push esi
+		call edi
+		push eax
+		mov eax, 0x419DD0
+		call eax
+		add esp, 8
+
+	done:
+		mov edx, dword ptr ss : [esp + 0x18]
+		movzx eax, byte ptr ds : [edx + 0xE]
+		mov ecx, 0x412E76
+		jmp ecx
+	}
+}

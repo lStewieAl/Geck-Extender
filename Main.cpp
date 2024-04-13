@@ -779,6 +779,11 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x47D256, UInt32(OnShowSearchAndReplaceWindowHook));
 	SafeWrite8(0x47D256 + 5, 0x90);
 
+	// add 'Z' modifier to render window preferences
+	WriteRelCall(0x41360A, UInt32(OnInsertRenderPreferencesComboHotkey));
+	WriteRelCall(0x413653, UInt32(OnInsertRenderPreferencesComboHotkey));
+	WriteRelJump(0x412E6E, UInt32(OnSelectRenderPreferencesComboHook));
+
 	if (config.bPlaySoundEndOfLoading)
 	{
 		DataLoadEvent::RegisterCallback(PlayMouseClickSound);
