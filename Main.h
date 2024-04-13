@@ -2990,3 +2990,19 @@ void PlayMouseClickSound()
 {
 	PlaySound("MouseClick", NULL, SND_ASYNC);
 }
+
+BOOL __fastcall OnShowSearchAndReplaceWindow(char* buffer, void* edx, HWND hWnd, int nCmdShow)
+{
+	auto scrapHeap = ThisCall<void*>(0x854540, (void*)0xF21B5C); // HeapManager::GetThreadScrapHeap
+	ThisCall(0x855B30, scrapHeap, buffer); // ScrapHeapFree
+	return ShowWindow(hWnd, nCmdShow);
+}
+
+__declspec(naked) void OnShowSearchAndReplaceWindowHook()
+{
+	_asm
+	{
+		mov ecx, [esp + 0x24] // buffer
+		jmp OnShowSearchAndReplaceWindow
+	}
+}

@@ -775,6 +775,10 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SafeWrite8(0x6C06F7, 1);
 	SafeWrite8(0x6C20CF, 1);
 
+	// fix 512 byte scrapheap leak when opening the find and replace window
+	WriteRelCall(0x47D256, UInt32(OnShowSearchAndReplaceWindowHook));
+	SafeWrite8(0x47D256 + 5, 0x90);
+
 	if (config.bPlaySoundEndOfLoading)
 	{
 		DataLoadEvent::RegisterCallback(PlayMouseClickSound);
