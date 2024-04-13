@@ -68,7 +68,6 @@
     <ClCompile Include="BetterFloatingFormList.cpp" />
     <ClCompile Include="ModifiedFormViewer.cpp" />
     <ClCompile Include="Settings.cpp" />
-    <ClCompile Include="NavMeshPickPreventer.cpp" />
     <ClCompile Include="Events\EventManager.cpp">
       <Filter>Events</Filter>
     </ClCompile>
@@ -160,7 +159,6 @@
     <ClInclude Include="ModifiedFormViewer.h" />
     <ClInclude Include="nvse\prefix.h" />
     <ClInclude Include="Settings.h" />
-    <ClInclude Include="NavMeshPickPreventer.h" />
     <ClInclude Include="Events\EventManager.h">
       <Filter>Events</Filter>
     </ClInclude>

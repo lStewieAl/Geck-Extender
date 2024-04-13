@@ -502,6 +502,37 @@ BOOL IsWindowHidden(HWND hWnd)
 	return !(GetWindowLong(hWnd, GWL_STYLE) & WS_VISIBLE);
 }
 
+void RestoreCachedSearchAndReplaceWindow(HWND hDlg)
+{
+	auto searchForDropdown = GetDlgItem(hDlg, 1439);
+	auto replaceWithDropdown = GetDlgItem(hDlg, 1440);
+
+	int index = -1;
+	auto selected = RenderWindow::SelectedData::GetSelected();
+	if (selected->selectedForms)
+	{
+		if (auto ref = CdeclCall<TESObjectREFR*>(0xC5D114, selected->selectedForms->ref, 0, 0xE8C57C, 0xE8E3E4, 0)) // DYNAMIC_CAST(TESForm, TESObjectREFR)
+		{
+			if (ref->baseForm)
+			{
+				index = SendMessageA(searchForDropdown, CB_SELECTSTRING, 0xFFFFFFFF, (LPARAM)ref->baseForm->GetEditorID());
+			}
+		}
+	}
+
+	if (index == -1)
+	{
+		SendMessageA(searchForDropdown, CB_SETCURSEL, 0, 0);
+		SendMessageA(replaceWithDropdown, CB_SETCURSEL, 1u, 0);
+	}
+	else
+	{
+		SendMessageA(replaceWithDropdown, CB_SETCURSEL, index + 1, 0);
+	}
+
+	ShowWindow(hDlg, SW_SHOW);
+}
+
 HWND cachedSearchAndReplaceWindow;
 void __stdcall OnCreateSearchAndReplaceWindow(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc, LPARAM dwInitParam)
 {
@@ -509,12 +540,12 @@ void __stdcall OnCreateSearchAndReplaceWindow(HINSTANCE hInstance, LPCSTR lpTemp
 	{
 		if (IsWindowHidden(cachedSearchAndReplaceWindow))
 		{
-			ShowWindow(cachedSearchAndReplaceWindow, SW_SHOW);
+			RestoreCachedSearchAndReplaceWindow(cachedSearchAndReplaceWindow);
 		}
 		else
 		{
-			// create a new dialog (case where there's multiple search dialogs opened)
-			CreateDialogParamA(hInstance, lpTemplateName, hWndParent, lpDialogFunc, dwInitParam);
+			// create a new dialog (case where there's multiple search dialogs opened, and set the last opened as the cached window)
+			cachedSearchAndReplaceWindow = CreateDialogParamA(hInstance, lpTemplateName, hWndParent, lpDialogFunc, dwInitParam);
 		}
 	}
 	else
