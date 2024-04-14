@@ -3040,9 +3040,9 @@ __declspec(naked) void OnSelectRenderPreferencesComboHook()
 	}
 }
 
-void __cdecl RenderPreferences_PostSetHotkey(HWND hWnd, int a2)
+void __cdecl RenderPreferences_PostPopulateList(HWND hWnd)
 {
-	CdeclCall(0x412D90, hWnd, a2);
+	CdeclCall(0x412D40, hWnd);
 	auto hDlg = GetDlgItem(hWnd, 5142);
 	auto sortColumn = GetWindowLongA(hDlg, -21);
 	SendMessageA(hDlg, LVM_SORTITEMS, sortColumn, (LPARAM)0x412C10); // RenderWindowHotkeys::CompareFn
