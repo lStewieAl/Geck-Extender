@@ -127,6 +127,10 @@ copy "$(TargetPath)" "$(FalloutNVPath)\Data\nvse\plugins\$(TargetFileName)"
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="CustomRenderWindowHotkeys.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="EasterEggs.cpp">
       <SubType>
       </SubType>
@@ -207,6 +211,10 @@ copy "$(TargetPath)" "$(FalloutNVPath)\Data\nvse\plugins\$(TargetFileName)"
       </SubType>
     </ClInclude>
     <ClInclude Include="CreatureMarkerSwapper.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="CustomRenderWindowHotkeys.h">
       <SubType>
       </SubType>
     </ClInclude>

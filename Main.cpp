@@ -37,6 +37,7 @@
 #include "OutOfMemoryHelper.h"
 #include "BetterFloatingFormList.h"
 #include "Settings.h"
+#include "CustomRenderWindowHotkeys.h"
 
 #include "Events/EventManager.h"
 #include "Events/Events.h"
@@ -675,6 +676,12 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	static const char* RenderWindowLandscapeEditColorsSettingLabel = "Landscape: Toggle Edit Colors";
 	SafeWrite32(0xE8CB94, UInt32(RenderWindowLandscapeEditColorsSettingLabel));
+	SafeWrite8(0xD2D21D, 'h');
+
+	// fix the render preferences window losing sort when assigning a hotkey
+	WriteRelCall(0x4134BF, UInt32(RenderPreferences_PostPopulateList));
+	WriteRelCall(0x413494, UInt32(RenderPreferences_PostPopulateList));
+	WriteRelCall(0x413456, UInt32(RenderPreferences_PostPopulateList));
 
 	WriteRelCall(0x465935, UInt32(FormatRenderWindowMemoryUsage));
 	WriteRelCall(0x465913, UInt32(FormatRenderWindowMemoryUsage));
@@ -783,6 +790,11 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x41360A, UInt32(OnInsertRenderPreferencesComboHotkey));
 	WriteRelCall(0x413653, UInt32(OnInsertRenderPreferencesComboHotkey));
 	WriteRelJump(0x412E6E, UInt32(OnSelectRenderPreferencesComboHook));
+
+	// add support for more keys to render window preferences
+	WriteRelCall(0x4137D5, UInt32(OnInitRenderWindowComboBox));
+
+	CustomRenderWindowHotkeys::Init();
 
 	if (config.bPlaySoundEndOfLoading)
 	{

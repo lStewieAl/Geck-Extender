@@ -1146,91 +1146,12 @@ void __fastcall PreferencesWindowApplyButtonHook(int* thiss, void* dummyEDX, int
 	SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_SETCHECK, GetIsRenderWindowAllowCellLoads(), NULL);
 }
 
-void PlaceXMarker()
-{
-	NiPoint3 pos, rot;
-	if (RenderWindow::GetMousePos(&pos, &rot))
-	{
-		TESObjectSTAT* xMarker = *(TESObjectSTAT**)0xEDDA54;
-		if (auto ref = DataHandler::GetSingleton()->CreateReferenceAtLocation(xMarker, &pos, &NiPoint3::ZERO, 0))
-		{
-			CdeclCall(0x44F470);
-			CdeclCall(0x44F260, ref); // RenderWindow::AddRef
-
-			HistoryManager::GetSingleton()->AddAction(2, RenderWindow::SelectedData::GetSelected());
-
-			if (*(byte*)0xECFB74) // CellView::bLoaded
-			{
-				auto pos = &RenderWindow::SelectedData::GetSelected()->pos;
-				CdeclCall(0x42E3C0, &pos, 1); // CellView::Refresh
-			}
-		}
-	}
-}
-
-void ToggleObjectVisibilityForCell(TESObjectCELL* cell)
-{
-	if (auto iter = cell->objectList.Head())
-	{
-		do
-		{
-			if (auto ref = iter->item)
-			{
-				if (auto node = ref->Get3D())
-				{
-					if (node = ThisCall<NiNode*>(0x68B370, node, 0xF1FDD4)) // NiRTTI::HasType(&NiNode::ms_RTTI);
-					{
-						node->SetAlphaRecurse(1.0F);
-						node->m_flags &= ~0x200001;
-						node->UpdatePropertiesUpward();
-					}
-				}
-			}
-		} while (iter = iter->next);
-	}
-}
-
-void ToggleAllObjectsVisible()
-{
-	auto tes = TES::GetSingleton();
-	if (auto cell = tes->currentInterior)
-	{
-		ToggleObjectVisibilityForCell(cell);
-	}
-	else
-	{
-		Setting* uGridsToLoad = (Setting*)0xED6550;
-		for (int x = 0, n = uGridsToLoad->data.uint; x < n; ++x)
-		{
-			for (int y = 0, n = uGridsToLoad->data.uint; y < n; ++y)
-			{
-				if (auto cell = tes->gridCellArray->GetCell(x, y))
-				{
-					ToggleObjectVisibilityForCell(cell);
-				}
-			}
-		}
-	}
-}
-
 BOOL __stdcall RenderWindowCallbackHook(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	if (msg == WM_KEYDOWN) {
 		switch (wParam) {
 		case VK_ESCAPE:
 		case VK_LWIN:
 			SetFlycamMode(0);
-			break;
-
-		case 'I':
-			SetIsShowLightMarkers(!GetIsShowLightMarkers());
-			break;
-
-		case 'O':
-			PlaceXMarker();
-			break;
-
-		case VK_OEM_4:
-			ToggleAllObjectsVisible();
 			break;
 		}
 	}
@@ -3038,4 +2959,29 @@ __declspec(naked) void OnSelectRenderPreferencesComboHook()
 		mov ecx, 0x412E76
 		jmp ecx
 	}
+}
+
+void __cdecl RenderPreferences_PostPopulateList(HWND hWnd)
+{
+	CdeclCall(0x412D40, hWnd);
+	auto hDlg = GetDlgItem(hWnd, 5142);
+	auto sortColumn = GetWindowLongA(hDlg, -21);
+	SendMessageA(hDlg, LVM_SORTITEMS, sortColumn, (LPARAM)0x412C10); // RenderWindowHotkeys::CompareFn
+}
+
+void __cdecl OnInitRenderWindowComboBox(HWND hWnd, const CHAR* text, LPARAM item, char bUpdateExtents)
+{
+	CdeclCall(0x419BC0, hWnd, text, item, bUpdateExtents);
+
+	short c = 0;
+	c = MapVirtualKeyA(VK_OEM_4, MAPVK_VK_TO_CHAR);
+	CdeclCall(0x419BC0, hWnd, &c, VK_OEM_4, bUpdateExtents);
+	c = MapVirtualKeyA(VK_OEM_5, MAPVK_VK_TO_CHAR);
+	CdeclCall(0x419BC0, hWnd, &c, VK_OEM_5, bUpdateExtents);
+
+	for (short c : { ';', '\'', ',', '.', '/' })
+	{
+		CdeclCall(0x419BC0, hWnd, &c, c, bUpdateExtents);
+	}
+	CdeclCall(0x419BC0, hWnd, "<TILDE>", '`', bUpdateExtents);
 }
