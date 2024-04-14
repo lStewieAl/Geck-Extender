@@ -1,20 +1,93 @@
+#include "GameForms.h"
+#include "GameObjects.h"
+#include "GameData.h"
+#include "GameSettings.h"
 #include "GECKUtility.h"
 #include <CommCtrl.h>
 
 namespace CustomRenderWindowHotkeys
 {
+	void PlaceXMarker()
+	{
+		NiPoint3 pos, rot;
+		if (RenderWindow::GetMousePos(&pos, &rot))
+		{
+			TESObjectSTAT* xMarker = *(TESObjectSTAT**)0xEDDA54;
+			if (auto ref = DataHandler::GetSingleton()->CreateReferenceAtLocation(xMarker, &pos, &NiPoint3::ZERO, 0))
+			{
+				CdeclCall(0x44F470);
+				CdeclCall(0x44F260, ref); // RenderWindow::AddRef
+
+				HistoryManager::GetSingleton()->AddAction(2, RenderWindow::SelectedData::GetSelected());
+
+				if (*(byte*)0xECFB74) // CellView::bLoaded
+				{
+					auto pos = &RenderWindow::SelectedData::GetSelected()->pos;
+					CdeclCall(0x42E3C0, &pos, 1); // CellView::Refresh
+				}
+			}
+		}
+	}
+
+	void ToggleObjectVisibilityForCell(TESObjectCELL* cell)
+	{
+		if (auto iter = cell->objectList.Head())
+		{
+			do
+			{
+				if (auto ref = iter->item)
+				{
+					if (auto node = ref->Get3D())
+					{
+						if (node = ThisCall<NiNode*>(0x68B370, node, 0xF1FDD4)) // NiRTTI::HasType(&NiNode::ms_RTTI);
+						{
+							node->SetAlphaRecurse(1.0F);
+							node->m_flags &= ~0x200001;
+							node->UpdatePropertiesUpward();
+						}
+					}
+				}
+			} while (iter = iter->next);
+		}
+	}
+
+	void SetAllObjectsVisible()
+	{
+		auto tes = TES::GetSingleton();
+		if (auto cell = tes->currentInterior)
+		{
+			ToggleObjectVisibilityForCell(cell);
+		}
+		else
+		{
+			Setting* uGridsToLoad = (Setting*)0xED6550;
+			for (int x = 0, n = uGridsToLoad->data.uint; x < n; ++x)
+			{
+				for (int y = 0, n = uGridsToLoad->data.uint; y < n; ++y)
+				{
+					if (auto cell = tes->gridCellArray->GetCell(x, y))
+					{
+						ToggleObjectVisibilityForCell(cell);
+					}
+				}
+			}
+		}
+	}
+
 	enum CustomHotkey
 	{
 		kHotkey_NONE = 0x47, // max ID of the vanilla IDs
 		kHotkey_FIRST,
-		kHotkey_TEST = kHotkey_FIRST,
-		kHotkey_TEST2
+		kHotkey_ToggleShowLightMarkers = kHotkey_FIRST,
+		kHotkey_SetAllObjectsVisible,
+		kHotkey_PlaceXMarker
 	};
 
 	static RenderWindowHotkey CustomHotkeys[] =
 	{
-		RenderWindowHotkey("Test Setting", "bTEST1", 'P'),
-		RenderWindowHotkey("Test Setting 2", "bTEST2", 'J', RenderWindowHotkey::kRenderWindowPreferenceFlag_Shift)
+		RenderWindowHotkey("Toggle Show Light Markers", "ToggleShowLightMarkers", 'I', RenderWindowHotkey::kRenderWindowPreferenceFlag_NONE, RenderWindowHotkey::kRenderHotkeyCategory_Visibility),
+		RenderWindowHotkey("Set All Objects Visible", "SetAllObjectsVisible", VK_OEM_4, RenderWindowHotkey::kRenderWindowPreferenceFlag_NONE, RenderWindowHotkey::kRenderHotkeyCategory_Visibility),
+		RenderWindowHotkey("Place XMarker", "PlaceXMarker", 'O'),
 	};
 
 	void __cdecl PopulateList(HWND hDlg)
@@ -44,11 +117,16 @@ namespace CustomRenderWindowHotkeys
 	{
 		switch (hotkey)
 		{
-		case kHotkey_TEST:
-			Console_Print("TEST HOTKEY");
+		case kHotkey_ToggleShowLightMarkers:
+			SetIsShowLightMarkers(!GetIsShowLightMarkers());
 			break;
-		case kHotkey_TEST2:
-			Console_Print("TEST HOTKEY 2");
+
+		case kHotkey_PlaceXMarker:
+			PlaceXMarker();
+			break;
+
+		case kHotkey_SetAllObjectsVisible:
+			SetAllObjectsVisible();
 			break;
 		}
 	}
