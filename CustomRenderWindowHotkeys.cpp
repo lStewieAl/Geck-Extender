@@ -90,6 +90,24 @@ namespace CustomRenderWindowHotkeys
 		RenderWindowHotkey("Place XMarker", "PlaceXMarker", 'O'),
 	};
 
+	void HandleHotkey(UInt32 hotkey)
+	{
+		switch (hotkey)
+		{
+		case kHotkey_ToggleShowLightMarkers:
+			SetIsShowLightMarkers(!GetIsShowLightMarkers());
+			break;
+
+		case kHotkey_PlaceXMarker:
+			PlaceXMarker();
+			break;
+
+		case kHotkey_SetAllObjectsVisible:
+			SetAllObjectsVisible();
+			break;
+		}
+	}
+
 	void __cdecl PopulateList(HWND hDlg)
 	{
 		auto listView = GetDlgItem(hDlg, 5142);
@@ -110,24 +128,6 @@ namespace CustomRenderWindowHotkeys
 		for (int i = 0; i < _ARRAYSIZE(CustomHotkeys); ++i)
 		{
 			AddCustomHotkey(CustomHotkeys[i].kCombo, i);
-		}
-	}
-
-	void HandleHotkey(UInt32 hotkey)
-	{
-		switch (hotkey)
-		{
-		case kHotkey_ToggleShowLightMarkers:
-			SetIsShowLightMarkers(!GetIsShowLightMarkers());
-			break;
-
-		case kHotkey_PlaceXMarker:
-			PlaceXMarker();
-			break;
-
-		case kHotkey_SetAllObjectsVisible:
-			SetAllObjectsVisible();
-			break;
 		}
 	}
 
