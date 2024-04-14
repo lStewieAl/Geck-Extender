@@ -63,14 +63,34 @@ namespace CustomRenderWindowHotkeys
 		return hotkey;
 	}
 
-	void SaveINI()
+	constexpr const char* INI_SECTION = "Render Window";
+	char IniPath[MAX_PATH];
+	void SetupINIPath()
 	{
-		// TODO: write INI
+		GetModuleFileNameA(NULL, IniPath, MAX_PATH);
+		strcpy((char*)(strrchr(IniPath, '\\') + 1), "Data\\nvse\\plugins\\GeckExtender\\Hotkeys.ini");
 	}
 
 	void ReadINI()
 	{
-		// TODO: read INI
+		for (int i = 0; i < _ARRAYSIZE(CustomHotkeys); ++i)
+		{
+			unsigned short combo = GetPrivateProfileIntA(INI_SECTION, CustomHotkeys[i].sInternalName, 0xFFFF, IniPath);
+			if (combo != 0xFFFF)
+			{
+				CustomHotkeys[i].kCombo.data = combo;
+			}
+		}
+	}
+
+	void SaveINI()
+	{
+		char buffer[0x10];
+		for (int i = 0; i < _ARRAYSIZE(CustomHotkeys); ++i)
+		{
+			_itoa(CustomHotkeys[i].kCombo.data, buffer, 10);
+			WritePrivateProfileStringA(INI_SECTION, CustomHotkeys[i].sInternalName, buffer, IniPath);
+		}
 	}
 
 	void RestoreDefaults()
@@ -116,6 +136,7 @@ namespace CustomRenderWindowHotkeys
 	void Init()
 	{
 		InitHooks();
+		SetupINIPath();
 		ReadINI();
 	}
 }
