@@ -2,6 +2,7 @@
 #include "GameTypes.h"
 #include "GameObjects.h"
 #include "GameAPI.h"
+#include "GeckUtility.h"
 
 #include <windows.h>
 #include <string>
@@ -56,7 +57,29 @@ namespace NavMeshPickPreventer
 		return false;
 	}
 
-	void AddLastRefToIgnoredList()
+	bool AddAllSelectedRefsToIgnoredList()
+	{
+		bool bItemsAdded = false;
+
+		auto selected = RenderWindow::SelectedData::GetSelected();
+		if (auto selectedFormIter = selected->selectedForms)
+		{
+			do
+			{
+				if (auto form = selectedFormIter->ref)
+				{
+					if (form->baseForm)
+					{
+						AddFormToIgnoredList(form->baseForm);
+						bItemsAdded = true;
+					}
+				}
+			} while (selectedFormIter = selectedFormIter->next);
+		}
+		return bItemsAdded;
+	}
+
+	bool AddLastRefToIgnoredList()
 	{
 		if (auto ref = LookupFormByID(lastPickedBaseFormID))
 		{
@@ -64,6 +87,7 @@ namespace NavMeshPickPreventer
 			{
 				ignoredRefs.Insert((UInt32*)lastPickedRefID);
 				Console_Print("Added %s (%08X) to ignored base forms list", ref->GetEditorID(), ref->refID);
+				return true;
 			}
 		}
 		else if (auto ref = LookupFormByID(lastPickedRefID))
@@ -72,8 +96,10 @@ namespace NavMeshPickPreventer
 			{
 				ignoredRefs.Insert((UInt32*)lastPickedRefID);
 				Console_Print("Added %s (%08X) to ignored refs list", ref->GetEditorID(), ref->refID);
+				return true;
 			}
 		}
+		return false;
 	}
 
 	LRESULT CALLBACK SubclassedListViewProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
@@ -202,7 +228,7 @@ namespace NavMeshPickPreventer
 	constexpr const char* INI_KEY = "sIgnoredPickEditorIDs";
 	std::vector<std::string> ReadIDs()
 	{
-		char buffer[0x1000];
+		char buffer[0x10000];
 		int len = GetPrivateProfileStringA(INI_SECTION, INI_KEY, "", buffer, sizeof(buffer), IniPath);
 
 		std::vector<std::string> ids;
@@ -254,9 +280,21 @@ namespace NavMeshPickPreventer
 		ReadINI();
 	}
 
-	void OnKeyDown()
+	void OnKeyDown(bool bShiftHeld)
 	{
-		AddLastRefToIgnoredList();
-		WriteINI();
+		bool bWriteINI = false;
+		if (bShiftHeld)
+		{
+			bWriteINI = AddAllSelectedRefsToIgnoredList();
+		}
+		else
+		{
+			bWriteINI = AddLastRefToIgnoredList();
+		}
+
+		if (bWriteINI)
+		{
+			WriteINI();
+		}
 	}
 }

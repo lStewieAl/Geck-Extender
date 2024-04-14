@@ -1154,6 +1154,10 @@ BOOL __stdcall RenderWindowCallbackHook(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 		case VK_LWIN:
 			SetFlycamMode(0);
 			break;
+
+		case 'K':
+			NavMeshPickPreventer::OnKeyDown(GetAsyncKeyState(VK_SHIFT) < 0);
+			break;
 		}
 	}
 	else if (msg == WM_RBUTTONDOWN) {
