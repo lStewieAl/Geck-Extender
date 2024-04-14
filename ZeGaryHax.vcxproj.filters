@@ -75,6 +75,7 @@
       <Filter>Events</Filter>
     </ClCompile>
     <ClCompile Include="CustomRenderWindowHotkeys.cpp" />
+    <ClCompile Include="NavMeshPickPreventer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Main.h" />
@@ -170,6 +171,7 @@
       <Filter>Events</Filter>
     </ClInclude>
     <ClInclude Include="CustomRenderWindowHotkeys.h" />
+    <ClInclude Include="NavMeshPickPreventer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

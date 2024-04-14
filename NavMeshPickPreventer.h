@@ -4,4 +4,5 @@ namespace NavMeshPickPreventer
 	void Init();
 	void OnKeyDown();
 	void PostLoadPlugins();
+	void ShowList();
 }

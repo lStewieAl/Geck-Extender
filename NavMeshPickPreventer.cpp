@@ -7,6 +7,8 @@
 #include <vector>
 #include <sstream>
 
+extern HWND g_MainHwnd;
+
 namespace NavMeshPickPreventer
 {
 	char IniPath[MAX_PATH];
@@ -45,7 +47,7 @@ namespace NavMeshPickPreventer
 		{
 			if (!ignoredRefs.IsInList((UInt32*)lastPickedRefID))
 			{
-				ignoredRefs.AddAt((UInt32*)lastPickedRefID, 0);
+				ignoredRefs.Insert((UInt32*)lastPickedRefID);
 				Console_Print("Added %s (%08X) to ignored base forms list", ref->GetEditorID(), ref->refID);
 			}
 		}
@@ -53,10 +55,63 @@ namespace NavMeshPickPreventer
 		{
 			if (!ignoredRefs.IsInList((UInt32*)lastPickedRefID))
 			{
-				ignoredRefs.AddAt((UInt32*)lastPickedRefID, 0);
+				ignoredRefs.Insert((UInt32*)lastPickedRefID);
 				Console_Print("Added %s (%08X) to ignored refs list", ref->GetEditorID(), ref->refID);
 			}
 		}
+	}
+
+	LRESULT CALLBACK SubclassedListViewProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
+	{
+		if (uMsg == WM_KEYDOWN)
+		{
+			if (wParam == 'A' && GetAsyncKeyState(VK_CONTROL) < 0)
+			{
+				SelectAllItemsInListView(hWnd);
+			}
+			else if (wParam == VK_DELETE)
+			{
+				int iSelected = -1;
+				while ((iSelected = ListView_GetNextItem(hWnd, iSelected, LVNI_SELECTED)) != -1)
+				{
+					if (auto form = GetNthListForm(hWnd, iSelected))
+					{
+						ignoredRefs.Remove((UInt32*)form->refID);
+					}
+					ListView_DeleteItem(hWnd, iSelected);
+					iSelected--; // because the indices shift after deletion, decrement iSelected to ensure no item is skipped
+				}
+				return true;
+			}
+		}
+
+		return DefSubclassProc(hWnd, uMsg, wParam, lParam);
+	}
+
+	void SubclassListView(HWND hListView)
+	{
+		SetWindowSubclass(hListView, SubclassedListViewProc, 0, 0);
+	}
+
+	WNDPROC originalWindowCallback;
+	LRESULT CALLBACK WindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+	{
+		auto result = CallWindowProc(originalWindowCallback, Hwnd, Message, wParam, lParam);
+		if (Message == WM_INITDIALOG)
+		{
+			// prevent the delete button deleting items from the list as it's misleading if users expect it to actually remove modified forms
+			auto listView = GetDlgItem(Hwnd, 1018);
+			SubclassListView(listView);
+		}
+		return result;
+	}
+
+	void ShowList()
+	{
+		originalWindowCallback = *(WNDPROC*)0x44BB19;
+		HINSTANCE hInstance = (HINSTANCE)GetModuleHandle(nullptr);
+		auto hWnd = CreateDialogParamA(hInstance, (LPCSTR)189, g_MainHwnd, (DLGPROC)WindowCallback, (LPARAM)((char*)(&ignoredRefs)) - 0xC);
+		SendMessageA(hWnd, WM_SETTEXT, 0, (LPARAM)"Ignored Forms");
 	}
 
 	std::string ConcatenateIDs()

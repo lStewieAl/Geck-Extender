@@ -13,6 +13,7 @@
 #include "GameSettings.h"
 #include "FormSearch.h"
 #include "Settings.h"
+#include "NavMeshPickPreventer.h"
 
 #define GH_NAME				"ZeGaryHax"		// this is the string for IsPluginInstalled and GetPluginVersion (also shows in nvse.log)
 #define GH_VERSION			0.41
@@ -2191,21 +2192,6 @@ int __stdcall OnMasterFileNotMatchedPopupSkipIfVersionControlDisabled(HWND hWnd,
 bool bSelectedFormsListInUse;
 tList<TESForm> selectedForms;
 
-TESForm* GetNthListItem(HWND hWnd, int n)
-{
-	if (n == -1)
-	{
-		return 0;
-	}
-
-	LVITEMA itemA;
-	memset(&itemA, 0, sizeof(itemA));
-	itemA.iItem = n;
-	itemA.mask = LVIS_CUT;
-	SendMessageA(hWnd, LVM_GETITEMA, 0, (LPARAM)&itemA);
-	return (TESForm*)itemA.lParam;
-}
-
 TESForm* __cdecl OnCloseSelectFormsDialogPopulateList(HWND hWnd)
 {
 	if (!hWnd)
@@ -2214,7 +2200,7 @@ TESForm* __cdecl OnCloseSelectFormsDialogPopulateList(HWND hWnd)
 	}
 	unsigned int index = SendMessageA(hWnd, LVM_GETNEXTITEM, 0xFFFFFFFF, LVIS_SELECTED);
 
-	auto result = GetNthListItem(hWnd, index);
+	auto result = GetNthListForm(hWnd, index);
 	if (result && bSelectedFormsListInUse)
 	{
 		selectedForms.AddAt(result, -2);
@@ -2223,7 +2209,7 @@ TESForm* __cdecl OnCloseSelectFormsDialogPopulateList(HWND hWnd)
 			auto startIndex = index;
 			index = SendMessageA(hWnd, LVM_GETNEXTITEM, startIndex, LVIS_SELECTED);
 
-			if (auto form = GetNthListItem(hWnd, index))
+			if (auto form = GetNthListForm(hWnd, index))
 			{
 				selectedForms.AddAt(form, -2);
 			}
@@ -2753,7 +2739,7 @@ void CopySelectedListViewItemData(HWND listView, std::function<void(std::string&
 	// Iterate over all selected items
 	while ((index = SendMessageA(listView, LVM_GETNEXTITEM, index, LVNI_SELECTED)) != -1)
 	{
-		if (auto form = GetNthListItem(listView, index))
+		if (auto form = GetNthListForm(listView, index))
 		{
 			aggregator(aggregatedText, form);
 		}
