@@ -611,6 +611,21 @@ void SelectAllItemsInListView(HWND listView)
 	}
 }
 
+TESForm* GetNthListForm(HWND hWnd, int n)
+{
+	if (n == -1)
+	{
+		return 0;
+	}
+
+	LVITEMA itemA;
+	memset(&itemA, 0, sizeof(itemA));
+	itemA.iItem = n;
+	itemA.mask = LVIS_CUT;
+	SendMessageA(hWnd, LVM_GETITEMA, 0, (LPARAM)&itemA);
+	return (TESForm*)itemA.lParam;
+}
+
 void SetDeferListUpdate(HWND hWnd, bool bDefer)
 {
 	if (bDefer)

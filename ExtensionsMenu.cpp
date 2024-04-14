@@ -6,6 +6,7 @@
 #include "FormSearch.h"
 #include "ModifiedFormViewer.h"
 #include "Settings.h"
+#include "NavMeshPickPreventer.h"
 
 #define UI_EXTMENU_ID			51001
 #define UI_EXTMENU_SHOWLOG		51002
@@ -27,6 +28,7 @@
 #define UI_EXTMENU_TOGGLENAVEMESHBISECT 51018
 #define UI_EXTMENU_LOOKUPFORM 51019
 #define UI_EXTMENU_VIEW_MODIFIED_FORMS 51020
+#define UI_EXTMENU_VIEW_NAVMESH_IGNORED_FORMS 51021
 #define MAIN_WINDOW_CALLBACK 0xFEED
 
 // unused button in vanilla menu
@@ -112,7 +114,7 @@ bool EditorUI_CreateExtensionMenu(HWND MainWindow, HMENU MainMenu)
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_SEPARATOR, (UINT_PTR)UI_EXTMENU_SPACER, "");
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_LOOKUPFORM, "Lookup Form");
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_VIEW_MODIFIED_FORMS, "View Modified Forms");
-
+	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_VIEW_NAVMESH_IGNORED_FORMS, "View Navmesh Ignored Forms");
 
 	MENUITEMINFO menuInfo;
 	memset(&menuInfo, 0, sizeof(MENUITEMINFO));
@@ -390,6 +392,12 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 		case UI_EXTMENU_VIEW_MODIFIED_FORMS:
 		{
 			ModifiedFormViewer::Show();
+		}
+		return 0;
+
+		case UI_EXTMENU_VIEW_NAVMESH_IGNORED_FORMS:
+		{
+			NavMeshPickPreventer::ShowList();
 		}
 		return 0;
 

@@ -275,6 +275,7 @@ char* GameHeapStrdup(const char* src);
 BOOL CopyTextToClipboard(const char* text);
 
 void SelectAllItemsInListView(HWND listView);
+TESForm* GetNthListForm(HWND hWnd, int n);
 void SetDeferListUpdate(HWND hWnd, bool bDefer = true);
 bool IsDialog(HWND hWnd);
 

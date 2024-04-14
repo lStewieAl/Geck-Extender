@@ -37,6 +37,7 @@
 #include "OutOfMemoryHelper.h"
 #include "BetterFloatingFormList.h"
 #include "Settings.h"
+#include "NavMeshPickPreventer.h"
 #include "CustomRenderWindowHotkeys.h"
 
 #include "Events/EventManager.h"
@@ -81,6 +82,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	_DMESSAGE("Geck Extender Base Address: %08X", GetModuleHandle("ZeGaryHax.dll"));
 	ReadAllSettings();
 	EventManager::InitHooks();
+
+	DisableProcessWindowsGhosting();
 
 	//	stop geck crash with bUseMultibounds = 0 in exterior cells with multibounds - credit to roy
 	WriteRelCall(0x004CA48F, (UInt32)FixMultiBounds);
@@ -796,6 +799,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	CustomRenderWindowHotkeys::Init();
 
+	NavMeshPickPreventer::Init();
+	DataLoadEvent::RegisterCallback(NavMeshPickPreventer::PostLoadPlugins);
 	if (config.bPlaySoundEndOfLoading)
 	{
 		DataLoadEvent::RegisterCallback(PlayMouseClickSound);

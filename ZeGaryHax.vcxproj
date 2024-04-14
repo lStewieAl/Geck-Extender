@@ -157,6 +157,7 @@ copy "$(TargetPath)" "$(FalloutNVPath)\Data\nvse\plugins\$(TargetFileName)"
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="NavMeshPickPreventer.cpp" />
     <ClCompile Include="nvse\GameAPI.cpp" />
     <ClCompile Include="nvse\GameBSExtraData.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -247,6 +248,7 @@ copy "$(TargetPath)" "$(FalloutNVPath)\Data\nvse\plugins\$(TargetFileName)"
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="NavMeshPickPreventer.h" />
     <ClInclude Include="nvse\CommandTable.h" />
     <ClInclude Include="nvse\GameAPI.h" />
     <ClInclude Include="nvse\GameBSExtraData.h" />

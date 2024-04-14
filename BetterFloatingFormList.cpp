@@ -1,3 +1,4 @@
+#include "BetterFloatingFormList.h"
 #include <commctrl.h>
 #include "GameObjects.h"
 #include "GECKUtility.h"
@@ -81,6 +82,7 @@ namespace BetterFloatingFormList
 			{
 				tList<TESForm> formsList;
 				formsList.Init();
+				int numItemsAdded = 0;
 				do
 				{
 					if (auto form = selectedFormIter->ref)
@@ -88,15 +90,22 @@ namespace BetterFloatingFormList
 						if (!IsFormInListView(listView, form))
 						{
 							formsList.Insert(form);
+							++numItemsAdded;
 						}
 					}
 				} while (selectedFormIter = selectedFormIter->next);
 
-				SetDeferListUpdate(listView, true);
-				CdeclCall(0x47E410, listView, &formsList, nullptr, nullptr);
-				SetDeferListUpdate(listView, false);
+				if (numItemsAdded)
+				{
+					SetDeferListUpdate(listView, true);
+					CdeclCall(0x47E410, listView, &formsList, nullptr, nullptr);
 
-				formsList.RemoveAll();
+					SendMessageA(listView, BFL_ADDED_ITEMS, (WPARAM)&formsList, numItemsAdded);
+
+					SetDeferListUpdate(listView, false);
+
+					formsList.RemoveAll();
+				}
 			}
 			break;
 		}
