@@ -132,8 +132,8 @@ static void DoModScriptWindow(HWND wnd)
 	SendMessage(wnd, EM_EXLIMITTEXT, 0, 0x00FFFFFF);
 
 	GetPrivateProfileStringA("Script", "Font", "Consolas", editorFont.lfFaceName, 31, IniPath);
-	editorFont.lfHeight = GetOrCreateINIInt("Script", "FontSize", 13, IniPath);
-	editorFont.lfWeight = GetOrCreateINIInt("Script", "FontWeight", FW_MEDIUM, IniPath);
+	editorFont.lfHeight = GetOrCreateINIValue("Script", "FontSize", 13, IniPath);
+	editorFont.lfWeight = GetOrCreateINIValue("Script", "FontWeight", FW_MEDIUM, IniPath);
 
 	// try something nice, otherwise fall back on SYSTEM_FIXED_FONT
 	fontHandle = CreateFontIndirect(&editorFont);
@@ -1536,10 +1536,10 @@ BOOL __stdcall HavokPreviewCallback(HWND hWnd, UINT Message, WPARAM wParam, LPAR
 		SendMessageA(trackbar, TBM_SETTICFREQ, 10, 0);
 		SendDlgItemMessageA(hWnd, ID_ANIMATIONSPEED_EDIT, WM_SETTEXT, NULL, (LPARAM)"1.00");
 
-		config.iPreviewWindowRed = GetOrCreateINIInt("Preview Window", "iBackgroundRed", 127, IniPath);
-		config.iPreviewWindowGreen = GetOrCreateINIInt("Preview Window", "iBackgroundGreen", 127, IniPath);
-		config.iPreviewWindowBlue = GetOrCreateINIInt("Preview Window", "iBackgroundBlue", 127, IniPath);
-		int landHeight = GetOrCreateINIInt("Preview Window", "iLandHeight", 50, IniPath);
+		config.iPreviewWindowRed = GetOrCreateINIValue("Preview Window", "iBackgroundRed", 127, IniPath);
+		config.iPreviewWindowGreen = GetOrCreateINIValue("Preview Window", "iBackgroundGreen", 127, IniPath);
+		config.iPreviewWindowBlue = GetOrCreateINIValue("Preview Window", "iBackgroundBlue", 127, IniPath);
+		int landHeight = GetOrCreateINIValue("Preview Window", "iLandHeight", 50, IniPath);
 
 		SendDlgItemMessageA(hWnd, 2543, TBM_SETPOS, 1u, landHeight);
 

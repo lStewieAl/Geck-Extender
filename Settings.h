@@ -66,11 +66,13 @@ struct Settings
 	int iRenderFOV;
 
 	UInt8 iPreviewWindowRed, iPreviewWindowGreen, iPreviewWindowBlue;
+
+	char* sLaunchExeName;
 };
 
 extern Settings config;
 extern char IniPath[MAX_PATH];
 
-int GetOrCreateINIInt(const char* sectionName, const char* keyName, int defaultValue, const char* filename);
-
+int GetOrCreateINIValue(const char* sectionName, const char* keyName, int defaultValue, const char* filename);
+char* GetOrCreateINIValue(const char* sectionName, const char* keyName, const char* defaultValue, const char* filename);
 void ReadAllSettings();

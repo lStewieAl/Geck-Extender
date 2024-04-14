@@ -101,14 +101,14 @@ LRESULT CALLBACK EditorUI_LogWndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPA
 		format.dwMask = CFM_FACE | CFM_SIZE | CFM_WEIGHT;
 
 		// Convert Twips to points (1 point = 20 Twips)
-		int pointSize = GetOrCreateINIInt("Log", "FontSize", 10, IniPath) * 20;
+		int pointSize = GetOrCreateINIValue("Log", "FontSize", 10, IniPath) * 20;
 		format.yHeight = pointSize;
 
 		char fontNameBuf[32];
 		GetPrivateProfileStringA("Log", "Font", "Consolas", fontNameBuf, 31, IniPath);
 		mbstowcs(format.szFaceName, fontNameBuf, 31);
 
-		format.wWeight = (WORD)GetOrCreateINIInt("Log", "FontWeight", FW_MEDIUM, IniPath);
+		format.wWeight = (WORD)GetOrCreateINIValue("Log", "FontWeight", FW_MEDIUM, IniPath);
 		SendMessageA(richEditHwnd, EM_SETCHARFORMAT, SCF_ALL, (LPARAM)&format);
 
 		//	Subscribe to EN_MSGFILTER and EN_SELCHANGE

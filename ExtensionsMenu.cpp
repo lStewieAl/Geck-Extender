@@ -280,9 +280,7 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 				EditorUI_AddRenderWindowShowPortalsCheckbox(Hwnd, createInfo->hInstance);
 			}
 
-			// insert a Launch Game button if an executable was specified in the ini
-			char buf[MAX_PATH];
-			if (GetPrivateProfileStringA("Launch Game", "ExecutableName", "", buf, MAX_PATH, IniPath))
+			if (*config.sLaunchExeName)
 			{
 				InsertMenu(createInfo->hMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_LAUNCHGAME, "Launch Game");
 			}
@@ -537,15 +535,11 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 
 		case UI_EXTMENU_LAUNCHGAME:
 		{
-			char falloutNVPath[MAX_PATH];
-			strcpy(falloutNVPath, (const char*)0xECFE30); // current dir from command line args
-			strcat(falloutNVPath, "\\");
-
-			char nvExeName[MAX_PATH];
-			GetPrivateProfileStringA("Launch Game", "ExecutableName", "FalloutNV.exe", nvExeName, MAX_PATH, IniPath);
-			strcat(falloutNVPath, nvExeName);
-
-			ShellExecuteA(0, 0, falloutNVPath, 0, 0, 1);
+			char exePath[MAX_PATH];
+			auto commandLineDir = (const char*)0xECFE30;
+			_snprintf(exePath, sizeof(exePath), "%s\\%s", commandLineDir, config.sLaunchExeName);
+			exePath[sizeof(exePath) - 1] = '\0'; // ensure exePath is null terminated
+			ShellExecuteA(0, 0, exePath, 0, 0, 1);
 		}
 		return 0;
 
