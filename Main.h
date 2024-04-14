@@ -2968,3 +2968,20 @@ void __cdecl RenderPreferences_PostPopulateList(HWND hWnd)
 	auto sortColumn = GetWindowLongA(hDlg, -21);
 	SendMessageA(hDlg, LVM_SORTITEMS, sortColumn, (LPARAM)0x412C10); // RenderWindowHotkeys::CompareFn
 }
+
+void __cdecl OnInitRenderWindowComboBox(HWND hWnd, const CHAR* text, LPARAM item, char bUpdateExtents)
+{
+	CdeclCall(0x419BC0, hWnd, text, item, bUpdateExtents);
+
+	short c = 0;
+	c = MapVirtualKeyA(VK_OEM_4, MAPVK_VK_TO_CHAR);
+	CdeclCall(0x419BC0, hWnd, &c, VK_OEM_4, bUpdateExtents);
+	c = MapVirtualKeyA(VK_OEM_5, MAPVK_VK_TO_CHAR);
+	CdeclCall(0x419BC0, hWnd, &c, VK_OEM_5, bUpdateExtents);
+
+	for (short c : { ';', '\'', ',', '.', '/' })
+	{
+		CdeclCall(0x419BC0, hWnd, &c, c, bUpdateExtents);
+	}
+	CdeclCall(0x419BC0, hWnd, "<TILDE>", '`', bUpdateExtents);
+}

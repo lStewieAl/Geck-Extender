@@ -791,6 +791,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x413653, UInt32(OnInsertRenderPreferencesComboHotkey));
 	WriteRelJump(0x412E6E, UInt32(OnSelectRenderPreferencesComboHook));
 
+	// add support for more keys to render window preferences
+	WriteRelCall(0x4137D5, UInt32(OnInitRenderWindowComboBox));
+
 	CustomRenderWindowHotkeys::Init();
 
 	if (config.bPlaySoundEndOfLoading)
