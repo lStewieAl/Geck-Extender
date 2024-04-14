@@ -37,6 +37,7 @@
 #include "OutOfMemoryHelper.h"
 #include "BetterFloatingFormList.h"
 #include "Settings.h"
+#include "NavMeshPickPreventer.h"
 #include "CustomRenderWindowHotkeys.h"
 
 #include "Events/EventManager.h"
@@ -796,6 +797,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	CustomRenderWindowHotkeys::Init();
 
+	NavMeshPickPreventer::Init();
+	DataLoadEvent::RegisterCallback(NavMeshPickPreventer::PostLoadPlugins);
 	if (config.bPlaySoundEndOfLoading)
 	{
 		DataLoadEvent::RegisterCallback(PlayMouseClickSound);
