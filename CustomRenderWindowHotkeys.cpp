@@ -3,6 +3,8 @@
 #include "GameData.h"
 #include "GameSettings.h"
 #include "GECKUtility.h"
+#include "NavMeshPickPreventer.h"
+
 #include <CommCtrl.h>
 
 namespace CustomRenderWindowHotkeys
@@ -80,7 +82,9 @@ namespace CustomRenderWindowHotkeys
 		kHotkey_FIRST,
 		kHotkey_ToggleShowLightMarkers = kHotkey_FIRST,
 		kHotkey_SetAllObjectsVisible,
-		kHotkey_PlaceXMarker
+		kHotkey_PlaceXMarker,
+		kHotkey_NavMeshIgnoreLastPick,
+		kHotkey_NavMeshIgnoreSelectedPicks,
 	};
 
 	static RenderWindowHotkey CustomHotkeys[] =
@@ -88,6 +92,8 @@ namespace CustomRenderWindowHotkeys
 		RenderWindowHotkey("Toggle Show Light Markers", "ToggleShowLightMarkers", 'I', RenderWindowHotkey::kRenderWindowPreferenceFlag_NONE, RenderWindowHotkey::kRenderHotkeyCategory_Visibility),
 		RenderWindowHotkey("Set All Objects Visible", "SetAllObjectsVisible", VK_OEM_4, RenderWindowHotkey::kRenderWindowPreferenceFlag_NONE, RenderWindowHotkey::kRenderHotkeyCategory_Visibility),
 		RenderWindowHotkey("Place XMarker", "PlaceXMarker", 'O'),
+		RenderWindowHotkey("Navmesh: Ignore Last Picked Form", "NavMeshIgnoreLastPick", 'K', RenderWindowHotkey::kRenderWindowPreferenceFlag_Navmesh, RenderWindowHotkey::kRenderHotkeyCategory_Navmesh),
+		RenderWindowHotkey("Navmesh: Ignore Selected Forms", "NavMeshIgnoreSelectedPicks", 'K', RenderWindowHotkey::kRenderWindowPreferenceFlag_Shift, RenderWindowHotkey::kRenderHotkeyCategory_Navmesh),
 	};
 
 	void HandleHotkey(UInt32 hotkey)
@@ -104,6 +110,14 @@ namespace CustomRenderWindowHotkeys
 
 		case kHotkey_SetAllObjectsVisible:
 			SetAllObjectsVisible();
+			break;
+
+		case kHotkey_NavMeshIgnoreLastPick:
+			NavMeshPickPreventer::OnKeyDown(false);
+			break;
+
+		case kHotkey_NavMeshIgnoreSelectedPicks:
+			NavMeshPickPreventer::OnKeyDown(true);
 			break;
 		}
 	}
