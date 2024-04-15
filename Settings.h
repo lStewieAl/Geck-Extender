@@ -51,6 +51,9 @@ struct Settings
 	int bNoFacegenCompression;
 	int bPreserveTimestamps;
 	int bNoDirtyCellWhenNonPersistentRefsDeleted;
+	bool bHideRenderWindow;
+	bool bHideObjectWindow;
+	bool bHideCellViewWindow;
 
 	int bUseAltShiftMultipliers;
 	float fMovementAltMultiplier;

@@ -2992,3 +2992,23 @@ __declspec(naked) void CellViewWindowResizeFixHook()
 		jmp eax
 	}
 }
+
+void __cdecl HideCSMainDialogsStartup(WPARAM wParam, LPARAM lParam)
+{
+	if (config.bHideRenderWindow)
+	{
+		SendMessage(g_MainHwnd, WM_COMMAND, 40198, NULL); // kMainMenu_View_RenderWindow
+	}
+
+	if (config.bHideObjectWindow)
+	{
+		SendMessage(g_MainHwnd, WM_COMMAND, 40199, NULL); // kMainMenu_View_ObjectWindow
+	}
+
+	if (config.bHideCellViewWindow)
+	{
+		SendMessage(g_MainHwnd, WM_COMMAND, 40200, NULL); // kMainMenu_View_CellWindow
+	}
+
+	return CdeclCall(0x4657A0, wParam, lParam);
+}

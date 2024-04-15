@@ -75,6 +75,10 @@ void ReadAllSettings()
 	config.bCacheComboboxes = GetOrCreateINIValue("Dialog", "bCacheComboboxes", 1, IniPath) != 0;
 
 	config.sLaunchExeName = GetOrCreateINIValue("Launch Game", "ExecutableName", "FalloutNV.exe", IniPath);
+
+	config.bHideRenderWindow = GetOrCreateINIValue("Windows", "bHideRenderWindow", 0, IniPath);
+	config.bHideObjectWindow = GetOrCreateINIValue("Windows", "bHideObjectWindow", 0, IniPath);
+	config.bHideCellViewWindow = GetOrCreateINIValue("Windows", "bHideCellViewWindow", 0, IniPath);
 }
 
 #define INI_SETTING_NOT_FOUND -1

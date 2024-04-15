@@ -803,6 +803,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// fix the cell view bunching up when resizing it the first time after loading a cell (ShadeMe)
 	WriteRelJump(0x42EA05, UInt32(CellViewWindowResizeFixHook));
 
+	// options to hide the cell/object/render windows at startup (ShadeMe)
+	WriteRelCall(0x446594, UInt32(HideCSMainDialogsStartup));
+
 	CustomRenderWindowHotkeys::Init();
 
 	NavMeshPickPreventer::Init();
