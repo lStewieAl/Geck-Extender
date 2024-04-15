@@ -2971,3 +2971,24 @@ void __cdecl OnInitRenderWindowComboBox(HWND hWnd, const CHAR* text, LPARAM item
 	}
 	CdeclCall(0x419BC0, hWnd, "<TILDE>", '`', bUpdateExtents);
 }
+
+__declspec(naked) void CellViewWindowResizeFixHook()
+{
+	static bool bDoOnce;
+	_asm
+	{
+		cmp bDoOnce, 0
+		jne skip
+
+		mov bDoOnce, 1
+		mov ebx, dword ptr ds : [0x00D23554]
+		mov eax, 0x42EA0B
+		jmp eax
+
+	skip:
+		push GWL_STYLE
+		push dword ptr ds : [0xECF548] // CellView::pObjectListHdlg
+		mov eax, 0x42EEFB
+		jmp eax
+	}
+}

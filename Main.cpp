@@ -712,7 +712,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	if (config.bPreserveTimestamps)
 	{
-		// preserve file times when saving
+		// preserve file times when saving (ShadeMe)
 		WriteRelCall(0x4D9A0E, UInt32(PreSaveStoreFileTime));
 		WriteRelCall(0x4DA14D, UInt32(PostSaveRestoreFileTime));
 	}
@@ -796,6 +796,12 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	// add support for more keys to render window preferences
 	WriteRelCall(0x4137D5, UInt32(OnInitRenderWindowComboBox));
+
+	// remove superfluous call to invalidate the cell view window's cell list (ShadeMe)
+	SafeWrite16(0x4309D4, 0x2AEB);
+
+	// fix the cell view bunching up when resizing it the first time after loading a cell (ShadeMe)
+	WriteRelJump(0x42EA05, UInt32(CellViewWindowResizeFixHook));
 
 	CustomRenderWindowHotkeys::Init();
 
