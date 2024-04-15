@@ -806,6 +806,14 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// options to hide the cell/object/render windows at startup (ShadeMe)
 	WriteRelCall(0x446594, UInt32(HideCSMainDialogsStartup));
 
+	// prevent minimize anim when toggling main window visibilities (ShadeMe)
+	SafeWrite8(0x442255 + 1, SW_HIDE); // RenderWindow
+	SafeWrite8(0x441575 + 1, SW_HIDE); // CellWindow
+	SafeWrite8(0x4415D6 + 1, SW_HIDE); // ObjectsWindow
+
+	SafeWrite8(0x4CE7DA, 0xEB); // Skip calling InvalidateRect on the RenderWindow in TESDataHandler::CloseAllTES (ShadeMe)
+	SafeWrite8(0x46252B, 0); // RenderWindowCallback - pass bUpdateSelection = 0 when copying (ShadeMe)
+
 	CustomRenderWindowHotkeys::Init();
 
 	NavMeshPickPreventer::Init();
