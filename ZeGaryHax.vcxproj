@@ -131,11 +131,13 @@ copy "$(TargetPath)" "$(FalloutNVPath)\Data\nvse\plugins\$(TargetFileName)"
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="Detours.cpp" />
     <ClCompile Include="EasterEggs.cpp">
       <SubType>
       </SubType>
     </ClCompile>
     <ClCompile Include="Editor.cpp" />
+    <ClCompile Include="EditorUIDarkMode.cpp" />
     <ClCompile Include="Events\DataLoadEvent.cpp">
       <SubType>
       </SubType>
@@ -220,11 +222,13 @@ copy "$(TargetPath)" "$(FalloutNVPath)\Data\nvse\plugins\$(TargetFileName)"
       </SubType>
     </ClInclude>
     <ClInclude Include="DebugCellShaders.h" />
+    <ClInclude Include="Detours.h" />
     <ClInclude Include="EasterEggs.h">
       <SubType>
       </SubType>
     </ClInclude>
     <ClInclude Include="Editor.h" />
+    <ClInclude Include="EditorUIDarkMode.h" />
     <ClInclude Include="Events\DataLoadEvent.h">
       <SubType>
       </SubType>

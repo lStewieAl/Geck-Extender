@@ -54,6 +54,7 @@ struct Settings
 	bool bHideRenderWindow;
 	bool bHideObjectWindow;
 	bool bHideCellViewWindow;
+	bool bDarkMode;
 
 	int bUseAltShiftMultipliers;
 	float fMovementAltMultiplier;
