@@ -39,6 +39,7 @@ void ReadAllSettings()
 	config.bIgnoreD3D9 = GetOrCreateINIValue("General", "bIgnoreD3D9", 1, IniPath);
 	config.bNoRecordCompression = GetOrCreateINIValue("General", "bNoRecordCompression", 1, IniPath);
 	config.bPreserveTimestamps = GetOrCreateINIValue("General", "bPreserveTimestamps", 0, IniPath);
+	config.bDarkMode = GetOrCreateINIValue("General", "bDarkMode", 0, IniPath);
 	config.bNoDirtyCellWhenNonPersistentRefsDeleted = GetOrCreateINIValue("Experimental", "bNoDirtyCellWhenNonPersistentRefsDeleted", 0, IniPath);
 
 	config.bPatchScriptEditorFont = GetOrCreateINIValue("Script", "bPatchEditorFont", 1, IniPath);

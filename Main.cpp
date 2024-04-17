@@ -820,8 +820,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	NavMeshPickPreventer::Init();
 	DataLoadEvent::RegisterCallback(NavMeshPickPreventer::PostLoadPlugins);
-	bool bDarkMode = true;
-	if (bDarkMode)
+	if (config.bDarkMode)
 	{
 		auto comDll = reinterpret_cast<uintptr_t>(GetModuleHandle("comctl32.dll"));
 		Assert(comDll);
@@ -834,6 +833,11 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		if (result)
 		{
 			EditorUIDarkMode::Initialize();
+
+			// prevent the data dialog's listview from generating a mask for the checkmarks (to ensure visibility) - ShadeMe
+			SafeWrite8(0x430D66 + 1, LR_MONOCHROME);
+			SafeWrite16(0x430D6A + 1, 0xFFFF);
+			SafeWrite8(0x430D6A + 3, 0xFF);
 		}
 		else
 		{
