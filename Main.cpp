@@ -831,24 +831,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	DataLoadEvent::RegisterCallback(NavMeshPickPreventer::PostLoadPlugins);
 	if (config.bDarkMode)
 	{
-		auto comDll = reinterpret_cast<uintptr_t>(GetModuleHandle("comctl32.dll"));
-		Assert(comDll);
-
-		bool result = true;
-		result && Detours::IATHook(comDll, "USER32.dll", "GetSysColor", (uintptr_t)&EditorUIDarkMode::Comctl32GetSysColor);
-		result && Detours::IATHook(comDll, "USER32.dll", "GetSysColorBrush", (uintptr_t)&EditorUIDarkMode::Comctl32GetSysColorBrush);
-		result && Detours::IATDelayedHook(comDll, "UxTheme.dll", "DrawThemeBackground", (uintptr_t)&EditorUIDarkMode::Comctl32DrawThemeBackground);
-		result && Detours::IATDelayedHook(comDll, "UxTheme.dll", "DrawThemeText", (uintptr_t)&EditorUIDarkMode::Comctl32DrawThemeText);
-		if (result)
-		{
-			EditorUIDarkMode::Initialize();
-
-			// prevent the data dialog's listview from generating a mask for the checkmarks (to ensure visibility) - ShadeMe
-			SafeWrite8(0x430D66 + 1, LR_MONOCHROME);
-			SafeWrite16(0x430D6A + 1, 0xFFFF);
-			SafeWrite8(0x430D6A + 3, 0xFF);
-		}
-		else
+		if (!EditorUIDarkMode::Initialize())
 		{
 			Console_Print("DarkMode: Failed to initialize");
 		}
