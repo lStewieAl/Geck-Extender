@@ -824,6 +824,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		SafeWrite16(0x4463BA, 0x21EB);
 	}
 
+	// add array index check
+	WriteRelJump(0x4D1F28, UInt32(OnDataHandlerGetInteriorAtIndexHook));
+
 	NavMeshPickPreventer::Init();
 	DataLoadEvent::RegisterCallback(NavMeshPickPreventer::PostLoadPlugins);
 	if (config.bDarkMode)

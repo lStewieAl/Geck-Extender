@@ -3046,3 +3046,19 @@ void AddEditorNumericIDWarningHooks()
 {
 	WriteRelCall(0x4FB456, UInt32(OnSetEditorIDHook));
 }
+
+__declspec(naked) void OnDataHandlerGetInteriorAtIndexHook()
+{
+	_asm
+	{
+		cmp cx, word ptr ds : [esi + 0x1E6]
+		jge isNull
+		mov eax, [eax + ecx * 4]
+	done:
+		pop esi
+		ret 4
+	isNull:
+		xor eax, eax
+		jmp done
+	}
+}
