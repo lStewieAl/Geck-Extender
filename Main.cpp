@@ -818,6 +818,12 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	CustomRenderWindowHotkeys::Init();
 
+	if (config.bSkipSplashScreen)
+	{
+		SafeWrite16(0x446586, 0x05EB);
+		SafeWrite16(0x4463BA, 0x21EB);
+	}
+
 	NavMeshPickPreventer::Init();
 	DataLoadEvent::RegisterCallback(NavMeshPickPreventer::PostLoadPlugins);
 	if (config.bDarkMode)

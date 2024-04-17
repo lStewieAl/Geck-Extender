@@ -41,6 +41,8 @@ void ReadAllSettings()
 	config.bPreserveTimestamps = GetOrCreateINIValue("General", "bPreserveTimestamps", 0, IniPath);
 	config.bDarkMode = GetOrCreateINIValue("General", "bDarkMode", 0, IniPath);
 	config.bNumericEditorIdWarning = GetOrCreateINIValue("General", "bNumericEditorIdWarning", 0, IniPath);
+	config.bSkipSplashScreen = GetOrCreateINIValue("General", "bSkipSplashScreen", 0, IniPath);
+
 	config.bNoDirtyCellWhenNonPersistentRefsDeleted = GetOrCreateINIValue("Experimental", "bNoDirtyCellWhenNonPersistentRefsDeleted", 0, IniPath);
 
 	config.bPatchScriptEditorFont = GetOrCreateINIValue("Script", "bPatchEditorFont", 1, IniPath);
