@@ -321,15 +321,15 @@ public:
 	UInt32							nextCreatedRefID;		// 208	Init'd to FF000800 (in GECK init'd to nn000800)
 	ModInfo*						activeFile;					// 20C	last unselected mod in modList. GECK: active ESM
 	ModList							modList;				// 210
-	UInt8							unk618;					// 618	5A4
-	UInt8							unk619;					// 619
-	UInt8							unk61A;					// 61A	referenced during LoadForm (ie TESSpellList). bit 1 might mean refID to pointer conversion not done. For GECK means save in progress
-	UInt8							unk61B;					// 61B
-	UInt8							unk61C;					// 61C	5A8
-	UInt8							unk61D;					// 61D
-	UInt8							unk61E;					// 61E
-	UInt8							unk61F;					// 61F
-	UInt8							unk620;					// 620	5AC
+	UInt8							bMasterSave;			// 618
+	UInt8							bBlockSave;				// 619
+	UInt8							bSaveLoadGame;			// 61A
+	UInt8							bAutoSaving;			// 61B
+	UInt8							bExportingPlugin;		// 61C
+	UInt8							bClearingData;			// 61D
+	UInt8							bHasDesiredFiles;		// 61E
+	UInt8							bCheckingModels;		// 61F
+	UInt8							isAssignFormIDs;		// 620
 	UInt8							loading;				// 621	Init'd to 0 after loadForms
 	UInt8							unk622;					// 622	referenced during loading of modules. Compared with type = GameSetting but seems to always end up equal to 1.
 	UInt8							unk623;					// 623

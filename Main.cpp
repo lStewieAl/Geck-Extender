@@ -850,6 +850,11 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		DataLoadEvent::RegisterCallback(PlayMouseClickSound);
 	}
 
+	if (config.bNumericEditorIdWarning)
+	{
+		DataLoadEvent::RegisterCallback(AddEditorNumericIDWarningHooks);
+	}
+
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
 	{

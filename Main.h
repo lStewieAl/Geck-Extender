@@ -3012,3 +3012,37 @@ void __cdecl HideCSMainDialogsStartup(WPARAM wParam, LPARAM lParam)
 
 	return CdeclCall(0x4657A0, wParam, lParam);
 }
+
+void __fastcall DoNumericEditorIDCheck(TESForm* Form, const char* EditorID)
+{
+	if (!DataHandler::GetSingleton()->bSaveLoadGame &&
+		EditorID &&
+		*EditorID &&
+		isdigit((int)*EditorID) &&
+		(Form->flags & TESForm::kFormFlags_Temporary) == 0)
+	{
+		char buf[0x200];
+		snprintf(buf, sizeof(buf), 
+			"The editorID '%s' begins with an integer.\n\nWhile this is generally accepted by the engine, scripts referring this form might fail to run or compile as the script compiler might attempt to parse it as an integer.\nConsider beginning the editorID with a letter.\n\nThis warning can be disabled in the INI.",
+			EditorID);
+		MessageBoxA(nullptr, buf, "Warning", MB_TASKMODAL | MB_TOPMOST | MB_SETFOREGROUND | MB_OK);
+	}
+}
+
+__declspec(naked) void OnSetEditorIDHook()
+{
+	_asm
+	{
+		mov edx, [ebp + 8]
+		push ecx
+		call DoNumericEditorIDCheck
+		pop ecx
+		mov eax, dword ptr ds : [0xECC3C8]
+		ret
+	}
+}
+
+void AddEditorNumericIDWarningHooks()
+{
+	WriteRelCall(0x4FB456, UInt32(OnSetEditorIDHook));
+}

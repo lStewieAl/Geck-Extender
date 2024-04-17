@@ -55,6 +55,7 @@ struct Settings
 	bool bHideObjectWindow;
 	bool bHideCellViewWindow;
 	bool bDarkMode;
+	bool bNumericEditorIdWarning;
 
 	int bUseAltShiftMultipliers;
 	float fMovementAltMultiplier;

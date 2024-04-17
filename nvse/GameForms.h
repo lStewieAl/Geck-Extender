@@ -316,7 +316,7 @@ public:
 		kFormFlags_Modified = 0x2,
 		kFormFlags_Deleted =		0x20,
 		kFormFlags_QuestItem =		0x00000400,
-		kFormFlags_DontSaveForm =	0x00004000,	// TODO: investigate
+		kFormFlags_Temporary =	0x00004000,
 		kFormFlags_Compressed =		0x00040000,
 	};
 
