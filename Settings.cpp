@@ -44,7 +44,7 @@ void ReadAllSettings()
 	config.bNoDirtyCellWhenNonPersistentRefsDeleted = GetOrCreateINIValue("Experimental", "bNoDirtyCellWhenNonPersistentRefsDeleted", 0, IniPath);
 
 	config.bPatchScriptEditorFont = GetOrCreateINIValue("Script", "bPatchEditorFont", 1, IniPath);
-	config.bScriptCompileWarningPopup = GetOrCreateINIValue("Script", "bScriptCompileWarningPopup", 0, IniPath);
+	config.bScriptCompileWarningPopup = GetOrCreateINIValue("Script", "bScriptCompileWarningPopup", 1, IniPath);
 	config.bShowScriptChangeTypeWarning = GetOrCreateINIValue("Script", "bShowChangeScriptTypeWarning", 0, IniPath);
 
 	config.bAutoScroll = GetOrCreateINIValue("Log", "bAutoScroll", 1, IniPath);
