@@ -23,6 +23,7 @@
 #include "nvse/ParamInfos.h"
 #include "nvse/nvse_version.h"
 #include "xutil.h"
+#include "Detours.h"
 
 #include "Main.h"
 #include "ExtensionsMenu.h"
@@ -36,6 +37,7 @@
 #include "EasterEggs.h"
 #include "OutOfMemoryHelper.h"
 #include "BetterFloatingFormList.h"
+#include "EditorUIDarkMode.h"
 #include "Settings.h"
 #include "NavMeshPickPreventer.h"
 #include "CustomRenderWindowHotkeys.h"
@@ -818,6 +820,27 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	NavMeshPickPreventer::Init();
 	DataLoadEvent::RegisterCallback(NavMeshPickPreventer::PostLoadPlugins);
+	bool bDarkMode = true;
+	if (bDarkMode)
+	{
+		auto comDll = reinterpret_cast<uintptr_t>(GetModuleHandle("comctl32.dll"));
+		Assert(comDll);
+
+		bool result = true;
+		result && Detours::IATHook(comDll, "USER32.dll", "GetSysColor", (uintptr_t)&EditorUIDarkMode::Comctl32GetSysColor);
+		result && Detours::IATHook(comDll, "USER32.dll", "GetSysColorBrush", (uintptr_t)&EditorUIDarkMode::Comctl32GetSysColorBrush);
+		result && Detours::IATDelayedHook(comDll, "UxTheme.dll", "DrawThemeBackground", (uintptr_t)&EditorUIDarkMode::Comctl32DrawThemeBackground);
+		result && Detours::IATDelayedHook(comDll, "UxTheme.dll", "DrawThemeText", (uintptr_t)&EditorUIDarkMode::Comctl32DrawThemeText);
+		if (result)
+		{
+			EditorUIDarkMode::Initialize();
+		}
+		else
+		{
+			Console_Print("DarkMode: Failed to initialize");
+		}
+	}
+
 	if (config.bPlaySoundEndOfLoading)
 	{
 		DataLoadEvent::RegisterCallback(PlayMouseClickSound);

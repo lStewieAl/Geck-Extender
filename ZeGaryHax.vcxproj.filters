@@ -76,6 +76,10 @@
     </ClCompile>
     <ClCompile Include="CustomRenderWindowHotkeys.cpp" />
     <ClCompile Include="NavMeshPickPreventer.cpp" />
+    <ClCompile Include="EditorUIDarkMode.cpp" />
+    <ClCompile Include="Detours.cpp">
+      <Filter>libs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Main.h" />
@@ -172,6 +176,10 @@
     </ClInclude>
     <ClInclude Include="CustomRenderWindowHotkeys.h" />
     <ClInclude Include="NavMeshPickPreventer.h" />
+    <ClInclude Include="EditorUIDarkMode.h" />
+    <ClInclude Include="Detours.h">
+      <Filter>libs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
