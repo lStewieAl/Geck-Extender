@@ -753,6 +753,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	originalObjectWindowCallback = *(WNDPROC*)0x4416A3;
 	SafeWrite32(0x4416A3, UInt32(ObjectWindowCallback));
 
+	originalCellWindowCallback = *(WNDPROC*)0x441648;
+	SafeWrite32(0x441648, UInt32(CellWindowCallback));
+
 	// fix the undo menu button for NavMesh
 	WriteRelCall(0x44104A, UInt32(OnMainWindowUndo));
 
@@ -767,6 +770,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	OutOfMemoryHelper::Init();
 
 	WriteRelCall(0x44B294, UInt32(OnSetupObjectAndCellWindowRightClickMenu));
+	WriteRelCall(0x42F2F5, UInt32(OnSetupObjectAndCellWindowRightClickMenu));
 
 	BetterFloatingFormList::Init();
 

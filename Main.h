@@ -2823,6 +2823,45 @@ LRESULT CALLBACK ObjectWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LP
 	return CallWindowProc(originalObjectWindowCallback, Hwnd, Message, wParam, lParam);
 }
 
+LRESULT CALLBACK CellWindowListViewCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
+{
+	if (Message == WM_COMMAND)
+	{
+		if (HandlePopupMenuCommand(Hwnd, wParam))
+		{
+			return true;
+		}
+	}
+	return DefSubclassProc(Hwnd, Message, wParam, lParam);
+}
+
+WNDPROC originalCellWindowCallback;
+LRESULT CALLBACK CellWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+{
+	if (Message == WM_INITDIALOG)
+	{
+		auto pCellList = GetDlgItem(Hwnd, 1155);
+		auto pObjectList = GetDlgItem(Hwnd, 1156);
+		SetWindowSubclass(pCellList, CellWindowListViewCallback, 0, 0);
+		SetWindowSubclass(pObjectList, CellWindowListViewCallback, 0, 0);
+	}
+	else if (Message == WM_COMMAND)
+	{
+		HWND pChildWindowFromPoint = *(HWND*)0xECF504;
+		bool isObjects = pChildWindowFromPoint == *(HWND*)0xECF548;
+		bool isCells = pChildWindowFromPoint == *(HWND*)0xECF57C;
+		if (isObjects || isCells)
+		{
+			int listId = isObjects ? 1156 : 1155;
+			if (HandlePopupMenuCommand(GetDlgItem(Hwnd, listId), wParam))
+			{
+				return true;
+			}
+		}
+	}
+	return CallWindowProc(originalCellWindowCallback, Hwnd, Message, wParam, lParam);
+}
+
 void __fastcall OnMainWindowUndo(HistoryManager* historyMgr, void* edx, int formal)
 {
 	if (NavMeshManager::IsActive())
