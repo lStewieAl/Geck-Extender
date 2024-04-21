@@ -2641,8 +2641,7 @@ __declspec(naked) void OnObjectWindowNewHook()
 	}
 }
 
-WNDPROC originalObjectWindowListViewProc;
-LRESULT CALLBACK ObjectWindowListViewCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK ObjectWindowListViewCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
 {
 	if (Message == WM_KEYDOWN)
 	{
@@ -2651,12 +2650,12 @@ LRESULT CALLBACK ObjectWindowListViewCallback(HWND Hwnd, UINT Message, WPARAM wP
 			if (wParam == 'G')
 			{
 				FormSearch::Show();
-				return TRUE;
+				return FALSE;
 			}
 			else if (wParam == 'F')
 			{
 				SetFocus(GetDlgItem(GetParent(Hwnd), 2557));
-				return TRUE;
+				return FALSE;
 			}
 		}
 		else if (wParam == VK_RETURN)
@@ -2674,29 +2673,28 @@ LRESULT CALLBACK ObjectWindowListViewCallback(HWND Hwnd, UINT Message, WPARAM wP
 			int** nodeDatas = (int**)0xED0778;
 			int iCurrentNode = *(int*)0xED0770;
 			ThisCall(0x437540, nodeDatas[iCurrentNode], &item);
-			return TRUE;
+			return FALSE;
 		}
 	}
-	return CallWindowProc(originalObjectWindowListViewProc, Hwnd, Message, wParam, lParam);
+	return DefSubclassProc(Hwnd, Message, wParam, lParam);
 }
 
-WNDPROC originalObjectWindowFilterFieldProc;
-LRESULT CALLBACK ObjectWindowFilterFieldCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK ObjectWindowFilterFieldCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
 {
 	if (Message == WM_KEYDOWN && GetAsyncKeyState(VK_CONTROL) < 0)
 	{
 		if (wParam == 'A')
 		{
 			SendMessage(Hwnd, EM_SETSEL, 0, -1);
-			return TRUE;
+			return FALSE;
 		}
 		else if (wParam == 'F')
 		{
 			SetFocus(GetDlgItem(GetParent(Hwnd), 1041));
-			return TRUE;
+			return FALSE;
 		}
 	}
-	return CallWindowProc(originalObjectWindowFilterFieldProc, Hwnd, Message, wParam, lParam);
+	return DefSubclassProc(Hwnd, Message, wParam, lParam);
 }
 
 void RemoveSubMenuByHandle(HMENU parentMenu, HMENU submenuHandle) {
@@ -2809,15 +2807,10 @@ LRESULT CALLBACK ObjectWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LP
 	if (Message == WM_INITDIALOG)
 	{
 		HWND listView = GetDlgItem(Hwnd, 1041);
-		if (!originalObjectWindowListViewProc)
-		{
-			originalObjectWindowListViewProc = (WNDPROC)SetWindowLongPtr(listView, GWLP_WNDPROC, (LONG_PTR)ObjectWindowListViewCallback);
-		}
+		SetWindowSubclass(listView, ObjectWindowListViewCallback, 0, 0);
+
 		HWND filterField = GetDlgItem(Hwnd, 2557);
-		if (!originalObjectWindowFilterFieldProc)
-		{
-			originalObjectWindowFilterFieldProc = (WNDPROC)SetWindowLongPtr(filterField, GWLP_WNDPROC, (LONG_PTR)ObjectWindowFilterFieldCallback);
-		}
+		SetWindowSubclass(filterField, ObjectWindowFilterFieldCallback, 0, 0);
 	}
 	else if (Message == WM_COMMAND)
 	{
