@@ -2758,6 +2758,51 @@ void CopySelectedListViewItemData(HWND listView, std::function<void(std::string&
 	}
 }
 
+bool HandlePopupMenuCommand(HWND listView, UInt32 commandID)
+{
+	switch (commandID)
+	{
+	case COPY_EDITOR_ID_MENUID:
+	{
+		CopySelectedListViewItemData(listView, [](std::string& currentText, TESForm* form)
+			{
+				currentText += form->GetEditorID();
+				currentText += "\n";
+			}
+		);
+		return true;
+	}
+
+	case COPY_REF_ID_MENUID:
+	{
+		CopySelectedListViewItemData(listView, [](std::string& currentText, TESForm* form)
+			{
+				currentText += std::format("{:X}\n", form->refID);
+			}
+		);
+		return true;
+	}
+
+	case COPY_XEDIT_ID_MENUID:
+	{
+		CopySelectedListViewItemData(listView, [](std::string& currentText, TESForm* form)
+			{
+				// e.g. DLC03LvlEnclaveSquad01 "Enclave Squad Sigma" [NPC_:090057BE]
+				auto editorID = form->GetEditorID();
+				auto formName = form->GetTheName();
+				auto formTypeNames = (const char**)0xE94404;
+				auto formTypeName = formTypeNames[form->typeID * 3];
+				auto refID = form->refID;
+
+				currentText += std::format("{} \"{}\" [{}:{:08X}]\n", editorID, formName, formTypeName, refID);
+			}
+		);
+		return true;
+	}
+	}
+	return false;
+}
+
 WNDPROC originalObjectWindowCallback;
 LRESULT CALLBACK ObjectWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
@@ -2776,40 +2821,10 @@ LRESULT CALLBACK ObjectWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LP
 	}
 	else if (Message == WM_COMMAND)
 	{
-		if (wParam == COPY_EDITOR_ID_MENUID)
+		HWND listView = GetDlgItem(Hwnd, 1041);
+		if (HandlePopupMenuCommand(listView, wParam))
 		{
-			HWND listView = GetDlgItem(Hwnd, 1041);
-			CopySelectedListViewItemData(listView, [](std::string& currentText, TESForm* form)
-				{
-					currentText += form->GetEditorID();
-					currentText += "\n";
-				}
-			);
-		}
-		else if (wParam == COPY_REF_ID_MENUID)
-		{
-			HWND listView = GetDlgItem(Hwnd, 1041);
-			CopySelectedListViewItemData(listView, [](std::string& currentText, TESForm* form)
-				{
-					currentText += std::format("{:X}\n", form->refID);
-				}
-			);
-		}
-		else if (wParam == COPY_XEDIT_ID_MENUID)
-		{
-			HWND listView = GetDlgItem(Hwnd, 1041);
-			CopySelectedListViewItemData(listView, [](std::string& currentText, TESForm* form)
-				{
-					// e.g. DLC03LvlEnclaveSquad01 "Enclave Squad Sigma" [NPC_:090057BE]
-					auto editorID = form->GetEditorID();
-					auto formName = form->GetTheName();
-					auto formTypeNames = (const char**)0xE94404;
-					auto formTypeName = formTypeNames[form->typeID * 3];
-					auto refID = form->refID;
-
-					currentText += std::format("{} \"{}\" [{}:{:08X}]\n", editorID, formName, formTypeName, refID);
-				}
-			);
+			return true;
 		}
 	}
 	return CallWindowProc(originalObjectWindowCallback, Hwnd, Message, wParam, lParam);
