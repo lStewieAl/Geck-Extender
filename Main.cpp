@@ -766,7 +766,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	OutOfMemoryHelper::Init();
 
-	WriteRelCall(0x44B294, UInt32(OnSetupObjectWindowRightClickMenu));
+	WriteRelCall(0x44B294, UInt32(OnSetupObjectAndCellWindowRightClickMenu));
 
 	BetterFloatingFormList::Init();
 
@@ -826,6 +826,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	// add array index check
 	WriteRelJump(0x4D1F28, UInt32(OnDataHandlerGetInteriorAtIndexHook));
+
+	// fix geck calling a GWL_WNDPROC function pointer directly instead of using CallWindowProcA
+	WriteRelJump(0x48CABC, UInt32(OnRenderWindowCallProcHook));
 
 	NavMeshPickPreventer::Init();
 	DataLoadEvent::RegisterCallback(NavMeshPickPreventer::PostLoadPlugins);

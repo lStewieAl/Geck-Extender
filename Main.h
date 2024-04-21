@@ -2716,7 +2716,7 @@ constexpr UInt32 COPY_MENU_ID = 0x10001;
 constexpr UInt32 COPY_EDITOR_ID_MENUID = 0x10002;
 constexpr UInt32 COPY_REF_ID_MENUID = 0x10003;
 constexpr UInt32 COPY_XEDIT_ID_MENUID = 0x10004;
-void __cdecl OnSetupObjectWindowRightClickMenu(HMENU menu, LPPOINT cursorPos, HWND hWnd, HWND listView)
+void __cdecl OnSetupObjectAndCellWindowRightClickMenu(HMENU menu, LPPOINT cursorPos, HWND hWnd, HWND listView)
 {
 	HMENU hCopySubMenu = CreatePopupMenu();
 
@@ -3060,5 +3060,20 @@ __declspec(naked) void OnDataHandlerGetInteriorAtIndexHook()
 	isNull:
 		xor eax, eax
 		jmp done
+	}
+}
+
+__declspec(naked) void OnRenderWindowCallProcHook()
+{
+	_asm
+	{
+		push eax
+		call dword ptr ds : [0xD2346C] // CallWindowProcA
+		pop     edi
+		pop     esi
+		pop     ebp
+		pop     ebx
+		add     esp, 8
+		retn    0x10
 	}
 }
