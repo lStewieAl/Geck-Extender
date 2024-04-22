@@ -2,7 +2,12 @@
 #include <commctrl.h>
 #include "GameObjects.h"
 #include "GECKUtility.h"
+#include "GameAPI.h"
 #include "Utilities.h"
+
+#include <iostream>
+#include <fstream>
+#include <sstream>
 
 namespace BetterFloatingFormList
 {
@@ -107,8 +112,8 @@ namespace BetterFloatingFormList
 				if (numItemsAdded)
 				{
 					SetDeferListUpdate(listView, true);
-					CdeclCall(0x47E410, listView, &addedForms, nullptr, nullptr);
 
+					AddFormsToListView(listView, &addedForms);
 					SendMessageA(Hwnd, BFL_ADDED_ITEMS, (WPARAM)&addedForms, (LPARAM)listView);
 
 					SetDeferListUpdate(listView, false);
@@ -148,33 +153,69 @@ namespace BetterFloatingFormList
 		return ShowOpenFileDialog(hWnd, dst, dstLen, true);
 	}
 
-	void LoadFormListFromFile(const char* path)
+	void LoadFormListFromFile(HWND listView, const char* path)
 	{
-		Console_Print("Load: %s", path);
-		// TODO - implement...
+		std::ifstream file(path);
+
+		if (!file.is_open())
+		{
+			return;
+		}
+
+		tList<TESForm> forms;
+		forms.Init();
+
+		std::string line;
+		while (getline(file, line))
+		{
+			std::stringstream ss(line);
+			std::string formEditorId;
+
+			while (getline(ss, formEditorId, ','))
+			{
+				if (auto form = LookupFormByName(formEditorId.c_str()))
+				{
+					forms.Append(form);
+				}
+			}
+		}
+
+		file.close(); // Close the file when done
+
+		if (!forms.IsEmpty())
+		{
+			SetDeferListUpdate(listView, true);
+
+			SendMessageA(listView, LVM_DELETEALLITEMS, 0, 0);
+			AddFormsToListView(listView, &forms);
+
+			SetDeferListUpdate(listView, false);
+		}
+
+		forms.RemoveAll();
 	}
 
-	void SaveFormListToFile(const char* path)
+	void SaveFormListToFile(HWND listView, const char* path)
 	{
 		Console_Print("Save as: %s", path);
 		// TODO - implement...
 	}
 
-	void LoadFormList(HWND hWnd)
+	void LoadFormList(HWND listView)
 	{
 		char buf[MAX_PATH]; *buf = '\0';
-		if (ShowOpenFileDialog(hWnd, buf, sizeof(buf)))
+		if (ShowOpenFileDialog(listView, buf, sizeof(buf)))
 		{
-			LoadFormListFromFile(buf);
+			LoadFormListFromFile(listView, buf);
 		}
 	}
 
-	void SaveFormList(HWND hWnd)
+	void SaveFormList(HWND listView)
 	{
 		char buf[MAX_PATH]; *buf = '\0';
-		if (ShowSaveFileDialog(hWnd, buf, sizeof(buf)))
+		if (ShowSaveFileDialog(listView, buf, sizeof(buf)))
 		{
-			SaveFormListToFile(buf);
+			SaveFormListToFile(listView, buf);
 		}
 	}
 
@@ -239,10 +280,10 @@ namespace BetterFloatingFormList
 			switch (LOWORD(wParam))
 			{
 			case IDM_LOAD:
-				LoadFormList(Hwnd);
+				LoadFormList(GetDlgItem(Hwnd, 1018));
 				break;
 			case IDM_SAVE:
-				SaveFormList(Hwnd);
+				SaveFormList(GetDlgItem(Hwnd, 1018));
 				break;
 			}
 			break;
@@ -260,7 +301,7 @@ namespace BetterFloatingFormList
 	{
 		if (form)
 		{
-			form->OpenDialog(parent, 0, 0);
+			OpenForm(form, parent);
 		}
 	}
 
@@ -289,7 +330,7 @@ namespace BetterFloatingFormList
 
 	void __cdecl InitFormIdNameAndFormTypeColumns(HWND hWnd, WPARAM index, char* pszText, int width, int format)
 	{
-		width = 64;
+		width = 80;
 		CdeclCall(0x419F50, hWnd, index, pszText, width, format);
 		CdeclCall(0x419F50, hWnd, 2, "Name", width, format);
 		CdeclCall(0x419F50, hWnd, COLUMN_TYPE, "Type", width, format);

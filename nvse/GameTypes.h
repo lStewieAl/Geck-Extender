@@ -362,6 +362,10 @@ public:
 			return -1;
 	}
 
+	bool IsEmpty()
+	{
+		return !m_listHead.item && !m_listHead.next;
+	}
 };
 STATIC_ASSERT(sizeof(tList<void *>) == 0x8);
 

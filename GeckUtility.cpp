@@ -1,4 +1,5 @@
 #include "GECKUtility.h"
+#include "GameForms.h"
 
 void(__cdecl* SaveWindowPositionToINI)(HWND, const char*) = ((void(__cdecl*)(HWND hWnd, const char* Src))(0x43E170));
 HWND g_mainWindowToolbar = (HWND)0xECFC14;
@@ -173,3 +174,47 @@ bool NavMeshManager::IsActive() { return *(bool**)0xED1412; }
 void NavMeshManager::Undo() { ThisCall(0x4249F0, this); }
 
 tList<HWND>* OpenWindows::GetWindowList() { return (tList<HWND>*)0xED033C; }
+
+void AddFormsToListView(HWND listView, tList<TESForm>* forms, bool(__cdecl* filterFn)(TESForm*, void*), void* filterData)
+{
+	CdeclCall(0x47E410, listView, forms, filterFn, filterData);
+}
+
+void GetCellCoords(NiPoint3& pos, TESObjectCELL* cell)
+{
+	if (cell->IsInterior())
+	{
+		pos = NiPoint3::ZERO;
+	}
+	else
+	{
+		pos.x = 2048 + (cell->GetPosX() << 12);
+		pos.y = 2048 + (cell->GetPosY() << 12);
+		pos.z = 0;
+	}
+}
+
+void OpenForm(TESForm* form, HWND parentHwnd)
+{
+	if (form)
+	{
+		if (form->typeID == kFormType_Cell || form->typeID == kFormType_Land)
+		{
+			TESObjectCELL* cell = form->typeID == kFormType_Land
+				? (TESObjectCELL*)(UInt32(form) + 0x34) : (TESObjectCELL*)form;
+
+			NiPoint3 pos;
+			GetCellCoords(pos, cell);
+			CdeclCall(0x465490, &pos, cell);
+			if (!cell->IsInterior())
+			{
+				cell->GetLandHeight(&pos, &pos.z);
+				CdeclCall(0x4652D0, &pos);
+			}
+		}
+		else
+		{
+			form->OpenDialog(parentHwnd, 0, 1);
+		}
+	}
+}
