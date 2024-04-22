@@ -1,6 +1,7 @@
 #include "GECKUtility.h"
 #include "GameObjects.h"
 #include "Utilities.h"
+#include "BetterFloatingFormList.h"
 
 extern HWND g_MainHwnd;
 
@@ -29,10 +30,9 @@ namespace ModifiedFormViewer
 		SetWindowSubclass(hListView, SubclassedListViewProc, 0, 0);
 	}
 
-	WNDPROC originalWindowCallback;
 	LRESULT CALLBACK WindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 	{
-		auto result = CallWindowProc(originalWindowCallback, Hwnd, Message, wParam, lParam);
+		auto result = BetterFloatingFormList::BaseWindowCallback(Hwnd, Message, wParam, lParam);
 		if (Message == WM_INITDIALOG)
 		{
 			// prevent the delete button deleting items from the list as it's misleading if users expect it to actually remove modified forms
@@ -61,7 +61,6 @@ namespace ModifiedFormViewer
 			data.forms.Insert(modifiedForms->data[i]);
 		}
 
-		originalWindowCallback = *(WNDPROC*)0x44BB19;
 		HINSTANCE hInstance = (HINSTANCE)GetModuleHandle(nullptr);
 		auto hWnd = CreateDialogParamA(hInstance, (LPCSTR)189, g_MainHwnd, (DLGPROC)WindowCallback, (LPARAM)&data);
 		SendMessageA(hWnd, WM_SETTEXT, 0, (LPARAM)"Modified Forms");
