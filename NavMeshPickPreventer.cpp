@@ -57,6 +57,11 @@ namespace NavMeshPickPreventer
 		return false;
 	}
 
+	void RemoveFromIgnoredList(TESForm* form)
+	{
+		ignoredRefs.Remove((UInt32*)form->refID);
+	}
+
 	bool AddAllSelectedRefsToIgnoredList()
 	{
 		bool bItemsAdded = false;
@@ -102,38 +107,12 @@ namespace NavMeshPickPreventer
 		return false;
 	}
 
-	LRESULT CALLBACK SubclassedListViewProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
+	WNDPROC originalWindowCallback;
+	LRESULT CALLBACK WindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 	{
-		if (Message == WM_KEYDOWN)
-		{
-			if (wParam == 'A' && GetAsyncKeyState(VK_CONTROL) < 0)
-			{
-				SelectAllItemsInListView(hWnd);
-			}
-			else if (wParam == VK_DELETE)
-			{
-				bool bFormsDeleted = false;
-				int iSelected = -1;
-				while ((iSelected = ListView_GetNextItem(hWnd, iSelected, LVNI_SELECTED)) != -1)
-				{
-					if (auto form = GetNthListForm(hWnd, iSelected))
-					{
-						ignoredRefs.Remove((UInt32*)form->refID);
-						bFormsDeleted = true;
-					}
-					ListView_DeleteItem(hWnd, iSelected);
-					iSelected--; // because the indices shift after deletion, decrement iSelected to ensure no item is skipped
-				}
+		auto result = CallWindowProc(originalWindowCallback, Hwnd, Message, wParam, lParam);
 
-				if (bFormsDeleted)
-				{
-					WriteINI();
-				}
-
-				return true;
-			}
-		}
-		else if (Message == BetterFloatingFormList::BFL_ADDED_ITEMS)
+		if (Message == BetterFloatingFormList::BFL_ADDED_ITEMS)
 		{
 			auto formList = (tList<TESForm>*)wParam;
 			if (formList && formList->Head())
@@ -145,28 +124,29 @@ namespace NavMeshPickPreventer
 					{
 						AddFormToIgnoredList(form);
 					}
-				} while (iter = iter->next);
+				}
+				while (iter = iter->next);
 
 				WriteINI();
 			}
 		}
-		return DefSubclassProc(hWnd, Message, wParam, lParam);
-	}
-
-	void SubclassListView(HWND hListView)
-	{
-		SetWindowSubclass(hListView, SubclassedListViewProc, 0, 0);
-	}
-
-	WNDPROC originalWindowCallback;
-	LRESULT CALLBACK WindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
-	{
-		auto result = CallWindowProc(originalWindowCallback, Hwnd, Message, wParam, lParam);
-		if (Message == WM_INITDIALOG)
+		else if (Message == BetterFloatingFormList::BFL_DELETED_ITEMS)
 		{
-			// prevent the delete button deleting items from the list as it's misleading if users expect it to actually remove modified forms
-			auto listView = GetDlgItem(Hwnd, 1018);
-			SubclassListView(listView);
+			auto formList = (tList<TESForm>*)wParam;
+			if (formList && formList->Head())
+			{
+				auto iter = formList->Head();
+				do
+				{
+					if (auto form = iter->item)
+					{
+						RemoveFromIgnoredList(form);
+					}
+				}
+				while (iter = iter->next);
+
+				WriteINI();
+			}
 		}
 		return result;
 	}

@@ -38,6 +38,7 @@ namespace ModifiedFormViewer
 			// prevent the delete button deleting items from the list as it's misleading if users expect it to actually remove modified forms
 			auto listView = GetDlgItem(Hwnd, 1018);
 			SubclassListView(listView);
+			DragAcceptFiles(Hwnd, FALSE);
 		}
 		return result;
 	}

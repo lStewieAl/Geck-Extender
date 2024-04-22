@@ -23,14 +23,23 @@ namespace BetterFloatingFormList
 		case WM_KEYDOWN:
 			if (wParam == VK_DELETE)
 			{
-				SetDeferListUpdate(hWnd, true);
+				tList<TESForm> deletedForms;
+				deletedForms.Init();
 				int iSelected = -1;
+				SetDeferListUpdate(hWnd, true);
 				while ((iSelected = ListView_GetNextItem(hWnd, iSelected, LVNI_SELECTED)) != -1)
 				{
+					if (auto form = GetNthListForm(hWnd, iSelected))
+					{
+						deletedForms.Insert(form);
+					}
 					ListView_DeleteItem(hWnd, iSelected);
 					iSelected--; // because the indices shift after deletion, decrement iSelected to ensure no item is skipped
 				}
+
+				SendMessageA(GetParent(hWnd), BFL_DELETED_ITEMS, (WPARAM)&deletedForms, (LPARAM)hWnd);
 				SetDeferListUpdate(hWnd, false);
+				deletedForms.RemoveAll();
 			}
 			else if (wParam == 'A' && GetAsyncKeyState(VK_CONTROL) < 0)
 			{
@@ -80,8 +89,8 @@ namespace BetterFloatingFormList
 			auto listView = GetDlgItem(Hwnd, 1018);
 			if (auto selectedFormIter = selected->selectedForms)
 			{
-				tList<TESForm> formsList;
-				formsList.Init();
+				tList<TESForm> addedForms;
+				addedForms.Init();
 				int numItemsAdded = 0;
 				do
 				{
@@ -89,7 +98,7 @@ namespace BetterFloatingFormList
 					{
 						if (!IsFormInListView(listView, form))
 						{
-							formsList.Insert(form);
+							addedForms.Insert(form);
 							++numItemsAdded;
 						}
 					}
@@ -98,13 +107,13 @@ namespace BetterFloatingFormList
 				if (numItemsAdded)
 				{
 					SetDeferListUpdate(listView, true);
-					CdeclCall(0x47E410, listView, &formsList, nullptr, nullptr);
+					CdeclCall(0x47E410, listView, &addedForms, nullptr, nullptr);
 
-					SendMessageA(listView, BFL_ADDED_ITEMS, (WPARAM)&formsList, numItemsAdded);
+					SendMessageA(Hwnd, BFL_ADDED_ITEMS, (WPARAM)&addedForms, (LPARAM)listView);
 
 					SetDeferListUpdate(listView, false);
 
-					formsList.RemoveAll();
+					addedForms.RemoveAll();
 				}
 			}
 			break;
