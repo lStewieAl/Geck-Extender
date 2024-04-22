@@ -153,6 +153,30 @@ namespace BetterFloatingFormList
 		return ShowOpenFileDialog(hWnd, dst, dstLen, true);
 	}
 
+	void SetWindowTitleToFileName(HWND listView, const char* path)
+	{
+		const char* fileName = strrchr(path, '\\');
+		if (fileName)
+		{
+			fileName++; // skip the backslash
+		}
+		else
+		{
+			fileName = path; // no backslash found, the path is the file name
+		}
+
+		char fileNameNoExt[MAX_PATH];
+		strcpy(fileNameNoExt, fileName);
+
+		char* lastDot = strrchr(fileNameNoExt, '.');
+		if (lastDot)
+		{
+			*lastDot = '\0';
+		}
+
+		SendMessageA(GetParent(listView), WM_SETTEXT, 0, (LPARAM)fileNameNoExt);
+	}
+
 	void LoadFormListFromFile(HWND listView, const char* path)
 	{
 		std::ifstream file(path);
@@ -193,12 +217,45 @@ namespace BetterFloatingFormList
 		}
 
 		forms.RemoveAll();
+
+		SetWindowTitleToFileName(listView, path);
 	}
 
 	void SaveFormListToFile(HWND listView, const char* path)
 	{
-		Console_Print("Save as: %s", path);
-		// TODO - implement...
+		std::stringstream concatenatedIDs;
+		bool isFirstItem = true;
+		int iIndex = -1;
+		while ((iIndex = ListView_GetNextItem(listView, iIndex, LVNI_ALL)) != -1)
+		{
+			if (auto form = GetNthListForm(listView, iIndex))
+			{
+				if (!isFirstItem)
+				{
+					concatenatedIDs << ',';
+				}
+
+				isFirstItem = false;
+				concatenatedIDs << (form->GetEditorID());
+			}
+		}
+
+		std::ofstream outFile(path);
+		if (!outFile)
+		{
+			Console_Print("Failed to open file for writing: %s", path);
+			return;
+		}
+
+		outFile << concatenatedIDs.str();
+		outFile.close();
+		if (outFile.fail())
+		{
+			Console_Print("Error occurred when writing to the file: %s", path);
+			return;
+		}
+
+		SetWindowTitleToFileName(listView, path);
 	}
 
 	void LoadFormList(HWND listView)
