@@ -331,6 +331,7 @@ namespace BetterFloatingFormList
 		{
 			CreateToolbar(Hwnd);
 			UpdateToolbarAndListviewPositions(Hwnd);
+			break;
 		}
 		case WM_COMMAND:
 		{
