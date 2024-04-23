@@ -142,8 +142,8 @@ namespace BetterFloatingFormList
 		ofn.nFilterIndex = 1;
 		ofn.lpstrFileTitle = NULL;
 		ofn.nMaxFileTitle = 0;
-		ofn.lpstrInitialDir = NULL;
-		ofn.Flags = OFN_PATHMUSTEXIST | (bSave ? OFN_OVERWRITEPROMPT : OFN_FILEMUSTEXIST);
+		ofn.lpstrInitialDir = "Data\\nvse\\plugins\\GeckExtender";
+		ofn.Flags = OFN_NOCHANGEDIR | OFN_PATHMUSTEXIST | (bSave ? OFN_OVERWRITEPROMPT : OFN_FILEMUSTEXIST);
 
 		return bSave ? GetSaveFileName(&ofn) : GetOpenFileName(&ofn);
 	}
