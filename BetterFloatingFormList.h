@@ -8,4 +8,5 @@ namespace BetterFloatingFormList
 	};
 
 	void Init();
+	LRESULT CALLBACK BaseWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam);
 }

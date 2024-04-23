@@ -107,11 +107,9 @@ namespace NavMeshPickPreventer
 		return false;
 	}
 
-	WNDPROC originalWindowCallback;
 	LRESULT CALLBACK WindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 	{
-		auto result = CallWindowProc(originalWindowCallback, Hwnd, Message, wParam, lParam);
-
+		auto result = BetterFloatingFormList::BaseWindowCallback(Hwnd, Message, wParam, lParam);
 		if (Message == BetterFloatingFormList::BFL_ADDED_ITEMS)
 		{
 			auto formList = (tList<TESForm>*)wParam;
@@ -153,7 +151,6 @@ namespace NavMeshPickPreventer
 
 	void ShowList()
 	{
-		originalWindowCallback = *(WNDPROC*)0x44BB19;
 		HINSTANCE hInstance = (HINSTANCE)GetModuleHandle(nullptr);
 
 		tList<TESForm> ignoredForms;

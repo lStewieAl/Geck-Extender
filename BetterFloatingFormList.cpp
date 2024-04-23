@@ -2,7 +2,12 @@
 #include <commctrl.h>
 #include "GameObjects.h"
 #include "GECKUtility.h"
+#include "GameAPI.h"
 #include "Utilities.h"
+
+#include <iostream>
+#include <fstream>
+#include <sstream>
 
 namespace BetterFloatingFormList
 {
@@ -57,7 +62,7 @@ namespace BetterFloatingFormList
 	}
 
 	WNDPROC originalWindowCallback;
-	LRESULT CALLBACK WindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+	LRESULT CALLBACK BaseWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 	{
 		switch (Message)
 		{
@@ -107,8 +112,8 @@ namespace BetterFloatingFormList
 				if (numItemsAdded)
 				{
 					SetDeferListUpdate(listView, true);
-					CdeclCall(0x47E410, listView, &addedForms, nullptr, nullptr);
 
+					AddFormsToListView(listView, &addedForms);
 					SendMessageA(Hwnd, BFL_ADDED_ITEMS, (WPARAM)&addedForms, (LPARAM)listView);
 
 					SetDeferListUpdate(listView, false);
@@ -123,11 +128,238 @@ namespace BetterFloatingFormList
 		return CallWindowProc(originalWindowCallback, Hwnd, Message, wParam, lParam);
 	}
 
+	bool ShowOpenFileDialog(HWND hWnd, char* dst, size_t dstLen, bool bSave = false) {
+		
+		OPENFILENAME ofn;
+		ZeroMemory(&ofn, sizeof(ofn));
+
+		ofn.lStructSize = sizeof(ofn);
+		ofn.hwndOwner = hWnd;
+		ofn.lpstrFile = dst;
+		ofn.lpstrFile[0] = '\0';
+		ofn.nMaxFile = dstLen;
+		ofn.lpstrFilter = "All files (*.*)\0*.*\0Text files (*.txt)\0*.TXT\0";
+		ofn.nFilterIndex = 1;
+		ofn.lpstrFileTitle = NULL;
+		ofn.nMaxFileTitle = 0;
+		ofn.lpstrInitialDir = "Data\\nvse\\plugins\\GeckExtender";
+		ofn.Flags = OFN_NOCHANGEDIR | OFN_PATHMUSTEXIST | (bSave ? OFN_OVERWRITEPROMPT : OFN_FILEMUSTEXIST);
+
+		return bSave ? GetSaveFileName(&ofn) : GetOpenFileName(&ofn);
+	}
+
+	bool ShowSaveFileDialog(HWND hWnd, char* dst, size_t dstLen)
+	{
+		return ShowOpenFileDialog(hWnd, dst, dstLen, true);
+	}
+
+	void SetWindowTitleToFileName(HWND listView, const char* path)
+	{
+		const char* fileName = strrchr(path, '\\');
+		if (fileName)
+		{
+			fileName++; // skip the backslash
+		}
+		else
+		{
+			fileName = path; // no backslash found, the path is the file name
+		}
+
+		char fileNameNoExt[MAX_PATH];
+		strcpy(fileNameNoExt, fileName);
+
+		char* lastDot = strrchr(fileNameNoExt, '.');
+		if (lastDot)
+		{
+			*lastDot = '\0';
+		}
+
+		SendMessageA(GetParent(listView), WM_SETTEXT, 0, (LPARAM)fileNameNoExt);
+	}
+
+	void LoadFormListFromFile(HWND listView, const char* path)
+	{
+		std::ifstream file(path);
+
+		if (!file.is_open())
+		{
+			return;
+		}
+
+		tList<TESForm> forms;
+		forms.Init();
+
+		std::string line;
+		while (getline(file, line))
+		{
+			std::stringstream ss(line);
+			std::string formEditorId;
+
+			while (getline(ss, formEditorId, ','))
+			{
+				if (auto form = LookupFormByName(formEditorId.c_str()))
+				{
+					forms.Append(form);
+				}
+			}
+		}
+
+		file.close();
+
+		if (!forms.IsEmpty())
+		{
+			SetDeferListUpdate(listView, true);
+
+			SendMessageA(listView, LVM_DELETEALLITEMS, 0, 0);
+			AddFormsToListView(listView, &forms);
+
+			SetDeferListUpdate(listView, false);
+		}
+
+		forms.RemoveAll();
+
+		SetWindowTitleToFileName(listView, path);
+	}
+
+	void SaveFormListToFile(HWND listView, const char* path)
+	{
+		std::stringstream concatenatedIDs;
+		bool isFirstItem = true;
+		int iIndex = -1;
+		while ((iIndex = ListView_GetNextItem(listView, iIndex, LVNI_ALL)) != -1)
+		{
+			if (auto form = GetNthListForm(listView, iIndex))
+			{
+				if (!isFirstItem)
+				{
+					concatenatedIDs << ',';
+				}
+
+				isFirstItem = false;
+				concatenatedIDs << (form->GetEditorID());
+			}
+		}
+
+		std::ofstream outFile(path);
+		if (!outFile)
+		{
+			Console_Print("Failed to open file for writing: %s", path);
+			return;
+		}
+
+		outFile << concatenatedIDs.str();
+		outFile.close();
+		if (outFile.fail())
+		{
+			Console_Print("Error occurred when writing to the file: %s", path);
+			return;
+		}
+
+		SetWindowTitleToFileName(listView, path);
+	}
+
+	void LoadFormList(HWND listView)
+	{
+		char buf[MAX_PATH]; *buf = '\0';
+		if (ShowOpenFileDialog(listView, buf, sizeof(buf)))
+		{
+			LoadFormListFromFile(listView, buf);
+		}
+	}
+
+	void SaveFormList(HWND listView)
+	{
+		char buf[MAX_PATH]; *buf = '\0';
+		if (ShowSaveFileDialog(listView, buf, sizeof(buf)))
+		{
+			SaveFormListToFile(listView, buf);
+		}
+	}
+
+	constexpr int IDM_LOAD = 0x1001;
+	constexpr int IDM_SAVE = 0x1002;
+	constexpr int IDC_TOOLBAR = 0x1003;
+	HWND CreateToolbar(HWND hParent)
+	{
+		HWND hWndToolbar = CreateWindowEx(0, TOOLBARCLASSNAME, NULL,
+			WS_CHILD | TBSTYLE_WRAPABLE, 5, 0, 0, 0,
+			hParent, (HMENU)IDC_TOOLBAR, GetModuleHandle(NULL), NULL);
+
+		SendMessage(hWndToolbar, TB_SETBITMAPSIZE, 0, MAKELONG(16, 4));
+		SendMessage(hWndToolbar, TB_SETBUTTONSIZE, 0, MAKELONG(24, 8));
+		SendMessage(hWndToolbar, TB_SETPADDING, 0, MAKELPARAM(4, 2));
+
+		TBBUTTON tbButtons[] =
+		{
+			{ MAKELONG(0, 0), IDM_LOAD, TBSTATE_ENABLED, BTNS_AUTOSIZE, {0}, 0, (INT_PTR)"Load" },
+			{ MAKELONG(1, 0), IDM_SAVE, TBSTATE_ENABLED, BTNS_AUTOSIZE, {0}, 0, (INT_PTR)"Save" },
+		};
+
+		SendMessage(hWndToolbar, TB_BUTTONSTRUCTSIZE, (WPARAM)sizeof(TBBUTTON), 0);
+		SendMessage(hWndToolbar, TB_ADDBUTTONS, (WPARAM)sizeof(tbButtons) / sizeof(TBBUTTON), (LPARAM)&tbButtons);
+
+		SendMessage(hWndToolbar, TB_AUTOSIZE, 0, 0);
+		ShowWindow(hWndToolbar, SW_SHOW);
+
+		return hWndToolbar;
+	}
+
+	void UpdateToolbarAndListviewPositions(HWND Hwnd)
+	{
+		RECT rcClient;
+		GetClientRect(Hwnd, &rcClient);
+
+		// Resize the toolbar and let it auto-adjust its height
+		auto hWndToolbar = GetDlgItem(Hwnd, IDC_TOOLBAR);
+		SendMessage(hWndToolbar, TB_AUTOSIZE, 0, 0);
+
+		RECT rcToolbar;
+		GetWindowRect(hWndToolbar, &rcToolbar);
+		int toolbarHeight = rcToolbar.bottom - rcToolbar.top;
+
+		// Calculate the new height and position for the list view
+		int listViewHeight = rcClient.bottom - toolbarHeight;
+		auto listView = GetDlgItem(Hwnd, 1018);
+		SetWindowPos(listView, NULL, 0, toolbarHeight, rcClient.right, listViewHeight, SWP_NOZORDER);
+	}
+
+	LRESULT CALLBACK WindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+	{
+		switch (Message)
+		{
+		case WM_INITDIALOG:
+		{
+			CreateToolbar(Hwnd);
+			UpdateToolbarAndListviewPositions(Hwnd);
+			break;
+		}
+		case WM_COMMAND:
+		{
+			switch (LOWORD(wParam))
+			{
+			case IDM_LOAD:
+				LoadFormList(GetDlgItem(Hwnd, 1018));
+				break;
+			case IDM_SAVE:
+				SaveFormList(GetDlgItem(Hwnd, 1018));
+				break;
+			}
+			break;
+		}
+		case WM_SIZE:
+		{
+			UpdateToolbarAndListviewPositions(Hwnd);
+			break;
+		}
+		}
+		return BaseWindowCallback(Hwnd, Message, wParam, lParam);
+	}
+
 	void __fastcall OnSelectForm(TESForm* form, HWND parent)
 	{
 		if (form)
 		{
-			form->OpenDialog(parent, 0, 0);
+			OpenForm(form, parent);
 		}
 	}
 
@@ -156,7 +388,7 @@ namespace BetterFloatingFormList
 
 	void __cdecl InitFormIdNameAndFormTypeColumns(HWND hWnd, WPARAM index, char* pszText, int width, int format)
 	{
-		width = 64;
+		width = 80;
 		CdeclCall(0x419F50, hWnd, index, pszText, width, format);
 		CdeclCall(0x419F50, hWnd, 2, "Name", width, format);
 		CdeclCall(0x419F50, hWnd, COLUMN_TYPE, "Type", width, format);
