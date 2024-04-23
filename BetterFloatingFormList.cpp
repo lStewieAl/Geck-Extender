@@ -204,7 +204,7 @@ namespace BetterFloatingFormList
 			}
 		}
 
-		file.close(); // Close the file when done
+		file.close();
 
 		if (!forms.IsEmpty())
 		{
@@ -307,14 +307,14 @@ namespace BetterFloatingFormList
 	void UpdateToolbarAndListviewPositions(HWND Hwnd)
 	{
 		RECT rcClient;
-		GetClientRect(Hwnd, &rcClient); // Get the dialog client area size
+		GetClientRect(Hwnd, &rcClient);
 
 		// Resize the toolbar and let it auto-adjust its height
 		auto hWndToolbar = GetDlgItem(Hwnd, IDC_TOOLBAR);
 		SendMessage(hWndToolbar, TB_AUTOSIZE, 0, 0);
 
 		RECT rcToolbar;
-		GetWindowRect(hWndToolbar, &rcToolbar); // Get the toolbar size
+		GetWindowRect(hWndToolbar, &rcToolbar);
 		int toolbarHeight = rcToolbar.bottom - rcToolbar.top;
 
 		// Calculate the new height and position for the list view
