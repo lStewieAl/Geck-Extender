@@ -3124,3 +3124,56 @@ __declspec(naked) void OnRenderWindowCallProcHook()
 		retn    0x10
 	}
 }
+
+void __cdecl InsertHeadPartsColumns(TESNPC* npc, HWND window, UInt32 retnAddr, HWND listView, tList<void>* headParts)
+{
+	CdeclCall(0x549F10, listView, headParts);
+
+	// refresh the head
+	ThisCall(0x574A70, npc, window, true);
+}
+
+HWND headPartNPCWindow;
+__declspec(naked) void PreInsertHeadPartsColumnsHookRemove()
+{
+	_asm
+	{
+		mov headPartNPCWindow, esi
+		pop eax
+		push LVM_GETNEXTITEM
+		push eax
+		ret
+	}
+}
+
+__declspec(naked) void InsertHeadPartsColumnsHookRemove()
+{
+	_asm
+	{
+		mov eax, headPartNPCWindow
+		push eax
+
+		mov edx, [esp + 0xC] // headParts
+		sub edx, 0x210 // TESNPC
+		push edx
+
+		call InsertHeadPartsColumns
+		add esp, 8
+		ret
+	}
+}
+
+__declspec(naked) void InsertHeadPartsColumnsHookAdd()
+{
+	_asm
+	{
+		push esi // window
+		mov edx, [esp + 0xC] // headParts
+		sub edx, 0x210 // TESNPC
+		push edx
+
+		call InsertHeadPartsColumns
+		add esp, 8
+		ret
+	}
+}

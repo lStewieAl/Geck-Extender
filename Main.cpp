@@ -834,6 +834,11 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// fix geck calling a GWL_WNDPROC function pointer directly instead of using CallWindowProcA
 	WriteRelJump(0x48CABC, UInt32(OnRenderWindowCallProcHook));
 
+	// fix head preview not updating when adding head parts
+	WriteRelCall(0x5785EF, UInt32(InsertHeadPartsColumnsHookAdd));
+	WriteRelCall(0x5784F0, UInt32(PreInsertHeadPartsColumnsHookRemove)); // save the window (ESI) in a global because it's lost otherwise...
+	WriteRelCall(0x578595, UInt32(InsertHeadPartsColumnsHookRemove));
+
 	NavMeshPickPreventer::Init();
 	DataLoadEvent::RegisterCallback(NavMeshPickPreventer::PostLoadPlugins);
 	if (config.bDarkMode)
