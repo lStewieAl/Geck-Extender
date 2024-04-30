@@ -3223,7 +3223,9 @@ void __fastcall OnObjectWindowFilter(void* objectWindowNodeData, void* edx, char
 	}
 	catch (const std::regex_error& e)
 	{
+#ifdef _DEBUG
 		Console_Print("%s  -  %s", filterString, e.what());
+#endif
 		bRegexSearch = false;
 	}
 
