@@ -80,6 +80,9 @@
     <ClCompile Include="Detours.cpp">
       <Filter>libs</Filter>
     </ClCompile>
+    <ClCompile Include="Events\MainWindowLoadEvent.cpp">
+      <Filter>Events</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Main.h" />
@@ -179,6 +182,9 @@
     <ClInclude Include="EditorUIDarkMode.h" />
     <ClInclude Include="Detours.h">
       <Filter>libs</Filter>
+    </ClInclude>
+    <ClInclude Include="Events\MainWindowLoadEvent.h">
+      <Filter>Events</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

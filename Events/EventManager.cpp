@@ -4,5 +4,6 @@ namespace EventManager
 	void InitHooks()
 	{
 		DataLoadEvent::InitHooks();
+		MainWindowLoadEvent::InitHooks();
 	}
 }

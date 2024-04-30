@@ -839,8 +839,16 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x5784F0, UInt32(PreInsertHeadPartsColumnsHookRemove)); // save the window (ESI) in a global because it's lost otherwise...
 	WriteRelCall(0x578595, UInt32(InsertHeadPartsColumnsHookRemove));
 
+	// support regex in the Object window filter
+	WriteRelCall(0x439754, UInt32(RegexContains));
+	WriteRelCall(0x43977D, UInt32(RegexContains));
+	WriteRelCall(0x449779, UInt32(OnObjectWindowFilter));
+	WriteRelCall(0x44A439, UInt32(OnObjectWindowFilter));
+	WriteRelCall(0x44B375, UInt32(OnObjectWindowFilter));
+
 	NavMeshPickPreventer::Init();
 	DataLoadEvent::RegisterCallback(NavMeshPickPreventer::PostLoadPlugins);
+	MainWindowLoadEvent::RegisterCallback(AddObjectWindowFilterCtrlBackspaceSupport);
 	if (config.bDarkMode)
 	{
 		if (!EditorUIDarkMode::Initialize())

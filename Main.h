@@ -3177,3 +3177,75 @@ __declspec(naked) void InsertHeadPartsColumnsHookAdd()
 		ret
 	}
 }
+
+bool IsOnlyAlphaNumeric(const char* apFilterString)
+{
+	if (!apFilterString) return false;
+
+	while (*apFilterString)
+	{
+		if (!isalpha((unsigned char)*apFilterString) && !isdigit((unsigned char)*apFilterString))
+		{
+			return false;
+		}
+		apFilterString++;
+	}
+
+	return true;
+}
+
+#include <shlwapi.h>
+#pragma comment(lib, "shlwapi.lib")
+void AddObjectWindowFilterCtrlBackspaceSupport()
+{
+	// use SHAutoComplete since it adds CTRL-Backspace support to the control
+	SHAutoComplete(*(HWND*)0xED1108, SHACF_AUTOSUGGEST_FORCE_OFF);
+}
+
+static std::unique_ptr<std::regex> objectWindowRegex;
+static bool bRegexSearch;
+void __fastcall OnObjectWindowFilter(void* objectWindowNodeData, void* edx, char* a2, const char* apFilterString)
+{
+	AddObjectWindowFilterCtrlBackspaceSupport();
+
+	char filterString[0x100];
+	GetWindowTextA(*(HWND*)0xED1108, filterString, 255);
+	try
+	{
+		// Static variables to cache the last compiled pattern and its regex object
+		static std::string lastPattern;
+		if (strcmp(lastPattern.c_str(), filterString))
+		{
+			if (IsOnlyAlphaNumeric(filterString))
+			{
+				bRegexSearch = false;
+			}
+			else
+			{
+				objectWindowRegex = std::make_unique<std::regex>(filterString, std::regex_constants::icase);
+				bRegexSearch = true;
+			}
+
+			lastPattern = filterString;
+		}
+	}
+	catch (const std::regex_error& e)
+	{
+		Console_Print("%s  -  %s", filterString, e.what());
+		bRegexSearch = false;
+	}
+
+	HWND listWindow = GetDlgItem(*(HWND*)0x00ECFB70, 1041);
+	SendMessage(listWindow, WM_SETREDRAW, FALSE, 0);
+	ThisCall(0x439630, objectWindowNodeData, a2, apFilterString);
+	SendMessage(listWindow, WM_SETREDRAW, TRUE, 0);
+	RedrawWindow(listWindow, nullptr, nullptr, RDW_ERASE | RDW_INVALIDATE | RDW_NOCHILDREN);
+}
+bool __cdecl RegexContains(const char* text, const char* regexPattern)
+{
+	if (bRegexSearch)
+	{
+		return std::regex_search(text, *objectWindowRegex);
+	}
+	return CdeclCall<bool>(0x8A15B0, text, regexPattern);
+}
