@@ -1,11 +1,14 @@
 #pragma once
 #pragma comment(lib, "libdeflate/libdeflatestatic.lib")
+#pragma comment(lib, "shlwapi.lib")
+
 #include "GECKUtility.h"
 #include "Editor.h"
 #include "resource.h"
 #include <filesystem>
 #include <unordered_set>
 #include <functional>
+#include <shlwapi.h>
 
 #include "NiNodes.h"
 #include "NiObjects.h"
@@ -3178,24 +3181,12 @@ __declspec(naked) void InsertHeadPartsColumnsHookAdd()
 	}
 }
 
-bool IsOnlyAlphaNumeric(const char* apFilterString)
+void __stdcall OnGetObjectWindowText(HWND hWnd, LPSTR lpString, int nMaxCount)
 {
-	if (!apFilterString) return false;
-
-	while (*apFilterString)
-	{
-		if (!isalpha((unsigned char)*apFilterString) && !isdigit((unsigned char)*apFilterString))
-		{
-			return false;
-		}
-		apFilterString++;
-	}
-
-	return true;
+	GetWindowTextA(hWnd, lpString, nMaxCount);
+	trim(lpString);
 }
 
-#include <shlwapi.h>
-#pragma comment(lib, "shlwapi.lib")
 void AddObjectWindowFilterCtrlBackspaceSupport()
 {
 	// use SHAutoComplete since it adds CTRL-Backspace support to the control
@@ -3210,6 +3201,7 @@ void __fastcall OnObjectWindowFilter(void* objectWindowNodeData, void* edx, char
 
 	char filterString[0x100];
 	GetWindowTextA(*(HWND*)0xED1108, filterString, 255);
+	trim(filterString);
 	try
 	{
 		// Static variables to cache the last compiled pattern and its regex object

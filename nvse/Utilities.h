@@ -274,10 +274,12 @@ char* GameHeapStrdup(const char* src);
 
 BOOL CopyTextToClipboard(const char* text);
 
+bool IsOnlyAlphaNumeric(const char* str);
+char* trim(char* str);
+
 void SelectAllItemsInListView(HWND listView);
 TESForm* GetNthListForm(HWND hWnd, int n);
 void SetDeferListUpdate(HWND hWnd, bool bDefer = true);
 bool IsDialog(HWND hWnd);
 
 void ForEachFileInPath(const char* path, const char* typeMatch, std::function<void(const char*)> callback);
-

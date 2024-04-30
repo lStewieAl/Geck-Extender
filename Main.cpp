@@ -846,9 +846,12 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x44A439, UInt32(OnObjectWindowFilter));
 	WriteRelCall(0x44B375, UInt32(OnObjectWindowFilter));
 
+	// trim whitespace in object window filter
+	WriteRelCall(0x44B2FE, UInt32(OnGetObjectWindowText));
+	SafeWrite8(0x44B2FE + 5, 0x90);
+
 	NavMeshPickPreventer::Init();
 	DataLoadEvent::RegisterCallback(NavMeshPickPreventer::PostLoadPlugins);
-	MainWindowLoadEvent::RegisterCallback(AddObjectWindowFilterCtrlBackspaceSupport);
 	if (config.bDarkMode)
 	{
 		if (!EditorUIDarkMode::Initialize())
