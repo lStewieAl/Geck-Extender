@@ -850,6 +850,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x44B2FE, UInt32(OnGetObjectWindowText));
 	SafeWrite8(0x44B2FE + 5, 0x90);
 
+	// fix the dialog window columns being zero width by default
+	WriteRelCall(0x59073B, UInt32(OnStoreDialogWindowColumnSizeHook));
+
 	NavMeshPickPreventer::Init();
 	DataLoadEvent::RegisterCallback(NavMeshPickPreventer::PostLoadPlugins);
 	if (config.bDarkMode)

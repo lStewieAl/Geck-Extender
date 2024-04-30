@@ -3243,3 +3243,15 @@ bool __cdecl RegexContains(const char* text, const char* regexPattern)
 	}
 	return CdeclCall<bool>(0x8A15B0, text, regexPattern);
 }
+
+__declspec(naked) void OnStoreDialogWindowColumnSizeHook()
+{
+	_asm
+	{
+		test eax, eax
+		je done
+		cmp eax, 0x400
+	done:
+		ret
+	}
+}
