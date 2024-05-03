@@ -1,5 +1,8 @@
 #include "GECKUtility.h"
+
 #include "GameForms.h"
+#include "GameSettings.h"
+#include "GameData.h"
 
 void(__cdecl* SaveWindowPositionToINI)(HWND, const char*) = ((void(__cdecl*)(HWND hWnd, const char* Src))(0x43E170));
 HWND g_mainWindowToolbar = (HWND)0xECFC14;
@@ -215,6 +218,47 @@ void OpenForm(TESForm* form, HWND parentHwnd)
 		else
 		{
 			form->OpenDialog(parentHwnd, 0, 1);
+		}
+	}
+}
+
+
+void RunCallbackOnCell(TESObjectCELL* cell, void (*callback)(TESObjectREFR*))
+{
+	if (auto iter = cell->objectList.Head())
+	{
+		do
+		{
+			if (auto ref = iter->item)
+			{
+				callback(ref);
+			}
+		} while (iter = iter->next);
+	}
+}
+
+void RunCallbackOnAllCellRefs(void (*callback)(TESObjectREFR*))
+{
+	auto tes = TES::GetSingleton();
+	if (auto cell = tes->currentInterior)
+	{
+		RunCallbackOnCell(cell, callback);
+	}
+	else
+	{
+		Setting* uGridsToLoad = (Setting*)0xED6550;
+		for (int x = 0, n = uGridsToLoad->data.uint; x < n; ++x)
+		{
+			for (int y = 0, n = uGridsToLoad->data.uint; y < n; ++y)
+			{
+				if (auto cell = tes->gridCellArray->GetCell(x, y))
+				{
+					if (cell->cellState == 6)
+					{
+						RunCallbackOnCell(cell, callback);
+					}
+				}
+			}
 		}
 	}
 }

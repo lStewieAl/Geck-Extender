@@ -369,3 +369,5 @@ STATIC_ASSERT(sizeof(RenderWindowHotkey) == 0x14);
 void AddFormsToListView(HWND listView, tList<TESForm>* forms, bool(__cdecl* filterFn)(TESForm*, void*) = nullptr, void* filterData = nullptr);
 
 void OpenForm(TESForm* form, HWND parentHwnd = nullptr);
+
+void RunCallbackOnAllCellRefs(void (*callback)(TESObjectREFR*));

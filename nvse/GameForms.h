@@ -3682,8 +3682,8 @@ public:
 	TESFullName fullName;
 	UInt8 cellFlags;
 	UInt8 cellState;
-	UInt8 byte3B;
-	UInt8 gap3C;
+	UInt8 byte3A;
+	UInt8 gap3B;
 	ExtraDataList extraDataList;
 	CellCoordinates coords;
 	TESObjectLAND* land;

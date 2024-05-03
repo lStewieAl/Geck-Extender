@@ -31,49 +31,22 @@ namespace CustomRenderWindowHotkeys
 		}
 	}
 
-	void ToggleObjectVisibilityForCell(TESObjectCELL* cell)
+	void ToggleRefVisible(TESObjectREFR* ref)
 	{
-		if (auto iter = cell->objectList.Head())
+		if (auto node = ref->Get3D())
 		{
-			do
+			if (node = ThisCall<NiNode*>(0x68B370, node, 0xF1FDD4)) // NiRTTI::HasType(&NiNode::ms_RTTI);
 			{
-				if (auto ref = iter->item)
-				{
-					if (auto node = ref->Get3D())
-					{
-						if (node = ThisCall<NiNode*>(0x68B370, node, 0xF1FDD4)) // NiRTTI::HasType(&NiNode::ms_RTTI);
-						{
-							node->SetAlphaRecurse(1.0F);
-							node->m_flags &= ~0x200001;
-							node->UpdatePropertiesUpward();
-						}
-					}
-				}
-			} while (iter = iter->next);
+				node->SetAlphaRecurse(1.0F);
+				node->m_flags &= ~0x200001;
+				node->UpdatePropertiesUpward();
+			}
 		}
 	}
 
 	void SetAllObjectsVisible()
 	{
-		auto tes = TES::GetSingleton();
-		if (auto cell = tes->currentInterior)
-		{
-			ToggleObjectVisibilityForCell(cell);
-		}
-		else
-		{
-			Setting* uGridsToLoad = (Setting*)0xED6550;
-			for (int x = 0, n = uGridsToLoad->data.uint; x < n; ++x)
-			{
-				for (int y = 0, n = uGridsToLoad->data.uint; y < n; ++y)
-				{
-					if (auto cell = tes->gridCellArray->GetCell(x, y))
-					{
-						ToggleObjectVisibilityForCell(cell);
-					}
-				}
-			}
-		}
+		RunCallbackOnAllCellRefs(ToggleRefVisible);
 	}
 
 	enum CustomHotkey
