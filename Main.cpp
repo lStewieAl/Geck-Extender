@@ -853,6 +853,12 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// fix the dialog window columns being zero width by default
 	WriteRelCall(0x59073B, UInt32(OnStoreDialogWindowColumnSizeHook));
 
+	// add support for showing/hiding activators
+	originalShowHideWindowCallback = *(WNDPROC*)0x4427E4;
+	SafeWrite32(0x4427E4, UInt32(ShowHideWindowCallback));
+	// fix the vanilla code changing the _name_ of settings
+	WriteRelCall(0x4576EF, UInt32(OnSetNonLandVisible));
+
 	NavMeshPickPreventer::Init();
 	DataLoadEvent::RegisterCallback(NavMeshPickPreventer::PostLoadPlugins);
 	if (config.bDarkMode)

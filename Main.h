@@ -3255,3 +3255,89 @@ __declspec(naked) void OnStoreDialogWindowColumnSizeHook()
 		ret
 	}
 }
+
+bool IsNonDeletedActivator(TESObjectREFR* ref)
+{
+	if (!(ref->flags & TESForm::kFormFlags_Deleted))
+	{
+		if (auto base = ref->baseForm)
+		{
+			if (base->typeID == kFormType_Activator)
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+void ToggleCullActivatorRef(TESObjectREFR* ref)
+{
+	if (IsNonDeletedActivator(ref))
+	{
+		if (auto node = ref->Get3D())
+		{
+			if (node->GetAsNiNode())
+			{
+				Setting* bShowActivators = (Setting*)0xECEE10;
+				node->SetVisible(bShowActivators->data.i);
+			}
+		}
+	}
+}
+
+constexpr UInt32 SHOW_ACTIVATORS_BUTTON = 1009;
+
+void ShowHideHwnd__CheckDlgButtons()
+{
+	auto showHideWindow = *(HWND*)0xECEE0C;
+	if (showHideWindow)
+	{
+		CdeclCall(0x416330); // ShowHideHwnd::CheckDlgButtons
+
+		Setting* bShowActivators = (Setting*)0xECEE10;
+		CheckDlgButton(showHideWindow, SHOW_ACTIVATORS_BUTTON, bShowActivators->data.i);
+	}
+}
+
+WNDPROC originalShowHideWindowCallback;
+LRESULT CALLBACK ShowHideWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+{
+	auto result = CallWindowProc(originalShowHideWindowCallback, Hwnd, Message, wParam, lParam);
+	if (Message == WM_INITDIALOG)
+	{
+		EnableWindow(GetDlgItem(Hwnd, SHOW_ACTIVATORS_BUTTON), TRUE);
+		ShowHideHwnd__CheckDlgButtons();
+	}
+	else if (Message == WM_COMMAND)
+	{
+		if (wParam == SHOW_ACTIVATORS_BUTTON)
+		{
+			RunCallbackOnAllCellRefs(ToggleCullActivatorRef);
+		}
+	}
+	return result;
+}
+
+void __cdecl OnSetNonLandVisible(bool bVisible)
+{
+	Setting* bShowCollisionObjects = (Setting*)0xECEF00;
+	bShowCollisionObjects->data.i = bVisible;
+	Setting* bShowWater = (Setting*)0xECEED0;
+	bShowWater->data.i = bVisible;
+	Setting* bShowMultibounds = (Setting*)0xECEE70;
+	bShowMultibounds->data.i = bVisible;
+	Setting* bShowStatics = (Setting*)0xECEEAC;
+	bShowStatics->data.i = bVisible;
+	Setting* bShowMarkers = (Setting*)0xECEEE8;
+	bShowMarkers->data.i = bVisible;
+	Setting* bShowActors = (Setting*)0xECEE54;
+	bShowActors->data.i = bVisible;
+	Setting* bShowDynamics = (Setting*)0xECEF0C;
+	bShowDynamics->data.i = bVisible;
+
+	Setting* bShowActivators = (Setting*)0xECEE10;
+	bShowActivators->data.i = bVisible;
+
+	ShowHideHwnd__CheckDlgButtons();
+}
