@@ -316,6 +316,7 @@ public:
 		kFormFlags_Modified = 0x2,
 		kFormFlags_Deleted =		0x20,
 		kFormFlags_QuestItem =		0x00000400,
+		kFormFlags_InitiallyDisabled = 0x800,
 		kFormFlags_Temporary =	0x00004000,
 		kFormFlags_Compressed =		0x00040000,
 	};
@@ -340,6 +341,7 @@ public:
 	TESFullName*	GetFullName();
 	const char* GetTheName() { return CdeclCall <const char*>(0x437DB0, this); };
 	bool			IsCloned() const;
+	bool IsDisabled() { return flags & kFormFlags_InitiallyDisabled; };
 
 	bool IsWeapon() { return typeID == kFormType_Weapon; }
 	bool IsArmor() { return typeID == kFormType_Armor; }

@@ -49,6 +49,46 @@ namespace CustomRenderWindowHotkeys
 		RunCallbackOnAllCellRefs(ToggleRefVisible);
 	}
 
+	static bool bAllDisabledRefsHidden = false;
+	void GetAnyDisabledRefsVisible(TESObjectREFR* ref)
+	{
+		if (ref->IsDisabled())
+		{
+			if (auto node = ref->Get3D())
+			{
+				if (node->GetAsNiNode())
+				{
+					if (node->IsVisible())
+					{
+						bAllDisabledRefsHidden = false;
+					}
+				}
+			}
+		}
+	}
+
+	void SetIsDisabledRefHidden(TESObjectREFR* ref)
+	{
+		if (ref->IsDisabled())
+		{
+			if (auto node = ref->Get3D())
+			{
+				if (node->GetAsNiNode())
+				{
+					node->SetVisible(!bAllDisabledRefsHidden);
+				}
+			}
+		}
+	}
+
+	void ToggleShowDisabledObjects()
+	{
+		bAllDisabledRefsHidden = true;
+		RunCallbackOnAllCellRefs(GetAnyDisabledRefsVisible);
+		bAllDisabledRefsHidden = !bAllDisabledRefsHidden;
+		RunCallbackOnAllCellRefs(SetIsDisabledRefHidden);
+	}
+
 	enum CustomHotkey
 	{
 		kHotkey_NONE = 0x47, // max ID of the vanilla IDs
@@ -58,15 +98,17 @@ namespace CustomRenderWindowHotkeys
 		kHotkey_PlaceXMarker,
 		kHotkey_NavMeshIgnoreLastPick,
 		kHotkey_NavMeshIgnoreSelectedPicks,
+		kHotkey_ToggleShowDisabledObjects,
 	};
 
 	static RenderWindowHotkey CustomHotkeys[] =
 	{
-		RenderWindowHotkey("Toggle Show Light Markers", "ToggleShowLightMarkers", 'I', RenderWindowHotkey::kRenderWindowPreferenceFlag_NONE, RenderWindowHotkey::kRenderHotkeyCategory_Visibility),
-		RenderWindowHotkey("Set All Objects Visible", "SetAllObjectsVisible", VK_OEM_4, RenderWindowHotkey::kRenderWindowPreferenceFlag_NONE, RenderWindowHotkey::kRenderHotkeyCategory_Visibility),
-		RenderWindowHotkey("Place XMarker", "PlaceXMarker", 'O'),
-		RenderWindowHotkey("Navmesh: Ignore Last Picked Form", "NavMeshIgnoreLastPick", 'K', RenderWindowHotkey::kRenderWindowPreferenceFlag_Navmesh, RenderWindowHotkey::kRenderHotkeyCategory_Navmesh),
-		RenderWindowHotkey("Navmesh: Ignore Selected Forms", "NavMeshIgnoreSelectedPicks", 'K', RenderWindowHotkey::kRenderWindowPreferenceFlag_Shift, RenderWindowHotkey::kRenderHotkeyCategory_Navmesh),
+		RenderWindowHotkey("Toggle show light markers", "ToggleShowLightMarkers", 'I', RenderWindowHotkey::kRenderWindowPreferenceFlag_NONE, RenderWindowHotkey::kRenderHotkeyCategory_Visibility),
+		RenderWindowHotkey("Set all objects visible", "SetAllObjectsVisible", VK_OEM_4, RenderWindowHotkey::kRenderWindowPreferenceFlag_NONE, RenderWindowHotkey::kRenderHotkeyCategory_Visibility),
+		RenderWindowHotkey("Place xMarker", "PlaceXMarker", 'O'),
+		RenderWindowHotkey("Navmesh: Ignore last picked form", "NavMeshIgnoreLastPick", 'K', RenderWindowHotkey::kRenderWindowPreferenceFlag_Navmesh, RenderWindowHotkey::kRenderHotkeyCategory_Navmesh),
+		RenderWindowHotkey("Navmesh: Ignore selected forms", "NavMeshIgnoreSelectedPicks", 'K', RenderWindowHotkey::kRenderWindowPreferenceFlag_Shift, RenderWindowHotkey::kRenderHotkeyCategory_Navmesh),
+		RenderWindowHotkey("Toggle Show disable objects", "ToggleShowDisabledObjects", 'N', RenderWindowHotkey::kRenderWindowPreferenceFlag_NONE, RenderWindowHotkey::kRenderHotkeyCategory_Visibility),
 	};
 
 	void HandleHotkey(UInt32 hotkey)
@@ -91,6 +133,10 @@ namespace CustomRenderWindowHotkeys
 
 		case kHotkey_NavMeshIgnoreSelectedPicks:
 			NavMeshPickPreventer::OnKeyDown(true);
+			break;
+
+		case kHotkey_ToggleShowDisabledObjects:
+			ToggleShowDisabledObjects();
 			break;
 		}
 	}
