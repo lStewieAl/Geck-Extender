@@ -859,6 +859,10 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// fix the vanilla code changing the _name_ of settings
 	WriteRelCall(0x4576EF, UInt32(OnSetNonLandVisible));
 
+	// add copy/paste support to texture quads
+	originalTextureUseCallback = *(WNDPROC*)0x4373B5;
+	SafeWrite32(0x4373B5, UInt32(TextureUseCallback));
+
 	NavMeshPickPreventer::Init();
 	DataLoadEvent::RegisterCallback(NavMeshPickPreventer::PostLoadPlugins);
 	if (config.bDarkMode)

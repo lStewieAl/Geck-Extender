@@ -3341,3 +3341,66 @@ void __cdecl OnSetNonLandVisible(bool bVisible)
 
 	ShowHideHwnd__CheckDlgButtons();
 }
+
+LRESULT CALLBACK TextureUseListViewCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR quadIdx)
+{
+	static UInt32 copiedTextureFormId = 0;
+	if (Message == WM_KEYDOWN)
+	{
+		if (GetAsyncKeyState(VK_CONTROL) < 0)
+		{
+			// allow copy/replacing entries
+			if (wParam == 'C' || wParam == 'V')
+			{
+				auto form = CdeclCall<TESForm*>(0x47ABC0, GetParent(Hwnd));
+				auto land = CdeclCall<TESObjectLAND*>(0xC5D114, form, 0, 0xE8C57C, 0xE8E57C, 0); // DYNAMIC_CAST(form, TESForm, TESObjectLAND)
+
+				int slot = SendMessageA(Hwnd, LVM_GETNEXTITEM, 0xFFFFFFFF, LVIS_SELECTED);
+				if (slot != -1)
+				{
+					TESLandTexture* texture;
+					if (slot)
+					{
+						texture = ThisCall<TESLandTexture*>(0x615090, land, quadIdx, slot - 1);
+					}
+					else
+					{
+						texture = ThisCall<TESLandTexture*>(0x615070, land, quadIdx);
+					}
+
+					if (texture)
+					{
+						if (wParam == 'C')
+						{
+							copiedTextureFormId = texture->refID;
+							return FALSE;
+						}
+						else if (auto clipBoardLandTexture = LookupFormByID(copiedTextureFormId))
+						{
+							CdeclCall(0x436B20, GetParent(Hwnd), quadIdx, texture, clipBoardLandTexture);
+							return FALSE;
+						}
+					}
+				}
+
+				return TRUE;
+			}
+			
+		}
+	}
+	return DefSubclassProc(Hwnd, Message, wParam, lParam);
+}
+
+WNDPROC originalTextureUseCallback;
+LRESULT CALLBACK TextureUseCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+{
+	if (Message == WM_INITDIALOG)
+	{
+		for (int quad = 0; quad < 4; ++quad)
+		{
+			HWND listView = GetDlgItem(Hwnd, 2386 + quad);
+			SetWindowSubclass(listView, TextureUseListViewCallback, 0, (DWORD_PTR)quad);
+		}
+	}
+	return CallWindowProc(originalTextureUseCallback, Hwnd, Message, wParam, lParam);
+}
