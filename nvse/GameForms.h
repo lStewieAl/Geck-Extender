@@ -347,6 +347,7 @@ public:
 	bool IsArmor() { return typeID == kFormType_Armor; }
 	bool IsAmmo() { return typeID == kFormType_Ammo; }
 	bool IsIngestible() { return typeID == kFormType_AlchemyItem; }
+	void SetTemporary() { ThisCall(0x4FBA50, this); }
 
 	MEMBER_FN_PREFIX(TESForm);
 };

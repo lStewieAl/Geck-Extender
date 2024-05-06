@@ -3500,3 +3500,11 @@ char __fastcall BGSBodyPartData__DialogCallback(BGSBodyPartData* bodyPart, void*
 	}
 	return ThisCall<char>(originalBGSBodyPartDataDialogFn, bodyPart, hDlg, msg, wParam, lParam, a6);
 }
+
+void __fastcall OnWeapCreateTempPlayer_MarkAsTemporary(Actor* pPlayer, void* edx, TESNPC* baseForm)
+{
+	ThisCall(0x6415D0, pPlayer, baseForm); // InitBaseForm
+	
+	// mark the temporary player as temporary so it doesn't mark the plugin as modified...
+	pPlayer->SetTemporary();
+}

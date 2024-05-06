@@ -870,7 +870,11 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x54826D, UInt32(OnSelectedBodyPartListViewButtonPressedHook));
 	SafeWrite16(0x54826D + 5, 0x9066);
 
+	// add CTRL-D to duplicate the selected body part
 	originalBGSBodyPartDataDialogFn = DetourVtable(0xD4E1CC, UInt32(BGSBodyPartData__DialogCallback));
+
+	// fix plugins becoming marked as modified when closing the weapon menu
+	WriteRelCall(0x604909, UInt32(OnWeapCreateTempPlayer_MarkAsTemporary));
 
 	NavMeshPickPreventer::Init();
 	if (config.bDarkMode)
