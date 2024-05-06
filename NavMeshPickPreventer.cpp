@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <Events/DataLoadEvent.h>
 
 extern HWND g_MainHwnd;
 
@@ -246,17 +247,19 @@ namespace NavMeshPickPreventer
 		}
 	}
 
+	void PostLoadPlugins()
+	{
+		ReadINI();
+	}
+
 	void Init()
 	{
 		WriteRelCall(0x45C5B7, UInt32(OnPickNavMeshNodeGetShouldSkip));
 
 		GetModuleFileNameA(NULL, IniPath, MAX_PATH);
 		strcpy((char*)(strrchr(IniPath, '\\') + 1), "Data\\nvse\\plugins\\GeckExtender\\NavMeshIgnore\\config.ini");
-	}
 
-	void PostLoadPlugins()
-	{
-		ReadINI();
+		DataLoadEvent::RegisterCallback(PostLoadPlugins);
 	}
 
 	void OnKeyDown(bool bShiftHeld)

@@ -455,8 +455,11 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		WriteRelCall(0x44EA74, UInt32(PreferencesWindowApplyButtonHook));
 	}
 
-	// remove broken "Textures" pane from Scene Info Window
-	XUtil::PatchMemoryNop(0x4156A8, 5);
+	// remove unimplemented 'bytes' from Scene Info Window
+	XUtil::PatchMemoryNop(0x4143CB, 5);
+	XUtil::PatchMemoryNop(0x51E8D5, 5);
+	XUtil::PatchMemoryNop(0x51EB19, 5);
+	SafeWrite16(0x4143D6, 0xD5F0); // increase column width
 
 	// fix bug where disabling orthogonal mode would cause a shader to be applied to the camera
 	XUtil::PatchMemoryNop(0x456BD6, 4);
@@ -863,8 +866,11 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	originalTextureUseCallback = *(WNDPROC*)0x4373B5;
 	SafeWrite32(0x4373B5, UInt32(TextureUseCallback));
 
+	// add spacebar to click on the selected body part data
+	WriteRelCall(0x54826D, UInt32(OnSelectedBodyPartListViewButtonPressedHook));
+	SafeWrite16(0x54826D + 5, 0x9066);
+
 	NavMeshPickPreventer::Init();
-	DataLoadEvent::RegisterCallback(NavMeshPickPreventer::PostLoadPlugins);
 	if (config.bDarkMode)
 	{
 		if (!EditorUIDarkMode::Initialize())

@@ -3404,3 +3404,18 @@ LRESULT CALLBACK TextureUseCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 	}
 	return CallWindowProc(originalTextureUseCallback, Hwnd, Message, wParam, lParam);
 }
+
+__declspec(naked) void OnSelectedBodyPartListViewButtonPressedHook()
+{
+	_asm
+	{
+		movzx eax, word ptr ds : [edi + 0x0C]
+		cmp eax, VK_SPACE
+		je done
+
+		sub eax, 0x0D
+
+	done:
+		ret
+	}
+}
