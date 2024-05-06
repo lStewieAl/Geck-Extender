@@ -3419,3 +3419,84 @@ __declspec(naked) void OnSelectedBodyPartListViewButtonPressedHook()
 		ret
 	}
 }
+
+struct BodyPart
+{
+	struct Data
+	{
+		float fDamageMult;
+		UInt8 flags;
+		UInt8 cDismemberedLimb;
+		UInt8 cHealthPct;
+		UInt8 cActorValue;
+		UInt8 cHitChance;
+		UInt8 cExplosionChance;
+		UInt8 cDebrisCount;
+		UInt8 gap00B;
+		UInt32 genericDebris;
+		UInt32 iExplosionType;
+		float fTrackingMaxAngle;
+		float fDebrisScale;
+		UInt8 cSevrDebrisCount;
+		UInt8 gap01D[3];
+		UInt32 genericDebrisSevr;
+		UInt32 iExplosionTypeSevr;
+		float fSevrDebrisScale;
+		NiPoint3 translate;
+		NiPoint3 rotate;
+		UInt32 sevrSpurtImpactData;
+		UInt32 spurtImpactData;
+		UInt8 cSevrDecalCount;
+		UInt8 cDecalCount;
+		UInt8 gap04E[2];
+		float fLimbReplacementScale;
+	};
+
+	const char* sPartNode;
+	UInt32 unk004;
+	UInt32 sVatsTarget;
+	UInt32 unk00C;
+	UInt32 sStartNode;
+	UInt32 unk014;
+	const char* sPart;
+	UInt32 unk01C;
+	UInt32 sTargetBone;
+	UInt32 unk024;
+	/*TESModel*/ char modelPSA28[0x24];
+	/*TESModelTESModel*/ char modelPSA4C[0x24];
+	BodyPart::Data data;
+};
+STATIC_ASSERT(sizeof(BodyPart) == 0xC4);
+
+UInt32 originalBGSBodyPartDataDialogFn;
+char __fastcall BGSBodyPartData__DialogCallback(BGSBodyPartData* bodyPart, void* edx, HWND hDlg, int msg, unsigned int wParam, int lParam, UInt32* a6)
+{
+	constexpr UInt32 LIST_VIEW_ID = 2461;
+	if (msg == WM_NOTIFY)
+	{
+		NMHDR* pnmh = (NMHDR*)lParam;
+		if (pnmh->idFrom == LIST_VIEW_ID && pnmh->code == LVN_KEYDOWN)
+		{
+			NMLVKEYDOWN* pKeyDown = (NMLVKEYDOWN*)lParam;
+			if (pKeyDown->wVKey == 'D' && (GetKeyState(VK_CONTROL) & 0x8000))
+			{
+				auto listView = pnmh->hwndFrom;
+				if (auto selectedRowBodyPart = CdeclCall<void*>(0x41A390, listView))
+				{
+					auto newBodyPart = FormHeap_Allocate(sizeof(BodyPart));
+					ThisCall(0x545E40, newBodyPart); // BodyPart::BodyPart
+					ThisCall(0x5455D0, newBodyPart, bodyPart, selectedRowBodyPart); // BodyPart::CopyFrom
+					ThisCall(0x4D1B80, (UInt32*)(((UInt32)bodyPart) + 0x54), &newBodyPart);// bodyPart->bodyParts.Append(newBodyPart);
+
+					ThisCall(0x5465C0, bodyPart, listView); // BGSBodyPartData::PopulateListView
+					auto index = CdeclCall<UInt32>(0x41A0F0, listView, bodyPart); // TESListView::GetItemByData
+					CdeclCall(0x41A260, listView, index); // TESListView::SetSelectedItem
+
+					*a6 = 0;
+					return TRUE; // Handle the message
+				}
+			}
+		}
+	}
+	return ThisCall<char>(originalBGSBodyPartDataDialogFn, bodyPart, hDlg, msg, wParam, lParam, a6);
+}

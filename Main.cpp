@@ -870,6 +870,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x54826D, UInt32(OnSelectedBodyPartListViewButtonPressedHook));
 	SafeWrite16(0x54826D + 5, 0x9066);
 
+	originalBGSBodyPartDataDialogFn = DetourVtable(0xD4E1CC, UInt32(BGSBodyPartData__DialogCallback));
+
 	NavMeshPickPreventer::Init();
 	if (config.bDarkMode)
 	{

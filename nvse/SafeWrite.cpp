@@ -93,3 +93,23 @@ void WriteRelJle(UInt32 jumpSrc, UInt32 jumpTgt)
 	SafeWrite16(jumpSrc, 0x8E0F);
 	SafeWrite32(jumpSrc + 2, jumpTgt - jumpSrc - 2 - 4);
 }
+
+
+[[nodiscard]] __declspec(noinline) UInt32 __stdcall DetourRelCall(UInt32 jumpSrc, UInt32 jumpTgt)
+{
+	UInt32 originalFunction = *(UInt32*)(jumpSrc + 1) + jumpSrc + 5;
+	WriteRelCall(jumpSrc, jumpTgt);
+	return originalFunction;
+}
+
+[[nodiscard]] __declspec(noinline) UInt32 __stdcall DetourVtable(UInt32 addr, UInt32 dst)
+{
+	UInt32 originalFunction = *(UInt32*)addr;
+	SafeWrite32(addr, dst);
+	return originalFunction;
+}
+
+UInt32 __stdcall GetRelJumpAddr(UInt32 jumpSrc)
+{
+	return *(UInt32*)(jumpSrc + 1) + jumpSrc + 5;
+}
