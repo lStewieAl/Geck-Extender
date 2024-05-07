@@ -3508,3 +3508,34 @@ void __fastcall OnWeapCreateTempPlayer_MarkAsTemporary(Actor* pPlayer, void* edx
 	// mark the temporary player as temporary so it doesn't mark the plugin as modified...
 	pPlayer->SetTemporary();
 }
+
+// the animShotsPerSec field is computed lossily so instead of checking if the bytes are different
+// load it as a float and compare it against some minimum difference
+_declspec(naked) void OnWeapCheckIsDifferentHook()
+{
+	// using static consts instead of the usual mov eax, jmp eax
+	// as all registers are in use already
+	static const UInt32 differentAddr = 0x604856;
+	static const UInt32 sameAddr = 0x60473B;
+	static float minDelta = 0.000001F;
+	
+	_asm
+	{
+		cmp ecx, 0x74
+		jne isDifferent
+
+		fld dword ptr ds : [eax + edx]
+		fsub dword ptr ds : [eax]
+		fcomp dword ptr ds : minDelta
+		push eax
+		fnstsw ax
+		test ah, 0x41
+		pop eax
+		je isDifferent
+
+		jmp sameAddr
+
+	isDifferent:
+		jmp differentAddr
+	}
+}

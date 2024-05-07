@@ -875,6 +875,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	// fix plugins becoming marked as modified when closing the weapon menu
 	WriteRelCall(0x604909, UInt32(OnWeapCreateTempPlayer_MarkAsTemporary));
+	WriteRelJnz(0x604735, UInt32(OnWeapCheckIsDifferentHook));
 
 	NavMeshPickPreventer::Init();
 	if (config.bDarkMode)
