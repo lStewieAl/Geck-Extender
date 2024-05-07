@@ -70,13 +70,6 @@ Items->Weapon
 SpecialEffects->Explosion
 WorldObjects->Container
 
-Dirty editors:
-ActorData->Race
-Audio->Media Location
-Audio->Media Set
-Items->ArmorAddon
-Items->Weapon
-
 MultiCombo Boxes
 0x6017A0
 0x49A091

@@ -877,6 +877,31 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x604909, UInt32(OnWeapCreateTempPlayer_MarkAsTemporary));
 	WriteRelJnz(0x604735, UInt32(OnWeapCheckIsDifferentHook));
 
+	// fix armor addons resetting the IsAddon flag when closing the form
+	SafeWrite32(0x4F2695, 0x10086780);
+
+	// fix media sets always marking as modified - incorrect strcmp
+	SafeWrite8(0x5B79DF, 0x23); // if strings are equal return FALSE
+	WriteRelJump(0x5B79E7, UInt32(MediaSetNameDiffersHook));
+	SafeWrite8(0x5B79F9, 0x75); // if name && !this.name return TRUE
+
+	// fix MediaLocationController's always marking as modified - would always return true if any lists were empty
+	SafeWrite16(0x005B2333, 0x9066);
+	SafeWrite16(0x005B233B, 0x9066);
+	SafeWrite16(0x5B2396, 0x9066);
+	SafeWrite16(0x5B23A2, 0x9066);
+	XUtil::PatchMemoryNop(0x5B2406, 6);
+	XUtil::PatchMemoryNop(0x5B2416, 6);
+	XUtil::PatchMemoryNop(0x5B2490, 6);
+	XUtil::PatchMemoryNop(0x5B24A3, 6);
+	XUtil::PatchMemoryNop(0x5B2514, 6);
+	XUtil::PatchMemoryNop(0x5B2527, 6);
+	XUtil::PatchMemoryNop(0x5B25A0, 6);
+	XUtil::PatchMemoryNop(0x5B25B3, 6);
+
+	// skip checking for differences in TESRace::TESAttributes, since they're a holdover from oblivion and caused dirty edits
+	SafeWrite16(0x00585A24, 0x41EB);
+
 	NavMeshPickPreventer::Init();
 	if (config.bDarkMode)
 	{

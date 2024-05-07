@@ -3539,3 +3539,15 @@ _declspec(naked) void OnWeapCheckIsDifferentHook()
 		jmp differentAddr
 	}
 }
+
+__declspec(naked) void MediaSetNameDiffersHook()
+{
+	_asm
+	{
+		cmp dword ptr ds : [ecx], 0
+		mov eax, 0x5B7A27 // retnTrue
+		mov edx, 0x5B79FB // retnFalse
+		cmove eax, edx
+		jmp eax
+	}
+}
