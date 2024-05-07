@@ -108,7 +108,7 @@ namespace CustomRenderWindowHotkeys
 		RenderWindowHotkey("Place xMarker", "PlaceXMarker", 'O'),
 		RenderWindowHotkey("Navmesh: Ignore last picked form", "NavMeshIgnoreLastPick", 'K', RenderWindowHotkey::kRenderWindowPreferenceFlag_Navmesh, RenderWindowHotkey::kRenderHotkeyCategory_Navmesh),
 		RenderWindowHotkey("Navmesh: Ignore selected forms", "NavMeshIgnoreSelectedPicks", 'K', RenderWindowHotkey::kRenderWindowPreferenceFlag_Shift, RenderWindowHotkey::kRenderHotkeyCategory_Navmesh),
-		RenderWindowHotkey("Toggle Show disable objects", "ToggleShowDisabledObjects", 'N', RenderWindowHotkey::kRenderWindowPreferenceFlag_NONE, RenderWindowHotkey::kRenderHotkeyCategory_Visibility),
+		RenderWindowHotkey("Toggle show disabled objects", "ToggleShowDisabledObjects", 'N', RenderWindowHotkey::kRenderWindowPreferenceFlag_NONE, RenderWindowHotkey::kRenderHotkeyCategory_Visibility),
 	};
 
 	void HandleHotkey(UInt32 hotkey)
