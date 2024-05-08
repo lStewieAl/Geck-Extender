@@ -371,3 +371,5 @@ void AddFormsToListView(HWND listView, tList<TESForm>* forms, bool(__cdecl* filt
 void OpenForm(TESForm* form, HWND parentHwnd = nullptr);
 
 void RunCallbackOnAllCellRefs(void (*callback)(TESObjectREFR*));
+
+BOOL __stdcall _CreateProcessA(LPSTR exePath, LPPROCESS_INFORMATION lpProcessInformation);

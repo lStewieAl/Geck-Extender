@@ -262,3 +262,11 @@ void RunCallbackOnAllCellRefs(void (*callback)(TESObjectREFR*))
 		}
 	}
 }
+
+BOOL __stdcall _CreateProcessA(LPSTR exePath, LPPROCESS_INFORMATION lpProcessInformation)
+{
+	STARTUPINFOA startupInfo;
+	ZeroMemory(&startupInfo, sizeof(startupInfo));
+	startupInfo.cb = sizeof(startupInfo);
+	return StdCall<BOOL>(*(UInt32*)0xD232D8, NULL, exePath, NULL, NULL, FALSE, 0, NULL, NULL, &startupInfo, lpProcessInformation);
+}
