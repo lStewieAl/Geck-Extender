@@ -2369,7 +2369,7 @@ void CleanupFaceGenMap()
 void __fastcall OnFaceGen_PeriodicCleanup(void* sfg)
 {
 	static int numNPCsProcessed;
-	if (++numNPCsProcessed % 100)
+	if (!(++numNPCsProcessed % 0x40))
 	{
 		CleanupFaceGenMap();
 	}
