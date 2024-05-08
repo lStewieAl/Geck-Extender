@@ -905,6 +905,10 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// show '(none)' on the empty option in the sound picker
 	SafeWrite16(0x47BEB9, 0xD3F0);
 
+	// skip 'Use a skill' in TESChallenge types
+	SafeWriteBuf(0x55FF7A, "\x83\xFE\x07\x75\x01\x46", 6);
+	SafeWrite8(0x55FF99, 0xE0);
+
 	NavMeshPickPreventer::Init();
 	if (config.bDarkMode)
 	{
