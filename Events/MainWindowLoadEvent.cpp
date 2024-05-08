@@ -20,7 +20,7 @@ namespace MainWindowLoadEvent
 
 	void __cdecl TESCSMain__InitializeCSWindows()
 	{
-		CdeclCall(0x464C50);
+		CdeclCall(0x43F200);
 
 		for (auto& listener : listeners) {
 			listener();
@@ -29,6 +29,6 @@ namespace MainWindowLoadEvent
 
 	void InitHooks()
 	{
-		WriteRelCall(0x4451A7, UInt32(TESCSMain__InitializeCSWindows));
+		WriteRelCall(0x446581, UInt32(TESCSMain__InitializeCSWindows));
 	}
 }

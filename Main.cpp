@@ -886,8 +886,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SafeWrite8(0x5B79F9, 0x75); // if name && !this.name return TRUE
 
 	// fix MediaLocationController's always marking as modified - would always return true if any lists were empty
-	SafeWrite16(0x005B2333, 0x9066);
-	SafeWrite16(0x005B233B, 0x9066);
+	SafeWrite16(0x5B2333, 0x9066);
+	SafeWrite16(0x5B233B, 0x9066);
 	SafeWrite16(0x5B2396, 0x9066);
 	SafeWrite16(0x5B23A2, 0x9066);
 	XUtil::PatchMemoryNop(0x5B2406, 6);
@@ -900,7 +900,10 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	XUtil::PatchMemoryNop(0x5B25B3, 6);
 
 	// skip checking for differences in TESRace::TESAttributes, since they're a holdover from oblivion and caused dirty edits
-	SafeWrite16(0x00585A24, 0x41EB);
+	SafeWrite16(0x585A24, 0x41EB);
+
+	// show '(none)' on the empty option in the sound picker
+	SafeWrite16(0x47BEB9, 0xD3F0);
 
 	NavMeshPickPreventer::Init();
 	if (config.bDarkMode)

@@ -283,9 +283,91 @@ HWND WINAPI hk_CreateDialogParamA(HINSTANCE hInstance, LPCSTR lpTemplateName, HW
 	return CreateDialogParamA(hInstance, lpTemplateName, hWndParent, DialogFuncOverride, dwInitParam);
 }
 
+LRESULT CALLBACK SoundPickerListBoxCallback(HWND listBox, UINT Message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
+{
+	if (Message == WM_KEYDOWN)
+	{
+		if (wParam == VK_SPACE || wParam == VK_RETURN)
+		{
+			int index = SendMessageA(listBox, LB_GETCURSEL, 0, 0);
+			TESSound* sound = (TESSound*)SendMessageA(listBox, LB_GETITEMDATA, index, 0);
+			if (sound)
+			{
+				CdeclCall(0x5CBC90, sound, 0);
+			}
+
+			if (wParam == VK_RETURN)
+			{
+				EndDialog(GetParent(listBox), (INT_PTR)sound);
+			}
+			return FALSE;
+		}
+	}
+	else if (Message == WM_GETDLGCODE)
+	{
+		// Indicate that we want to handle specific keys like VK_RETURN
+		return DLGC_WANTALLKEYS;
+	}
+	return DefSubclassProc(listBox, Message, wParam, lParam);
+}
+
+void __cdecl OnSoundPickerPlaySound(void* buf, TESSound* sound, UInt32 flags)
+{
+	// call a method that prevents sounds overlapping by only allowing a single sound at once
+	CdeclCall(0x5CBC90, sound, flags);
+}
+
+BOOL __stdcall SoundPickCallback(HWND hDlg, UINT Message, WPARAM wParam, LPARAM lParam)
+{
+	constexpr int TIMER_ID = 1, TIMER_INTERVAL_MS = 1;
+	switch (Message)
+	{
+	case WM_INITDIALOG:
+	{
+		auto listBox = GetDlgItem(hDlg, 1018);
+		SendMessageA(listBox, WM_SETREDRAW, FALSE, 0);
+		SetWindowSubclass(listBox, SoundPickerListBoxCallback, 0, 0);
+		SetTimer(hDlg, TIMER_ID, TIMER_INTERVAL_MS, NULL);
+
+		// prevent overlapping sounds
+		WriteRelCall(0x47BD67, UInt32(OnSoundPickerPlaySound));
+		WriteRelCall(0x47BDF8, UInt32(OnSoundPickerPlaySound));
+		XUtil::PatchMemoryNop(0x47BD25, 5); // prevent sound stopping when closing the menu
+		break;
+	}
+	case WM_TIMER:
+	{
+		if (wParam == TIMER_ID)
+		{
+			ThisCall(0x885130, *(UInt32**)0xF226C0, 1); // BSAudioManager::Update
+			return TRUE;
+		}
+	}
+	case WM_DESTROY:
+	{
+		KillTimer(hDlg, TIMER_ID);
+		break;
+	}
+	}
+
+	auto result = CallWindowProc((WNDPROC)0x47BC70, hDlg, Message, wParam, lParam);
+	if (Message == WM_INITDIALOG)
+	{
+		auto listBox = GetDlgItem(hDlg, 1018);
+		SendMessageA(listBox, WM_SETREDRAW, TRUE, 0);
+	}
+	return result;
+}
+
 INT_PTR WINAPI hk_DialogBoxParamA(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc, LPARAM dwInitParam)
 {
-	//	EndDialog MUST be used
+	if (lpDialogFunc == (DLGPROC)0x47BC70)
+	{
+		// add Return to preview the hovered item in the sound picker
+		lpDialogFunc = SoundPickCallback;
+	}
+
+	// EndDialog MUST be used
 	DialogOverrideData* data = new DialogOverrideData;
 	data->DialogFunc = lpDialogFunc;
 	data->Param = dwInitParam;
@@ -3189,8 +3271,14 @@ void __stdcall OnGetObjectWindowText(HWND hWnd, LPSTR lpString, int nMaxCount)
 
 void AddObjectWindowFilterCtrlBackspaceSupport()
 {
-	// use SHAutoComplete since it adds CTRL-Backspace support to the control
-	SHAutoComplete(*(HWND*)0xED1108, SHACF_AUTOSUGGEST_FORCE_OFF);
+	static bool bDoOnce;
+	if (!bDoOnce)
+	{
+		bDoOnce = true;
+
+		// use SHAutoComplete since it adds CTRL-Backspace support to the control
+		SHAutoComplete(*(HWND*)0xED1108, SHACF_AUTOSUGGEST_FORCE_OFF);
+	}
 }
 
 static std::unique_ptr<std::regex> objectWindowRegex;

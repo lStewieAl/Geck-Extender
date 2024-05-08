@@ -7,6 +7,7 @@
 #include "ModifiedFormViewer.h"
 #include "Settings.h"
 #include "NavMeshPickPreventer.h"
+#include "Events/MainWindowLoadEvent.h"
 
 #define UI_EXTMENU_ID			51001
 #define UI_EXTMENU_SHOWLOG		51002
@@ -57,7 +58,6 @@ extern LOGFONT  editorFont;
 extern HMODULE ZeGaryHaxHandle;
 
 LPLOGFONT GetEditorFont();
-
 void ToggleNavmeshPlaceAboveOthers(bool isAllowed)
 {
 	//	Patch Navmesh editing to allow placing vertices over existing navmesh (disables line bisection)
@@ -94,7 +94,7 @@ void ToggleObjectWindowFilterUnedited(bool show)
 	}
 }
 
-bool EditorUI_CreateExtensionMenu(HWND MainWindow, HMENU MainMenu)
+bool CreateExtensionMenu(HWND MainWindow, HMENU MainMenu)
 {
 	//	Create extended menu options
 	g_ExtensionMenu = CreateMenu();
@@ -192,8 +192,15 @@ void EditorUI_AddAllowRenderWindowCellLoadsCheckbox(HWND MainWindow, HINSTANCE h
 	);
 	SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_SETCHECK, GetIsRenderWindowAllowCellLoads(), NULL);
 
-	HBITMAP hBitmap = (HBITMAP)LoadImage(ZeGaryHaxHandle, MAKEINTRESOURCE(IDB_ALLOW_CELL_LOADS_ICON), IMAGE_BITMAP, NULL, NULL, NULL);
-	SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
+	HBITMAP hBitmap = (HBITMAP)LoadImage(ZeGaryHaxHandle, MAKEINTRESOURCE(IDB_ALLOW_CELL_LOADS_ICON), IMAGE_BITMAP, NULL, NULL, LR_LOADTRANSPARENT);
+	if (hBitmap)
+	{
+		SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
+	}
+	else
+	{
+		MessageBox(MainWindow, "Could not load icon resource.", "Error", MB_OK | MB_ICONERROR);
+	}
 }
 
 void EditorUI_AddRenderWindowShowPortalsCheckbox(HWND MainWindow, HINSTANCE hInstance) {
@@ -234,6 +241,20 @@ void EditorUI_AddRenderWindowShowWaterCheckbox(HWND MainWindow, HINSTANCE hInsta
 	SendMessageA(g_renderWindowShowWaterButtonHwnd, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
 }
 
+void AddExtraButtonsAndSliders(HWND hWnd, HINSTANCE hInstance)
+{
+	if (config.bShowTimeOfDaySlider) {
+		EditorUI_AddSliderToToolbar(hWnd, hInstance);
+		EditorUI_AddTimeOfDayTextToToolbar(hWnd, hInstance);
+	}
+
+	if (config.bShowAdditionalToolbarButtons) {
+		EditorUI_AddAllowRenderWindowCellLoadsCheckbox(hWnd, hInstance);
+		EditorUI_AddRenderWindowShowWaterCheckbox(hWnd, hInstance);
+		EditorUI_AddRenderWindowShowPortalsCheckbox(hWnd, hInstance);
+	}
+}
+
 void MoveChildWindow(HWND hwndChild, LPPOINT offset)
 {
 	// Get the current position of the child window
@@ -267,18 +288,8 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 			editorUIInit = true;
 			g_MainHwnd = Hwnd;
 
-			EditorUI_CreateExtensionMenu(Hwnd, createInfo->hMenu);
-
-			if (config.bShowTimeOfDaySlider) {
-				EditorUI_AddSliderToToolbar(Hwnd, createInfo->hInstance);
-				EditorUI_AddTimeOfDayTextToToolbar(Hwnd, createInfo->hInstance);
-			}
-
-			if (config.bShowAdditionalToolbarButtons) {
-				EditorUI_AddAllowRenderWindowCellLoadsCheckbox(Hwnd, createInfo->hInstance);
-				EditorUI_AddRenderWindowShowWaterCheckbox(Hwnd, createInfo->hInstance);
-				EditorUI_AddRenderWindowShowPortalsCheckbox(Hwnd, createInfo->hInstance);
-			}
+			CreateExtensionMenu(Hwnd, createInfo->hMenu);
+			AddExtraButtonsAndSliders(Hwnd, createInfo->hInstance);
 
 			if (*config.sLaunchExeName)
 			{
