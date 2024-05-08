@@ -3639,3 +3639,19 @@ __declspec(naked) void MediaSetNameDiffersHook()
 		jmp eax
 	}
 }
+
+__declspec(naked) void OnSoundPickerInitDialog_FreeBufferHook()
+{
+	_asm
+	{
+		push dword ptr ss : [esp + 0x8]
+		mov ecx, 0xF21B5C // MemoryManager::kSingleton
+		mov eax, 0x854540 // MemoryManager::GetThreadScrapHeap
+		call eax
+		mov ecx, eax
+		mov eax, 0x855B30 // ScrapHeapFree
+		call eax
+		mov eax, 1
+		ret
+	}
+}

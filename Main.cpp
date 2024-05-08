@@ -904,6 +904,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	// show '(none)' on the empty option in the sound picker
 	SafeWrite16(0x47BEB9, 0xD3F0);
+	WriteRelCall(0x47BF9B, UInt32(OnSoundPickerInitDialog_FreeBufferHook)); // fix 512 byte scrapheap leak
 
 	// skip 'Use a skill' in TESChallenge types
 	SafeWriteBuf(0x55FF7A, "\x83\xFE\x07\x75\x01\x46", 6);
