@@ -81,24 +81,16 @@ void CreateLogFile()
 
 void GameMessageHandler(NVSEMessagingInterface::Message* msg)
 {
-	static int FramesWaited;
-	static bool bDoOnce;
 	if (msg->type == NVSEMessagingInterface::kMessage_MainGameLoop)
 	{
-		if (FramesWaited < 20)
-		{
-			++FramesWaited;
-		}
-		else if (!bDoOnce)
-		{
-			bDoOnce = true;
-			LaunchGame::OnGameMainMenu();
-		}
+		LaunchGame::OnMainGameLoop();
 	}
 }
 
 void LoadGameSpecificHooks(const NVSEInterface* nvse)
 {
+	LaunchGame::OnGamePluginLoad();
+
 	auto pluginHandle = nvse->GetPluginHandle();
 
 	// setup DirectInput hooks

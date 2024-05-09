@@ -11,5 +11,6 @@ namespace LaunchGame
 
 	void WriteLaunchAtCellFile(UInt32 time, TESObjectCELL* cell);
 	void Launch();
-	void OnGameMainMenu();
+	void OnMainGameLoop();
+	void OnGamePluginLoad();
 }

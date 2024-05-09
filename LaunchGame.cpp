@@ -75,17 +75,47 @@ namespace LaunchGame
 		return FindWindowA("Garden of Eden Creation Kit", 0);
 	}
 
-	void OnGameMainMenu()
+	std::string sCellEditorID;
+	bool ReadCellEditorID()
 	{
-		constexpr UInt32 TIMESTAMP_MAX_DELAY = 30 * 1000;
+		constexpr UInt32 TIMESTAMP_MAX_DELAY = 5 * 1000;
 		LaunchGameData launchData;
 		if (ReadLaunchAtCellFile(launchData))
 		{
 			if (IsGeckRunning() && (GetTickCount() - launchData.timestamp) < TIMESTAMP_MAX_DELAY)
 			{
-				ThisCall(0x93DB60, *(UInt32**)0x11DEA3C, launchData.cellEditorId.c_str(), 0); // CenterOnCell
+				sCellEditorID = launchData.cellEditorId;
+				return true;
 			}
 		}
+		return false;
+	}
+	void OnGameMainMenu()
+	{
+		if (!sCellEditorID.empty())
+		{
+			ThisCall(0x93DB60, *(UInt32**)0x11DEA3C, sCellEditorID.c_str(), 0); // CenterOnCell
+		}
+	}
+
+	void OnMainGameLoop()
+	{
+		static int FramesWaited;
+		static bool bDoOnce;
+		if (FramesWaited < 10)
+		{
+			++FramesWaited;
+		}
+		else if (!bDoOnce)
+		{
+			bDoOnce = true;
+			OnGameMainMenu();
+		}
+	}
+
+	void OnGamePluginLoad()
+	{
+		ReadCellEditorID();
 	}
 
 	void Launch()
