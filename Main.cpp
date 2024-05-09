@@ -83,7 +83,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 {
 	if (!nvse->isEditor)
 	{
-		return LaunchGame::OnGamePluginLoad(nvse);
+		LaunchGame::OnGamePluginLoad(nvse);
+		return true;
 	}
 
 	CreateLogFile();
