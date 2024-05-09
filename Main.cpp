@@ -358,7 +358,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteUIHooks();
 
 	// hook Load ESP/ESM window callback
-	SafeWrite32(0x44192A, UInt32(hk_LoadESPESMCallback));
+	originalLoadEspEsmFn = (WNDPROC)DetourVtable(0x44192A, UInt32(LoadEspEsmCallback));
 
 	// make flycam mouse rotation grid smaller (1*1 instead of 2*2)
 	// the game was checking if the difference in mouse position was > 1 rather than >= 1
@@ -760,8 +760,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// add support for right clicking and doing 'New' in the 'All' tab of the Objects window
 	WriteRelCall(0x44B05A, UInt32(OnObjectWindowNewHook));
 
-	originalObjectWindowCallback = *(WNDPROC*)0x4416A3;
-	SafeWrite32(0x4416A3, UInt32(ObjectWindowCallback));
+	originalObjectWindowCallback = (WNDPROC)DetourVtable(0x4416A3, UInt32(ObjectWindowCallback));
 
 	originalCellWindowCallback = *(WNDPROC*)0x441648;
 	SafeWrite32(0x441648, UInt32(CellWindowCallback));

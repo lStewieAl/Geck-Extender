@@ -57,6 +57,7 @@ struct Settings
 	bool bDarkMode;
 	bool bNumericEditorIdWarning;
 	bool bSkipSplashScreen;
+	bool bDataMenuSpaceTogglesSelectedFile;
 
 	int bUseAltShiftMultipliers;
 	float fMovementAltMultiplier;

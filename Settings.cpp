@@ -42,6 +42,7 @@ void ReadAllSettings()
 	config.bDarkMode = GetOrCreateINIValue("General", "bDarkMode", 0, IniPath);
 	config.bNumericEditorIdWarning = GetOrCreateINIValue("General", "bNumericEditorIdWarning", 0, IniPath);
 	config.bSkipSplashScreen = GetOrCreateINIValue("General", "bSkipSplashScreen", 0, IniPath);
+	config.bDataMenuSpaceTogglesSelectedFile = GetOrCreateINIValue("General", "bDataMenuSpaceTogglesSelectedFile", 1, IniPath);
 
 	config.bNoDirtyCellWhenNonPersistentRefsDeleted = GetOrCreateINIValue("Experimental", "bNoDirtyCellWhenNonPersistentRefsDeleted", 0, IniPath);
 

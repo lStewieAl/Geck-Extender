@@ -786,7 +786,8 @@ void ToggleSelectedFiles(HWND* pListView)
 }
 
 void doKonami(int);
-BOOL __stdcall hk_LoadESPESMCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
+WNDPROC originalLoadEspEsmFn;
+BOOL __stdcall LoadEspEsmCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
 	static RECT WindowSize;
 	if (msg == WM_NOTIFY && ((LPNMHDR)lParam)->code == LVN_KEYDOWN)
 	{
@@ -805,16 +806,13 @@ BOOL __stdcall hk_LoadESPESMCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM 
 				return true;
 			}
 		}
-		else
+		else if (key == VK_SPACE && config.bDataMenuSpaceTogglesSelectedFile)
 		{
-			if (key == VK_SPACE)
-			{
-				ToggleSelectedFiles(pListView);
-				return true;
-			}
+			ToggleSelectedFiles(pListView);
+			return true;
 		}
 	}
-	return StdCall<LRESULT>(0x432A80, hDlg, msg, wParam, lParam);
+	return CallWindowProc(originalLoadEspEsmFn, hDlg, msg, wParam, lParam);
 }
 
 void doKonami(int key) {
@@ -1897,7 +1895,6 @@ BOOL __stdcall LandscapeEditCallback(HWND hWnd, UINT Message, WPARAM wParam, LPA
 	}
 	return CallWindowProc(originalLandscapeEditCallback, hWnd, Message, wParam, lParam);
 }
-
 
 HWND __stdcall CreateLandscapeEditHook(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, WNDPROC lpDialogFunc, LPARAM dwInitParam)
 {
