@@ -156,6 +156,8 @@ bool RenderWindow::GetMousePos(NiPoint3* aPosOut, NiPoint3* aRotOut) {
 	return RenderData::GetSingleton()->pCamera->WindowPointToRay(point.x, point.y, aPosOut, aRotOut);
 }
 
+TESObjectCELL* RenderWindow::GetCurrentCell() { return *(TESObjectCELL**)0xED1174; };
+
 RenderWindow::SelectedData* RenderWindow::SelectedData::GetSelected() { return *(SelectedData**)0xECFB8C; }
 RenderWindow::SelectedData* RenderWindow::SelectedData::GetClipboard() { return *(SelectedData**)0xECFB90; }
 

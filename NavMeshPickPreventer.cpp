@@ -31,7 +31,7 @@ namespace NavMeshPickPreventer
 		if (bIsIgnoredRef || bIsIgnoredBaseForm)
 		{
 #ifdef _DEBUG
-			EditorUI_Log("Ignored %s (%08X)", ref->GetEditorID(), ref->refID);
+			Console_Print("Ignored %s (%08X)", ref->GetEditorID(), ref->refID);
 #endif
 			return true;
 		}
@@ -39,7 +39,7 @@ namespace NavMeshPickPreventer
 		if (lastPickedRefID != ref->refID)
 		{
 #ifdef _DEBUG
-			EditorUI_Log("Picked %s (%08X)", ref->GetEditorID(), ref->refID);
+			Console_Print("Picked %s (%08X)", ref->GetEditorID(), ref->refID);
 #endif
 			lastPickedRefID = ref->refID;
 			lastPickedBaseFormID = ref->baseForm ? ref->baseForm->refID : 0;

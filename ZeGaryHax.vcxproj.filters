@@ -83,6 +83,7 @@
     <ClCompile Include="Events\MainWindowLoadEvent.cpp">
       <Filter>Events</Filter>
     </ClCompile>
+    <ClCompile Include="LaunchGame.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Main.h" />
@@ -186,6 +187,7 @@
     <ClInclude Include="Events\MainWindowLoadEvent.h">
       <Filter>Events</Filter>
     </ClInclude>
+    <ClInclude Include="LaunchGame.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

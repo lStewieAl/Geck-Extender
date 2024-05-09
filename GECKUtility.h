@@ -54,6 +54,7 @@ struct RenderWindow
 
 	static HWND GetWindow();
 	static bool GetMousePos(NiPoint3* aPosOut, NiPoint3* aRotOut = nullptr);
+	static TESObjectCELL* GetCurrentCell();
 };
 
 struct ObjectsView

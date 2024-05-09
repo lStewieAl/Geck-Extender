@@ -61,14 +61,14 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\nvse;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;NVSE_PLUGIN_EXAMPLE_EXPORTS;EDITOR;EDITOR_VERSION=0x04002060;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MinimalRebuild>true</MinimalRebuild>
+      <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader />
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <ForcedIncludeFiles>nvse/prefix.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
@@ -84,7 +84,10 @@
     </Link>
     <PostBuildEvent>
       <Message>Installing DLL...</Message>
-      <Command>copy "$(TargetPath)" "$(FalloutNVPath)\Data\nvse\plugins\$(TargetFileName)"</Command>
+      <Command>taskkill /F /IM x32dbg.exe 2&gt;nul
+copy "$(TargetPath)" "$(FalloutNVPath)\Data\nvse\plugins\$(TargetFileName)"
+copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(TargetName).pdb"
+"$(MO2Path)\ModOrganizer.exe" "moshortcut://:GECK x32dbg"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -101,7 +104,7 @@
     </ClCompile>
     <Link>
       <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -115,6 +118,7 @@
       <Message>Installing DLL...</Message>
       <Command>taskkill /F /IM x32dbg.exe 2&gt;nul
 copy "$(TargetPath)" "$(FalloutNVPath)\Data\nvse\plugins\$(TargetFileName)"
+copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(TargetName).pdb"
 "$(MO2Path)\ModOrganizer.exe" "moshortcut://:GECK x32dbg"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -159,6 +163,10 @@ copy "$(TargetPath)" "$(FalloutNVPath)\Data\nvse\plugins\$(TargetFileName)"
       </SubType>
     </ClCompile>
     <ClCompile Include="GeckUtility.cpp" />
+    <ClCompile Include="LaunchGame.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="ModifiedFormViewer.cpp">
       <SubType>
       </SubType>
@@ -255,6 +263,10 @@ copy "$(TargetPath)" "$(FalloutNVPath)\Data\nvse\plugins\$(TargetFileName)"
       </SubType>
     </ClInclude>
     <ClInclude Include="GECKUtility.h" />
+    <ClInclude Include="LaunchGame.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="libs\nlohmann\json.hpp" />
     <ClInclude Include="ModifiedFormViewer.h">
       <SubType>

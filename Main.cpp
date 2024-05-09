@@ -41,6 +41,7 @@
 #include "Settings.h"
 #include "NavMeshPickPreventer.h"
 #include "CustomRenderWindowHotkeys.h"
+#include "LaunchGame.h"
 
 #include "Events/EventManager.h"
 #include "Events/Events.h"
@@ -62,7 +63,8 @@ bool NVSEPlugin_Query(const NVSEInterface* nvse, PluginInfo* info)
 	info->infoVersion = PluginInfo::kInfoVersion;
 	info->name = GH_NAME;
 	info->version = GH_VERSION;
-	return (nvse->isEditor && nvse->nvseVersion >= NVSE_VERSION_INTEGER);
+	UInt32 requiredVersion = nvse->isEditor ? 5 : NVSE_VERSION_INTEGER;
+	return nvse->nvseVersion >= requiredVersion;
 }
 
 void CreateLogFile()
@@ -77,8 +79,41 @@ void CreateLogFile()
 	gLog.Open(logPath);
 }
 
+void GameMessageHandler(NVSEMessagingInterface::Message* msg)
+{
+	static int FramesWaited;
+	static bool bDoOnce;
+	if (msg->type == NVSEMessagingInterface::kMessage_MainGameLoop)
+	{
+		if (FramesWaited < 20)
+		{
+			++FramesWaited;
+		}
+		else if (!bDoOnce)
+		{
+			bDoOnce = true;
+			LaunchGame::OnGameMainMenu();
+		}
+	}
+}
+
+void LoadGameSpecificHooks(const NVSEInterface* nvse)
+{
+	auto pluginHandle = nvse->GetPluginHandle();
+
+	// setup DirectInput hooks
+	NVSEMessagingInterface* msgIntfc = (NVSEMessagingInterface*)nvse->QueryInterface(kInterface_Messaging);
+	msgIntfc->RegisterListener(pluginHandle, "NVSE", GameMessageHandler);
+}
+
 bool NVSEPlugin_Load(const NVSEInterface* nvse)
 {
+	if (!nvse->isEditor)
+	{
+		LoadGameSpecificHooks(nvse);
+		return true;
+	}
+
 	CreateLogFile();
 
 	_DMESSAGE("Geck Extender Base Address: %08X", GetModuleHandle("ZeGaryHax.dll"));

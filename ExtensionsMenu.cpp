@@ -7,6 +7,7 @@
 #include "ModifiedFormViewer.h"
 #include "Settings.h"
 #include "NavMeshPickPreventer.h"
+#include "LaunchGame.h"
 #include "Events/MainWindowLoadEvent.h"
 
 #define UI_EXTMENU_ID			51001
@@ -546,21 +547,7 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 
 		case UI_EXTMENU_LAUNCHGAME:
 		{
-			char exePath[MAX_PATH];
-			auto commandLineDir = (const char*)0xECFE30;
-			_snprintf(exePath, sizeof(exePath), "%s\\%s", commandLineDir, config.sLaunchExeName);
-			exePath[sizeof(exePath) - 1] = '\0'; // ensure exePath is null terminated
-
-			PROCESS_INFORMATION processInfo;
-			ZeroMemory(&processInfo, sizeof(processInfo));
-
-			if (_CreateProcessA(exePath, &processInfo))
-			{
-				Console_Print("Launched ProcessID: %d", processInfo.dwProcessId);
-			}
-
-			if (processInfo.hProcess) CloseHandle(processInfo.hProcess);
-			if (processInfo.hThread) CloseHandle(processInfo.hThread);
+			LaunchGame::Launch();
 		}
 		return 0;
 
