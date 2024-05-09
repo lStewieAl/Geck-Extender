@@ -76,7 +76,7 @@ void ReadAllSettings()
 	config.bObjectPaletteAllowRandom = GetOrCreateINIValue("Object Palette", "bObjectPaletteAllowRandom", 1, IniPath);
 	config.bObjectPaletteRandomByDefault = GetOrCreateINIValue("Object Palette", "bObjectPaletteRandomByDefault", 0, IniPath) != 0;
 
-	config.bRemoveDialogSoundFilter = GetOrCreateINIValue("Dialog", "bRemoveDialogSoundFilter", 1, IniPath) != 0;
+	config.bRemoveDialogSoundFilter = GetOrCreateINIValue("Dialog", "bRemoveDialogSoundFilter", 0, IniPath) != 0;
 	config.bCacheComboboxes = GetOrCreateINIValue("Dialog", "bCacheComboboxes", 1, IniPath) != 0;
 
 	config.sLaunchExeName = GetOrCreateINIValue("Launch Game", "ExecutableName", "FalloutNV.exe", IniPath);
