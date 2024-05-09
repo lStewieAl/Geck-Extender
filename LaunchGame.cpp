@@ -85,11 +85,12 @@ namespace LaunchGame
 			if (IsGeckRunning() && (GetTickCount() - launchData.timestamp) < TIMESTAMP_MAX_DELAY)
 			{
 				sCellEditorID = launchData.cellEditorId;
-				return true;
 			}
+			DeleteFile(GECK_LAUNCH_FILENAME);
 		}
-		return false;
+		return !sCellEditorID.empty();
 	}
+
 	void OnGameMainMenu()
 	{
 		if (!sCellEditorID.empty())
@@ -98,24 +99,36 @@ namespace LaunchGame
 		}
 	}
 
-	void OnMainGameLoop()
+	void GameMessageHandler(NVSEMessagingInterface::Message* msg)
 	{
-		static int FramesWaited;
-		static bool bDoOnce;
-		if (FramesWaited < 10)
+		if (msg->type == NVSEMessagingInterface::kMessage_MainGameLoop)
 		{
-			++FramesWaited;
-		}
-		else if (!bDoOnce)
-		{
-			bDoOnce = true;
-			OnGameMainMenu();
+			static int FramesWaited;
+			static bool bDoOnce;
+			if (FramesWaited < 10)
+			{
+				++FramesWaited;
+			}
+			else if (!bDoOnce)
+			{
+				bDoOnce = true;
+				OnGameMainMenu();
+			}
 		}
 	}
 
-	void OnGamePluginLoad()
+	bool OnGamePluginLoad(const NVSEInterface* nvse)
 	{
-		ReadCellEditorID();
+		if (ReadCellEditorID())
+		{
+			auto pluginHandle = nvse->GetPluginHandle();
+
+			// setup DirectInput hooks
+			NVSEMessagingInterface* msgIntfc = (NVSEMessagingInterface*)nvse->QueryInterface(kInterface_Messaging);
+			msgIntfc->RegisterListener(pluginHandle, "NVSE", GameMessageHandler);
+			return true;
+		}
+		return false;
 	}
 
 	void Launch()

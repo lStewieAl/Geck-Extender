@@ -79,31 +79,11 @@ void CreateLogFile()
 	gLog.Open(logPath);
 }
 
-void GameMessageHandler(NVSEMessagingInterface::Message* msg)
-{
-	if (msg->type == NVSEMessagingInterface::kMessage_MainGameLoop)
-	{
-		LaunchGame::OnMainGameLoop();
-	}
-}
-
-void LoadGameSpecificHooks(const NVSEInterface* nvse)
-{
-	LaunchGame::OnGamePluginLoad();
-
-	auto pluginHandle = nvse->GetPluginHandle();
-
-	// setup DirectInput hooks
-	NVSEMessagingInterface* msgIntfc = (NVSEMessagingInterface*)nvse->QueryInterface(kInterface_Messaging);
-	msgIntfc->RegisterListener(pluginHandle, "NVSE", GameMessageHandler);
-}
-
 bool NVSEPlugin_Load(const NVSEInterface* nvse)
 {
 	if (!nvse->isEditor)
 	{
-		LoadGameSpecificHooks(nvse);
-		return true;
+		return LaunchGame::OnGamePluginLoad(nvse);
 	}
 
 	CreateLogFile();

@@ -1,4 +1,5 @@
 #pragma once
+#include "nvse/PluginAPI.h"
 #include <string>
 class TESObjectCELL;
 namespace LaunchGame
@@ -12,5 +13,5 @@ namespace LaunchGame
 	void WriteLaunchAtCellFile(UInt32 time, TESObjectCELL* cell);
 	void Launch();
 	void OnMainGameLoop();
-	void OnGamePluginLoad();
+	bool OnGamePluginLoad(const NVSEInterface* nvse);
 }
