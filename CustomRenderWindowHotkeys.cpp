@@ -164,11 +164,27 @@ namespace CustomRenderWindowHotkeys
 		}
 	}
 
-	RenderWindowHotkey::eKeys __cdecl GetPressedHotkeyID(char aiKeyCode, char abShift, char abControl, char abAlt, char abIsZ, char abIsNavMesh)
+	RenderWindowHotkey::eKeys __cdecl GetPressedHotkeyID(char aiKeyCode, bool abShift, bool abControl, bool abAlt, bool abIsZ, bool abIsNavMesh)
 	{
 		auto hotkey = CdeclCall<RenderWindowHotkey::eKeys>(0x412F00, aiKeyCode, abShift, abControl, abAlt, abIsZ, abIsNavMesh);
 		if (hotkey > RenderWindowHotkey::kRenderHotkey_COUNT)
 		{
+			// workaround for the landscape edit hotkey being the same as the toggle lights key by default...
+			if (RenderWindow::InLandscapeEditingMode())
+			{
+				UInt8 pressedFlags = 0;
+				if (abShift) pressedFlags |= RenderWindowHotkey::kRenderWindowPreferenceFlag_Shift;
+				if (abControl) pressedFlags |= RenderWindowHotkey::kRenderWindowPreferenceFlag_Ctrl;
+				if (abAlt) pressedFlags |= RenderWindowHotkey::kRenderWindowPreferenceFlag_Alt;
+				if (abIsZ) pressedFlags |= RenderWindowHotkey::kRenderWindowPreferenceFlag_Z;
+				if (abIsNavMesh) pressedFlags |= RenderWindowHotkey::kRenderWindowPreferenceFlag_Navmesh;
+				auto combo = RenderWindowHotkey::KeyCombo(aiKeyCode, pressedFlags);
+				if (hotkey == kHotkey_ToggleShowLightMarkers && (RenderWindowHotkey::GetArray()[RenderWindowHotkey::kRenderHotkey_OpenTextureUseDialog].kCombo.data & ~0x8000) == combo.data)
+				{
+					return RenderWindowHotkey::kRenderHotkey_OpenTextureUseDialog;
+				}
+			}
+
 			HandleHotkey(hotkey);
 		}
 		return hotkey;

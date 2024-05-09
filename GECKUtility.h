@@ -55,6 +55,7 @@ struct RenderWindow
 	static HWND GetWindow();
 	static bool GetMousePos(NiPoint3* aPosOut, NiPoint3* aRotOut = nullptr);
 	static TESObjectCELL* GetCurrentCell();
+	static bool InLandscapeEditingMode();
 };
 
 struct ObjectsView
@@ -333,6 +334,7 @@ struct RenderWindowHotkey
 		kRenderWindowPreferenceFlag_Alt = 0x4,
 		kRenderWindowPreferenceFlag_Z = 0x8,
 		kRenderWindowPreferenceFlag_Navmesh = 0x40,
+		kRenderWindowPreferenceFlag_LowPriority = 0x80, // loses conflicts to combos that don't have this flag
 	};
 
 	struct __declspec(align(2)) KeyCombo
@@ -342,12 +344,12 @@ struct RenderWindowHotkey
 			struct
 			{
 				UInt8 key;
-				RenderWindowHotkeyFlag flags;
+				UInt8 flags;
 			};
 			unsigned short data;
 		};
 
-		KeyCombo(UInt8 key, RenderWindowHotkeyFlag flags) : key(key), flags(flags) {};
+		KeyCombo(UInt8 key, UInt8 flags) : key(key), flags(flags) {};
 	};
 
 	const char* sName;
@@ -364,6 +366,8 @@ struct RenderWindowHotkey
 		UInt32 bIsEditAllowed = 1)
 		: sName(name), sInternalName(internalName), uiCategory(category),
 		bIsEditAllowed(bIsEditAllowed), kDefaultCombo(defaultKey, defaultFlags), kCombo(defaultKey, defaultFlags) {};
+
+	static RenderWindowHotkey* GetArray() { return (RenderWindowHotkey*)0xE8C9A0; };
 };
 STATIC_ASSERT(sizeof(RenderWindowHotkey) == 0x14);
 
