@@ -271,6 +271,22 @@ void MoveChildWindow(HWND hwndChild, LPPOINT offset)
 	SetWindowPos(hwndChild, NULL, newX, newY, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
 }
 
+void OpenExtenderPreferences()
+{
+	ShellExecuteA(0, "open", IniPath, 0, 0, SW_NORMAL);
+}
+
+void InjectOpenSettingsMenuItem(HMENU hMenu)
+{
+	HMENU hSubMenu = GetSubMenu(hMenu, 0);
+
+	if (hSubMenu != nullptr)
+	{
+		ModifyMenu(hSubMenu, 40620, MF_BYCOMMAND | MF_STRING, 40620, "Extender Preferences...");
+		WriteRelCall(0x44408E, UInt32(OpenExtenderPreferences));
+	}
+}
+
 LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	if (Message == WM_CREATE)
@@ -288,6 +304,8 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 
 			editorUIInit = true;
 			g_MainHwnd = Hwnd;
+
+			InjectOpenSettingsMenuItem(createInfo->hMenu);
 
 			CreateExtensionMenu(Hwnd, createInfo->hMenu);
 			AddExtraButtonsAndSliders(Hwnd, createInfo->hInstance);
