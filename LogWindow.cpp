@@ -6,6 +6,7 @@
 #include <Richedit.h>
 #include <regex>
 #include "Settings.h"
+#include "GECKUtility.h"
 
 HWND g_ConsoleHwnd;
 extern HWND g_MainHwnd;
@@ -145,49 +146,54 @@ LRESULT CALLBACK EditorUI_LogWndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPA
 		static uint64_t lastDoubleClickTime;
 		LPNMHDR notification = (LPNMHDR)lParam;
 
-		if (notification->code == EN_MSGFILTER)
-		{
+		if (notification->code == EN_MSGFILTER) {
 			auto msgFilter = (MSGFILTER*)notification;
 
 			if (msgFilter->msg == WM_LBUTTONDBLCLK)
 				lastDoubleClickTime = GetTickCount();
 		}
-		else if (notification->code == EN_SELCHANGE)
-		{
+		else if (notification->code == EN_SELCHANGE) {
 			auto selChange = (SELCHANGE*)lParam;
+			auto selLen = abs(selChange->chrg.cpMax - selChange->chrg.cpMin);
 
-			//	Mouse double click with a valid selection -> try to parse form id
-			if ((GetTickCount() - lastDoubleClickTime > 1000) || abs(selChange->chrg.cpMax - selChange->chrg.cpMin) <= 0)
+			if ((GetTickCount() - lastDoubleClickTime > 1000) || selLen == 0)
 				break;
 
 			if (selChange->chrg.cpMin == 0 && selChange->chrg.cpMax == -1)
 				break;
 
-			//	Get the line number from the selected range
-			LRESULT lineIndex = SendMessageA(richEditHwnd, EM_LINEFROMCHAR, selChange->chrg.cpMin, 0);
+			// expand the selection to include any brackets if double clicking on a number
+			selChange->chrg.cpMin--;
+			selChange->chrg.cpMax++;
+			selLen += 2;
 
-			char lineData[4096];
-			*(uint16_t*)&lineData[0] = ARRAYSIZE(lineData);
+			// Get the selected text from the rich edit control
+			char buf[0x400]; *buf = 0;
 
-			LRESULT charCount = SendMessageA(richEditHwnd, EM_GETLINE, lineIndex, (LPARAM)&lineData);
+			if (2 * (selLen + 1) >= sizeof(buf))
+				break;
 
-			if (charCount > 0)
-			{
-				lineData[charCount - 1] = '\0';
+			TEXTRANGEA textRange;
+			textRange.chrg = selChange->chrg;
+			textRange.lpstrText = buf;
 
-				//	Capture each form id with regex "(XXXXXXXX)"
-				static const std::regex formIdRegex("\\(([0-9a-fA-F]*)\\)");
-				std::smatch sm;
+			SendMessageA(richEditHwnd, EM_GETTEXTRANGE, 0, (LPARAM)&textRange);
 
-				for (std::string line = lineData; std::regex_search(line, sm, formIdRegex); line = sm.suffix())
-				{
-					//	Parse to integer, then bring up the menu
-					uint32_t id = strtoul(sm[1].str().c_str(), nullptr, 16);
-					TESForm* (*LookupFormByID)(UInt32 formID) = (TESForm * (*)(UInt32))0x4F9620;
-					if (auto form = LookupFormByID(id))
-					{
-						form->OpenDialog(g_MainHwnd, 0, 1);
-					}
+			char selectedText[0x400];
+			WideCharToMultiByte(CP_UTF8, 0, (LPCWCH)buf, -1, selectedText, sizeof(selectedText), nullptr, nullptr);
+
+			// Ensure null termination
+			selectedText[selLen] = '\0';
+
+			// Capture the first form id with regex "\(([0-9a-fA-F]*)\)"
+			static const std::regex formIdRegex("\\(([0-9a-fA-F]{1,8})\\)");
+			std::smatch sm;
+
+			std::string selectedStr = selectedText;
+			if (std::regex_search(selectedStr, sm, formIdRegex)) {
+				uint32_t id = strtoul(sm[1].str().c_str(), nullptr, 16);
+				if (auto form = LookupFormByID(id)) {
+					OpenForm(form, g_MainHwnd);
 				}
 			}
 		}
