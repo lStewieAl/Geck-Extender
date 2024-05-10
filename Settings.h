@@ -58,6 +58,7 @@ struct Settings
 	bool bNumericEditorIdWarning;
 	bool bSkipSplashScreen;
 	bool bDataMenuSpaceTogglesSelectedFile;
+	bool bNewPluginsDefaultToESM;
 
 	int bUseAltShiftMultipliers;
 	float fMovementAltMultiplier;

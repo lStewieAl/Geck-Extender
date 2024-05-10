@@ -918,6 +918,17 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SafeWrite8(0x55FF99, 0xE0);
 
 	NavMeshPickPreventer::Init();
+
+	// allow saving as ESM
+	const char* fileExtensions = "ESM Files (*.esm)\0*.esm\0ESP Files (*.esp)\0*.esp\0";
+	const char* fileExtensionsEspFirst = "ESP Files (*.esp)\0*.esp\0ESM Files (*.esm)\0*.esm\0";
+	SafeWrite32(0x47F36A, config.bNewPluginsDefaultToESM ? UInt32(fileExtensions) : UInt32(fileExtensionsEspFirst));
+	if (config.bNewPluginsDefaultToESM)
+	{
+		SafeWrite8(0x47F374, 0xFC);
+	}
+
+
 	if (config.bDarkMode)
 	{
 		if (!EditorUIDarkMode::Initialize())
