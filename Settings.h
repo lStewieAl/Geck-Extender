@@ -59,6 +59,7 @@ struct Settings
 	bool bSkipSplashScreen;
 	bool bDataMenuSpaceTogglesSelectedFile;
 	bool bNewPluginsDefaultToESM;
+	bool bAllowHardDeletionInESMs;
 
 	int bUseAltShiftMultipliers;
 	float fMovementAltMultiplier;

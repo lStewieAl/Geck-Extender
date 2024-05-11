@@ -3652,3 +3652,31 @@ __declspec(naked) void OnSoundPickerInitDialog_FreeBufferHook()
 		ret
 	}
 }
+
+__declspec(naked) void OnSaveDeletedMasterFormHook()
+{
+	_asm
+	{
+		test byte ptr ds : [esi + 0x08], 1 // TESForm::kFormFlag_Master
+		je nonMaster
+		test byte ptr ds : [esi + 0x08], 0x20 // TESForm::kFormFlag_Deleted
+		jne deletedForm
+	nonDeletedMaster:
+		mov eax, 0x4CDD17
+		jmp eax
+
+	deletedForm:
+		mov eax, 0x4F9960
+		push 0
+		mov ecx, esi
+		call eax
+		cmp dword ptr ss : [ebp + 0x20C], eax
+		jne nonDeletedMaster
+		mov eax, 0x4CDD38
+		jmp eax
+
+	nonMaster:
+		mov eax, 0x4CDD2E
+		jmp eax
+	}
+}

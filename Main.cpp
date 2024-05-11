@@ -928,6 +928,11 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		SafeWrite8(0x47F374, 0xFC);
 	}
 
+	if (config.bAllowHardDeletionInESMs)
+	{
+		// make it so deleting forms added by the active ESM plugin completely removes them instead of marking them as deleted
+		WriteRelJump(0x4CDD11, UInt32(OnSaveDeletedMasterFormHook));
+	}
 
 	if (config.bDarkMode)
 	{

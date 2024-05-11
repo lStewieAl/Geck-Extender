@@ -44,6 +44,7 @@ void ReadAllSettings()
 	config.bSkipSplashScreen = GetOrCreateINIValue("General", "bSkipSplashScreen", 0, IniPath);
 	config.bDataMenuSpaceTogglesSelectedFile = GetOrCreateINIValue("General", "bDataMenuSpaceTogglesSelectedFile", 1, IniPath);
 	config.bNewPluginsDefaultToESM = GetOrCreateINIValue("General", "bUseEsmAsDefaultExtension", 1, IniPath);
+	config.bAllowHardDeletionInESMs = GetOrCreateINIValue("General", "bAllowHardDeletionInESMs", 1, IniPath);
 
 	config.bNoDirtyCellWhenNonPersistentRefsDeleted = GetOrCreateINIValue("Experimental", "bNoDirtyCellWhenNonPersistentRefsDeleted", 0, IniPath);
 
