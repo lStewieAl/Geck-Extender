@@ -3697,3 +3697,16 @@ __declspec(naked) void OnSaveDeletedMasterFormHook()
 		jmp eax
 	}
 }
+
+__declspec(naked) void OnCreateQuestWindowGetParamHook()
+{
+	_asm
+	{
+		mov eax, 0x47ABC0
+		call eax
+		test eax, eax
+		cmove eax, edi
+		mov ecx, 0x57E257
+		jmp ecx
+	}
+}

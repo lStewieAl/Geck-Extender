@@ -923,6 +923,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SafeWriteBuf(0x55FF7A, "\x83\xFE\x07\x75\x01\x46", 6);
 	SafeWrite8(0x55FF99, 0xE0);
 
+	// populate the quest view when creating new entry
+	WriteRelJump(0x57E252, UInt32(OnCreateQuestWindowGetParamHook));
+
 	NavMeshPickPreventer::Init();
 
 	// allow saving as ESM
