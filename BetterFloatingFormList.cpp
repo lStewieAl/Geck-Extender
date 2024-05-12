@@ -363,7 +363,7 @@ namespace BetterFloatingFormList
 		}
 	}
 
-	__declspec(naked) void OnSelectFormHook()
+	__HOOK OnSelectFormHook()
 	{
 		_asm
 		{

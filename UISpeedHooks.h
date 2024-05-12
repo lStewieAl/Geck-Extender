@@ -182,7 +182,7 @@ void* __fastcall SearchAndReplaceEndUI(void** selectedForms, HWND hDlg)
 	return *selectedForms;
 }
 
-__declspec(naked) void SearchAndReplaceBeginUIHook()
+__HOOK SearchAndReplaceBeginUIHook()
 {
 	_asm
 	{
@@ -191,7 +191,7 @@ __declspec(naked) void SearchAndReplaceBeginUIHook()
 	}
 }
 
-__declspec(naked) void SearchAndReplaceEndUIHook()
+__HOOK SearchAndReplaceEndUIHook()
 {
 	_asm
 	{

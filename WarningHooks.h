@@ -129,7 +129,7 @@ static const char* messagePotentiallyInvalidZValue = "CELLS: Potentially Invalid
 static const char* messagePotentiallyInvalidXValue = "CELLS: Potentially Invalid X value (%.2f) on reference:\n%s";
 static const char* messagePotentiallyInvalidYValue = "CELLS: Potentially Invalid Y value (%.2f) on reference:\n%s";
 
-__declspec(naked) void hk_UnableToFindEnableStateParentMsgHook()
+__HOOK hk_UnableToFindEnableStateParentMsgHook()
 {
 	static const char* messageFormat = "MASTERFILE: Unable to find enable state parent %08X. Enable state parent data will be removed in ref (%08X).";
 	static const UInt32 kRetnAddr = 0x004AFD59;
@@ -145,7 +145,7 @@ __declspec(naked) void hk_UnableToFindEnableStateParentMsgHook()
 	}
 }
 
-__declspec(naked) void hk_UnableToFindPackageReferenceMsgHook()
+__HOOK hk_UnableToFindPackageReferenceMsgHook()
 {
 	static const char* messageFormat = "MASTERFILE: Unable to find Package Target Reference (%08X) on owner object \"%s\" (%08X).";
 	static const UInt32 kRetnAddr = 0x004A1687;
@@ -161,7 +161,7 @@ __declspec(naked) void hk_UnableToFindPackageReferenceMsgHook()
 		jmp		kRetnAddr
 	}
 }
-__declspec(naked) void hk_UnableToFindPackageLocationMsgHook()
+__HOOK hk_UnableToFindPackageLocationMsgHook()
 {
 	static const char* messageFormat = "MASTERFILE: Unable to find Package Location Reference (%08X) on owner object \"%s\" (%08X).";
 	static const UInt32 kCallAddr = (UInt32)Console_Print2;
@@ -183,7 +183,7 @@ __declspec(naked) void hk_UnableToFindPackageLocationMsgHook()
 	}
 }
 
-__declspec(naked) void hk_TryingToAccessLocalVariableInScriptMsgHook()
+__HOOK hk_TryingToAccessLocalVariableInScriptMsgHook()
 {
 	static const char* messageFormat = "SCRIPTS: Trying to access local variable %d in script '%s' (%08X) -- variable not found.\r\n";
 	static const UInt32 kRetnAddr = 0x005C2852;
@@ -202,7 +202,7 @@ __declspec(naked) void hk_TryingToAccessLocalVariableInScriptMsgHook()
 	}
 }
 
-__declspec(naked) void hk_UnableToFindLinkedReferenceMsgHook()
+__HOOK hk_UnableToFindLinkedReferenceMsgHook()
 {
 	static const char* messageFormat = "MASTERFILE: Unable to find linked reference (%08X). Linked reference data will be removed in ref (%08X).";
 	static const UInt32 kRetnAddr = 0x004AFE7F;
@@ -217,7 +217,7 @@ __declspec(naked) void hk_UnableToFindLinkedReferenceMsgHook()
 		jmp		kRetnAddr
 	}
 }
-__declspec(naked) void hk_CouldNotFindMediaLocationControllerMsgHook()
+__HOOK hk_CouldNotFindMediaLocationControllerMsgHook()
 {
 	static const char* messageFormat = "MASTERFILE: Could not find MediaLocationController (%08X) for AudioMarker (%08X) in extra data list.";
 	static const UInt32 kRetnAddr = 0x004AF98C;
@@ -235,7 +235,7 @@ __declspec(naked) void hk_CouldNotFindMediaLocationControllerMsgHook()
 	}
 }
 
-__declspec(naked) void hk_ChunkAbnormallyTerminatedMsgHook()
+__HOOK hk_ChunkAbnormallyTerminatedMsgHook()
 {
 	static const char* messageFormat = "MASTERFILE: Chunk %c%c%c%c abnormally terminated TESObjectREFR::Load for ref (%08X).\n";
 	static const UInt32 kRetnAddr = 0x0064FF84;
@@ -262,7 +262,7 @@ __declspec(naked) void hk_ChunkAbnormallyTerminatedMsgHook()
 	}
 }
 
-__declspec(naked) void hk_OnPackageBeginScriptNotCompiledMsgHook()
+__HOOK hk_OnPackageBeginScriptNotCompiledMsgHook()
 {
 	static const char* messageFormat = "MASTERFILE: %s (%08X)";
 	static const UInt32 kCallAddr = 0x00407120;
@@ -281,7 +281,7 @@ __declspec(naked) void hk_OnPackageBeginScriptNotCompiledMsgHook()
 	}
 }
 
-__declspec(naked) void hk_OnPackageChangeScriptNotCompiledMsgHook()
+__HOOK hk_OnPackageChangeScriptNotCompiledMsgHook()
 {
 	static const char* messageFormat = "MASTERFILE: %s (%08X)";
 	static const UInt32 kCallAddr = 0x00407120;
@@ -300,7 +300,7 @@ __declspec(naked) void hk_OnPackageChangeScriptNotCompiledMsgHook()
 	}
 }
 
-__declspec(naked) void hk_OnPackageEndScriptNotCompiledMsgHook()
+__HOOK hk_OnPackageEndScriptNotCompiledMsgHook()
 {
 	static const char* messageFormat = "MASTERFILE: %s (%08X)";
 	static const UInt32 kCallAddr = 0x00407120;
@@ -320,7 +320,7 @@ __declspec(naked) void hk_OnPackageEndScriptNotCompiledMsgHook()
 }
 
 
-__declspec(naked) void hk_ScriptHasTextButNotCompiledMsgHook()
+__HOOK hk_ScriptHasTextButNotCompiledMsgHook()
 {
 	static const char* messageFormat = "SCRIPTS: %s (%X08)";
 	static const UInt32 kCallAddr = 0x00407120;
@@ -339,7 +339,7 @@ __declspec(naked) void hk_ScriptHasTextButNotCompiledMsgHook()
 	}
 }
 
-__declspec(naked) void hk_RemoveEmptyLitWaterMsgHook()
+__HOOK hk_RemoveEmptyLitWaterMsgHook()
 {
 	static const char* messageFormat = "MASTERFILE: Removing empty lit water extra data in ref (%08X).";
 	static const UInt32 kRetnAddr = 0x004B044A;
@@ -354,7 +354,7 @@ __declspec(naked) void hk_RemoveEmptyLitWaterMsgHook()
 	}
 }
 
-__declspec(naked) void hk_EnableStateParentLoopMsgHook()
+__HOOK hk_EnableStateParentLoopMsgHook()
 {
 	static const char* messageFormat = "MASTERFILE: Enable state parent loop detected in ref (%08X). Parent removed.";
 	static const UInt32 kRetnAddr = 0x004AFDB7;
@@ -373,7 +373,7 @@ __declspec(naked) void hk_EnableStateParentLoopMsgHook()
 	}
 }
 
-__declspec(naked) void hk_RemoveEmptyActivateParentMsgHook()
+__HOOK hk_RemoveEmptyActivateParentMsgHook()
 {
 	static const char* messageFormat = "MASTERFILE: Removing empty activate parent extra data in ref (%08X).";
 	static const UInt32 kRetnAddr = 0x004B0214;
@@ -392,7 +392,7 @@ __declspec(naked) void hk_RemoveEmptyActivateParentMsgHook()
 	}
 }
 
-__declspec(naked) void hk_UnableToFindLeveledObjectMsgHook()
+__HOOK hk_UnableToFindLeveledObjectMsgHook()
 {
 	static const char* messageFormat = "Unable to find Leveled Object Form (%08X) for owner object \"%s\" (%08X).";
 	static const UInt32 kRetnAddr = 0x005004BB;
@@ -419,7 +419,7 @@ void DoScriptErrorWarning(char* errorMsg) {
 	}
 }
 
-__declspec(naked) void hk_EnableScriptErrorsMsgHook()
+__HOOK hk_EnableScriptErrorsMsgHook()
 {
 	static const UInt32 kRetnAddr = 0x005C57E7;
 	__asm
@@ -436,7 +436,7 @@ __declspec(naked) void hk_EnableScriptErrorsMsgHook()
 	}
 }
 
-__declspec(naked) void hk_UnableToFindPortalLinkedMsgHook()
+__HOOK hk_UnableToFindPortalLinkedMsgHook()
 {
 	static const UInt32 retnAddr = 0x4B000E;
 	static const char* msg = "MASTERFILE: Unable to find portal linked reference %08X for ref %08X. Portal linked reference data will be removed.";
@@ -448,7 +448,7 @@ __declspec(naked) void hk_UnableToFindPortalLinkedMsgHook()
 	}
 }
 
-__declspec(naked) void hk_RemovingEmptyReflectorWaterMsgHook()
+__HOOK hk_RemovingEmptyReflectorWaterMsgHook()
 {
 	static const UInt32 retnAddr = 0x4B0482;
 	static const char* msg = "MASTERFILE: Removing empty reflector water extra for ref (%08X).";

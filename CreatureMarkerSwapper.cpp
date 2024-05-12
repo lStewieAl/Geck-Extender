@@ -42,7 +42,7 @@ namespace CreatureMarkerSwapper
 		}
 	}
 
-	__declspec(naked) void LoadCreatureMarkerHook()
+	__HOOK LoadCreatureMarkerHook()
 	{
 		_asm
 		{
@@ -52,7 +52,7 @@ namespace CreatureMarkerSwapper
 		}
 	}
 
-	__declspec(naked) void LoadNPCMarkerHook()
+	__HOOK LoadNPCMarkerHook()
 	{
 		_asm
 		{

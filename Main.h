@@ -159,7 +159,7 @@ static void DoModScriptWindow(HWND wnd)
 	DeleteObject(fontHandle);
 }
 
-static __declspec(naked) void ModScriptWindow()
+static __HOOK ModScriptWindow()
 {
 	__asm
 	{
@@ -184,7 +184,7 @@ static void FixEditorFont(void)
 	SafeWrite8(basePatchAddr + 5, 0x90);
 }
 
-static __declspec(naked) void FixMultiBounds()
+static __HOOK FixMultiBounds()
 {
 	__asm
 	{
@@ -392,7 +392,7 @@ BOOL WINAPI hk_EndDialog(HWND hDlg, INT_PTR nResult)
 	return EndDialog(hDlg, nResult);
 }
 
-__declspec(naked) void hk_QuestWindowLoad()
+__HOOK hk_QuestWindowLoad()
 {
 	__asm
 	{
@@ -483,7 +483,7 @@ void __stdcall ConditionDataDialog_SetupColumnHeaders(HWND ListViewControl)
 }
 
 //	fix crash with esm as active file - credit to hlp
-static __declspec(naked) void hk_addr_42CD31()
+__HOOK hk_addr_42CD31()
 {
 	__asm
 	{
@@ -501,7 +501,7 @@ static __declspec(naked) void hk_addr_42CD31()
 }
 
 //	patch ONAM count - credit to hlp
-static __declspec(naked) void hk_addr_4E26BA()
+__HOOK hk_addr_4E26BA()
 {
 	__asm
 	{
@@ -536,7 +536,7 @@ bool __fastcall GetIsRIL(TESForm* form)
 	return form->refID == RIL_FormID;
 }
 
-__declspec(naked) void CheckIsRILHook()
+__HOOK CheckIsRILHook()
 {
 	static const UInt32 kRetnAddr = 0x005B8FFD;
 
@@ -555,7 +555,7 @@ __declspec(naked) void CheckIsRILHook()
 }
 
 //	enable/disable spell checker - credit to roy
-__declspec(naked) void hk_SpellCheck()
+__HOOK hk_SpellCheck()
 {
 	static const UInt32 kRetnAddrYes = 0x0041B613;
 	static const UInt32 kRetnAddrNo = 0x0041B61A;
@@ -1372,7 +1372,7 @@ _declspec(naked) void MultipleMasterLoadHook()
 	}
 }
 
-__declspec(naked) void RenderWindowHandlesRefRotationHook()
+__HOOK RenderWindowHandlesRefRotationHook()
 {
 	static const UInt32 retnAddr = 0x4523D0;
 	_asm
@@ -2014,7 +2014,7 @@ void PatchFasterLipGen()
 	WriteRelCall(0x0047964E, (UInt32)hk_sub_8A1FC0);
 }
 
-__declspec(naked) void LoadCellCheckLinkedRefNullHook()
+__HOOK LoadCellCheckLinkedRefNullHook()
 {
 	_asm
 	{
@@ -2057,7 +2057,7 @@ void __fastcall RemoveScriptDataSizeLimit(ScriptBuffer* scriptBuffer, ScriptLine
 	scriptBuffer->scriptData = static_cast<UInt8*>(newMem);
 }
 
-__declspec(naked) void Hook_RemoveScriptDataLimit()
+__HOOK Hook_RemoveScriptDataLimit()
 {
 	__asm
 	{
@@ -2180,7 +2180,7 @@ errno_t __cdecl OnGetMeshPathModifyIfDragDrop(char* Dst, rsize_t SizeInBytes, co
 	return CdeclCall<errno_t>(0xC5BEEA, Dst, SizeInBytes, Src); // strcat_s
 }
 
-__declspec(naked) void OnLoadRegionsHook()
+__HOOK OnLoadRegionsHook()
 {
 	_asm
 	{
@@ -2378,7 +2378,7 @@ void __fastcall OnInitDebrisScale(float& pDebrisScale, void* edx, HWND hDlg, int
 	CdeclCall(0x41AB10, hDlg, nIDDlgItem, pDebrisScale, 4);
 }
 
-__declspec(naked) void OnInitDebrisScaleHook()
+__HOOK OnInitDebrisScaleHook()
 {
 	_asm
 	{
@@ -2387,7 +2387,7 @@ __declspec(naked) void OnInitDebrisScaleHook()
 	}
 }
 
-__declspec(naked) void RetnGlobalDialogIDHook()
+__HOOK RetnGlobalDialogIDHook()
 {
 	_asm
 	{
@@ -2431,7 +2431,7 @@ void __fastcall StopSound_ResetRecordAudioPopupIfInvalid(HWND parent)
 	}
 }
 
-__declspec(naked) void StopSound_ResetRecordAudioPopupIfInvalidHook()
+__HOOK StopSound_ResetRecordAudioPopupIfInvalidHook()
 {
 	_asm
 	{
@@ -2468,7 +2468,7 @@ bool __fastcall IsWeaponModSubViewActive(HWND hWnd)
 	return false;
 }
 
-__declspec(naked) void OnTESModelTextureSwapDialogCallbackHook()
+__HOOK OnTESModelTextureSwapDialogCallbackHook()
 {
 	_asm
 	{
@@ -2622,7 +2622,7 @@ BOOL __stdcall ScriptEditCallback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
 	return StdCall<LRESULT>(0x5C3D40, hWnd, msg, wParam, lParam);
 }
 
-__declspec(naked) void NiTreeCtrl_CreateTreeRecursiveHook()
+__HOOK NiTreeCtrl_CreateTreeRecursiveHook()
 {
 	_asm
 	{
@@ -2642,7 +2642,7 @@ __declspec(naked) void NiTreeCtrl_CreateTreeRecursiveHook()
 	}
 }
 
-__declspec(naked) void NiTreeCtrl_CreateTreeRecursiveHook2()
+__HOOK NiTreeCtrl_CreateTreeRecursiveHook2()
 {
 	_asm
 	{
@@ -2658,7 +2658,7 @@ __declspec(naked) void NiTreeCtrl_CreateTreeRecursiveHook2()
 	}
 }
 
-__declspec(naked) void NiAVObject_GetViewerStringsHook()
+__HOOK NiAVObject_GetViewerStringsHook()
 {
 	_asm
 	{
@@ -2682,7 +2682,7 @@ void __cdecl OnLoadEspEsmSetupDetailsText(HWND hDlg, ModInfo* file)
 	bInSetupDetailsText = false;
 }
 
-__declspec(naked) void OnLoadEspEsmSetSummaryModifiedHook()
+__HOOK OnLoadEspEsmSetSummaryModifiedHook()
 {
 	_asm
 	{
@@ -2714,7 +2714,7 @@ void __fastcall OnObjectWindowNew(int* pFormType, HWND hDlg)
 	}
 }
 
-__declspec(naked) void OnObjectWindowNewHook()
+__HOOK OnObjectWindowNewHook()
 {
 	_asm
 	{
@@ -2975,7 +2975,7 @@ int __fastcall OnScriptConfirmClose(Script* script, HWND textEdit, HWND hWnd, LP
 	return MessageBoxA(hWnd, lpText, lpCaption, uType);
 }
 
-__declspec(naked) void OnScriptConfirmCloseHook()
+__HOOK OnScriptConfirmCloseHook()
 {
 	_asm
 	{
@@ -3007,7 +3007,7 @@ void __stdcall DestroySelectedWindowOrDialog(HWND hWnd)
 	DestroyWindowOrDialog(hWnd);
 }
 
-__declspec(naked) void OnDestroyAllWindowsHook()
+__HOOK OnDestroyAllWindowsHook()
 {
 	_asm
 	{
@@ -3034,7 +3034,7 @@ BOOL __fastcall OnShowSearchAndReplaceWindow(char* buffer, void* edx, HWND hWnd,
 	return ShowWindow(hWnd, nCmdShow);
 }
 
-__declspec(naked) void OnShowSearchAndReplaceWindowHook()
+__HOOK OnShowSearchAndReplaceWindowHook()
 {
 	_asm
 	{
@@ -3049,7 +3049,7 @@ void __cdecl OnInsertRenderPreferencesComboHotkey(HWND hWnd, const CHAR* text, L
 	CdeclCall(0x419BC0, hWnd, "Z", 8, bUpdateExtents);
 }
 
-__declspec(naked) void OnSelectRenderPreferencesComboHook()
+__HOOK OnSelectRenderPreferencesComboHook()
 {
 	_asm
 	{
@@ -3101,7 +3101,7 @@ void __cdecl OnInitRenderWindowComboBox(HWND hWnd, const CHAR* text, LPARAM item
 	CdeclCall(0x419BC0, hWnd, "<TILDE>", '`', bUpdateExtents);
 }
 
-__declspec(naked) void CellViewWindowResizeFixHook()
+__HOOK CellViewWindowResizeFixHook()
 {
 	static bool bDoOnce;
 	_asm
@@ -3158,7 +3158,7 @@ void __fastcall DoNumericEditorIDCheck(TESForm* Form, const char* EditorID)
 	}
 }
 
-__declspec(naked) void OnSetEditorIDHook()
+__HOOK OnSetEditorIDHook()
 {
 	_asm
 	{
@@ -3176,7 +3176,7 @@ void AddEditorNumericIDWarningHooks()
 	WriteRelCall(0x4FB456, UInt32(OnSetEditorIDHook));
 }
 
-__declspec(naked) void OnDataHandlerGetInteriorAtIndexHook()
+__HOOK OnDataHandlerGetInteriorAtIndexHook()
 {
 	_asm
 	{
@@ -3192,7 +3192,7 @@ __declspec(naked) void OnDataHandlerGetInteriorAtIndexHook()
 	}
 }
 
-__declspec(naked) void OnRenderWindowCallProcHook()
+__HOOK OnRenderWindowCallProcHook()
 {
 	_asm
 	{
@@ -3216,7 +3216,7 @@ void __cdecl InsertHeadPartsColumns(TESNPC* npc, HWND window, UInt32 retnAddr, H
 }
 
 HWND headPartNPCWindow;
-__declspec(naked) void PreInsertHeadPartsColumnsHookRemove()
+__HOOK PreInsertHeadPartsColumnsHookRemove()
 {
 	_asm
 	{
@@ -3228,7 +3228,7 @@ __declspec(naked) void PreInsertHeadPartsColumnsHookRemove()
 	}
 }
 
-__declspec(naked) void InsertHeadPartsColumnsHookRemove()
+__HOOK InsertHeadPartsColumnsHookRemove()
 {
 	_asm
 	{
@@ -3245,7 +3245,7 @@ __declspec(naked) void InsertHeadPartsColumnsHookRemove()
 	}
 }
 
-__declspec(naked) void InsertHeadPartsColumnsHookAdd()
+__HOOK InsertHeadPartsColumnsHookAdd()
 {
 	_asm
 	{
@@ -3346,7 +3346,7 @@ bool __cdecl CellWindowRegexContains(const char* text, const char* pattern)
 	return cellWindowFilter.Contains(text, pattern);
 }
 
-__declspec(naked) void OnStoreDialogWindowColumnSizeHook()
+__HOOK OnStoreDialogWindowColumnSizeHook()
 {
 	_asm
 	{
@@ -3507,7 +3507,7 @@ LRESULT CALLBACK TextureUseCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 	return CallWindowProc(originalTextureUseCallback, Hwnd, Message, wParam, lParam);
 }
 
-__declspec(naked) void OnSelectedBodyPartListViewButtonPressedHook()
+__HOOK OnSelectedBodyPartListViewButtonPressedHook()
 {
 	_asm
 	{
@@ -3642,7 +3642,7 @@ _declspec(naked) void OnWeapCheckIsDifferentHook()
 	}
 }
 
-__declspec(naked) void MediaSetNameDiffersHook()
+__HOOK MediaSetNameDiffersHook()
 {
 	_asm
 	{
@@ -3654,7 +3654,7 @@ __declspec(naked) void MediaSetNameDiffersHook()
 	}
 }
 
-__declspec(naked) void OnSoundPickerInitDialog_FreeBufferHook()
+__HOOK OnSoundPickerInitDialog_FreeBufferHook()
 {
 	_asm
 	{
@@ -3670,7 +3670,7 @@ __declspec(naked) void OnSoundPickerInitDialog_FreeBufferHook()
 	}
 }
 
-__declspec(naked) void OnSaveDeletedMasterFormHook()
+__HOOK OnSaveDeletedMasterFormHook()
 {
 	_asm
 	{
@@ -3698,7 +3698,7 @@ __declspec(naked) void OnSaveDeletedMasterFormHook()
 	}
 }
 
-__declspec(naked) void OnCreateQuestWindowGetParamHook()
+__HOOK OnCreateQuestWindowGetParamHook()
 {
 	_asm
 	{
