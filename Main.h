@@ -3266,127 +3266,84 @@ void __stdcall OnGetObjectWindowText(HWND hWnd, LPSTR lpString, int nMaxCount)
 	trim(lpString);
 }
 
-void AddObjectWindowFilterCtrlBackspaceSupport()
+struct WindowFilter
 {
-	static bool bDoOnce;
-	if (!bDoOnce)
+	HWND* hwnd;
+	std::unique_ptr<std::regex> regex;
+	bool bRegexSearch;
+	std::string lastPattern;
+	bool bAddedBackspaceSupport;
+
+	void AddBackspaceSupport()
 	{
-		bDoOnce = true;
-
-		// use SHAutoComplete since it adds CTRL-Backspace support to the control
-		SHAutoComplete(*(HWND*)0xED1108, SHACF_AUTOSUGGEST_FORCE_OFF);
-	}
-}
-
-static std::unique_ptr<std::regex> objectWindowRegex;
-static bool bObjectWindowRegexSearch;
-void __fastcall OnObjectWindowFilter(void* objectWindowNodeData, void* edx, char* a2, const char* apFilterString)
-{
-	AddObjectWindowFilterCtrlBackspaceSupport();
-
-	char filterString[0x100];
-	GetWindowTextA(*(HWND*)0xED1108, filterString, 255);
-	trim(filterString);
-	try
-	{
-		// Static variables to cache the last compiled pattern and its regex object
-		static std::string lastPattern;
-		if (strcmp(lastPattern.c_str(), filterString))
+		if (!bAddedBackspaceSupport)
 		{
-			if (IsOnlyAlphaNumeric(filterString))
-			{
-				bObjectWindowRegexSearch = false;
-			}
-			else
-			{
-				objectWindowRegex = std::make_unique<std::regex>(filterString, std::regex_constants::icase);
-				bObjectWindowRegexSearch = true;
-			}
-
-			lastPattern = filterString;
+			bAddedBackspaceSupport = true;
+			SHAutoComplete(*hwnd, SHACF_AUTOSUGGEST_FORCE_OFF);
 		}
 	}
-	catch (const std::regex_error& e)
+
+	void UpdateFilter()
 	{
-#ifdef _DEBUG
-		Console_Print("%s  -  %s", filterString, e.what());
-#endif
-		bObjectWindowRegexSearch = false;
-	}
-
-	HWND listWindow = GetDlgItem(*(HWND*)0x00ECFB70, 1041);
-	SendMessage(listWindow, WM_SETREDRAW, FALSE, 0);
-	ThisCall(0x439630, objectWindowNodeData, a2, apFilterString);
-	SendMessage(listWindow, WM_SETREDRAW, TRUE, 0);
-	RedrawWindow(listWindow, nullptr, nullptr, RDW_ERASE | RDW_INVALIDATE | RDW_NOCHILDREN);
-}
-
-bool __cdecl ObjectWindowRegexContains(const char* text, const char* regexPattern)
-{
-	if (bObjectWindowRegexSearch)
-	{
-		return std::regex_search(text, *objectWindowRegex);
-	}
-	return CdeclCall<bool>(0x8A15B0, text, regexPattern);
-}
-
-void AddCellWindowFilterCtrlBackspaceSupport()
-{
-	static bool bDoOnce;
-	if (!bDoOnce)
-	{
-		bDoOnce = true;
-
-		// use SHAutoComplete since it adds CTRL-Backspace support to the control
-		SHAutoComplete(*(HWND*)0xECF520, SHACF_AUTOSUGGEST_FORCE_OFF);
-	}
-}
-
-static std::unique_ptr<std::regex> cellWindowRegex;
-static bool bCellWindowRegexSearch;
-UInt32 OnCellWindowFilter()
-{
-	AddCellWindowFilterCtrlBackspaceSupport();
-
-	char filterString[0x100];
-	GetWindowTextA(*(HWND*)0xECF520, filterString, 255);
-	trim(filterString);
-	try
-	{
-		// Static variables to cache the last compiled pattern and its regex object
-		static std::string lastPattern;
-		if (strcmp(lastPattern.c_str(), filterString))
+		char filterString[0x100];
+		GetWindowTextA(*hwnd, filterString, 255);
+		trim(filterString);
+		try
 		{
-			if (IsOnlyAlphaNumeric(filterString))
+			if (strcmp(lastPattern.c_str(), filterString))
 			{
-				bCellWindowRegexSearch = false;
+				if (IsOnlyAlphaNumeric(filterString))
+				{
+					bRegexSearch = false;
+				}
+				else
+				{
+					regex = std::make_unique<std::regex>(filterString, std::regex_constants::icase);
+					bRegexSearch = true;
+				}
+				lastPattern = filterString;
 			}
-			else
-			{
-				cellWindowRegex = std::make_unique<std::regex>(filterString, std::regex_constants::icase);
-				bCellWindowRegexSearch = true;
-			}
-
-			lastPattern = filterString;
+		}
+		catch (const std::regex_error& e)
+		{
+#ifdef _DEBUG
+			Console_Print("%s  -  %s", filterString, e.what());
+#endif
+			bRegexSearch = false;
 		}
 	}
-	catch (const std::regex_error& e)
+
+	bool Contains(const char* text, const char* pattern)
 	{
-#ifdef _DEBUG
-		Console_Print("%s  -  %s", filterString, e.what());
-#endif
-		bCellWindowRegexSearch = false;
+		return bRegexSearch ? std::regex_search(text, *regex) : CdeclCall<bool>(0x8A15B0, text, pattern);
 	}
+};
+
+WindowFilter objectWindowFilter = { (HWND*)0xED1108 };
+WindowFilter cellWindowFilter = { (HWND*)0xECF520 };
+
+UInt32 __fastcall OnObjectWindowFilter()
+{
+	objectWindowFilter.AddBackspaceSupport();
+	objectWindowFilter.UpdateFilter();
 	return *(UInt32*)0xECC3C8;
 }
 
-bool __cdecl CellWindowRegexContains(const char* text, const char* regexPattern)
+bool __cdecl ObjectWindowRegexContains(const char* text, const char* pattern)
 {
-	if (bCellWindowRegexSearch)
-	{
-		return std::regex_search(text, *cellWindowRegex);
-	}
-	return CdeclCall<bool>(0x8A15B0, text, regexPattern);
+	return objectWindowFilter.Contains(text, pattern);
+}
+
+UInt32 OnCellWindowFilter()
+{
+	cellWindowFilter.AddBackspaceSupport();
+	cellWindowFilter.UpdateFilter();
+	return *(UInt32*)0xECC3C8;
+}
+
+bool __cdecl CellWindowRegexContains(const char* text, const char* pattern)
+{
+	return cellWindowFilter.Contains(text, pattern);
 }
 
 __declspec(naked) void OnStoreDialogWindowColumnSizeHook()

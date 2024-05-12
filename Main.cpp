@@ -850,11 +850,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x578595, UInt32(InsertHeadPartsColumnsHookRemove));
 
 	// support regex in the Object window filter
+	WriteRelCall(0x439641, UInt32(OnObjectWindowFilter));
 	WriteRelCall(0x439754, UInt32(ObjectWindowRegexContains));
 	WriteRelCall(0x43977D, UInt32(ObjectWindowRegexContains));
-	WriteRelCall(0x449779, UInt32(OnObjectWindowFilter));
-	WriteRelCall(0x44A439, UInt32(OnObjectWindowFilter));
-	WriteRelCall(0x44B375, UInt32(OnObjectWindowFilter));
 
 	// support regex in the cell window
 	WriteRelCall(0x42DE03, UInt32(OnCellWindowFilter));
