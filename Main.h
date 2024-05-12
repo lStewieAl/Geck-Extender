@@ -3710,3 +3710,11 @@ __HOOK OnCreateQuestWindowGetParamHook()
 		jmp ecx
 	}
 }
+
+void __fastcall TESIdleForm__56B5A0_Recurse(TESIdleForm* idleForm, void* edx, tList<TESIdleForm>* formList)
+{
+	if (idleForm)
+	{
+		ThisCall(0x56B5A0, idleForm, formList);
+	}
+}

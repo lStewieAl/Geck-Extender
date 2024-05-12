@@ -926,6 +926,10 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// populate the quest view when creating new entry
 	WriteRelJump(0x57E252, UInt32(OnCreateQuestWindowGetParamHook));
 
+	// add null check for idle form
+	WriteRelCall(0x56CFC6, UInt32(TESIdleForm__56B5A0_Recurse));
+	WriteRelCall(0x56D006, UInt32(TESIdleForm__56B5A0_Recurse));
+
 	NavMeshPickPreventer::Init();
 
 	// allow saving as ESM
