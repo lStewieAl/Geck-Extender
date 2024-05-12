@@ -30,6 +30,16 @@ void __cdecl OnPopulateFloatingObjectsList(HWND listWindow, tList<TESForm>* list
 	RedrawWindow(listWindow, nullptr, nullptr, RDW_ERASE | RDW_INVALIDATE | RDW_NOCHILDREN);
 }
 
+void __fastcall sub_406C40(void* thiss, void* edx, HWND comboBox, TESForm* a3)
+{
+	SendMessage(comboBox, WM_SETREDRAW, FALSE, 0);
+	ThisCall(0x406C40, thiss, comboBox, a3);
+	WM_CLOSE;
+	WM_DESTROY;
+	SendMessage(comboBox, WM_SETREDRAW, TRUE, 0);
+	RedrawWindow(comboBox, nullptr, nullptr, RDW_ERASE | RDW_INVALIDATE | RDW_NOCHILDREN);
+}
+
 _declspec(naked) void DialogueListViewBeginUI() {
 	static const UInt32 retnAddr = 0x592EB4;
 	static const UInt32 skipAddr = 0x592FB8;
@@ -291,4 +301,8 @@ void WriteUIHooks() {
 
 	// speed up the floating objects list
 	WriteRelCall(0x4838C1, UInt32(OnPopulateFloatingObjectsList));
+
+	// dialogue tree
+	WriteRelCall(0x408A25, UInt32(sub_406C40));
+	WriteRelCall(0x408A3C, UInt32(sub_406C40));
 }

@@ -282,6 +282,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	XUtil::PatchMemoryNop(0x00591CCE, 0x24);
 	XUtil::PatchMemoryNop(0x00592F08, 0x3F);
 	SafeWriteBuf(0x592F4A, "\x10\x90\x90\x90", 4); // above removes pushed args, so need to change mov offset and nop the add esp
+	XUtil::PatchMemoryNop(0x004084D2, 0x05); // prevent "Adding topic %s" when loading Dialogue Tree
 
 	//	Make search and replace window stay open unless explicitly close - credit to StewieA
 	if (config.bAllowMultipleSearchAndReplace) {
