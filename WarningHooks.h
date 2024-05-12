@@ -451,7 +451,7 @@ __declspec(naked) void hk_UnableToFindPortalLinkedMsgHook()
 __declspec(naked) void hk_RemovingEmptyReflectorWaterMsgHook()
 {
 	static const UInt32 retnAddr = 0x4B0482;
-	static const char* msg = "MASTERFILE: Removing empty reflector water extra for ref %08X.";
+	static const char* msg = "MASTERFILE: Removing empty reflector water extra for ref (%08X).";
 	_asm
 	{
 		push [ebp + 0xC] // form->refID
@@ -463,7 +463,8 @@ __declspec(naked) void hk_RemovingEmptyReflectorWaterMsgHook()
 
 
 
-void WriteErrorMessageHooks() {
+void WriteErrorMessageHooks()
+{
 	//	Fix message bugs/change message formatting - credit to roy
 	SafeWrite32(0x00468D13 + 1, (UInt32)messageCreateFileMapping);
 	SafeWrite32(0x00468DD8 + 1, (UInt32)messageCreateFileMapping);
@@ -567,4 +568,20 @@ void WriteErrorMessageHooks() {
 
 	WriteRelJump(0x4B047D, UInt32(hk_RemovingEmptyReflectorWaterMsgHook));
 	SafeWrite8(0x4B0489, 0x8); // pop extra arg
+
+	// swap formID and editorID for consistency in LOD message
+	const char* LODMessage = "MODELS: LOD Mesh '%s' for object '%s' (%08X) could not be found.";
+	SafeWrite8(0x5F1F54, 0x56);
+	SafeWrite8(0x5F1F55, 0x50);
+	SafeWrite32(0x5F1F5C, UInt32(LODMessage));
+
+	const char* LODMessage2 = "MODELS: LOD Mesh '%s' for reference '%s' (%08X) in cell '%s' (%d, %d) could not be found.";
+	SafeWrite8(0x659DF9, 0x55);
+	SafeWrite8(0x659DFA, 0x50);
+	SafeWrite32(0x659E01, UInt32(LODMessage2));
+
+	const char* LODMessage3 = "MODELS: LOD Mesh '%s' for reference '%s' (%08X) in cell '%s' could not be found.";
+	SafeWrite8(0x659DBC, 0x55);
+	SafeWrite8(0x659DBD, 0x50);
+	SafeWrite32(0x659DC4, UInt32(LODMessage3));
 }
