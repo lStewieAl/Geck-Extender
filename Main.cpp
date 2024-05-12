@@ -850,11 +850,18 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x578595, UInt32(InsertHeadPartsColumnsHookRemove));
 
 	// support regex in the Object window filter
-	WriteRelCall(0x439754, UInt32(RegexContains));
-	WriteRelCall(0x43977D, UInt32(RegexContains));
+	WriteRelCall(0x439754, UInt32(ObjectWindowRegexContains));
+	WriteRelCall(0x43977D, UInt32(ObjectWindowRegexContains));
 	WriteRelCall(0x449779, UInt32(OnObjectWindowFilter));
 	WriteRelCall(0x44A439, UInt32(OnObjectWindowFilter));
 	WriteRelCall(0x44B375, UInt32(OnObjectWindowFilter));
+
+	// support regex in the cell window
+	WriteRelCall(0x42DE03, UInt32(OnCellWindowFilter));
+	WriteRelCall(0x42DE5A, UInt32(CellWindowRegexContains));
+	WriteRelCall(0x42DE85, UInt32(CellWindowRegexContains));
+	WriteRelCall(0x42DEAE, UInt32(CellWindowRegexContains));
+	WriteRelCall(0x42DF67, UInt32(CellWindowRegexContains));
 
 	// trim whitespace in object window filter
 	WriteRelCall(0x44B2FE, UInt32(OnGetObjectWindowText));

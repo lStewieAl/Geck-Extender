@@ -3279,7 +3279,7 @@ void AddObjectWindowFilterCtrlBackspaceSupport()
 }
 
 static std::unique_ptr<std::regex> objectWindowRegex;
-static bool bRegexSearch;
+static bool bObjectWindowRegexSearch;
 void __fastcall OnObjectWindowFilter(void* objectWindowNodeData, void* edx, char* a2, const char* apFilterString)
 {
 	AddObjectWindowFilterCtrlBackspaceSupport();
@@ -3295,12 +3295,12 @@ void __fastcall OnObjectWindowFilter(void* objectWindowNodeData, void* edx, char
 		{
 			if (IsOnlyAlphaNumeric(filterString))
 			{
-				bRegexSearch = false;
+				bObjectWindowRegexSearch = false;
 			}
 			else
 			{
 				objectWindowRegex = std::make_unique<std::regex>(filterString, std::regex_constants::icase);
-				bRegexSearch = true;
+				bObjectWindowRegexSearch = true;
 			}
 
 			lastPattern = filterString;
@@ -3311,7 +3311,7 @@ void __fastcall OnObjectWindowFilter(void* objectWindowNodeData, void* edx, char
 #ifdef _DEBUG
 		Console_Print("%s  -  %s", filterString, e.what());
 #endif
-		bRegexSearch = false;
+		bObjectWindowRegexSearch = false;
 	}
 
 	HWND listWindow = GetDlgItem(*(HWND*)0x00ECFB70, 1041);
@@ -3320,11 +3320,71 @@ void __fastcall OnObjectWindowFilter(void* objectWindowNodeData, void* edx, char
 	SendMessage(listWindow, WM_SETREDRAW, TRUE, 0);
 	RedrawWindow(listWindow, nullptr, nullptr, RDW_ERASE | RDW_INVALIDATE | RDW_NOCHILDREN);
 }
-bool __cdecl RegexContains(const char* text, const char* regexPattern)
+
+bool __cdecl ObjectWindowRegexContains(const char* text, const char* regexPattern)
 {
-	if (bRegexSearch)
+	if (bObjectWindowRegexSearch)
 	{
 		return std::regex_search(text, *objectWindowRegex);
+	}
+	return CdeclCall<bool>(0x8A15B0, text, regexPattern);
+}
+
+void AddCellWindowFilterCtrlBackspaceSupport()
+{
+	static bool bDoOnce;
+	if (!bDoOnce)
+	{
+		bDoOnce = true;
+
+		// use SHAutoComplete since it adds CTRL-Backspace support to the control
+		SHAutoComplete(*(HWND*)0xECF520, SHACF_AUTOSUGGEST_FORCE_OFF);
+	}
+}
+
+static std::unique_ptr<std::regex> cellWindowRegex;
+static bool bCellWindowRegexSearch;
+UInt32 OnCellWindowFilter()
+{
+	AddCellWindowFilterCtrlBackspaceSupport();
+
+	char filterString[0x100];
+	GetWindowTextA(*(HWND*)0xECF520, filterString, 255);
+	trim(filterString);
+	try
+	{
+		// Static variables to cache the last compiled pattern and its regex object
+		static std::string lastPattern;
+		if (strcmp(lastPattern.c_str(), filterString))
+		{
+			if (IsOnlyAlphaNumeric(filterString))
+			{
+				bCellWindowRegexSearch = false;
+			}
+			else
+			{
+				cellWindowRegex = std::make_unique<std::regex>(filterString, std::regex_constants::icase);
+				bCellWindowRegexSearch = true;
+			}
+
+			lastPattern = filterString;
+		}
+	}
+	catch (const std::regex_error& e)
+	{
+#ifdef _DEBUG
+		Console_Print("%s  -  %s", filterString, e.what());
+#endif
+		bCellWindowRegexSearch = false;
+	}
+	return *(UInt32*)0xECC3C8;
+}
+
+bool __cdecl CellWindowRegexContains(const char* text, const char* regexPattern)
+{
+	if (bCellWindowRegexSearch)
+	{
+		return std::regex_search(text, *cellWindowRegex);
 	}
 	return CdeclCall<bool>(0x8A15B0, text, regexPattern);
 }
