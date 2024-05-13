@@ -60,6 +60,7 @@ struct Settings
 	bool bDataMenuSpaceTogglesSelectedFile;
 	bool bNewPluginsDefaultToESM;
 	bool bAllowHardDeletionInESMs;
+	bool bAddFilterCtrlBackspace;
 
 	int bUseAltShiftMultipliers;
 	float fMovementAltMultiplier;

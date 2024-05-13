@@ -3276,7 +3276,7 @@ struct WindowFilter
 
 	void AddBackspaceSupport()
 	{
-		if (!bAddedBackspaceSupport)
+		if (!bAddedBackspaceSupport && config.bAddFilterCtrlBackspace)
 		{
 			bAddedBackspaceSupport = true;
 			SHAutoComplete(*hwnd, SHACF_AUTOSUGGEST_FORCE_OFF);
