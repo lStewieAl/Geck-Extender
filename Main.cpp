@@ -930,6 +930,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x56CFC6, UInt32(TESIdleForm__56B5A0_Recurse));
 	WriteRelCall(0x56D006, UInt32(TESIdleForm__56B5A0_Recurse));
 
+	// fix havok preview anim timer increasing for non-anims
+	TESPreviewControl__SetTimeAddr = DetourVtable(0xD38DE0, UInt32(TESPreviewControl__SetTime));
+
 	NavMeshPickPreventer::Init();
 
 	// allow saving as ESM

@@ -3718,3 +3718,30 @@ void __fastcall TESIdleForm__56B5A0_Recurse(TESIdleForm* idleForm, void* edx, tL
 		ThisCall(0x56B5A0, idleForm, formList);
 	}
 }
+
+class TESRenderControl;
+UInt32 TESPreviewControl__SetTimeAddr;
+void __fastcall TESPreviewControl__SetTime(TESRenderControl* renderControl, void* edx, float afTime, char abIsPaused)
+{
+	bool bHasAnims = false;
+	auto ref = *(TESObjectREFR**)0xECECE0;
+	if (ref)
+	{
+		if (auto node = ref->Get3D())
+		{
+			auto listView = *(HWND*)0xECECD4; // HavokPreview::pAnimListHwnd
+			if (auto animSequence = CdeclCall<NiControllerSequence*>(0x41A390, listView))
+			{
+				bHasAnims = true;
+			}
+		}
+	}
+
+	if (!bHasAnims)
+	{
+		// always use 33ms
+		afTime = (1000.0F / 30) / havokAnimationRate;
+	}
+
+	ThisCall(TESPreviewControl__SetTimeAddr, renderControl, afTime, abIsPaused);
+}
