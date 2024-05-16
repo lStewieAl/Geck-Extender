@@ -705,6 +705,15 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x4531E9, UInt32(FormatRenderWindowMemoryUsage));
 	WriteRelCall(0x4530BF, UInt32(FormatRenderWindowMemoryUsage));
 	WriteRelCall(0x45319B, UInt32(FormatRenderWindowMemoryUsage));
+	WriteRelCall(0x46594C, UInt32(OnPrintRenderWindowStatusBarText));
+	SafeWrite8(0x46594C + 5, 0x90);
+
+	// prevent flickering caused by status bar updates by checking if the text changed
+	WriteRelCall(0x460CDB, UInt32(TESCSMain__WriteToStatusBarIfChanged));
+	WriteRelCall(0x460CE7, UInt32(TESCSMain__WriteToStatusBarIfChanged));
+	WriteRelCall(0x460912, UInt32(TESCSMain__WriteToStatusBarIfChanged));
+	WriteRelCall(0x460903, UInt32(TESCSMain__WriteToStatusBarIfChanged));
+	WriteRelCall(0x460AA9, UInt32(TESCSMain__WriteToStatusBarIfChanged));
 
 	WriteRelCall(0x57484D, UInt32(OnFaceGen_PeriodicCleanup));
 	WriteRelCall(0x574A40, UInt32(OnFaceGen_PeriodicCleanup));

@@ -2350,6 +2350,29 @@ void __cdecl FormatRenderWindowMemoryUsage(char* DstBuf, size_t SizeInBytes, cha
 	CdeclCall<int>(0x401190, DstBuf + bytesWritten, SizeInBytes - bytesWritten, " (%d MB)", GetCurrentMemoryUsage() / (1024*1024));
 }
 
+void __stdcall OnPrintRenderWindowStatusBarText(HWND hWnd, UINT Msg, WPARAM wParam, const char* renderText)
+{
+	static char lastText[0x200];
+	if (strncmp(renderText, lastText, sizeof(lastText)))
+	{
+		strncpy(lastText, renderText, sizeof(lastText));
+		hk_SendMessageA(hWnd, Msg, wParam, (LPARAM)renderText);
+	}
+}
+
+void __cdecl TESCSMain__WriteToStatusBarIfChanged(WPARAM wParam, const char* text)
+{
+	char buf[0x200];
+
+	auto statusBar = *(HWND*)0xECFC18;
+	SendMessageA(statusBar, SB_GETTEXTA, wParam, (LPARAM)buf);
+
+	if (strncmp(buf, text, sizeof(buf)))
+	{
+		SendMessageA(statusBar, SB_SETTEXTA, wParam, (LPARAM)text);
+	}
+}
+
 void CleanupFaceGenMap()
 {
 	// 0x44F180 but without clearing the cell data, lights or navmesh
