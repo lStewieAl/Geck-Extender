@@ -3768,3 +3768,17 @@ void __fastcall TESPreviewControl__SetTime(TESRenderControl* renderControl, void
 
 	ThisCall(TESPreviewControl__SetTimeAddr, renderControl, afTime, abIsPaused);
 }
+
+__HOOK OnWaterTypeCheckExtraSubWindowHook()
+{
+	_asm
+	{
+		test eax, eax
+		je done
+		mov eax, [eax + 0x10]
+	done:
+		add esp, 0x8
+		mov ecx, 0x65F8F5
+		jmp ecx
+	}
+}

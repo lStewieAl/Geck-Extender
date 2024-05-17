@@ -853,6 +853,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	// fix geck calling a GWL_WNDPROC function pointer directly instead of using CallWindowProcA
 	WriteRelJump(0x48CABC, UInt32(OnRenderWindowCallProcHook));
+	// fix crash with water type window
+	WriteRelJump(0x65F8EF, UInt32(OnWaterTypeCheckExtraSubWindowHook));
 
 	// fix head preview not updating when adding head parts
 	WriteRelCall(0x5785EF, UInt32(InsertHeadPartsColumnsHookAdd));
