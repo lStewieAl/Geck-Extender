@@ -944,6 +944,14 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// fix havok preview anim timer increasing for non-anims
 	TESPreviewControl__SetTimeAddr = DetourVtable(0xD38DE0, UInt32(TESPreviewControl__SetTime));
 
+	// allow opening any form that has a model in the preview (e.g. Impact Datas)
+	SafeWrite8(0x44B243, 0xB8);
+	SafeWrite32(0x44B243 + 1, UInt32(IsBoundObjectOrHasModelPath));
+	WriteRelCall(0x44A782, UInt32(OnSelectObjectCheckIsBoundObject));
+	SafeWrite8(0x44B243 + 1 + 4, 0x90);
+	WriteRelCall(0x44BB8E, UInt32(OnHavokPreviewSetup));
+	WriteRelCall(0x44A793, UInt32(OnHavokPreviewSetup));
+
 	NavMeshPickPreventer::Init();
 
 	// allow saving as ESM

@@ -259,7 +259,7 @@ public:
 	virtual void		Unk_2F();
 	virtual void		Unk_30();
 	virtual void		Unk_31();
-	virtual void		Unk_32();
+	virtual bool		IsBoundObject();
 	virtual void		Unk_33();
 	virtual void		Unk_34();
 	virtual void		Unk_35();

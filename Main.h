@@ -3782,3 +3782,44 @@ __HOOK OnWaterTypeCheckExtraSubWindowHook()
 		jmp ecx
 	}
 }
+
+void __cdecl OnHavokPreviewSetup(TESForm* form)
+{
+	if (form)
+	{
+		if (form->IsBoundObject())
+		{
+			// open the havok preview directly on the TESBoundObject
+			CdeclCall(0x4102F0, form);
+		}
+		else
+		{
+			const char* modelPath = CdeclCall<const char*>(0x501B20, form);
+			if (modelPath && *modelPath)
+			{
+				// call a method that creates a TESObjectSTAT and sets the mesh path
+				CdeclCall(0x4105C0, modelPath);
+			}
+		}
+	}
+}
+
+bool __fastcall IsBoundObjectOrHasModelPath(TESForm* form)
+{
+	if (form->IsBoundObject())
+	{
+		return true;
+	}
+
+	const char* modelPath = CdeclCall<const char*>(0x501B20, form);
+	return modelPath && *modelPath;
+}
+
+TESForm* __cdecl OnSelectObjectCheckIsBoundObject(TESForm* form)
+{
+	if (IsBoundObjectOrHasModelPath(form))
+	{
+		return form;
+	}
+	return nullptr;
+}
