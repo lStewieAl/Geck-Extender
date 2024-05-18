@@ -3762,8 +3762,8 @@ void __fastcall TESPreviewControl__SetTime(TESRenderControl* renderControl, void
 
 	if (!bHasAnims)
 	{
-		// always use 33ms
-		afTime = (1000.0F / 30) / havokAnimationRate;
+		// always use 16.67ms as render window is 60fps
+		afTime = (1000.0F / 60) / havokAnimationRate;
 	}
 
 	ThisCall(TESPreviewControl__SetTimeAddr, renderControl, afTime, abIsPaused);
