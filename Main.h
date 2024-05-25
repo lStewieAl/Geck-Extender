@@ -1626,6 +1626,10 @@ BOOL __stdcall HavokPreviewCallback(HWND hWnd, UINT Message, WPARAM wParam, LPAR
 
 		SendDlgItemMessageA(hWnd, 2543, TBM_SETPOS, 1u, landHeight);
 
+		if (*(bool*)0xECECEC) // HavokPreview::bPaused
+		{
+			SetDlgItemTextA(hWnd, 1018, "Resume");
+		}
 	}
 	else if (Message == WM_DESTROY)
 	{
@@ -3746,26 +3750,28 @@ class TESRenderControl;
 UInt32 TESPreviewControl__SetTimeAddr;
 void __fastcall TESPreviewControl__SetTime(TESRenderControl* renderControl, void* edx, float afTime, char abIsPaused)
 {
-	bool bHasAnims = false;
-	auto ref = *(TESObjectREFR**)0xECECE0;
-	if (ref)
+	if (renderControl == *(TESRenderControl**)0xECECE4) // if this is the havok preview window
 	{
-		if (auto node = ref->Get3D())
+		bool bHasAnims = false;
+		auto ref = *(TESObjectREFR**)0xECECE0;
+		if (ref)
 		{
-			auto listView = *(HWND*)0xECECD4; // HavokPreview::pAnimListHwnd
-			if (auto animSequence = CdeclCall<NiControllerSequence*>(0x41A390, listView))
+			if (auto node = ref->Get3D())
 			{
-				bHasAnims = true;
+				auto listView = *(HWND*)0xECECD4; // HavokPreview::pAnimListHwnd
+				if (auto animSequence = CdeclCall<NiControllerSequence*>(0x41A390, listView))
+				{
+					bHasAnims = true;
+				}
 			}
 		}
-	}
 
-	if (!bHasAnims)
-	{
-		// always use 16.67ms as render window is 60fps
-		afTime = (1000.0F / 60) / havokAnimationRate;
+		if (!bHasAnims)
+		{
+			// always use 16.67ms as render window is 60fps
+			afTime = (1000.0F / 60) / havokAnimationRate;
+		}
 	}
-
 	ThisCall(TESPreviewControl__SetTimeAddr, renderControl, afTime, abIsPaused);
 }
 
