@@ -35,7 +35,7 @@ namespace CustomRenderWindowHotkeys
 	{
 		if (auto node = ref->Get3D())
 		{
-			if (node = ThisCall<NiNode*>(0x68B370, node, 0xF1FDD4)) // NiRTTI::HasType(&NiNode::ms_RTTI);
+			if (node = ThisStdCall<NiNode*>(0x68B370, node, 0xF1FDD4)) // NiRTTI::HasType(&NiNode::ms_RTTI);
 			{
 				node->SetAlphaRecurse(1.0F);
 				node->m_flags &= ~0x200001;
@@ -153,7 +153,7 @@ namespace CustomRenderWindowHotkeys
 	void AddCustomHotkey(RenderWindowHotkey::KeyCombo combo, unsigned int hotkey)
 	{
 		void* hotkeysNiTMap = (void*)0xE8CF3C;
-		ThisCall(0x50D880, hotkeysNiTMap, combo.data, kHotkey_FIRST + hotkey);
+		ThisStdCall(0x50D880, hotkeysNiTMap, combo.data, kHotkey_FIRST + hotkey);
 	}
 
 	void __cdecl AddKeysToMap()

@@ -95,7 +95,7 @@ namespace LaunchGame
 	{
 		if (!sCellEditorID.empty())
 		{
-			ThisCall(0x93DB60, *(UInt32**)0x11DEA3C, sCellEditorID.c_str(), 0); // CenterOnCell
+			ThisStdCall(0x93DB60, *(UInt32**)0x11DEA3C, sCellEditorID.c_str(), 0); // CenterOnCell
 		}
 	}
 

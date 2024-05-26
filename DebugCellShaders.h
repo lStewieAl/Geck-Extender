@@ -1,5 +1,7 @@
 #pragma once
 
+#include "NiNodes.h"
+
 enum DebugRenderModes {
 	DEBUG_NONE = 0,
 	DEBUG_LIGHT_COUNT = 1,
@@ -11,6 +13,7 @@ enum DebugRenderModes {
 #define eDebugRenderMode *(DebugRenderModes*)0xF23C04
 #define ShaderConstant_AmbientColor (*(NiColorAlpha*)0xF244E0)
 #define ShaderConstant_AmbientColor30 (*(NiColorAlpha*)0xF2B988)
+#define BSBatchRenderer_pCurrentPass (*(BSShaderProperty::RenderPass**)0xF23C30)
 
 
 
@@ -25,6 +28,26 @@ static const NiColorAlpha LightCountDebugColors[] = {
 	NiColorAlpha(0.4f, 0.0f, 0.6f, 1.0f),
 	NiColorAlpha(0.6f, 0.0f, 0.4f, 1.0f),
 	NiColorAlpha(0.8f, 0.0f, 0.2f, 1.0f),
+	NiColorAlpha(1.0f, 0.0f, 0.0f, 1.0f),
+};
+
+static const NiColorAlpha PassCountDebugColors[] = {
+	NiColorAlpha(0.0f, 1.0f, 0.0f, 1.0f),
+	NiColorAlpha(0.0f, 0.875f, 0.125f, 1.0f),
+	NiColorAlpha(0.0f, 0.75f, 0.25f, 1.0f),
+	NiColorAlpha(0.0f, 0.625f, 0.375f, 1.0f),
+	NiColorAlpha(0.0f, 0.5f, 0.5f, 1.0f),
+	NiColorAlpha(0.0f, 0.375f, 0.625f, 1.0f),
+	NiColorAlpha(0.0f, 0.25f, 0.75f, 1.0f),
+	NiColorAlpha(0.0f, 0.125f, 0.875f, 1.0f),
+	NiColorAlpha(0.0f, 0.0f, 1.0f, 1.0f),
+	NiColorAlpha(0.125f, 0.0f, 0.875f, 1.0f),
+	NiColorAlpha(0.25f, 0.0f, 0.75f, 1.0f),
+	NiColorAlpha(0.375f, 0.0f, 0.625f, 1.0f),
+	NiColorAlpha(0.5f, 0.0f, 0.5f, 1.0f),
+	NiColorAlpha(0.625f, 0.0f, 0.375f, 1.0f),
+	NiColorAlpha(0.75f, 0.0f, 0.25f, 1.0f),
+	NiColorAlpha(0.875f, 0.0f, 0.125f, 1.0f),
 	NiColorAlpha(1.0f, 0.0f, 0.0f, 1.0f),
 };
 
@@ -131,8 +154,9 @@ _declspec(naked) void DebugShaderHook965B40()
 static bool bRenderModeChanged = false;
 static DebugRenderModes eLastRenderMode = DEBUG_NONE;
 
-void inline HandleDebugRender(DWORD* pShader, DWORD* pShaderProperty, DWORD* pRenderPass, DWORD* pGeometry, DWORD* pMaterialProperty, bool bIs30Shader) {
-	UInt32 uiLightCount = ThisStdCall(0x925830, pShaderProperty); // GetActiveLightCount
+// Returns false if debug mode is active
+bool SetDebugColors(NiColorAlpha* apAmbient, BSShaderProperty* apShaderProp, NiGeometry* apGeometry) {
+	UInt32 uiLightCount = ThisStdCall(0x925830, apShaderProp); // GetActiveLightCount
 
 	bool bAutoColor = config.bAutoLightWarnings && (uiLightCount > 6) && eDebugRenderMode != DEBUG_LIGHT_COUNT;
 
@@ -141,26 +165,41 @@ void inline HandleDebugRender(DWORD* pShader, DWORD* pShaderProperty, DWORD* pRe
 		eLastRenderMode = eDebugRenderMode;
 	}
 
-	if (eDebugRenderMode == 1 || bAutoColor) {
-		uiLightCount = max(min(uiLightCount, 10), 0);
-		static NiColorAlpha* pAmbientColor = bIs30Shader ? &ShaderConstant_AmbientColor30 : &ShaderConstant_AmbientColor;
-		*pAmbientColor = LightCountDebugColors[uiLightCount];
+	if (eDebugRenderMode > 0 || bAutoColor) {
+		if (eDebugRenderMode == DEBUG_LIGHT_COUNT || bAutoColor) {
+			uiLightCount = max(min(uiLightCount, 10), 0);
+			*apAmbient = LightCountDebugColors[uiLightCount];
 
-		if (bAutoColor) {
-			pAmbientColor->Scale(3.0f);
+			if (bAutoColor) {
+				apAmbient->Scale(1.5f);
+			}
+		}
+		else if (eDebugRenderMode == DEBUG_PASS_COUNT) {
+			UInt16 usPasses = apShaderProp->GetNumberofPasses(apGeometry);
+			*apAmbient = PassCountDebugColors[min(16, max(0, usPasses))];
 		}
 
-		if (eDebugRenderMode == 1 && bRenderModeChanged) {
+		if (bRenderModeChanged) {
 			LightingFlags = 1;
 			bRenderModeChanged = false;
 		}
+
+		return false;
 	}
 	else {
-		if (bIs30Shader) {
-			StdCall(0x9661C0, pMaterialProperty, pShaderProperty); // Lighting30Shader::UpdateAmbientColor
+		return true;
+	}
+}
+
+void inline HandleDebugRender(DWORD* apShader, BSShaderProperty* apShaderProperty, DWORD* apRenderPass, NiGeometry* apGeometry, NiMaterialProperty* apMaterialProperty, bool abIs30Shader) {
+	static NiColorAlpha* pAmbientColor = abIs30Shader ? &ShaderConstant_AmbientColor30 : &ShaderConstant_AmbientColor;
+
+	if (SetDebugColors(pAmbientColor, apShaderProperty, apGeometry)) {
+		if (abIs30Shader) {
+			StdCall(0x9661C0, apMaterialProperty, apShaderProperty); // Lighting30Shader::UpdateAmbientColor
 		}
 		else {
-			StdCall(0x94DA90, pShaderProperty, pRenderPass, pGeometry, pMaterialProperty); // ShadowLightShader::UpdateAmbientColor
+			StdCall(0x94DA90, apShaderProperty, apRenderPass, apGeometry, apMaterialProperty); // ShadowLightShader::UpdateAmbientColor
 		}
 		if (bRenderModeChanged) {
 			LightingFlags |= (1 | 2 | 8 | 20);
@@ -169,13 +208,35 @@ void inline HandleDebugRender(DWORD* pShader, DWORD* pShaderProperty, DWORD* pRe
 	}
 }
 
-void __stdcall ShadowLightShader_UpdateAmbientColorEx(DWORD* pShaderProperty, DWORD* pRenderPass, DWORD* pGeometry, DWORD* pMaterialProperty) {
-	HandleDebugRender(nullptr, pShaderProperty, pRenderPass, pGeometry, pMaterialProperty, false);
+void __stdcall ShadowLightShader_UpdateAmbientColorEx(BSShaderProperty* apShaderProperty, DWORD* apRenderPass, NiGeometry* apGeometry, NiMaterialProperty* apMaterialProperty) {
+	HandleDebugRender(nullptr, apShaderProperty, apRenderPass, apGeometry, apMaterialProperty, false);
 }
 
-void __stdcall Lighting30Shader_UpdateAmbientColor30Ex(DWORD* pMaterialProperty, DWORD* pShaderProperty) {
-	HandleDebugRender(nullptr, pShaderProperty, nullptr, nullptr, pMaterialProperty, true);
+void __stdcall Lighting30Shader_UpdateAmbientColor30Ex(NiMaterialProperty* apMaterialProperty, BSShaderProperty* apShaderProperty) {
+	HandleDebugRender(nullptr, apShaderProperty, nullptr, nullptr, apMaterialProperty, true);
 }
+
+
+void __fastcall BSShaderPPLightingProperty__AddPass_Opt(void* apThis, void*, void* apGeometry, void* apLight0, UInt16* apusPassCount, BOOL abAddPass, bool* abEnable, bool abSkinned, bool abGlowMap, bool abSpecular, bool bFacegen, bool abHasLights) {
+	if (abAddPass == 0) {
+		(*apusPassCount)++;
+		return;
+	}
+
+	ThisStdCall(0x97FDD0, apThis, apGeometry, apLight0, apusPassCount, abAddPass, abEnable, abSkinned, abGlowMap, abSpecular, bFacegen, abHasLights);
+}
+
+void __fastcall ShadowLightShader__SetAmbientColor(void* apThis) {
+	static NiColorAlpha* pAmbientColor = &ShaderConstant_AmbientColor;
+
+	NiGeometry* pGeometry = BSBatchRenderer_pCurrentPass->pGeometry;
+	BSShaderProperty* pShaderProperty = (BSShaderProperty*)pGeometry->m_kProperties.m_aspProps[NiPropertyState::SHADE];
+
+	if (SetDebugColors(pAmbientColor, pShaderProperty, pGeometry)) {
+		ThisStdCall(0x94E5A0, apThis);
+	}
+}
+
 
 void RestoreRenderWindowDebugShaders()
 {
@@ -188,14 +249,14 @@ void RestoreRenderWindowDebugShaders()
 	WriteRelCall(0x94FBAB, UInt32(ShadowLightShader_UpdateAmbientColorEx));
 	//WriteRelCall(0x966625, UInt32(Lighting30Shader_UpdateAmbientColor30Ex));
 
-	// Set WS_VISIBLE on debug shader buttons - Stewie
-	SafeWrite8(RES_HACKER_ADDR_TO_ACTUAL + 0xC2DD97, 0x50);
-	SafeWrite8(RES_HACKER_ADDR_TO_ACTUAL + 0xC2DD97 + 0x30, 0x50);
-	SafeWrite8(RES_HACKER_ADDR_TO_ACTUAL + 0xC2DD97 + 0x60, 0x50);
-	SafeWrite8(RES_HACKER_ADDR_TO_ACTUAL + 0xC2DD97 + 0x90, 0x50);
-	SafeWrite8(RES_HACKER_ADDR_TO_ACTUAL + 0xC2DD97 + 0xC0, 0x50);
-	SafeWrite8(RES_HACKER_ADDR_TO_ACTUAL + 0xC2DD97 + 0x100, 0x50);
-	SafeWrite8(RES_HACKER_ADDR_TO_ACTUAL + 0xC2DD97 + 0x134, 0x50);
-	SafeWrite8(RES_HACKER_ADDR_TO_ACTUAL + 0xC2DD97 + 0x16C, 0x50);
-	SafeWrite8(RES_HACKER_ADDR_TO_ACTUAL + 0xC2DD97 + 0x1A4, 0x50);
+	WriteRelCall(0x94FD81, UInt32(ShadowLightShader__SetAmbientColor));
+	WriteRelCall(0x94FFC1, UInt32(ShadowLightShader__SetAmbientColor));
+
+
+	// Crash fix
+	WriteRelCall(0x98158C, UInt32(BSShaderPPLightingProperty__AddPass_Opt));
+
+	// Prevent shader package destruction (allows shader reloading)
+	SafeWrite8(0x9001F8, 0xEB);
+	SafeWrite8(0x9002AA, 0xEB);
 }

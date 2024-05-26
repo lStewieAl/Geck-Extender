@@ -72,7 +72,63 @@ static struct NiUpdateData
 	UInt8 gap09[3];
 } DefaultNodeUpdateParams;
 
-class NiProperty;
+class NiProperty : public NiObjectNET {
+public:
+	NiProperty();
+	virtual ~NiProperty();
+
+	virtual UInt32	Type();
+	virtual void	Update(NiUpdateData& apUpdateData);
+
+	enum PropertyType {
+		ALPHA,
+		CULLING,
+		MATERIAL,
+		SHADE,
+		STENCIL,
+		TEXTURING,
+		MAX_TYPES
+	};
+};
+
+class NiShadeProperty : public NiProperty {
+public:
+	NiShadeProperty();
+	virtual ~NiShadeProperty();
+
+	enum ShaderPropType : UInt32 {
+		PROP_Lighting			= 1,
+		PROP_DistantLOD			= 2,
+		PROP_GeometryDecal		= 3,
+		PROP_TallGrass			= 4,
+		//						  5,
+		PROP_SpeedTreeLeaf		= 6,
+		//						  7,
+		PROP_PPLighting			= 8,
+		PROP_Hair				= 9,
+		PROP_SpeedTreeBranch	= 10,
+		PROP_SpeedTreeBillboard = 11,
+		PROP_Lighting30			= 12,
+		PROP_Sky				= 13,
+		PROP_Water				= 14,
+		PROP_Bolt				= 15,
+		//						  16,
+		PROP_Particle			= 17,
+		PROP_Precipitation		= 18,
+		PROP_Tile				= 19,
+		//						  20,
+		PROP_NoLighting			= 21,
+		PROP_VolumetricFog		= 22,
+		PROP_BloodSplatter		= 23,
+		PROP_DistantTree		= 24,
+	};
+
+
+	Bitfield16		m_usFlags;
+	ShaderPropType	m_eShaderType;
+
+	bool IsLightShader() const { return m_eShaderType < 13; };
+};
 
 // 9C
 class NiAVObject : public NiObjectNET
@@ -168,7 +224,7 @@ public:
 	void SetVisible(bool visible) { visible ? (m_flags &= ~kNiFlag_Culled) : (m_flags |= kNiFlag_Culled); };
 	bool IsVisible() { return !(m_flags & kNiFlag_Culled); }
 	bool IsSelectiveUpdate() { return m_flags & kNiFlag_SelectiveUpdate; };
-	void UpdatePropertiesUpward() { ThisCall(0x80E140, this); };
+	void UpdatePropertiesUpward() { ThisStdCall(0x80E140, this); };
 };
 STATIC_ASSERT(sizeof(NiAVObject) == 0x9C);
 
@@ -596,7 +652,7 @@ public:
 
 	bool WindowPointToRay(int x, int y, NiPoint3* origin, NiPoint3* direction, float width = 0.0F)
 	{
-		return ThisCall<bool>(0x817480, this, x, y, origin, direction, width);
+		return ThisStdCall<bool>(0x817480, this, x, y, origin, direction, width);
 	}
 };
 
@@ -808,3 +864,181 @@ public:
 
 #endif
 class NiWindow;
+class ShadowSceneLight;
+class BSShaderAccumulator;
+class BGSTextureUseMap;
+
+class BSShaderProperty : public NiShadeProperty {
+public:
+	BSShaderProperty();
+	virtual ~BSShaderProperty();
+
+	enum BSShaderFlags {
+		Specular					= 0x1,
+		Skinned						= 0x2,
+		LowDetail					= 0x4,
+		Vertex_Alpha				= 0x8,
+		Motion_Blur					= 0x10,
+		Single_Pass					= 0x20,
+		Empty						= 0x40,
+		Environment_Mapping			= 0x80,
+		Alpha_Texture				= 0x100,
+		Z_Prepass					= 0x200,
+		FaceGen						= 0x400,
+		Parallax_Shader				= 0x800,
+		Model_Space_Normals			= 0x1000,
+		Non_Projective_Shadows		= 0x2000,
+		Landscape					= 0x4000,
+		Refraction					= 0x8000,
+		Fire_Refraction				= 0x10000,
+		Eye_Environment_Mapping		= 0x20000,
+		Hair						= 0x40000,
+		Dynamic_Alpha				= 0x80000,
+		Localmap_Hide_Secret		= 0x100000,
+		Window_Environment_Mapping	= 0x200000,
+		Tree_Billboard				= 0x400000,
+		Shadow_Frustum				= 0x800000,
+		Multiple_Textures			= 0x1000000,
+		Remappable_Textures			= 0x2000000,
+		Decal_Single_Pass			= 0x4000000,
+		Dynamic_Decal_Single_Pass	= 0x8000000,
+		Parallax_Occlusion			= 0x10000000,
+		External_Emittance			= 0x20000000,
+		Shadow_Map					= 0x40000000,
+		ZBuffer_Test				= 0x80000000,
+	};
+
+	enum BSShaderFlags2 {
+		ZBuffer_Write					= 0x1,
+		LOD_Landscape					= 0x2,
+		LOD_Building					= 0x4,
+		No_Fade							= 0x8,
+		Refraction_Tint					= 0x10,
+		Vertex_Colors					= 0x20,
+		_1st_person						= 0x40,
+		_1st_Light_is_Point_Light		= 0x80,
+		_2nd_Light						= 0x100,
+		_3rd_Light						= 0x200,
+		Vertex_Lighting					= 0x400,
+		Uniform_Scale					= 0x800,
+		Fit_Slope						= 0x1000,
+		Billboard_and_Envmap_Light_Fade = 0x2000,
+		No_LOD_Land_Blend				= 0x4000,
+		Envmap_Light_Fade				= 0x8000,
+		Wireframe						= 0x10000,
+		VATS_Selection					= 0x20000,
+		Show_in_Local_Map				= 0x40000,
+		Premult_Alpha					= 0x80000,
+		Skip_Normal_Maps				= 0x100000,
+		Alpha_Decal						= 0x200000,
+		No_Transparency_Multisampling	= 0x400000,
+		stinger_prop					= 0x800000,
+		Unknown3						= 0x1000000,
+		Unknown4						= 0x2000000,
+		Unknown5						= 0x4000000,
+		Unknown6						= 0x8000000,
+		Unknown7						= 0x10000000,
+		Unknown8						= 0x20000000,
+		Unknown9						= 0x40000000,
+		Wall_RealTimeEnv				= 0x80000000,
+	};
+
+	class RenderPass {
+	public:
+		enum AccumMode : UInt8 {
+			ACCUM_NONE				= 0,
+			ACCUM_ALPHA_BLEND		= 1,
+			ACCUM_UNK_2				= 2,
+			ACCUM_PARTICLE			= 3,
+			ACCUM_DECAL_SINGLE		= 4,
+			ACCUM_DYN_DECAL_SINGLE	= 5,
+			ACCUM_REFRACTION		= 6,
+			ACCUM_REFRACTION_CLEAR	= 7,
+			ACCUM_UNK_8				= 8,
+			ACCUM_UNK_9				= 9,
+			ACCUM_LOD				= 10,
+			ACCUM_UNK_11			= 11,
+			ACCUM_UNK_12			= 12,
+			ACCUM_UNK_13			= 13,
+			ACCUM_ALPHA_FADE		= 14,
+		};
+
+		NiGeometry*			pGeometry;
+		UInt16				usPassEnum;
+		AccumMode			eAccumulationHint;
+		bool				bIsFirst;
+		bool				bNoFog;
+		UInt8				ucNumLights;
+		UInt8				ucMaxNumLights;
+		UInt8				cCurrLandTexture;
+		ShadowSceneLight**	ppSceneLights;
+	};
+
+	class RenderPassArray;
+
+	virtual void						CopyTo(BSShaderProperty* apTarget);
+	virtual void						CopyData(BSShaderProperty* apTarget);
+	virtual void						SetupGeometry(NiGeometry* apGeometry);
+	virtual RenderPassArray*			GetRenderPasses(const NiGeometry* apGeometry, const UInt32 auiEnabledPasses, UInt16* apusPassCount, const UInt32 aeRenderMode, BSShaderAccumulator* apAccumulator, bool abAddPass);
+	virtual UInt16						GetNumberofPasses(NiGeometry* apGeometry);
+	virtual RenderPassArray*			GetRenderPassArray4C();
+	virtual RenderPass*					GetDepthPass(NiGeometry* apGeometry);
+	virtual BSShaderProperty*			PickShader(NiGeometry* apGeometry, UInt32 unk0 = 0, UInt32 unk2 = 0);
+	virtual NiSourceTexture*			GetDiffuseTexture() const;
+	virtual RenderPassArray*			GetWaterDepthPass(NiGeometry* apGeometry);
+	virtual void						CountTextures(void* apCountFunc, BGSTextureUseMap* apTexMap) const;
+	virtual void						PrecacheTextures() const;
+
+	UInt32							ulFlags[2];
+	float							fAlpha;
+	float							fFadeAlpha;
+	float							fEnvMapScale;
+	float							fLODFade;
+	UInt32							iLastRenderPassState;
+	RenderPassArray*				pRenderPassArray;
+	RenderPassArray*				pRenderPassArray_depthMap;
+	RenderPassArray*				pRenderPassArray_constAlpha;
+	RenderPassArray*				pRenderPassArray_localMap;
+	RenderPassArray*				pRenderPassArray_unk4C;
+	RenderPassArray*				pRenderPassArray_waterDepth;
+	RenderPassArray*				pRenderPassArray_silhouette;
+	UInt32							uiShaderIndex;
+	float							fDepthBias;
+};
+
+
+class NiMaterialProperty : public NiProperty {
+public:
+	NiMaterialProperty();
+	virtual ~NiMaterialProperty();
+
+	SInt32		m_iIndex;
+	NiColor		m_spec;
+	NiColor		m_emit;
+	NiColor*	m_pExternalEmittance;
+	float		m_fShine;
+	float		m_fAlpha;
+	float		m_fEmitMult;
+	UInt32		m_uiRevID;
+	void*		m_pvRendererData;
+};
+
+class NiSkinInstance;
+class BSShader;
+
+class NiGeometry : public NiAVObject {
+public:
+	NiGeometry();
+	virtual ~NiGeometry();
+
+	virtual void	RenderImmediate(NiRenderer* pkRenderer);
+	virtual void	RenderImmediateAlt(NiRenderer* pkRenderer);
+	virtual void	SetModelData(NiGeometryData* pkModelData);
+	virtual void	CalculateNormals();
+	virtual void	CalculateConsistency(bool bTool);
+
+	NiPropertyState		m_kProperties;
+	NiGeometryData*		m_spModelData;
+	NiSkinInstance*		m_spSkinInstance;
+	BSShader*			m_pShader;
+};

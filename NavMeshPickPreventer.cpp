@@ -24,7 +24,7 @@ namespace NavMeshPickPreventer
 	UInt32 lastPickedBaseFormID;
 	bool __fastcall OnPickNavMeshNodeGetShouldSkip(TESObjectREFR* ref)
 	{
-		if (ThisCall<bool>(0x44FEB0, ref) || (ref->baseForm && ref->baseForm->typeID == kFormType_Activator)) return true;
+		if (ThisStdCall<bool>(0x44FEB0, ref) || (ref->baseForm && ref->baseForm->typeID == kFormType_Activator)) return true;
 
 		bool bIsIgnoredRef = ignoredRefs.IsInList((UInt32*)ref->refID);
 		bool bIsIgnoredBaseForm = ref->baseForm && ignoredRefs.IsInList((UInt32*)ref->baseForm->refID);

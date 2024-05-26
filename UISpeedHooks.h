@@ -15,7 +15,7 @@ LRESULT __fastcall hk_ObjectListViewListView(DWORD* thisptr, void* ignorethisthi
 {
 	HWND listWindow = GetDlgItem(*(HWND*)0x00ECFB70, 1041);
 	SendMessage(listWindow, WM_SETREDRAW, FALSE, 0);
-	ThisCall(0x439630, thisptr, a2, a3);
+	ThisStdCall(0x439630, thisptr, a2, a3);
 	SendMessage(listWindow, WM_SETREDRAW, TRUE, 0);
 	RedrawWindow(listWindow, nullptr, nullptr, RDW_ERASE | RDW_INVALIDATE | RDW_NOCHILDREN);
 	return 0;
@@ -33,7 +33,7 @@ void __cdecl OnPopulateFloatingObjectsList(HWND listWindow, tList<TESForm>* list
 void __fastcall sub_406C40(void* thiss, void* edx, HWND comboBox, TESForm* a3)
 {
 	SendMessage(comboBox, WM_SETREDRAW, FALSE, 0);
-	ThisCall(0x406C40, thiss, comboBox, a3);
+	ThisStdCall(0x406C40, thiss, comboBox, a3);
 	WM_CLOSE;
 	WM_DESTROY;
 	SendMessage(comboBox, WM_SETREDRAW, TRUE, 0);
@@ -78,7 +78,7 @@ It would be a lot faster with the BeginUIDefer calls, however it causes dirty ed
 */
 void __fastcall hk_sub_59C950(char* thiss, void* dummyEDX, int a2, HWND hDlg) {
 	SendMessage(hDlg, WM_SETREDRAW, FALSE, 0);
-	ThisCall(0x59C950, thiss, a2, hDlg);
+	ThisStdCall(0x59C950, thiss, a2, hDlg);
 	SendMessage(hDlg, WM_SETREDRAW, TRUE, 0);
 	RedrawWindow(hDlg, nullptr, nullptr, RDW_ERASE | RDW_INVALIDATE);
 }
@@ -92,7 +92,7 @@ int* __cdecl hk_sub_595410(HWND hDlg, int a2, char a3) {
 
 char* __fastcall hk_sub_56B270(int* thiss, void* dummyEDX, HWND hWnd) {
 	BeginUIDefer();
-	char* res = ThisCall<char*>(0x56B270, thiss, hWnd);
+	char* res = ThisStdCall<char*>(0x56B270, thiss, hWnd);
 	EndUIDefer();
 	return res;
 }
@@ -120,27 +120,27 @@ void __cdecl hk_sub_47D330(HWND hWnd, char a2, char a3) {
 
 BOOL __fastcall hk_sub_49B260(int* thiss, void* dummyEDX, HWND hDlg) {
 	BeginUIDefer();
-	BOOL res = ThisCall<BOOL>(0x49B260, thiss, hDlg);
+	BOOL res = ThisStdCall<BOOL>(0x49B260, thiss, hDlg);
 	EndUIDefer();
 	return res;
 }
 
 BOOL __fastcall hk_sub_4979F0(void* thiss, void* dummyEDX, HWND hDlg, int a3) {
 	BeginUIDefer();
-	BOOL res = ThisCall<BOOL>(0x4979F0, thiss, hDlg, a3);
+	BOOL res = ThisStdCall<BOOL>(0x4979F0, thiss, hDlg, a3);
 	EndUIDefer();
 	return res;
 }
 
 void __fastcall hk_sub_4E3020(int* thiss, void* dummyEDX, HWND hDlg) {
 	BeginUIDefer();
-	ThisCall(0x4E3020, thiss, hDlg);
+	ThisStdCall(0x4E3020, thiss, hDlg);
 	EndUIDefer();
 }
 
 void __fastcall hk_sub_4E8A20(int* thiss, void* dummyEDX, HWND hDlg) {
 	BeginUIDefer();
-	ThisCall(0x4E8A20, thiss, hDlg);
+	ThisStdCall(0x4E8A20, thiss, hDlg);
 	EndUIDefer();
 }
 
@@ -159,7 +159,7 @@ void __cdecl hk_sub_47E0D0(HWND hWnd, char a2, int a3, char a4) {
 
 void __fastcall hk_sub_666C10(int* thiss, void* dummyEDX, HWND hWnd, int a3) {
 	BeginUIDefer();
-	ThisCall(0x666C10, thiss, hWnd, a3);
+	ThisStdCall(0x666C10, thiss, hWnd, a3);
 	EndUIDefer();
 }
 

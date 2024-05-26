@@ -59,7 +59,7 @@ const char* DataHandler::GetNthModName(UInt32 modIndex)
 
 ModInfo* DataHandler::GetNthFile(int n)
 {
-	return ThisCall<ModInfo*>(0x4CF380, DataHandler::GetSingleton(), n);
+	return ThisStdCall<ModInfo*>(0x4CF380, DataHandler::GetSingleton(), n);
 }
 
 struct IsModLoaded
@@ -86,13 +86,13 @@ ModInfo::~ModInfo() {
 
 TESObjectREFR* DataHandler::CreateReferenceAtLocation(TESBoundObject* object, const NiPoint3* aPos, const NiPoint3* aRot, float radius)
 {
-	return ThisCall<TESObjectREFR*>(0x4D0940, this, object, aPos, aRot, radius, 0, 0);
+	return ThisStdCall<TESObjectREFR*>(0x4D0940, this, object, aPos, aRot, radius, 0, 0);
 }
 
 TESObjectCELL* GridCellArray::GetCell(int x, int y)
 {
-	auto pCell = ThisCall<TESObjectCELL**>(0x5296F0, this, x, y);
+	auto pCell = ThisStdCall<TESObjectCELL**>(0x5296F0, this, x, y);
 	return pCell ? *pCell : nullptr;
 }
 
-bool TES::GetLandHeight(NiPoint3* cameraPos, float* heightOut) { return ThisCall<bool>(0x4C9A00, this, cameraPos, heightOut); };
+bool TES::GetLandHeight(NiPoint3* cameraPos, float* heightOut) { return ThisStdCall<bool>(0x4C9A00, this, cameraPos, heightOut); };

@@ -203,65 +203,10 @@ public:
 
 // thread-safe template versions of ThisStdCall()
 
-__forceinline UInt32 ThisStdCall(UInt32 _f,void* _t)
-{
-    class T {}; union { UInt32 x; UInt32 (T::*m)(); } u = { _f };
-    return ((T*)_t->*u.m)();
-}
-
-template <typename T1>
-__forceinline UInt32 ThisStdCall(UInt32 _f,void* _t,T1 a1)
-{
-    class T {}; union { UInt32 x; UInt32 (T::*m)(T1); } u = { _f };
-    return ((T*)_t->*u.m)(a1);
-}
-
-template <typename T1,typename T2>
-__forceinline UInt32 ThisStdCall(UInt32 _f,void* _t,T1 a1,T2 a2)
-{
-    class T {}; union { UInt32 x; UInt32 (T::*m)(T1,T2); } u = { _f };
-    return ((T*)_t->*u.m)(a1,a2);
-}
-
-template <typename T1,typename T2,typename T3>
-__forceinline UInt32 ThisStdCall(UInt32 _f,void* _t,T1 a1,T2 a2,T3 a3)
-{
-    class T {}; union { UInt32 x; UInt32 (T::*m)(T1,T2,T3); } u = { _f };
-    return ((T*)_t->*u.m)(a1,a2,a3);
-}
-
-template <typename T1,typename T2,typename T3,typename T4>
-__forceinline UInt32 ThisStdCall(UInt32 _f,void* _t,T1 a1,T2 a2,T3 a3,T4 a4)
-{
-    class T {}; union { UInt32 x; UInt32 (T::*m)(T1,T2,T3,T4); } u = { _f };
-    return ((T*)_t->*u.m)(a1,a2,a3,a4);
-}
-
-template <typename T1,typename T2,typename T3,typename T4,typename T5>
-__forceinline UInt32 ThisStdCall(UInt32 _f,void* _t,T1 a1,T2 a2,T3 a3,T4 a4,T5 a5)
-{
-    class T {}; union { UInt32 x; UInt32 (T::*m)(T1,T2,T3,T4,T5); } u = { _f };
-    return ((T*)_t->*u.m)(a1,a2,a3,a4,a5);
-}
-
-template <typename T1,typename T2,typename T3,typename T4,typename T5,typename T6>
-__forceinline UInt32 ThisStdCall(UInt32 _f,void* _t,T1 a1,T2 a2,T3 a3,T4 a4,T5 a5, T6 a6)
-{
-    class T {}; union { UInt32 x; UInt32 (T::*m)(T1,T2,T3,T4,T5,T6); } u = { _f };
-    return ((T*)_t->*u.m)(a1,a2,a3,a4,a5,a6);
-}
-
-template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7>
-__forceinline UInt32 ThisStdCall(UInt32 _f, void* _t, T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, T7 a7)
-{
-	class T {}; union { UInt32 x; UInt32(T::*m)(T1, T2, T3, T4, T5, T6, T7); } u = { _f };
-	return ((T*)_t->*u.m)(a1, a2, a3, a4, a5, a6, a7);
-}
-
 template <typename T_Ret = UInt32, typename ...Args>
-__forceinline T_Ret ThisCall(UInt32 _addr, const void* _this, Args ...args)
+__forceinline T_Ret ThisStdCall(UInt32 _addr, const void *_this, Args ...args)
 {
-	return ((T_Ret(__thiscall*)(const void*, Args...))_addr)(_this, std::forward<Args>(args)...);
+	return ((T_Ret (__thiscall *)(const void*, Args...))_addr)(_this, std::forward<Args>(args)...);
 }
 
 template <typename T_Ret = void, typename ...Args>

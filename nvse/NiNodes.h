@@ -470,10 +470,9 @@ class NiRefObject : public NiMemObject
 {
 public:
 	NiRefObject();
-	~NiRefObject();
+	virtual ~NiRefObject();
 
-	virtual void		Destructor(bool freeThis);	// 00
-	virtual void		Free(void);					// 01
+	virtual void		DeleteThis();					// 01
 
 //	void		** _vtbl;		// 000
 	UInt32		m_uiRefCount;	// 004 - name known
@@ -484,7 +483,7 @@ class NiObject : public NiRefObject
 {
 public:
 	NiObject();
-	~NiObject();
+	virtual ~NiObject();
 
 	virtual NiRTTI *	GetType(void);		// 02
 	virtual NiNode *	GetAsNiNode(void);	// 03 
@@ -531,7 +530,7 @@ class NiObjectNET : public NiObject
 {
 public:
 	NiObjectNET();
-	~NiObjectNET();
+	virtual ~NiObjectNET();
 
 #if RUNTIME
 	MEMBER_FN_PREFIX(NiObjectNET);
@@ -1342,13 +1341,24 @@ public:
 /**** misc non-NiObjects ****/
 
 // 30
-class NiPropertyState : public NiRefObject
+class NiPropertyState
 {
 public:
 	NiPropertyState();
 	~NiPropertyState();
 
-	UInt32	unk008[(0x30 - 0x08) >> 2];	// 008
+	enum PropertyID {
+		ALPHA = 0,
+		CULLING = 1,
+		MATERIAL = 2,
+		SHADE = 3,
+		STENCIL = 4,
+		TEXTURING = 5,
+		UNK = 6, // Never seen this one used - maybe I could add custom properties here?
+		MAX,
+	};
+
+	NiProperty* m_aspProps[MAX];
 };
 
 // 20
