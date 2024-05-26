@@ -9,8 +9,8 @@
 // 4312 - pointer extension
 #pragma warning(disable: 4018 4244 4267 4305 4288 4312 4311)
 
-// winxp and above
-#define _WIN32_WINNT	0x0501
+// Vista and above
+#define _WIN32_WINNT	0x0600
 
 #include <cstdlib>
 #include <cstdio>

@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns:atg="http://atg.xbox.com" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{68652706-b700-4472-9af7-a56a482bd896}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{9b7fcbc5-2533-4b88-b75b-d4803e55fa7c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <CLInclude Include="DirectXTex.h">
+      <Filter>Header Files</Filter>
+    </CLInclude>
+    <CLInclude Include="DirectXTex.inl">
+      <Filter>Header Files</Filter>
+    </CLInclude>
+    <CLInclude Include="DDS.h">
+      <Filter>Source Files</Filter>
+    </CLInclude>
+    <CLInclude Include="DirectXTexP.h">
+      <Filter>Source Files</Filter>
+    </CLInclude>
+    <ClInclude Include="filters.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <CLInclude Include="scoped.h">
+      <Filter>Source Files</Filter>
+    </CLInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="BC.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXTexCompress.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXTexConvert.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXTexDDS.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXTexImage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXTexMipMaps.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXTexMisc.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXTexUtil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BC6HBC7.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BC4BC5.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CLInclude Include="BC.h">
+      <Filter>Source Files</Filter>
+    </CLInclude>
+  </ItemGroup>
+</Project>

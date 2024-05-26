@@ -188,6 +188,7 @@
       <Filter>Events</Filter>
     </ClInclude>
     <ClInclude Include="LaunchGame.h" />
+    <ClInclude Include="FaceGenExporter.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

@@ -258,6 +258,7 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="FaceGenExporter.h" />
     <ClInclude Include="FormSearch.h">
       <SubType>
       </SubType>
