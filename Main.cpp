@@ -650,7 +650,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	
 	if (config.bPreventFaceAndBodyModExports) {
 		// prevent .tga files when exporting
+		SafeWriteBuf(0x57481B, "\x83\xC4\x0C\x90\x90", 5); // face mods
 		SafeWriteBuf(0x574A0F, "\x83\xC4\x0C\x90\x90", 5); // face mods
+
 		SafeWriteBuf(0x570D6B, "\x83\xC4\x0C\x90\x90", 5); // body mods
 		SafeWriteBuf(0x570C50, "\x83\xC4\x0C\x90\x90", 5); // body mods
 	}
