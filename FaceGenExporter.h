@@ -86,15 +86,15 @@ namespace FaceGenExporter {
 			ComPtr<IDirect3DSurface9> pSysMemSurface;
 
 			result = spSourceTexture->GetSurfaceLevel(0, &pOriginalSurface);
-			if (SUCCEEDED(result)) {
+			if (SUCCEEDED(result))
 				result = spWorkingTexture->GetSurfaceLevel(0, &pSysMemSurface);
-				if (SUCCEEDED(result)) {
-					result = pDevice->GetRenderTargetData(pOriginalSurface.Get(), pSysMemSurface.Get());
-					if (FAILED(result)) {
-						_MESSAGE("Failed to update surface - %x", result);
-						return result;
-					}
-				}
+
+			if (SUCCEEDED(result))
+				result = pDevice->GetRenderTargetData(pOriginalSurface.Get(), pSysMemSurface.Get());
+
+			if (FAILED(result)) {
+				_MESSAGE("Failed to update surface - %x", result);
+				return result;
 			}
 		}
 		else {
@@ -140,12 +140,10 @@ namespace FaceGenExporter {
 		DirectX::ScratchImage kScratchMipMapImg;
 
 		// Move the image to a scratch image
-		if (DirectX::IsCompressed(kImg.format)) {
+		if (DirectX::IsCompressed(kImg.format))
 			DirectX::Decompress(kImg, DXGI_FORMAT_UNKNOWN, kScratchImg);
-		}
-		else {
+		else
 			kScratchImg.InitializeFromImage(kImg);
-		}
 
 		// Generate mipmaps
 		DirectX::GenerateMipMaps(kScratchImg.GetImages(), kScratchImg.GetImageCount(), kScratchImg.GetMetadata(), DirectX::TEX_FILTER_TRIANGLE, 0, kScratchMipMapImg);
@@ -161,15 +159,12 @@ namespace FaceGenExporter {
 
 		result = DirectX::SaveToDDSFile(kScratchMipMapImg.GetImages(), kScratchMipMapImg.GetImageCount(), kMetaData, DirectX::DDS_FLAGS_FORCE_DX9_LEGACY | DirectX::DDS_FLAGS_FORCE_RGB, wPath);
 
-		if (FAILED(result)) {
+		if (FAILED(result))
 			_MESSAGE("Failed to save texture to \"%s\" - %x", apPath, result);
-			goto FINISH;
-		}
 
-	FINISH:
 		delete[] kImg.pixels;
 		delete[] wPath;
-		return 0;
+		return S_OK;
 	}
 
 	// Returns a null pointer, so the body texture would be regenerated
@@ -214,7 +209,11 @@ namespace FaceGenExporter {
 			WriteRelCall(addr, (UInt32)FaceGenExporter::SaveTextureImage);
 
 		WriteRelCall(0x587D7F, (UInt32)FaceGenExporter::CreateTextureImage);
+	}
 
+	// Speeds up the process by console output while generating textures
+	// NPCs spam with animation prints at the end which locks down the program
+	static void NoLogging() {
 		// Shortcut
 		WriteRelJump(0x44AB57, UInt32(ObjectWindowF4HotkeyHook));
 		WriteRelCall(0x44AC23, (UInt32)ActionEnd);
