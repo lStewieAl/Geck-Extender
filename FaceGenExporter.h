@@ -13,6 +13,8 @@
 
 namespace fs = std::filesystem;
 
+extern bool g_bPauseLogging;
+
 LRESULT (__cdecl* FooterPrint)(WPARAM, LPARAM) = (LRESULT(__cdecl*)(WPARAM, LPARAM))(0x4657A0);
 
 using namespace ABI::Windows::Foundation;
@@ -176,10 +178,49 @@ namespace FaceGenExporter {
 		aspTexture = nullptr;
 	}
 
+	LRESULT __stdcall ActionStart(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam2) {
+		LPARAM result = hk_SendMessageA(hWnd, Msg, wParam, lParam2);
+		if (SUCCEEDED(result))
+			g_bPauseLogging = true;
+		return result;
+	}
+
+	__HOOK ObjectWindowF4HotkeyHook()
+	{
+		_asm
+		{
+			push edx
+			call ActionStart
+			mov esi, eax
+
+			mov eax, 0x44AB5C
+			jmp eax
+		}
+	}
+
+	LRESULT __cdecl ActionStart2(WPARAM wParam, LPARAM lParam)  {
+		LRESULT result = CdeclCall<LRESULT>(0x4657A0, wParam, lParam);
+		g_bPauseLogging = true;
+		return result;
+	}
+
+	LRESULT __cdecl ActionEnd(WPARAM wParam, LPARAM lParam) {
+		g_bPauseLogging = false;
+		return CdeclCall<LRESULT>(0x4657A0, wParam, lParam);
+	}
+
 	static void InitHooks() {
 		for (UInt32 addr : { 0x570C36, 0x570D54, 0x574801, 0x5749F9 })
 			WriteRelCall(addr, (UInt32)FaceGenExporter::SaveTextureImage);
 
 		WriteRelCall(0x587D7F, (UInt32)FaceGenExporter::CreateTextureImage);
+
+		// Shortcut
+		WriteRelJump(0x44AB57, UInt32(ObjectWindowF4HotkeyHook));
+		WriteRelCall(0x44AC23, (UInt32)ActionEnd);
+
+		// GUI
+		WriteRelCall(0x442064, (UInt32)ActionStart2);
+		WriteRelCall(0x44208E, (UInt32)ActionEnd);
 	}
 };
