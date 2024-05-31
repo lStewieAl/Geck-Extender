@@ -3,6 +3,7 @@
 #include "NiTypes.h"
 #include "GameTypes.h"
 #include "Utilities.h"
+#include "d3d9.h"
 
 /*** class hierarchy
  *
@@ -551,6 +552,12 @@ public:
 };
 STATIC_ASSERT(sizeof(NiObjectNET) == 0x18);
 
+class NiPixelFormat {
+public:
+	UInt32 padding[0x44 / 4];
+};
+STATIC_ASSERT(sizeof(NiPixelFormat) == 0x44);
+
 // 030
 class NiTexture : public NiObjectNET
 {
@@ -568,13 +575,24 @@ public:
 		UInt32	unk4;
 	};
 
-	class RendererData
-	{
+	class RendererData : public NiObject {
 	public:
-		virtual void	Destroy(bool arg);
-		virtual UInt32	GetWidth(void);
-		virtual UInt32	GetHeight(void);
-		virtual void	Unk_03(void);
+		RendererData();
+		virtual ~RendererData();
+
+		virtual UInt32	UpgradeTexture(NiTexture* apTexture);
+		virtual UInt32	DegradeTexture(NiTexture* apTexture);
+		virtual void	Unk_03();
+
+		NiTexture*		m_pkTexture;
+		UInt32			m_uiWidth;
+		UInt32			m_uiHeight;
+		NiPixelFormat	m_kPixelFormat;
+		char			unk58;
+		char			unk59;
+		char			unk5A;
+		char			bState;
+		int				unk5C;
 	};
 
 	enum
@@ -634,6 +652,31 @@ public:
 	UInt8		pad042[2];			// 042
 	void		* unk044;			// 044
 };
+
+class NiDX9Renderer;
+class NiDX9RenderedTextureData;
+class NiDX9SourceTextureData;
+class NiDX9DynamicTextureData;
+
+class NiDX9TextureData : public NiTexture::RendererData {
+public:
+	NiDX9TextureData();
+	virtual ~NiDX9TextureData();
+
+	virtual UInt32						GetLevels() const;
+	virtual LPDIRECT3DBASETEXTURE9		GetD3DTexture() const;
+	virtual void						SetD3DTexture(LPDIRECT3DBASETEXTURE9 pkD3DTexture);
+	virtual NiDX9RenderedTextureData*	GetAsRenderedTexture() const;
+	virtual NiDX9SourceTextureData*		GetAsSourceTexture() const;
+	virtual NiDX9DynamicTextureData*	GetAsDynamicTexture() const;
+	virtual bool						InitializeFromD3DTexture(LPDIRECT3DBASETEXTURE9 pkD3DTexture);
+
+	NiDX9Renderer*			m_pkRenderer;
+	LPDIRECT3DBASETEXTURE9	m_pkD3DTexture;
+	UInt32					m_uiLevels;
+};
+
+STATIC_ASSERT(sizeof(NiDX9TextureData) == 0x6C);
 
 // 04C
 class NiSourceCubeMap : public NiSourceTexture
@@ -1445,3 +1488,17 @@ public:
 	void					* textureEffectData;		// 48 seen TextureEffectData< BSSahderLightingProperty >, init'd to RefNiObject
 };	// Alloc'd to 6C, 68 is RefNiObject, 60 is Init'd to 1.0, 64 also
 	// 4C is byte, Init'd to 0 for non player, otherwize = Player.1stPersonSkeleton.Flags0030.Bit0 is null
+
+class NiDX9Renderer {
+public:
+	UInt32 padding[0x288 / 4];
+	LPDIRECT3DDEVICE9 m_pkD3DDevice9;
+
+	static NiDX9Renderer* GetSingleton() {
+		return *(NiDX9Renderer**)0xED6C14;
+	};
+
+	LPDIRECT3DDEVICE9 GetD3DDevice() const {
+		return m_pkD3DDevice9;
+	}
+};

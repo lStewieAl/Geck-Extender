@@ -42,6 +42,7 @@
 #include "NavMeshPickPreventer.h"
 #include "CustomRenderWindowHotkeys.h"
 #include "LaunchGame.h"
+#include "FaceGenExporter.h"
 
 #include "Events/EventManager.h"
 #include "Events/Events.h"
@@ -642,14 +643,25 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// make weapon mods in object window show the same information as misc items
 	SafeWrite8(0x438B94 + kFormType_ItemMod, 0x11);
 
-	if (config.bPreventFaceAndBodyModExports)
+	// Facegen section
 	{
-		// prevent .tga files when exporting
-		SafeWriteBuf(0x574A0F, "\x83\xC4\x0C\x90\x90", 5); // face mods
-		SafeWriteBuf(0x570D6B, "\x83\xC4\x0C\x90\x90", 5); // body mods
-		SafeWriteBuf(0x570C50, "\x83\xC4\x0C\x90\x90", 5); // body mods
-	}
+		// Skips console output from processed actors to speed up the export process
+		FaceGenExporter::NoLogging();
 
+		if (config.bNoFacegenCompression) {
+			FaceGenExporter::InitHooks();
+			config.bPreventFaceAndBodyModExports = true;
+		}
+
+		if (config.bPreventFaceAndBodyModExports) {
+			// prevent .tga files when exporting
+			SafeWriteBuf(0x57481B, "\x83\xC4\x0C\x90\x90", 5); // face mods
+			SafeWriteBuf(0x574A0F, "\x83\xC4\x0C\x90\x90", 5); // face mods
+
+			SafeWriteBuf(0x570D6B, "\x83\xC4\x0C\x90\x90", 5); // body mods
+			SafeWriteBuf(0x570C50, "\x83\xC4\x0C\x90\x90", 5); // body mods
+		}
+	}
 	if (config.bIgnoreD3D9)
 	{
 		// ignore the d3d9.dll from the game's folder since dxvk makes the geck super slow
@@ -676,8 +688,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	if (config.bNoRecordCompression) {
 		// Remove record compression
-		XUtil::PatchMemoryNop(0x5726C9, 5); // TESNPC
-		SafeWrite8(0x5726C9, 0xC3);
+		SafeWriteBuf(0x5726C9, "\xC3\x90\x90\x90\x90", 5); // TESNPC
 
 		XUtil::PatchMemoryNop(0x624632, 5); // TESObjectLAND
 	}

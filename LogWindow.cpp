@@ -10,6 +10,7 @@
 
 HWND g_ConsoleHwnd;
 extern HWND g_MainHwnd;
+extern bool g_bPauseLogging = false;
 
 void Console_PrintVa(const char* Format, va_list Va)
 {
@@ -30,6 +31,9 @@ void Console_PrintVa(const char* Format, va_list Va)
 
 void Console_Print(const char* Format, ...)
 {
+	if (g_bPauseLogging)
+		return;
+
 	va_list va;
 	va_start(va, Format);
 	Console_PrintVa(Format, va);
@@ -38,6 +42,9 @@ void Console_Print(const char* Format, ...)
 
 int __cdecl Console_Print2(const char* Format, ...)
 {
+	if (g_bPauseLogging)
+		return 0;
+
 	va_list va;
 	va_start(va, Format);
 	Console_PrintVa(Format, va);

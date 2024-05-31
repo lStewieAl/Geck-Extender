@@ -41,3 +41,4 @@ Release/*
 common/Debug VC9/*
 common/Release VC9/*
 .vs/*
+/DirectXTex/DirectXTex/Lib

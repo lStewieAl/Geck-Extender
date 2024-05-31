@@ -1845,9 +1845,7 @@ typedef HRESULT(__stdcall* D3DXCreateTextureFromFileInMemoryEx_)(_In_    void* p
 
 enum d3
 {
-	D3DFMT_UNKNOWN = 0,
 	D3DX_DEFAULT = -1,
-	D3DPOOL_DEFAULT = 0
 };
 
 D3DXCreateTextureFromFileInMemoryEx_ D3DXCreateTextureFromFileInMemoryEx;

@@ -36,6 +36,7 @@ void ReadAllSettings()
 	config.bDisableTextureMirroring = GetOrCreateINIValue("General", "bDisableTextureMirroring", 0, IniPath);
 	config.bObjectWindowOnlyShowEditedByDefault = GetOrCreateINIValue("General", "bObjectWindowOnlyShowEditedForms", 0, IniPath);
 	config.bPreventFaceAndBodyModExports = GetOrCreateINIValue("General", "bFaceBodyExportPreventTGAFiles", 0, IniPath);
+	config.bNoFacegenCompression = GetOrCreateINIValue("General", "bNoFacegenCompression", 1, IniPath);
 	config.bIgnoreD3D9 = GetOrCreateINIValue("General", "bIgnoreD3D9", 1, IniPath);
 	config.bNoRecordCompression = GetOrCreateINIValue("General", "bNoRecordCompression", 1, IniPath);
 	config.bPreserveTimestamps = GetOrCreateINIValue("General", "bPreserveTimestamps", 0, IniPath);
