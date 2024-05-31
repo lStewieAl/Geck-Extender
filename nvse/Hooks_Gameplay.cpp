@@ -364,7 +364,7 @@ private:
 void TESSaveLoadGame::LoadCreatedObjectsHook(UInt32 unk0)
 {
 	// run the original code
-	ThisStdCall(kOriginalLoadCreatedObjectsAddr, this, unk0);
+	ThisCall(kOriginalLoadCreatedObjectsAddr, this, unk0);
 
 	// iterate the linked list, call DoPostFixup
 	CreatedObjectVisitor	visitor(&createdObjectList);
@@ -375,11 +375,11 @@ void TESSaveLoadGame::LoadCreatedObjectsHook(UInt32 unk0)
 bool TESSaveLoadGame::LoadGame(const char* filename)
 {
 #if OBLIVION_VERSION == OBLIVION_VERSION_1_1
-	return (bool)ThisStdCall(0x0045EA60, this, 0, filename, 0);
+	return (bool)ThisCall(0x0045EA60, this, 0, filename, 0);
 #elif OBLIVION_VERSION == OBLIVION_VERSION_1_2
-	return (bool)ThisStdCall(0x00465760, this, 0, filename, 0);
+	return (bool)ThisCall(0x00465760, this, 0, filename, 0);
 #elif OBLIVION_VERSION == OBLIVION_VERSION_1_2_416
-	bool bFileFound = ThisStdCall(0x00465860, this, 0, filename, 0) ? true : false;
+	bool bFileFound = ThisCall(0x00465860, this, 0, filename, 0) ? true : false;
 	return bFileFound;
 #else
 #error unsupported Oblivion version
@@ -389,7 +389,7 @@ bool TESSaveLoadGame::LoadGame(const char* filename)
 UInt32 TESSaveLoadGame::ResetObject(TESForm* object, UInt32 changeFlags, UInt32 unk2)
 {
 #if OBLIVION_VERSION == OBLIVION_VERSION_1_2_416
-	return ThisStdCall(0x000045BDE0, this, object, changeFlags, unk2);
+	return ThisCall(0x000045BDE0, this, object, changeFlags, unk2);
 #else
 #error unsupported oblivion version
 #endif
@@ -605,7 +605,7 @@ float __stdcall GetPlayerSpellEffectiveness(UInt32 arg0, UInt32 arg1)
 	if (pcCaster)
 	{
 		// let the game calculate the base value
-		ThisStdCall(s_GetPlayerSpellEffectivenessAddr, pcCaster, arg0, arg1);
+		ThisCall(s_GetPlayerSpellEffectivenessAddr, pcCaster, arg0, arg1);
 
 		// return value is float so pop it
 		__asm {
@@ -662,7 +662,7 @@ AlchemyItem* MatchPotion(AlchemyItem* toMatch)
 	if (!toMatch)
 		return NULL;
 
-	return (AlchemyItem*)ThisStdCall(kDataHandler_GetCreatedPotion, *g_dataHandler, toMatch);
+	return (AlchemyItem*)ThisCall(kDataHandler_GetCreatedPotion, *g_dataHandler, toMatch);
 }
 
 #if OBLIVION_VERSION == OBLIVION_VERSION_1_2_416
@@ -691,7 +691,7 @@ UInt32 __stdcall Player_GetActorValue(UInt32 actorVal)
 	};
 
 	// get the actor value from the original function
-	UInt32 result = ThisStdCall(kPlayer_GetActorValueAddr, *g_thePlayer, actorVal);
+	UInt32 result = ThisCall(kPlayer_GetActorValueAddr, *g_thePlayer, actorVal);
 
 	// were we called from one of the movement-related functions?
 	bool bApplyModifier = false;

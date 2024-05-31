@@ -383,7 +383,7 @@ public:
 
 	void StopEffect(void *arg0, bool arg1)
 	{
-		ThisStdCall(0x8248E0, this, arg0, arg1);
+		ThisCall(0x8248E0, this, arg0, arg1);
 	}
 };
 

@@ -1483,7 +1483,7 @@ void CreateCrashSave()
 	static const char* path = "Data\\CrashSaves\\";
 	SafeWrite32(0x4DB0AC, UInt32(path));
 
-	ThisStdCall(0x4DB020, DataHandler::GetSingleton()); // DoAutosave
+	ThisCall(0x4DB020, DataHandler::GetSingleton()); // DoAutosave
 
 	// restore original path (Data\\Backup\\)
 	SafeWrite32(0x4DB0AC, 0xD415C4);
@@ -1550,7 +1550,7 @@ void __fastcall InitPreviewWindowBackgroundColor(void* window, void* edx, UInt32
 	UInt8 g = config.iPreviewWindowGreen;
 	UInt8 b = config.iPreviewWindowBlue;
 	UInt32 color = r + (g << 8) + (b << 16);
-	ThisStdCall(0x4793D0, window, color);
+	ThisCall(0x4793D0, window, color);
 }
 
 static double havokAnimationRate = 1000.0;
@@ -1762,7 +1762,7 @@ UInt32 __fastcall PlaceOPALObjectHook(ObjectPalette::Object* current, void* edx,
 		toPlace = opal->list.GetNthItem(randomIndex);
 	}
 
-	return ThisStdCall(0x40BF90, toPlace, point1, point2);
+	return ThisCall(0x40BF90, toPlace, point1, point2);
 }
 
 const double M_TAU = 6.28318530717958647692528676;
@@ -2042,7 +2042,7 @@ void* g_heapManager = reinterpret_cast<void*>(0xF21B5C);
 
 size_t Heap_MemorySize(void* memory)
 {
-	auto msize = ThisStdCall(0x854720, g_heapManager, memory);
+	auto msize = ThisCall(0x854720, g_heapManager, memory);
 	return msize;
 }
 

@@ -52,7 +52,7 @@ ScriptEventList* TESObjectREFR::GetEventList() const
 
 TESContainer* TESObjectREFR::GetContainer()
 {
-	return (TESContainer*)ThisStdCall(s_TESObjectREFR__GetContainer, this);	// First call in REFR::RemoveItem
+	return (TESContainer*)ThisCall(s_TESObjectREFR__GetContainer, this);	// First call in REFR::RemoveItem
 }
 
 TESObjectCELL* TESObjectREFR::GetParentCell()
@@ -97,12 +97,12 @@ TESForm* GetPermanentBaseForm(TESObjectREFR* thisObj)	// For LevelledForm, find 
 
 void Actor::EquipItem(TESForm * objType, UInt32 equipCount, ExtraDataList* itemExtraList, UInt32 unk3, bool lockEquip, UInt32 unk5)
 {
-	ThisStdCall(s_Actor_EquipItem, this, objType, equipCount, itemExtraList, unk3, lockEquip, unk5);
+	ThisCall(s_Actor_EquipItem, this, objType, equipCount, itemExtraList, unk3, lockEquip, unk5);
 }
 
 void Actor::UnequipItem(TESForm* objType, UInt32 unk1, ExtraDataList* itemExtraList, UInt32 unk3, bool lockUnequip, UInt32 unk5)
 {
-	ThisStdCall(s_Actor_UnequipItem, this, objType, unk1, itemExtraList, unk3, lockUnequip, unk5);
+	ThisCall(s_Actor_UnequipItem, this, objType, unk1, itemExtraList, unk3, lockUnequip, unk5);
 }
 
 EquippedItemsList Actor::GetEquippedItems()

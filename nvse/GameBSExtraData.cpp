@@ -53,7 +53,7 @@ void BaseExtraList::MarkType(UInt32 type, bool bCleared)
 
 bool BaseExtraList::Remove(BSExtraData* toRemove, bool free)
 {
-	return ThisStdCall(s_ExtraDataListRemoveData, this, toRemove, free) ? true : false;
+	return ThisCall(s_ExtraDataListRemoveData, this, toRemove, free) ? true : false;
 	if (!toRemove) return false;
 
 	if (HasType(toRemove->type)) {
@@ -84,7 +84,7 @@ bool BaseExtraList::Remove(BSExtraData* toRemove, bool free)
 bool BaseExtraList::Add(BSExtraData* toAdd)
 {
 	if (!toAdd || HasType(toAdd->type)) return false;
-	return ThisStdCall(s_ExtraDataListAddData, this, toAdd) ? true : false;
+	return ThisCall(s_ExtraDataListAddData, this, toAdd) ? true : false;
 	BSExtraData* next = m_data;
 	m_data = toAdd;
 	toAdd->next = next;
@@ -104,7 +104,7 @@ ExtraDataList* ExtraDataList::Create(BSExtraData* xBSData)
 
 bool BaseExtraList::RemoveByType(UInt32 type, bool free)
 {
-	return ThisStdCall(s_ExtraDataListRemoveType, this, type) ? true : false;
+	return ThisCall(s_ExtraDataListRemoveType, this, type) ? true : false;
 	if (HasType(type)) {
 		return Remove(GetByType(type), free);
 	}
@@ -124,9 +124,9 @@ void BaseExtraList::RemoveAll()
 void BaseExtraList::Copy(BaseExtraList* from)
 {
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
-	ThisStdCall(0x00411EC0, this, from);	// 428920 in last Fallout3
+	ThisCall(0x00411EC0, this, from);	// 428920 in last Fallout3
 #elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-	ThisStdCall(0x00411F10, this, from);	// 428920 in last Fallout3
+	ThisCall(0x00411F10, this, from);	// 428920 in last Fallout3
 #elif EDITOR
 #else
 #error
