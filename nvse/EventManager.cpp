@@ -405,7 +405,7 @@ void __stdcall OnVampireFeedHook(bool bHasFed)
 		HandleEvent(kEventID_OnVampireFeed, NULL, NULL);
 	}
 
-	ThisStdCall(s_PlayerCharacter_SetVampireHasFed_OriginalFn, *g_thePlayer, bHasFed);
+	ThisCall(s_PlayerCharacter_SetVampireHasFed_OriginalFn, *g_thePlayer, bHasFed);
 }
 
 void InstallOnVampireFeedHook()
@@ -1019,7 +1019,7 @@ static void SaveIniHook()
 		HandleEvent(kEventID_SaveIni, 0, NULL);
 
 	// just in case I've screwed something up, let the vanilla Write() method run even if we've determined above that it shouldn't
-	bool bWritten = ThisStdCall(s_IniSettingCollection_Write, settings) ? true : false;
+	bool bWritten = ThisCall(s_IniSettingCollection_Write, settings) ? true : false;
 	
 	// if successful, dispatch post-save event
 	if (bWritten)
@@ -1112,9 +1112,9 @@ static bool PerformMagicCasterTargetHook(UInt32 eventID, MagicCaster* caster, Ma
 	bool result = false;
 	
 	if (eventID == kEventID_OnMagicCast) {
-		result = ThisStdCall(kMagicCasterCastMagicItemFnAddr, caster, magicItem, target, noHitVFX);
+		result = ThisCall(kMagicCasterCastMagicItemFnAddr, caster, magicItem, target, noHitVFX);
 	} else {
-		result = ThisStdCall(kMagicTargetAddEffectFnAddr, target, caster, magicItem, av);
+		result = ThisCall(kMagicTargetAddEffectFnAddr, target, caster, magicItem, av);
 	}
 
 	if (result) {

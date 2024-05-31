@@ -888,7 +888,7 @@ public:
 	void Init() { first = nullptr; last = nullptr; count = 0; };
 	void Append(Item* item)
 	{
-		ThisStdCall(0x4ED8C0, this, &item);
+		ThisCall(0x4ED8C0, this, &item);
 	}
 	Node* Remove(Item* item)
 	{

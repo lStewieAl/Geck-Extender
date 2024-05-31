@@ -201,10 +201,10 @@ public:
 	void operator++() { if (!FindNextFile(handle, &fndData)) Close(); }
 };
 
-// thread-safe template versions of ThisStdCall()
+// thread-safe template versions of ThisCall()
 
 template <typename T_Ret = UInt32, typename ...Args>
-__forceinline T_Ret ThisStdCall(UInt32 _addr, const void *_this, Args ...args)
+__forceinline T_Ret ThisCall(UInt32 _addr, const void *_this, Args ...args)
 {
 	return ((T_Ret (__thiscall *)(const void*, Args...))_addr)(_this, std::forward<Args>(args)...);
 }

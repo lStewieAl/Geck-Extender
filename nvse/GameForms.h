@@ -347,7 +347,7 @@ public:
 	bool IsArmor() { return typeID == kFormType_Armor; }
 	bool IsAmmo() { return typeID == kFormType_Ammo; }
 	bool IsIngestible() { return typeID == kFormType_AlchemyItem; }
-	void SetTemporary() { ThisStdCall(0x4FBA50, this); }
+	void SetTemporary() { ThisCall(0x4FBA50, this); }
 
 	MEMBER_FN_PREFIX(TESForm);
 };
@@ -3722,13 +3722,13 @@ public:
 	UInt32 inheritFlags;
 	BGSLightingTemplate* lightingTemplate;
 
-	SInt32 GetPosX() { return ThisStdCall<SInt32>(0x625A70, this); };
-	SInt32 GetPosY() { return ThisStdCall<SInt32>(0x625A90, this); };
+	SInt32 GetPosX() { return ThisCall<SInt32>(0x625A70, this); };
+	SInt32 GetPosY() { return ThisCall<SInt32>(0x625A90, this); };
 	bool IsInterior() { return cellFlags & 1; };
 	bool GetLandHeight(NiPoint3* pos, float* heightOut)
 	{
-		auto land = ThisStdCall<TESObjectLAND*>(0x627140, this);
-		return ThisStdCall<bool>(0x61A810, land, pos, heightOut);
+		auto land = ThisCall<TESObjectLAND*>(0x627140, this);
+		return ThisCall<bool>(0x61A810, land, pos, heightOut);
 	}
 };
 STATIC_ASSERT(sizeof(TESObjectCELL) == 0x100);

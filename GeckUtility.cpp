@@ -49,7 +49,7 @@ void SetTimeOfDay(float time) {
 	float* timeStruct = *(float**)(unknownStruct + 0x1A);
 	if (!timeStruct) return;
 
-	ThisStdCall(0x44CD00, timeStruct, time);
+	ThisCall(0x44CD00, timeStruct, time);
 }
 
 void ToggleRenderWindowAllowCellLoads(bool toggle) {
@@ -168,16 +168,16 @@ void ObjectsView::Refresh() { SendMessageA(GetWindow(), 1042, NULL, NULL); };
 HWND CellView::GetWindow() { return *(HWND*)0xECFB78; };
 
 HistoryManager* HistoryManager::GetSingleton() { return *(HistoryManager**)0xECFDF4; };
-void HistoryManager::ClearHistoryForCurrentElement() { ThisStdCall(0x467CC0, this); };
-void HistoryManager::Undo() { ThisStdCall(0x4665C0, this, 0); };
-void HistoryManager::AddAction(int aiActionType, RenderWindow::SelectedData* apSelectedForms) { ThisStdCall(0x465D90, this, aiActionType, apSelectedForms); };
+void HistoryManager::ClearHistoryForCurrentElement() { ThisCall(0x467CC0, this); };
+void HistoryManager::Undo() { ThisCall(0x4665C0, this, 0); };
+void HistoryManager::AddAction(int aiActionType, RenderWindow::SelectedData* apSelectedForms) { ThisCall(0x465D90, this, aiActionType, apSelectedForms); };
 
 RenderData* RenderData::GetSingleton() { return *(RenderData**)0xED116C; };
 
 NavMeshManager* NavMeshManager::GetSingleton() { return (NavMeshManager*)0xECEFF8; }
 
 bool NavMeshManager::IsActive() { return *(bool**)0xED1412; }
-void NavMeshManager::Undo() { ThisStdCall(0x4249F0, this); }
+void NavMeshManager::Undo() { ThisCall(0x4249F0, this); }
 
 tList<HWND>* OpenWindows::GetWindowList() { return (tList<HWND>*)0xED033C; }
 

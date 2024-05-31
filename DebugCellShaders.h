@@ -156,7 +156,7 @@ static DebugRenderModes eLastRenderMode = DEBUG_NONE;
 
 // Returns false if debug mode is active
 bool SetDebugColors(NiColorAlpha* apAmbient, BSShaderProperty* apShaderProp, NiGeometry* apGeometry) {
-	UInt32 uiLightCount = ThisStdCall(0x925830, apShaderProp); // GetActiveLightCount
+	UInt32 uiLightCount = ThisCall(0x925830, apShaderProp); // GetActiveLightCount
 
 	bool bAutoColor = config.bAutoLightWarnings && (uiLightCount > 6) && eDebugRenderMode != DEBUG_LIGHT_COUNT;
 
@@ -223,7 +223,7 @@ void __fastcall BSShaderPPLightingProperty__AddPass_Opt(void* apThis, void*, voi
 		return;
 	}
 
-	ThisStdCall(0x97FDD0, apThis, apGeometry, apLight0, apusPassCount, abAddPass, abEnable, abSkinned, abGlowMap, abSpecular, bFacegen, abHasLights);
+	ThisCall(0x97FDD0, apThis, apGeometry, apLight0, apusPassCount, abAddPass, abEnable, abSkinned, abGlowMap, abSpecular, bFacegen, abHasLights);
 }
 
 void __fastcall ShadowLightShader__SetAmbientColor(void* apThis) {
@@ -233,7 +233,7 @@ void __fastcall ShadowLightShader__SetAmbientColor(void* apThis) {
 	BSShaderProperty* pShaderProperty = (BSShaderProperty*)pGeometry->m_kProperties.m_aspProps[NiPropertyState::SHADE];
 
 	if (SetDebugColors(pAmbientColor, pShaderProperty, pGeometry)) {
-		ThisStdCall(0x94E5A0, apThis);
+		ThisCall(0x94E5A0, apThis);
 	}
 }
 

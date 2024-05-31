@@ -339,7 +339,7 @@ BOOL __stdcall SoundPickCallback(HWND hDlg, UINT Message, WPARAM wParam, LPARAM 
 	{
 		if (wParam == TIMER_ID)
 		{
-			ThisStdCall(0x885130, *(UInt32**)0xF226C0, 1); // BSAudioManager::Update
+			ThisCall(0x885130, *(UInt32**)0xF226C0, 1); // BSAudioManager::Update
 			return TRUE;
 		}
 	}
@@ -961,7 +961,7 @@ _declspec(naked) void ScriptEditKeypressHook(HWND hWnd) {
 }
 
 bool __fastcall ScriptEdit__Save(byte* thiss, void* dummyEDX, HWND hDlg, char a3, char a4) {
-	bool saveSuccess = ThisStdCall<bool>(0x5C2F40, thiss, hDlg, a3, a4);
+	bool saveSuccess = ThisCall<bool>(0x5C2F40, thiss, hDlg, a3, a4);
 	if (saveSuccess) {
 		SendDlgItemMessageA(hDlg, 1166, EM_SETMODIFY, 0, 0);
 
@@ -1000,7 +1000,7 @@ char __cdecl hk_DoRenderMousewheelScroll(int a1, int a2, float a3) {
 }
 
 double __fastcall hk_CalculateVectorMagnitude(float* vector, void* dummyEDX) {
-	return ThisStdCall<float>(0x40B3D0, vector) * GetRefSpeedMultiplier();
+	return ThisCall<float>(0x40B3D0, vector) * GetRefSpeedMultiplier();
 }
 
 /* multiply the reference movement speed dependent */
@@ -1226,7 +1226,7 @@ _declspec(naked) void EmbeddedRenderWindowSoundNullCheck() {
 }
 
 void __fastcall PreferencesWindowApplyButtonHook(int* thiss, void* dummyEDX, int a2) {
-	ThisStdCall(0x855B30, thiss, a2);
+	ThisCall(0x855B30, thiss, a2);
 	SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_SETCHECK, GetIsRenderWindowAllowCellLoads(), NULL);
 }
 
@@ -1483,7 +1483,7 @@ void CreateCrashSave()
 	static const char* path = "Data\\CrashSaves\\";
 	SafeWrite32(0x4DB0AC, UInt32(path));
 
-	ThisStdCall(0x4DB020, DataHandler::GetSingleton()); // DoAutosave
+	ThisCall(0x4DB020, DataHandler::GetSingleton()); // DoAutosave
 
 	// restore original path (Data\\Backup\\)
 	SafeWrite32(0x4DB0AC, 0xD415C4);
@@ -1550,7 +1550,7 @@ void __fastcall InitPreviewWindowBackgroundColor(void* window, void* edx, UInt32
 	UInt8 g = config.iPreviewWindowGreen;
 	UInt8 b = config.iPreviewWindowBlue;
 	UInt32 color = r + (g << 8) + (b << 16);
-	ThisStdCall(0x4793D0, window, color);
+	ThisCall(0x4793D0, window, color);
 }
 
 static double havokAnimationRate = 1000.0;
@@ -1762,7 +1762,7 @@ UInt32 __fastcall PlaceOPALObjectHook(ObjectPalette::Object* current, void* edx,
 		toPlace = opal->list.GetNthItem(randomIndex);
 	}
 
-	return ThisStdCall(0x40BF90, toPlace, point1, point2);
+	return ThisCall(0x40BF90, toPlace, point1, point2);
 }
 
 const double M_TAU = 6.28318530717958647692528676;
@@ -1984,7 +1984,7 @@ int __fastcall hk_sub_8A1FC0(void *thisptr, void *_EDX, const char *Path, const 
     if (!FileCacheMap.empty() && !FileCacheMap.count(Path))
         return 0;
 
-    return ThisStdCall<int>(0x008A1FC0, thisptr, Path, a2, a3, a4);
+    return ThisCall<int>(0x008A1FC0, thisptr, Path, a2, a3, a4);
 }
 
 void __declspec(naked) hk_call_41EBDE()
@@ -2044,7 +2044,7 @@ void* g_heapManager = reinterpret_cast<void*>(0xF21B5C);
 
 size_t Heap_MemorySize(void* memory)
 {
-	auto msize = ThisStdCall(0x854720, g_heapManager, memory);
+	auto msize = ThisCall(0x854720, g_heapManager, memory);
 	return msize;
 }
 
@@ -2250,7 +2250,7 @@ namespace CustomFOV
 		apCamera->m_kPort.r = 1.f;
 		apCamera->m_kPort.t = 1.f;
 		apCamera->m_kPort.b = 0.f;
-		ThisStdCall(0x80DD60, apCamera, &DefaultNodeUpdateParams);
+		ThisCall(0x80DD60, apCamera, &DefaultNodeUpdateParams);
 		return 1;
 	}
 
@@ -2384,7 +2384,7 @@ void CleanupFaceGenMap()
 	CdeclCall(0x9DEC60, 0); // NiObjectGarbage::ClearAll
 	CdeclCall(0x68C790); // BSFaceGenManager::ClearModelCache
 	CdeclCall(0x68C8B0); // BSFaceGenManager::ClearModelStrings
-	ThisStdCall(0x4C5250, *(UInt32**)0xED36A0, 0); // ModelLoader::ClearUnusedModels
+	ThisCall(0x4C5250, *(UInt32**)0xED36A0, 0); // ModelLoader::ClearUnusedModels
 	*(UInt32*)0xEB452C = 0x7FFFFFFF;
 	TES::GetSingleton()->CleanUpUnusedTextures();
 	CdeclCall(0x81AF10); // NiGlobalStringTable::FreeUnusedStrings
@@ -2397,7 +2397,7 @@ void __fastcall OnFaceGen_PeriodicCleanup(void* sfg)
 	{
 		CleanupFaceGenMap();
 	}
-	ThisStdCall(0x573480, sfg);
+	ThisCall(0x573480, sfg);
 }
 
 void __fastcall OnInitDebrisScale(float& pDebrisScale, void* edx, HWND hDlg, int nIDDlgItem, UINT uValue, BOOL bSigned)
@@ -2453,7 +2453,7 @@ void __fastcall StopSound_ResetRecordAudioPopupIfInvalid(HWND parent)
 		if (!data->pRecordingPopup || !IsWindow(data->pRecordingPopup->hWnd))
 		{
 			data->pRecordingPopup = (EditResponseData::RecordingPopup*)FormHeap_Allocate(sizeof(EditResponseData::RecordingPopup));
-			ThisStdCall(0x42C910, data->pRecordingPopup, parent);
+			ThisCall(0x42C910, data->pRecordingPopup, parent);
 		}
 	}
 }
@@ -2568,7 +2568,7 @@ void RestoreFileTime(ModInfo* apFile)
 void __fastcall PreSaveStoreFileTime(ModInfo* apFile)
 {
 	SaveFileTime(apFile);
-	ThisStdCall(0x4DE610, apFile);
+	ThisCall(0x4DE610, apFile);
 }
 
 void __cdecl PostSaveRestoreFileTime(void* a1)
@@ -2595,7 +2595,7 @@ void __fastcall FastExitHook(volatile LONG** thiss)
 {
 	SaveWindowPositions();
 	if (GetINIExists() && config.bFastExit) TerminateProcess(GetCurrentProcess(), 0);
-	ThisStdCall(0x4CC540, thiss);
+	ThisCall(0x4CC540, thiss);
 }
 
 void __stdcall BadFormPrintID(TESForm* form)
@@ -2733,7 +2733,7 @@ void __fastcall OnObjectWindowNew(int* pFormType, HWND hDlg)
 			*pFormType = form->typeID;
 		}
 	}
-	ThisStdCall(0x437840, pFormType);
+	ThisCall(0x437840, pFormType);
 
 	if (bInAllForms)
 	{
@@ -2781,7 +2781,7 @@ LRESULT CALLBACK ObjectWindowListViewCallback(HWND Hwnd, UINT Message, WPARAM wP
 
 			int** nodeDatas = (int**)0xED0778;
 			int iCurrentNode = *(int*)0xED0770;
-			ThisStdCall(0x437540, nodeDatas[iCurrentNode], &item);
+			ThisCall(0x437540, nodeDatas[iCurrentNode], &item);
 			return FALSE;
 		}
 	}
@@ -3056,8 +3056,8 @@ void PlayMouseClickSound()
 
 BOOL __fastcall OnShowSearchAndReplaceWindow(char* buffer, void* edx, HWND hWnd, int nCmdShow)
 {
-	auto scrapHeap = ThisStdCall<void*>(0x854540, (void*)0xF21B5C); // HeapManager::GetThreadScrapHeap
-	ThisStdCall(0x855B30, scrapHeap, buffer); // ScrapHeapFree
+	auto scrapHeap = ThisCall<void*>(0x854540, (void*)0xF21B5C); // HeapManager::GetThreadScrapHeap
+	ThisCall(0x855B30, scrapHeap, buffer); // ScrapHeapFree
 	return ShowWindow(hWnd, nCmdShow);
 }
 
@@ -3239,7 +3239,7 @@ void __cdecl InsertHeadPartsColumns(TESNPC* npc, HWND window, UInt32 retnAddr, H
 	CdeclCall(0x549F10, listView, headParts);
 
 	// refresh the head
-	ThisStdCall(0x574A70, npc, window, true);
+	ThisCall(0x574A70, npc, window, true);
 }
 
 HWND headPartNPCWindow;
@@ -3490,11 +3490,11 @@ LRESULT CALLBACK TextureUseListViewCallback(HWND Hwnd, UINT Message, WPARAM wPar
 					TESLandTexture* texture;
 					if (slot)
 					{
-						texture = ThisStdCall<TESLandTexture*>(0x615090, land, quadIdx, slot - 1);
+						texture = ThisCall<TESLandTexture*>(0x615090, land, quadIdx, slot - 1);
 					}
 					else
 					{
-						texture = ThisStdCall<TESLandTexture*>(0x615070, land, quadIdx);
+						texture = ThisCall<TESLandTexture*>(0x615070, land, quadIdx);
 					}
 
 					if (texture)
@@ -3613,11 +3613,11 @@ char __fastcall BGSBodyPartData__DialogCallback(BGSBodyPartData* bodyPart, void*
 				if (auto selectedRowBodyPart = CdeclCall<void*>(0x41A390, listView))
 				{
 					auto newBodyPart = FormHeap_Allocate(sizeof(BodyPart));
-					ThisStdCall(0x545E40, newBodyPart); // BodyPart::BodyPart
-					ThisStdCall(0x5455D0, newBodyPart, bodyPart, selectedRowBodyPart); // BodyPart::CopyFrom
-					ThisStdCall(0x4D1B80, (UInt32*)(((UInt32)bodyPart) + 0x54), &newBodyPart);// bodyPart->bodyParts.Append(newBodyPart);
+					ThisCall(0x545E40, newBodyPart); // BodyPart::BodyPart
+					ThisCall(0x5455D0, newBodyPart, bodyPart, selectedRowBodyPart); // BodyPart::CopyFrom
+					ThisCall(0x4D1B80, (UInt32*)(((UInt32)bodyPart) + 0x54), &newBodyPart);// bodyPart->bodyParts.Append(newBodyPart);
 
-					ThisStdCall(0x5465C0, bodyPart, listView); // BGSBodyPartData::PopulateListView
+					ThisCall(0x5465C0, bodyPart, listView); // BGSBodyPartData::PopulateListView
 					auto index = CdeclCall<UInt32>(0x41A0F0, listView, bodyPart); // TESListView::GetItemByData
 					CdeclCall(0x41A260, listView, index); // TESListView::SetSelectedItem
 
@@ -3627,12 +3627,12 @@ char __fastcall BGSBodyPartData__DialogCallback(BGSBodyPartData* bodyPart, void*
 			}
 		}
 	}
-	return ThisStdCall<char>(originalBGSBodyPartDataDialogFn, bodyPart, hDlg, msg, wParam, lParam, a6);
+	return ThisCall<char>(originalBGSBodyPartDataDialogFn, bodyPart, hDlg, msg, wParam, lParam, a6);
 }
 
 void __fastcall OnWeapCreateTempPlayer_MarkAsTemporary(Actor* pPlayer, void* edx, TESNPC* baseForm)
 {
-	ThisStdCall(0x6415D0, pPlayer, baseForm); // InitBaseForm
+	ThisCall(0x6415D0, pPlayer, baseForm); // InitBaseForm
 	
 	// mark the temporary player as temporary so it doesn't mark the plugin as modified...
 	pPlayer->SetTemporary();
@@ -3742,7 +3742,7 @@ void __fastcall TESIdleForm__56B5A0_Recurse(TESIdleForm* idleForm, void* edx, tL
 {
 	if (idleForm)
 	{
-		ThisStdCall(0x56B5A0, idleForm, formList);
+		ThisCall(0x56B5A0, idleForm, formList);
 	}
 }
 
@@ -3772,7 +3772,7 @@ void __fastcall TESPreviewControl__SetTime(TESRenderControl* renderControl, void
 			afTime = (1000.0F / 60) / havokAnimationRate;
 		}
 	}
-	ThisStdCall(TESPreviewControl__SetTimeAddr, renderControl, afTime, abIsPaused);
+	ThisCall(TESPreviewControl__SetTimeAddr, renderControl, afTime, abIsPaused);
 }
 
 __HOOK OnWaterTypeCheckExtraSubWindowHook()

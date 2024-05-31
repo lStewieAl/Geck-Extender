@@ -224,7 +224,7 @@ public:
 	void SetVisible(bool visible) { visible ? (m_flags &= ~kNiFlag_Culled) : (m_flags |= kNiFlag_Culled); };
 	bool IsVisible() { return !(m_flags & kNiFlag_Culled); }
 	bool IsSelectiveUpdate() { return m_flags & kNiFlag_SelectiveUpdate; };
-	void UpdatePropertiesUpward() { ThisStdCall(0x80E140, this); };
+	void UpdatePropertiesUpward() { ThisCall(0x80E140, this); };
 };
 STATIC_ASSERT(sizeof(NiAVObject) == 0x9C);
 
@@ -652,7 +652,7 @@ public:
 
 	bool WindowPointToRay(int x, int y, NiPoint3* origin, NiPoint3* direction, float width = 0.0F)
 	{
-		return ThisStdCall<bool>(0x817480, this, x, y, origin, direction, width);
+		return ThisCall<bool>(0x817480, this, x, y, origin, direction, width);
 	}
 };
 
