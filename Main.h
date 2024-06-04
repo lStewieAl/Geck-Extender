@@ -3827,3 +3827,11 @@ TESForm* __cdecl OnSelectObjectCheckIsBoundObject(TESForm* form)
 	}
 	return nullptr;
 }
+
+void __cdecl TESObjectLAND_CopyPercentArrays(void* a1, const void* a2, size_t a3)
+{
+	if (a1)
+	{
+		CdeclCall(0xC5CAA0, a1, a2, a3);
+	}
+}

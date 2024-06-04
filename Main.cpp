@@ -963,6 +963,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x44BB8E, UInt32(OnHavokPreviewSetup));
 	WriteRelCall(0x44A793, UInt32(OnHavokPreviewSetup));
 
+	// fix crash when duplicating worldspaces 
+//	WriteRelCall(0x623E31, UInt32(TESObjectLAND_CopyPercentArrays)); WIP needs to properly get the address of the pointer instead of just skipping when it's zero
+
 	NavMeshPickPreventer::Init();
 
 	// allow saving as ESM
