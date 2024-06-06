@@ -189,12 +189,15 @@ struct ModInfo		// referred to by game as TESFile
 	String								description;		// 418
 	void								* dataBuf;			// 420 
 	UInt32								dataBufSize;		// 424 looks like size of entire record
-	UInt8								unk428;				// 428 decide if forms needs to be reloaded on LoadFiles
-	UInt8								pad429[3];
+	ModInfo*							pUnkTESFile_428;
+	UInt8								unk42C[4];
+	UInt32*								pONAM_Data;
+	UInt32								uiONAM_Size;
 
 	// In Editor: 430 = ONAM array and 434 ONAM array count. Allocated at 0438
 	
 	bool IsLoaded() const { return true; }
+	bool IsMaster() const { return flags & 1; }
 	bool IsEnabled() const { return flags & 4; }
 	void SetEnabled(char bEnabled)
 	{

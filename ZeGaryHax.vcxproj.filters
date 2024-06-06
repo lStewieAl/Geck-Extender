@@ -189,6 +189,7 @@
     </ClInclude>
     <ClInclude Include="LaunchGame.h" />
     <ClInclude Include="FaceGenExporter.h" />
+    <ClInclude Include="ONAMFix.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

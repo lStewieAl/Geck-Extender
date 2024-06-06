@@ -43,6 +43,7 @@
 #include "CustomRenderWindowHotkeys.h"
 #include "LaunchGame.h"
 #include "FaceGenExporter.h"
+#include "ONAMFix.h"
 
 #include "Events/EventManager.h"
 #include "Events/Events.h"
@@ -641,7 +642,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelJump(0x5C92E6, UInt32(Hook_RemoveScriptDataLimit));
 
 	// make weapon mods in object window show the same information as misc items
-	SafeWrite8(0x438B94 + kFormType_ItemMod, 0x11);
+	SafeWrite8(0x438B94 + kFormType_TESObjectIMOD, 0x11);
 
 	// Facegen section
 	{
@@ -732,7 +733,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	FixCommCtl32ScrollingBug();
 
 	// open the 'Globals' window when clicking 'New' in the objects window
-	SafeWrite32(0x47A094 + 4 * (kFormType_Global), UInt32(RetnGlobalDialogIDHook));
+	SafeWrite32(0x47A094 + 4 * (kFormType_TESGlobal), UInt32(RetnGlobalDialogIDHook));
 
 	// fix freeze when clicking on 'Record Audio' twice in the dialogue editor
 	WriteRelCall(0x58F495, UInt32(StopSound_ResetRecordAudioPopupIfInvalid));
@@ -1000,6 +1001,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	{
 		DataLoadEvent::RegisterCallback(AddEditorNumericIDWarningHooks);
 	}
+
+	// Fix ONAM not being written when not using Version Control
+	ONAMFix::InitHooks();
 
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
