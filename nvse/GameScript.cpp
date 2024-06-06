@@ -218,13 +218,13 @@ UInt32 ScriptBuffer::GetVariableType(VariableInfo* varInfo, Script::RefVariable*
 			TESScriptableForm* scriptable = NULL;
 			switch (refVar->form->typeID)
 			{
-			case kFormType_Reference:
+			case kFormType_TESObjectREFR:
 				{
 					TESObjectREFR* refr = DYNAMIC_CAST(refVar->form, TESForm, TESObjectREFR);
 					scriptable = DYNAMIC_CAST(refr->baseForm, TESForm, TESScriptableForm);
 					break;
 				}
-			case kFormType_Quest:
+			case kFormType_TESQuest:
 				scriptable = DYNAMIC_CAST(refVar->form, TESForm, TESScriptableForm);
 			}
 

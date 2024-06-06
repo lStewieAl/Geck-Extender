@@ -204,9 +204,9 @@ void OpenForm(TESForm* form, HWND parentHwnd)
 {
 	if (form)
 	{
-		if (form->typeID == kFormType_Cell || form->typeID == kFormType_Land)
+		if (form->typeID == kFormType_TESObjectCELL || form->typeID == kFormType_TESObjectLAND)
 		{
-			TESObjectCELL* cell = form->typeID == kFormType_Land
+			TESObjectCELL* cell = form->typeID == kFormType_TESObjectLAND
 				? (TESObjectCELL*)(UInt32(form) + 0x34) : (TESObjectCELL*)form;
 
 			NiPoint3 pos;

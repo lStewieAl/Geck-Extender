@@ -84,7 +84,7 @@ namespace BetterFloatingFormList
 
 		case BSMsg_AcceptsDropType:
 		{
-			SetWindowLong(Hwnd, DWL_MSGRESULT, wParam != kFormType_Reference);
+			SetWindowLong(Hwnd, DWL_MSGRESULT, wParam != kFormType_TESObjectREFR);
 			return TRUE;
 		}
 

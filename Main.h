@@ -3389,7 +3389,7 @@ bool IsNonDeletedActivator(TESObjectREFR* ref)
 	{
 		if (auto base = ref->baseForm)
 		{
-			if (base->typeID == kFormType_Activator)
+			if (base->typeID == kFormType_TESObjectACTI)
 			{
 				return true;
 			}
