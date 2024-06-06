@@ -3,56 +3,74 @@
 #include "nvse/GameData.h"
 #include "nvse/GameForms.h"
 
-namespace ONAMFix {
+namespace ONAMFix 
+{
 	static NiTLargeArray<TESForm*>** const pModifiedForms = (NiTLargeArray<TESForm*>**)0xED56D0;
 
-	static bool IsESM(ModInfo* apFile) {
+	static bool IsMaster(ModInfo* apFile) 
+	{
 		// If file is newly created, the master flag would not be yet set, that's why checking the extension takes priority
-		// (The flag is set this patch is called)
+		// (The flag is set after this patch is called)
 		const char* pFileName = apFile->name;
 		if (!pFileName)
+		{
 			return false;
+		}
 
 		const char* pDot = strrchr(pFileName, '.');
 		// This is not possible to happen, but just in case
 		if (!pDot)
+		{
 			return false;
+		}
 
 		const char* pExt = pDot + 1;
 		if (!_stricmp(pExt, "esm"))
+		{
 			return true;
+		}
 
 		// ESP plugin could be flagged as master - flag is more important here
 		return apFile->IsMaster();
 	}
 
-	static void CreateONAM(ModInfo* apFile) {
+	static void CreateONAM(ModInfo* apFile) 
+	{
 		// Only master files have ONAM
 		// All forms in ESPs are persistent, so they don't need it
 		// Technically we could add ONAM to ESPs, but it would just be a waste of space
-		if (IsESM(apFile) == false)
+		if (!IsMaster(apFile))
+		{
 			return;
+		}
 
-		if (apFile->pONAM_Data) {
+		if (apFile->pONAM_Data) 
+		{
 			FormHeap_Free(apFile->pONAM_Data);
 			apFile->pONAM_Data = nullptr;
 			apFile->uiONAM_Size = 0;
 		}
 
 		auto pModified = *pModifiedForms;
-		if (pModified->numObjs == 0)
+		if (!pModified->numObjs)
+		{
 			return;
+		}
 
 		std::vector<UInt32> kFormIDs;
-		for (UInt32 i = 0; i < pModified->firstFreeEntry; i++) {
+		for (UInt32 i = 0; i < pModified->firstFreeEntry; i++) 
+		{
 			const TESForm* pForm = pModified->Get(i);
 
 			if (!pForm)
+			{
 				continue;
+			}
 
 			UInt32 uiTypeID = pForm->typeID;
 			bool bAdd = false;
-			switch (uiTypeID) {
+			switch (uiTypeID) 
+			{
 			case kFormType_TESObjectREFR:
 			case kFormType_MissileProjectile:
 			case kFormType_GrenadeProjectile:
@@ -61,7 +79,9 @@ namespace ONAMFix {
 			case kFormType_ContinuousBeamProjectile:
 				// Only temporary references are added to ONAM
 				if (pForm->IsPersistent() == false)
+				{
 					bAdd = true;
+				}
 				break;
 			case kFormType_TESObjectLAND:
 			case kFormType_NavMesh:
@@ -69,13 +89,18 @@ namespace ONAMFix {
 				break;
 			}
 
-			if (bAdd == false)
+			if (!bAdd)
+			{
 				continue;
+			}
 
 			// Skip references that come from our file
-			// Only overriden references are added to ONAM
+			// Only overridden references are added to ONAM
 			if (pForm->mods.Head()->item == apFile)
+			{
 				continue;
+			}
+
 
 #if 0
 			Console_Print("Adding form %08X to %s's ONAM", pForm->refID, apFile->name);
@@ -84,7 +109,8 @@ namespace ONAMFix {
 		}
 
 		const UInt32 uiFormCount = kFormIDs.size();
-		if (uiFormCount) {
+		if (uiFormCount)
+		{
 			UInt32 uiDataSize = uiFormCount * sizeof(UInt32);
 			UInt32* pONAM = (UInt32*)FormHeap_Allocate(uiDataSize);
 			memcpy(pONAM, kFormIDs.data(), uiDataSize);
@@ -92,7 +118,8 @@ namespace ONAMFix {
 			apFile->pONAM_Data = pONAM;
 			apFile->uiONAM_Size = uiFormCount;
 		}
-		else {
+		else
+		{
 			apFile->pONAM_Data = nullptr;
 			apFile->uiONAM_Size = 0;
 		}
