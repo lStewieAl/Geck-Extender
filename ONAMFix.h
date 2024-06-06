@@ -78,7 +78,7 @@ namespace ONAMFix
 			case kFormType_FlameProjectile:
 			case kFormType_ContinuousBeamProjectile:
 				// Only temporary references are added to ONAM
-				if (pForm->IsPersistent() == false)
+				if (!pForm->IsPersistent())
 				{
 					bAdd = true;
 				}
