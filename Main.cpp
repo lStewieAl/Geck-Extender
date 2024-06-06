@@ -965,7 +965,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x44A793, UInt32(OnHavokPreviewSetup));
 
 	// fix crash when duplicating worldspaces 
-//	WriteRelCall(0x623E31, UInt32(TESObjectLAND_CopyPercentArrays)); WIP needs to properly get the address of the pointer instead of just skipping when it's zero
+	SafeWriteBuf(0x623D96, "\x33\xF6\x56\x8B\xCD\xE8\xD0\x88\xFF\xFF", 10); // pass nullptr to TESObjectLAND::CreateLandscape to ensure the data is setup correctly...
 
 	NavMeshPickPreventer::Init();
 
