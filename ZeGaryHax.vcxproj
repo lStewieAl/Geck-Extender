@@ -295,11 +295,13 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
     <ClInclude Include="nvse\prefix.h" />
     <ClInclude Include="nvse\SafeWrite.h" />
     <ClInclude Include="nvse\Utilities.h" />
+    <ClInclude Include="ONAMFix.h" />
     <ClInclude Include="OutOfMemoryHelper.h">
       <SubType>
       </SubType>
     </ClInclude>
     <ClInclude Include="resource.h" />
+    <ClInclude Include="SCOLConsistencyFix.h" />
     <ClInclude Include="Settings.h">
       <SubType>
       </SubType>

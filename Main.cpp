@@ -44,6 +44,7 @@
 #include "LaunchGame.h"
 #include "FaceGenExporter.h"
 #include "ONAMFix.h"
+#include "SCOLConsistencyFix.h"
 
 #include "Events/EventManager.h"
 #include "Events/Events.h"
@@ -1004,6 +1005,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	// Fix ONAM not being written when not using Version Control
 	ONAMFix::InitHooks();
+
+	// Fix geometry data created for SCOLs always using MUTABLE consistency, which increases memory usage
+	SCOLConsistencyFix::InitHooks();
 
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
