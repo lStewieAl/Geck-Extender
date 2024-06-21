@@ -968,6 +968,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// fix crash when duplicating worldspaces 
 	SafeWriteBuf(0x623D96, "\x33\xF6\x56\x8B\xCD\xE8\xD0\x88\xFF\xFF", 10); // pass nullptr to TESObjectLAND::CreateLandscape to ensure the data is setup correctly...
 
+	// check if x/y/z are held while you move refs to fix the axis lock keys not working after closing a menu
+	WriteRelCall(0x45F490, UInt32(OnMoveRefCheckXYZHeld));
+
 	NavMeshPickPreventer::Init();
 
 	// allow saving as ESM

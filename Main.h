@@ -3827,3 +3827,35 @@ TESForm* __cdecl OnSelectObjectCheckIsBoundObject(TESForm* form)
 	}
 	return nullptr;
 }
+
+bool OnMoveRefCheckXYZHeld()
+{
+	bool* isXHeld = (bool*)0xED1413;
+	bool* isYHeld = (bool*)0xED1411;
+	bool* isZHeld = (bool*)0xED1410;
+	if (GetAsyncKeyState(VK_CONTROL) >= 0)
+	{
+		if (!*isXHeld)
+		{
+			if (*isXHeld = GetAsyncKeyState('X') < 0)
+			{
+				*(float*)0xED1164 = 0;
+			}
+		}
+		if (!*isYHeld)
+		{
+			if (*isYHeld = GetAsyncKeyState(config.bSwapRenderCYKeys ? 'C' : 'Y') < 0)
+			{
+				*(float*)0xED1164 = 0;
+			}
+		}
+		if (!*isZHeld)
+		{
+			if (*isZHeld = GetAsyncKeyState('Z') < 0)
+			{
+				*(float*)0xED1164 = 0;
+			}
+		}
+	}
+	return *isXHeld;
+}
