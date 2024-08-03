@@ -2315,7 +2315,7 @@ TESForm* __cdecl OnMediaLocationControllerSelectForm(HWND hWndParent, TESForm* f
 	auto iter = selectedForms.Head();
 	do
 	{
-		if (auto form = iter->item)
+		if (auto form = iter->data)
 		{
 			if (CdeclCall<int>(0x41A0F0, listView, form) < 0)
 			{

@@ -26,8 +26,8 @@ namespace NavMeshPickPreventer
 	{
 		if (ThisCall<bool>(0x44FEB0, ref) || (ref->baseForm && ref->baseForm->typeID == kFormType_TESObjectACTI)) return true;
 
-		bool bIsIgnoredRef = ignoredRefs.IsInList((UInt32*)ref->refID);
-		bool bIsIgnoredBaseForm = ref->baseForm && ignoredRefs.IsInList((UInt32*)ref->baseForm->refID);
+		bool bIsIgnoredRef = ignoredRefs.Contains((UInt32*)ref->refID);
+		bool bIsIgnoredBaseForm = ref->baseForm && ignoredRefs.Contains((UInt32*)ref->baseForm->refID);
 		if (bIsIgnoredRef || bIsIgnoredBaseForm)
 		{
 #ifdef _DEBUG
@@ -50,7 +50,7 @@ namespace NavMeshPickPreventer
 	bool AddFormToIgnoredList(TESForm* form)
 	{
 		UInt32* refID = (UInt32*)form->refID;
-		if (!ignoredRefs.IsInList(refID))
+		if (!ignoredRefs.Contains(refID))
 		{
 			ignoredRefs.Insert(refID);
 			return true;
@@ -89,7 +89,7 @@ namespace NavMeshPickPreventer
 	{
 		if (auto ref = LookupFormByID(lastPickedBaseFormID))
 		{
-			if (!ignoredRefs.IsInList((UInt32*)lastPickedRefID))
+			if (!ignoredRefs.Contains((UInt32*)lastPickedRefID))
 			{
 				ignoredRefs.Insert((UInt32*)lastPickedRefID);
 				Console_Print("Added %s (%08X) to ignored base forms list", ref->GetEditorID(), ref->refID);
@@ -98,7 +98,7 @@ namespace NavMeshPickPreventer
 		}
 		else if (auto ref = LookupFormByID(lastPickedRefID))
 		{
-			if (!ignoredRefs.IsInList((UInt32*)lastPickedRefID))
+			if (!ignoredRefs.Contains((UInt32*)lastPickedRefID))
 			{
 				ignoredRefs.Insert((UInt32*)lastPickedRefID);
 				Console_Print("Added %s (%08X) to ignored refs list", ref->GetEditorID(), ref->refID);
@@ -119,7 +119,7 @@ namespace NavMeshPickPreventer
 				auto iter = formList->Head();
 				do
 				{
-					if (auto form = iter->item)
+					if (auto form = iter->data)
 					{
 						AddFormToIgnoredList(form);
 					}
@@ -137,7 +137,7 @@ namespace NavMeshPickPreventer
 				auto iter = formList->Head();
 				do
 				{
-					if (auto form = iter->item)
+					if (auto form = iter->data)
 					{
 						RemoveFromIgnoredList(form);
 					}
@@ -160,7 +160,7 @@ namespace NavMeshPickPreventer
 		auto iter = ignoredRefs.Head();
 		do
 		{
-			if (auto form = LookupFormByID((UInt32)iter->item))
+			if (auto form = LookupFormByID((UInt32)iter->data))
 			{
 				ignoredForms.Insert(form);
 			}
@@ -178,7 +178,7 @@ namespace NavMeshPickPreventer
 		bool isFirstItem = true;
 		do
 		{
-			if (auto form = LookupFormByID((UInt32)iter->item))
+			if (auto form = LookupFormByID((UInt32)iter->data))
 			{
 				if (!isFirstItem)
 				{

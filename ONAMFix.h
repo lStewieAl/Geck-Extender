@@ -96,7 +96,7 @@ namespace ONAMFix
 
 			// Skip references that come from our file
 			// Only overridden references are added to ONAM
-			if (pForm->mods.Head()->item == apFile)
+			if (pForm->mods.Head()->data == apFile)
 			{
 				continue;
 			}

@@ -232,7 +232,7 @@ void RunCallbackOnCell(TESObjectCELL* cell, void (*callback)(TESObjectREFR*))
 	{
 		do
 		{
-			if (auto ref = iter->item)
+			if (auto ref = iter->data)
 			{
 				callback(ref);
 			}
