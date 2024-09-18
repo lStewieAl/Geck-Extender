@@ -3662,7 +3662,7 @@ class NavMesh;
 class TESObjectLAND;
 class BSMultiBoundNode;
 
-class TESObjectCELL : public TESForm
+class TESObjectCELL : public TESForm, public TESFullName
 {
 public:
 	TESObjectCELL();
@@ -3681,8 +3681,8 @@ public:
 	typedef tList<TESObjectREFR> RefList;
 	struct CellCoordinates
 	{
-		UInt32	x;
-		UInt32	y;
+		UInt16	x;
+		UInt16	y;
 	}; // Exterior is 3 DWord, Interior is 5 DWord and 5 floats
 
 	struct LOADED_CELL_DATA
@@ -3698,7 +3698,6 @@ public:
 		tList<TESObjectREFR> placeableWatersList;
 	};
 
-	TESFullName fullName;
 	UInt8 cellFlags;
 	UInt8 cellState;
 	UInt8 byte3A;
@@ -3708,10 +3707,9 @@ public:
 	TESObjectLAND* land;
 	float waterHeight;
 	UInt8 bAutoWaterLoaded;
-	UInt8 gap69[3];
 	TESTexture noiseTexture;
 	NavMesh** navMeshArray;
-	UInt32 unk80[8];
+	UInt32 unk80[5];
 	RTL_CRITICAL_SECTION refLockSemaphore;
 	UInt32 unkB8;
 	UInt32 unkBC;
@@ -3720,8 +3718,8 @@ public:
 	UInt16 countVisibleDistant;
 	UInt16 visibleWhenDistantCountLoaded;
 	tList<TESObjectREFR> objectList;
-	NiNode* niNodeD4;
-	NiNode* niNodeD8;
+	NiPointer<NiNode>	spLightMarkerNode;
+	NiPointer<NiNode>	spSoundMarkerNode;
 	UInt32 unkDC;
 	LOADED_CELL_DATA* renderData;
 	float unkE4;
@@ -3759,7 +3757,7 @@ public:
 		ThisCall(0x6286B0, this, abModified);
 	}
 };
-STATIC_ASSERT(sizeof(TESObjectCELL) == 0x100);
+static_assert(sizeof(TESObjectCELL) == 0x100);
 
 // TESObjectREFR (60) - see GameObjects.h
 
