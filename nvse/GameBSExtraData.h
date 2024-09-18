@@ -3,6 +3,7 @@
 // Added to remove a cyclic dependency between GameForms.h and GameExtraData.h
 
 class TESForm;
+class TESObjectREFR;
 
 // C+?
 class BSExtraData
@@ -51,6 +52,8 @@ struct BaseExtraList
 struct ExtraDataList : public BaseExtraList
 {
 	static ExtraDataList * Create(BSExtraData* xBSData = NULL);
+
+	TESObjectREFR* GetMultiBoundRef() const;
 };
 
 STATIC_ASSERT(offsetof(BaseExtraList, m_presenceBitfield) == 0x008);

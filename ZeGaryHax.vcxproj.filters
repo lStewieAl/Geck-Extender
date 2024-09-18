@@ -191,6 +191,7 @@
     <ClInclude Include="FaceGenExporter.h" />
     <ClInclude Include="ONAMFix.h" />
     <ClInclude Include="SCOLConsistencyFix.h" />
+    <ClInclude Include="MultiBoundsAdder.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

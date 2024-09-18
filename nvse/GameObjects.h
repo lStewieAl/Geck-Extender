@@ -9,6 +9,7 @@ struct ScriptEventList;
 class ActiveEffect;
 class NiNode;
 class Animation;
+class BSMultiBound;
 
 // 008
 class TESChildCell
@@ -72,7 +73,7 @@ public:
 	virtual UInt32		Unk_83(void);
 	virtual void		Unk_84(UInt32 arg0);
 	virtual UInt32		Unk_85(void);
-	virtual NiPoint3*	GetPos(void);
+	virtual NiPoint3*	GetPos(void) const;
 	virtual bool		Unk_87(void);
 	virtual bool		Unk_88(void);
 	virtual bool		Unk_89(void);
@@ -128,6 +129,16 @@ public:
 	TESContainer* GetContainer();
 	bool IsMapMarker();
 
+	void AddMultiBound(TESObjectREFR* apMultiBoundRef);
+
+	bool CheckBound(const BSMultiBound* apBound) const;
+	bool IsInMultiBound(const BSMultiBound* apBound) const;
+
+	void MarkAsModified(bool abModified);
+
+	static bool CanSetMultibound(const TESObjectREFR* apRef, const TESObjectREFR* apBound);
+
+	bool IsMultiBoundOrRoomMarker() const;
 
 	MEMBER_FN_PREFIX(TESObjectREFR);
 };

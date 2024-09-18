@@ -15,6 +15,8 @@ const UInt32 _NiTMap_Lookup = 0x00844740;
 const UInt32 _NiTMap_Lookup = 0;
 #endif
 
+typedef void* NiTMapIterator;
+
 // 8
 struct NiRTTI
 {
@@ -259,8 +261,8 @@ public:
 		UInt32		m_bucket;
 	};
 
-	virtual UInt32	CalculateBucket(UInt32 key);
-	virtual bool	CompareKey(UInt32 lhs, UInt32 rhs);
+	virtual UInt32	KeyToHashIndex(UInt32 key);
+	virtual bool	IsKeysEqual(UInt32 lhs, UInt32 rhs);
 	virtual void	Fn_03(UInt32 arg0, UInt32 arg1, UInt32 arg2);	// assign to entry
 	virtual void	Fn_04(UInt32 arg);
 	virtual void	Fn_05(void);	// locked operations
@@ -273,6 +275,39 @@ public:
 	UInt32	m_numBuckets;	// 4
 	Entry	** m_buckets;	// 8
 	UInt32	m_numItems;		// C
+
+	NiTMapIterator GetFirstPos() const {
+		for (UInt32 i = 0; i < m_numBuckets; i++) {
+			if (m_buckets[i])
+				return m_buckets[i];
+		}
+		return 0;
+	}
+
+	void GetNext(NiTMapIterator& pos, UInt32& key, T_Data*& val) {
+		Entry* pItem = (Entry*)pos;
+
+		key = pItem->key;
+		val = pItem->data;
+
+		if (pItem->next) {
+			pos = pItem->next;
+			return;
+		}
+
+		UInt32 i = KeyToHashIndex(pItem->key);
+		for (++i; i < m_numBuckets; i++)
+		{
+			pItem = m_buckets[i];
+			if (pItem)
+			{
+				pos = pItem;
+				return;
+			}
+		}
+
+		pos = 0;
+	}
 };
 
 template <typename T_Data>
@@ -370,6 +405,8 @@ void NiTPointerMap <T_Data>::Iterator::FindValid(void)
 	}
 }
 
+
+
 // 10
 // todo: NiTPointerMap should derive from this
 // cleaning that up now could cause problems, so it will wait
@@ -388,19 +425,51 @@ public:
 	};
 
 	virtual NiTMapBase<T_Key, T_Data>*	Destructor(bool doFree);						// 000
-	virtual UInt32						Hash(T_Key key);								// 001
-	virtual void						Equal(T_Key key1, T_Key key2);					// 002
-	virtual void						FillEntry(Entry entry, T_Key key, T_Data data);	// 003
-	virtual	void						Unk_004(void * arg0);							// 004
-	virtual	void						Unk_005(void);									// 005
-	virtual	void						Unk_006();										// 006
+	virtual UInt32						KeyToHashIndex(T_Key key);								// 001
+	virtual void						IsKeysEqual(T_Key key1, T_Key key2);					// 002
+	virtual void						SetValue(Entry entry, T_Key key, T_Data data);	// 003
+	virtual	void						ClearValue(void * arg0);							// 004
+	virtual	void						NewItem(void);									// 005
+	virtual	void						DeleteItem();										// 006
 
-	//void	** _vtbl;	// 0
 	UInt32	numBuckets;	// 4
 	Entry	** buckets;	// 8
 	UInt32	numItems;	// C
 
 	DEFINE_MEMBER_FN_LONG(NiTMapBase, Lookup, bool, _NiTMap_Lookup, T_Key key, T_Data * dataOut);
+
+	NiTMapIterator GetFirstPos() const {
+		for (UInt32 i = 0; i < numBuckets; i++) {
+			if (buckets[i])
+				return buckets[i];
+		}
+		return 0;
+	}
+
+	void GetNext(NiTMapIterator& pos, T_Key& key, T_Data& val) {
+		Entry* pItem = (Entry*) pos;
+
+		key = pItem->key;
+		val = pItem->data;
+
+		if (pItem->next) {
+			pos = pItem->next;
+			return;
+		}
+
+		UInt32 i = KeyToHashIndex(pItem->key);
+		for (++i; i < numBuckets; i++)
+		{
+			pItem = buckets[i];
+			if (pItem)
+			{
+				pos = pItem;
+				return;
+			}
+		}
+
+		pos = 0;
+	}
 };
 
 // 14
@@ -470,8 +539,38 @@ public:
 	const T&	operator *() const { return *data; }
 	T&			operator *() { return *data; }
 
+	T* operator->() const { return data; }
+
 	operator const T*() const { return data; }
 	operator T*() { return data; }
+
+	__forceinline NiPointer<T>& operator =(const NiPointer& ptr) {
+		if (data != ptr.data) {
+			if (data)
+				data->DecRefCount();
+			data = ptr.data;
+			if (data)
+				data->IncRefCount();
+		}
+		return *this;
+	}
+
+	__forceinline NiPointer<T>& operator =(T* pObject) {
+		if (data != pObject) {
+			if (data)
+				data->DecRefCount();
+			data = pObject;
+			if (data)
+				data->IncRefCount();
+		}
+		return *this;
+	}
+
+	__forceinline bool operator==(T* apObject) const { return (data == apObject); }
+
+	__forceinline bool operator==(const NiPointer& ptr) const { return (data == ptr.data); }
+
+	__forceinline operator bool() const { return data != nullptr; }
 };
 
 // 14

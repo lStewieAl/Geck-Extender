@@ -352,6 +352,9 @@ public:
 	ModInfo* GetNthFile(int n);
 	TESObjectREFR* CreateReferenceAtLocation(TESBoundObject* object, const NiPoint3* aPos, const NiPoint3* aRot, float radius);
 
+	TESObjectCELL* GetCellFromCellCoord(SInt32 aiX, SInt32 aiY, TESWorldSpace* apWorldSpace, bool abUnk);
+	void UnloadCell(TESObjectCELL* apCell);
+
 	MEMBER_FN_PREFIX(DataHandler);
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 	DEFINE_MEMBER_FN(DoAddForm, UInt32, 0x004603B0, TESForm * pForm);	// stupid name is because AddForm is redefined in windows header files
@@ -489,4 +492,8 @@ public:
 	static TES* GetSingleton() { return *(TES**)0xECF93C; }
 	void CleanUpUnusedTextures(bool bEmergencyTextureRelease = false) { ThisCall(0x4C7D70, this, bEmergencyTextureRelease); };
 	bool GetLandHeight(NiPoint3* cameraPos, float* heightOut);
+
+	bool IsCellLoaded(TESObjectCELL* apCell, bool abIgnoreBuffered);
+
+	void LoadCell(TESObjectCELL* apCell);
 };

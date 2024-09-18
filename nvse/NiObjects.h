@@ -72,6 +72,26 @@ static struct NiUpdateData
 	UInt8 gap09[3];
 } DefaultNodeUpdateParams;
 
+class NiFrustumPlanes {
+public:
+	NiFrustumPlanes() {
+		m_uiActivePlanes = 63;
+	}
+
+	enum ActivePlanes {
+		NEAR_PLANE		= 0,
+		FAR_PLANE		= 1,
+		LEFT_PLANE		= 2,
+		RIGHT_PLANE		= 3,
+		TOP_PLANE		= 4,
+		BOTTOM_PLANE	= 5,
+		MAX_PLANES		= 6
+	};
+
+	NiPlane	m_akCullingPlanes[MAX_PLANES];
+	UInt32	m_uiActivePlanes;
+};
+
 class NiProperty : public NiObjectNET {
 public:
 	NiProperty();
@@ -137,26 +157,26 @@ public:
 	NiAVObject();
 	~NiAVObject();
 
-	virtual void	Unk_23(UInt32 arg1);
-	virtual void	Unk_24(NiMatrix33* arg1, NiVector3* arg2, bool arg3);
-	virtual void	Unk_25(UInt32 arg1);
-	virtual void	Unk_26(UInt32 arg1);
-	virtual void	Unk_27(UInt32 arg1);
-	virtual void	Unk_28(UInt32 arg1, UInt32 arg2, UInt32 arg3);
-	virtual void	Unk_29(UInt32 arg1, UInt32 arg2);
-	virtual void	Unk_2A(UInt32 arg1, UInt32 arg2);
-	virtual void	Unk_2B(UInt32 arg1, UInt32 arg2);
-	virtual void	Unk_2C(UInt32 arg1);
-	virtual void	Unk_2D(UInt32 arg1);
-	virtual void	UpdateTransform(UInt32 arg1);
-	virtual void	Unk_2F(void);
-	virtual void	UpdateBounds(UInt32 arg1);
-	virtual void	Unk_31(UInt32 arg1, UInt32 arg2);
-	virtual void	Unk_32(UInt32 arg1);
-	virtual void	Unk_33(UInt32 arg1);
-	virtual void	Unk_34(void);
-	virtual void	OnVisible(NiCullingProcess* cullingProcess);
-	virtual void	Unk_36(UInt32 arg1);
+	virtual void			UpdateControllers(NiUpdateData& arData);
+	virtual void			ApplyTransform(NiMatrix33& arMat, NiPoint3& arTrn, bool abOnLeft);
+	virtual void			Unk_39();
+	virtual NiAVObject*		GetObject_(const NiFixedString& arName);
+	virtual NiAVObject*		GetObjectByName(const NiFixedString& arName);
+	virtual void			SetSelectiveUpdateFlags(bool& arSelectiveUpdate, BOOL abSelectiveUpdateTransforms, bool& arRigid);
+	virtual void			UpdateDownwardPass(const NiUpdateData& arData, UInt32 auiFlags);
+	virtual void			UpdateSelectedDownwardPass(const NiUpdateData& arData, UInt32 auiFlags);
+	virtual void			UpdateRigidDownwardPass(const NiUpdateData& arData, UInt32 auiFlags);
+	virtual void			UpdatePropertiesDownward(NiPropertyState* apParentState);
+	virtual void			Unk_47();
+	virtual void			UpdateWorldData(const NiUpdateData& arData);
+	virtual void			UpdateWorldBound();
+	virtual void			UpdateTransformAndBounds(const NiUpdateData& arData);
+	virtual void			PreAttachUpdate(NiNode* apEventualParent, const NiUpdateData& arData);
+	virtual void			PreAttachUpdateProperties(NiNode* apEventualParent);
+	virtual void			DetachParent();
+	virtual void			UpdateUpwardPassParent(void* arg);
+	virtual void			OnVisible(NiCullingProcess* apCuller);
+	virtual void			PurgeRendererData(NiDX9Renderer* apRenderer);
 
 	enum
 	{
@@ -369,24 +389,106 @@ public:
 	NiNode();
 	~NiNode();
 
-	virtual void		AddObject(NiObject * obj, UInt32 arg1);							// 37 verified
-	virtual NiObject *	RemoveObject(NiObject ** out, NiObject* toRemove);				// 38 looks ok
-	virtual void		Unk_38(void);													// 39 either lookup or remove a child.
-	virtual void		Unk_39(void);													// 3A calls 39 then release returned child
-	virtual void		Unk_3A(void);													// 3B
-	virtual bool		Unk_3B(void);
-	virtual bool		Unk_3C(void);
-	virtual bool		Unk_3D(void);
-	virtual bool		Unk_3E(void);
-	virtual bool		Unk_3F(void);
+	virtual void	AttachChild(NiAVObject* apChild, bool abFirstAvail);
+	virtual void	InsertChildAt(UInt32 i, NiAVObject* apChild);
+	virtual void	DetachChild(NiAVObject* apChild, NiPointer<NiAVObject>& arResult);
+	virtual void	DetachChildAlt(NiAVObject* apChild);
+	virtual void	DetachChildAt(UInt32 i, NiPointer<NiAVObject>& arResult);
+	virtual void	DetachChildAtAlt(UInt32 i);
+	virtual void	SetAt(UInt32 i, NiAVObject* apChild, NiPointer<NiAVObject>& arResult);
+	virtual void	SetAtAlt(UInt32 i, NiAVObject* apChild);
+	virtual void	UpdateUpwardPass();
 
-	UInt32						unk0094;	// 094
-	UInt32						unk0098;	// 098
 	NiTArray <NiAVObject *>		m_children;	// 09C
 
 	void SetAlphaRecurse(float alpha) { CdeclCall(0x90A1C0, this, alpha); };
 
 };	// 0AC
+
+static_assert(sizeof(NiNode) == 0xAC);
+
+class BSNiNode : public NiNode {
+public:
+	virtual ~BSNiNode();
+	virtual void ReparentSkinInstances(NiNode* apNode, NiAVObject* apParent);
+};
+
+class BSMultiBoundRoom;
+class BSMultiBound;
+
+class BSMultiBoundShape : public NiObject {
+public:
+	enum CullResult {
+		BS_CULL_UNTESTED = 0,
+		BS_CULL_VISIBLE = 1,
+		BS_CULL_CULLED = 2,
+		BS_CULL_OCCLUDED = 3,
+	};
+
+	enum ShapeType {
+		BSMB_SHAPE_NONE = 0,
+		BSMB_SHAPE_AABB = 1,
+		BSMB_SHAPE_OBB = 2,
+		BSMB_SHAPE_SPHERE = 3,
+		BSMB_SHAPE_CAPSULE = 4,
+	};
+
+	enum IntersectResult
+	{
+		BS_INTERSECT_NONE = 0,
+		BS_INTERSECT_PARTIAL = 1,
+		BS_INTERSECT_CONTAINSTARGET = 2
+	};
+
+	virtual ShapeType		GetType() const;
+	virtual double			GetRadius() const;
+	virtual IntersectResult	CheckBSBound(BSMultiBound& arTargetBound) const;
+	virtual IntersectResult	CheckBound(NiBound& arTargetBound) const;
+	virtual bool			WithinFrustum(NiFrustumPlanes& arPlanes) const;
+	virtual bool			CompletelyWithinFrustum(NiFrustumPlanes& arPlanes) const;
+	virtual void			GetNiBound(NiBound& arBound) const;
+	virtual void			CreateDebugGeometry(NiLines* apLines, NiTriShape* apGeometry, NiColorAlpha akColor);
+	virtual UInt32			GetDebugGeomLineSize() const;
+	virtual UInt32			GetDebugGeomShapeSize() const;
+	virtual bool			GetPointWithin(NiPoint3& arPoint) const;
+	virtual void			SetCenter(NiPoint3& arCenter);
+
+	struct BoundVertices {
+		NiPoint3 point[8];
+	};
+
+	CullResult eCullResult;
+
+	inline void ResetCullResult() {
+		eCullResult = BS_CULL_UNTESTED;
+	};
+};
+
+class BSMultiBound : public NiObject {
+public:
+	BSMultiBound();
+	~BSMultiBound();
+
+	virtual bool GetPointWithin(const NiPoint3& arPoint) const;
+	virtual void Nullsub024(void*);
+
+	UInt32							uiBoundFrameCount;
+	NiPointer<BSMultiBoundShape>	spShape;
+};
+
+class BSMultiBoundNode : public BSNiNode {
+public:
+	BSMultiBoundNode();
+	virtual ~BSMultiBoundNode();
+
+	virtual BSMultiBoundRoom*	GetMultiBoundRoom();
+	virtual bool				GetPointWithin(NiPoint3& akPoint);
+	virtual UInt32				CheckBound(BSMultiBound*);
+	virtual UInt32				CheckBoundAlt(NiBound*);
+
+	NiPointer<BSMultiBound> spMultiBound;
+	UInt32					uiCullingMode;
+};
 
 #if 0
 
