@@ -12,6 +12,12 @@
 namespace MultiBoundsAdder {
 
 #define PRINT_FAILS 0
+	static void RunGarbageCollection() {
+		CdeclCall(0x9DEC60, false); // NiObjectGarbage::ClearAll
+		ModelLoader::GetSingleton()->ClearUnusedModels();
+		TES::GetSingleton()->CleanUpUnusedTextures(true);
+		StdCall(0x81AF10); // NiGlobalStringTable::FreeUnusedStrings
+	}
 
 	static void LoadRefs(TESObjectCELL* apCell) {
 		apCell->CellRefLockEnter();
@@ -65,6 +71,13 @@ namespace MultiBoundsAdder {
 		pLoadedCell->AddObjectsToLoadedRefCollection();
 		LoadRefs(pLoadedCell);
 		return pLoadedCell;
+	}
+
+	static TESObjectCELL* LoadCell(TESObjectCELL* apCell) {
+		apCell->Load3D();
+		apCell->AddObjectsToLoadedRefCollection();
+		LoadRefs(apCell);
+		return apCell;
 	}
 
 	static void UnloadCell(TESObjectCELL* apCell) {
@@ -391,6 +404,8 @@ namespace MultiBoundsAdder {
 			if (abReattach)
 				RemoveMultiBounds(pCell);
 			TestCell(pCell, nullptr);
+
+			RunGarbageCollection();
 		}
 		else if (TES::GetSingleton()->currentWrldspc) {
 #if 0
@@ -438,17 +453,12 @@ namespace MultiBoundsAdder {
 					pCell = pLoadedCell;
 				}
 
-
-				//if (pCell->renderData)
-				//	Console_Print(">>>>>>>>> Render data loaded", pCell->refID);
-
-				//if (!pCell->objectList.IsEmpty())
-				//	Console_Print(">>>>>>>>> Objects loaded", pCell->refID);
+				if (abReattach)
+					RemoveMultiBounds(pCell);
 
 				TestCell(pCell, pWorld);
 
 				if (pLoadedCell) {
-					//Console_Print(">>>>>>>>> Unloading cell %08X", pLoadedCell->refID);
 					UnloadCell(pLoadedCell);
 				}
 
@@ -456,13 +466,29 @@ namespace MultiBoundsAdder {
 
 				if (uiCellsProcessed >= 8) {
 					uiCellsProcessed = 0;
-					CdeclCall(0x9DEC60, false); // NiObjectGarbage::ClearAll
-					ModelLoader::GetSingleton()->ClearUnusedModels();
-					TES::GetSingleton()->CleanUpUnusedTextures(true);
-					StdCall(0x81AF10); // NiGlobalStringTable::FreeUnusedStrings
+					RunGarbageCollection();
 				}
 			}
 #endif
+		}
+		else {
+			UInt32 uiCellsProcessed = 0;
+			for (UInt32 i = 0; i < DataHandler::GetSingleton()->cellArray.numObjs; i++) {
+				TESObjectCELL* pCell = DataHandler::GetSingleton()->cellArray.Get(i);
+				if (!pCell)
+					continue;
+
+				LoadCell(pCell);
+
+				TestCell(pCell, nullptr);
+
+				UnloadCell(pCell);
+
+				if (uiCellsProcessed >= 8) {
+					uiCellsProcessed = 0;
+					RunGarbageCollection();
+				}
+			}
 		}
 	}
 
