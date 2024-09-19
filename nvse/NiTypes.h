@@ -39,7 +39,68 @@ struct NiVector4
 struct NiPoint3
 {
 	float x, y, z;
+
+	static const NiPoint3 UNIT_X;
+	static const NiPoint3 UNIT_Y;
+	static const NiPoint3 UNIT_Z;
+	static const NiPoint3 UNIT_ALL;
 	static const NiPoint3 ZERO;
+
+	NiPoint3& operator= (const NiPoint3& pt) {
+		x = pt.x;
+		y = pt.y;
+		z = pt.z;
+		return *this;
+	};
+
+	NiPoint3& operator= (const NiPoint3* pt) {
+		x = pt->x;
+		y = pt->y;
+		z = pt->z;
+		return *this;
+	};
+
+	NiPoint3 operator+ (const NiPoint3& pt) const { return NiPoint3(x + pt.x, y + pt.y, z + pt.z); };
+	NiPoint3& operator+= (const NiPoint3& pt) {
+		x += pt.x;
+		y += pt.y;
+		z += pt.z;
+		return *this;
+	};
+
+	NiPoint3 operator- (const NiPoint3& pt) const { return NiPoint3(x - pt.x, y - pt.y, z - pt.z); };
+	NiPoint3 operator- () const { return NiPoint3(-x, -y, -z); };
+	NiPoint3& operator-= (const NiPoint3& pt) {
+		x -= pt.x;
+		y -= pt.y;
+		z -= pt.z;
+		return *this;
+	};
+
+	float operator* (const NiPoint3& pt) const { return x * pt.x + y * pt.y + z * pt.z; };
+
+	NiPoint3 operator* (float fScalar) const { return NiPoint3(fScalar * x, fScalar * y, fScalar * z); };
+	friend NiPoint3 operator* (float fScalar, const NiPoint3& pt) { return NiPoint3(fScalar * pt.x, fScalar * pt.y, fScalar * pt.z); };
+	NiPoint3& operator*= (float fScalar) {
+		x *= fScalar;
+		y *= fScalar;
+		z *= fScalar;
+		return *this;
+	};
+
+
+
+	NiPoint3 operator/ (float fScalar) const {
+		float fInvScalar = 1.0f / fScalar;
+		return NiPoint3(fInvScalar * x, fInvScalar * y, fInvScalar * z);
+	};
+
+	NiPoint3& operator/= (float fScalar) {
+		x /= fScalar;
+		y /= fScalar;
+		z /= fScalar;
+		return *this;
+	};
 };
 
 struct NiPoint4
@@ -56,15 +117,125 @@ struct NiQuaternion
 // 24
 struct NiMatrix33
 {
-	float	data[9];
+	float	data[3][3];
+
+	__forceinline float GetEntry(UInt32 uiRow, UInt32 uiCol) const {
+		return data[uiRow][uiCol];
+	}
+
+	NiPoint3 operator*(const NiPoint3& pt) const {
+		return NiPoint3(
+			data[0][0] * pt.x + data[0][1] * pt.y + data[0][2] * pt.z,
+			data[1][0] * pt.x + data[1][1] * pt.y + data[1][2] * pt.z,
+			data[2][0] * pt.x + data[2][1] * pt.y + data[2][2] * pt.z);
+	}
+
+	NiMatrix33 operator* (const NiMatrix33& mat) const {
+		NiMatrix33 result;
+		result.data[0][0] =
+			data[0][0] * mat.data[0][0] +
+			data[0][1] * mat.data[1][0] +
+			data[0][2] * mat.data[2][0];
+		result.data[1][0] =
+			data[1][0] * mat.data[0][0] +
+			data[1][1] * mat.data[1][0] +
+			data[1][2] * mat.data[2][0];
+		result.data[2][0] =
+			data[2][0] * mat.data[0][0] +
+			data[2][1] * mat.data[1][0] +
+			data[2][2] * mat.data[2][0];
+		result.data[0][1] =
+			data[0][0] * mat.data[0][1] +
+			data[0][1] * mat.data[1][1] +
+			data[0][2] * mat.data[2][1];
+		result.data[1][1] =
+			data[1][0] * mat.data[0][1] +
+			data[1][1] * mat.data[1][1] +
+			data[1][2] * mat.data[2][1];
+		result.data[2][1] =
+			data[2][0] * mat.data[0][1] +
+			data[2][1] * mat.data[1][1] +
+			data[2][2] * mat.data[2][1];
+		result.data[0][2] =
+			data[0][0] * mat.data[0][2] +
+			data[0][1] * mat.data[1][2] +
+			data[0][2] * mat.data[2][2];
+		result.data[1][2] =
+			data[1][0] * mat.data[0][2] +
+			data[1][1] * mat.data[1][2] +
+			data[1][2] * mat.data[2][2];
+		result.data[2][2] =
+			data[2][0] * mat.data[0][2] +
+			data[2][1] * mat.data[1][2] +
+			data[2][2] * mat.data[2][2];
+		return result;
+	}
+
+	void MakeXRotation(float fAngle) {
+		float sn = std::sin(fAngle);
+		float cs = std::cos(fAngle);
+
+		data[0][0] = 1.0f;
+		data[0][1] = 0.0f;
+		data[0][2] = 0.0f;
+		data[1][0] = 0.0f;
+		data[1][1] = cs;
+		data[1][2] = sn;
+		data[2][0] = 0.0f;
+		data[2][1] = -sn;
+		data[2][2] = cs;
+	}
+
+	void MakeYRotation(float fAngle) {
+		float sn = std::sin(fAngle);
+		float cs = std::cos(fAngle);
+
+		data[0][0] = cs;
+		data[0][1] = 0.0f;
+		data[0][2] = -sn;
+		data[1][0] = 0.0f;
+		data[1][1] = 1.0f;
+		data[1][2] = 0.0f;
+		data[2][0] = sn;
+		data[2][1] = 0.0f;
+		data[2][2] = cs;
+	}
+
+	void MakeZRotation(float fAngle) {
+		float sn = std::sin(fAngle);
+		float cs = std::cos(fAngle);
+
+		data[0][0] = cs;
+		data[0][1] = sn;
+		data[0][2] = 0.0f;
+		data[1][0] = -sn;
+		data[1][1] = cs;
+		data[1][2] = 0.0f;
+		data[2][0] = 0.0f;
+		data[2][1] = 0.0f;
+		data[2][2] = 1.0f;
+	}
+
+	void FromEulerAnglesXYZ(float fXAngle, float fYAngle, float fZAngle) {
+		NiMatrix33 kXRot, kYRot, kZRot;
+		kXRot.MakeXRotation(fXAngle);
+		kYRot.MakeYRotation(fYAngle);
+		kZRot.MakeZRotation(fZAngle);
+		*this = kXRot * (kYRot * kZRot);
+	}
 };
 
 // 34
 struct NiTransform
 {
 	NiMatrix33	rotate;		// 00
-	NiVector3	translate;	// 24
+	NiPoint3	translate;	// 24
 	float		scale;		// 30
+
+	// 0x524C40
+	inline NiPoint3 operator*(const NiPoint3& kPoint) const {
+		return(((rotate * kPoint) * scale) + translate);
+	};
 };
 
 // 10

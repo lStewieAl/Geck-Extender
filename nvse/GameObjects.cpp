@@ -1,8 +1,4 @@
 #include "GameObjects.h"
-#include "GameRTTI.h"
-#include "GameExtraData.h"
-#include "GameTasks.h"
-#include "SafeWrite.h"
 #include "NiObjects.h"
 
 
@@ -34,4 +30,23 @@ bool TESObjectREFR::CanSetMultibound(const TESObjectREFR* apRef, const TESObject
 // 0x4BA240
 bool TESObjectREFR::IsMultiBoundOrRoomMarker() const {
 	return ThisCall<bool>(0x4BA240, this);
+}
+
+// 0x64C0C0
+const char* TESObjectREFR::GetEquippableModelPath() const {
+	return ThisCall<const char*>(0x64C0C0, this);
+}
+
+// 0x64C030
+void TESObjectREFR::Set3DSimple(NiNode* apNode) {
+	ThisCall(0x64C030, this, apNode);
+}
+
+NiMatrix33& TESObjectREFR::GetOrientation(NiMatrix33& arMatrix) const {
+	if (IsActor())
+		arMatrix.FromEulerAnglesXYZ(0, 0, rotZ);
+	else
+		arMatrix.FromEulerAnglesXYZ(rotX, rotY, rotZ);
+
+	return arMatrix;
 }

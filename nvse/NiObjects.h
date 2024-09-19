@@ -214,7 +214,7 @@ public:
 		kNiFlag_UnkBit31 = 0x80000000,
 	};
 
-	NiAVObject* m_parent;				// 18
+	NiNode* m_parent;				// 18
 	bhkNiCollisionObject* m_collisionObject;		// 1C
 	NiSphere* m_kWorldBound;			// 20
 	DList<NiProperty>		m_propertyList;			// 24
@@ -245,6 +245,8 @@ public:
 	bool IsVisible() { return !(m_flags & kNiFlag_Culled); }
 	bool IsSelectiveUpdate() { return m_flags & kNiFlag_SelectiveUpdate; };
 	void UpdatePropertiesUpward() { ThisCall(0x80E140, this); };
+
+	void Update(NiUpdateData& arData);
 };
 STATIC_ASSERT(sizeof(NiAVObject) == 0x9C);
 
@@ -462,6 +464,27 @@ public:
 	inline void ResetCullResult() {
 		eCullResult = BS_CULL_UNTESTED;
 	};
+};
+
+class BSMultiBoundAABB : public BSMultiBoundShape {
+public:
+	BSMultiBoundAABB();
+	virtual ~BSMultiBoundAABB();
+
+	NiPoint3 Center;
+	NiPoint3 HalfExtents;
+
+	void GetVertices(BoundVertices* apVerts);
+};
+
+class BSMultiBoundOBB : public BSMultiBoundAABB {
+public:
+	BSMultiBoundOBB();
+	virtual ~BSMultiBoundOBB();
+
+	NiMatrix33 Axis;
+
+	void GetVertices(BoundVertices* apPoints);
 };
 
 class BSMultiBound : public NiObject {

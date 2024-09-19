@@ -2,17 +2,84 @@
 
 #include "GameData.h"
 #include "GameObjects.h"
+#include "GameTasks.h"
 #include "NiObjects.h"
 #include <GameSettings.h>
+#include <array>
+#include <algorithm>
 
 
 namespace MultiBoundsAdder {
 
 #define PRINT_FAILS 1
 
-	void PrintFail(const char* apReason, TESObjectREFR* apRef, TESObjectREFR* apMBRef) {
+	static void LoadRefs(TESObjectCELL* apCell) {
+		apCell->CellRefLockEnter();
+		auto pIter = apCell->objectList.Head();
+		while (pIter) {
+			TESObjectREFR* pRef = pIter->data;
+			pIter = pIter->next;
+
+			if (!pRef)
+				continue;
+
+			if (pRef->IsActor())
+				continue;
+
+			if (pRef->Get3D())
+				continue;
+
+			// Deleted
+			if ((pRef->flags & 0x20) != 0)
+				continue;
+
+			// Disabled
+			if ((pRef->flags & 0x800) != 0)
+				continue;
+
+			if (pRef->IsMultiBoundOrRoomMarker())
+				continue;
+
+			const char* pPath = pRef->GetEquippableModelPath();
+			if (!pPath)
+				continue;
+
+			//Console_Print("Loading 3D data for %08X - %s", pRef->refID, pPath);
+			NiNode* pNode = ModelLoader::GetSingleton()->LoadFile(pPath, 0, false, 0, false, false);
+			if (pNode) {
+				pRef->Set3DSimple(pNode);
+				pNode->m_kLocal.translate = *pRef->GetPos();
+				pNode->m_kLocal.scale = pRef->scale;
+				pRef->GetOrientation(pNode->m_kLocal.rotate);
+				NiUpdateData kUpdateData;
+				pNode->Update(kUpdateData);
+			}
+		}
+		apCell->CellRefLockLeave();
+	}
+
+	static TESObjectCELL* LoadCell(SInt32 iX, SInt32 iY, TESWorldSpace* apWorld) {
+		TESObjectCELL* pLoadedCell = DataHandler::GetSingleton()->GetCellFromCellCoord(iX, iY, apWorld, true);
+		ThisCall(0x6656D0, apWorld, pLoadedCell);
+		pLoadedCell->Load3D();
+		pLoadedCell->AddObjectsToLoadedRefCollection();
+		LoadRefs(pLoadedCell);
+		return pLoadedCell;
+	}
+
+	static void UnloadCell(TESObjectCELL* apCell) {
+		DataHandler::GetSingleton()->UnloadCell(apCell);
+	}
+
+	void PrintFail(const char* apReason, const TESObjectREFR* apRef, const TESObjectREFR* apMBRef) {
 #if PRINT_FAILS
-		Console_Print("Can't add ref %08X to MultiBound %08X - %s", apRef->refID, apMBRef->refID, apReason);
+		Console_Print("Can't add ref %s (%08X) to MultiBound %08X - %s", apRef->GetEditorID(), apRef->refID, apMBRef->refID, apReason);
+#endif
+	}
+
+	void PrintFail(const char* apReason, const TESObjectREFR* apRef) {
+#if PRINT_FAILS
+		Console_Print("Ignoring ref %s (%08X) - %s", apRef->GetEditorID(), apRef->refID, apReason);
 #endif
 	}
 	
@@ -20,125 +87,278 @@ namespace MultiBoundsAdder {
 		return CdeclCall<bool>(0x643350, apTestedObject, apMultiBound, &arResult, abFastExit);
 	}
 
-	void TestCell(TESObjectCELL* apCell) {
-		Console_Print("Testing cell %08X", apCell->refID);
+	UInt32 TestMultibound(TESObjectREFR* apMBRef, BSMultiBound* apMultiBound, std::vector<TESObjectREFR*>& arRefList) {
+		UInt32 uiCount = 0;
+		for (TESObjectREFR* pTestedRef : arRefList) {
+			if (!TESObjectREFR::CanSetMultibound(apMBRef, pTestedRef)) {
+				PrintFail("Not allowed", pTestedRef, apMBRef);
+				continue;
+			}
 
+			// Simple position test
+			if (!pTestedRef->IsInMultiBound(apMultiBound)) {
+				PrintFail("Position outside of the bound", pTestedRef, apMBRef);
+				continue;
+			}
+
+			NiNode* pRoot = pTestedRef->Get3D();
+			if (!pRoot) {
+				PrintFail("No 3D data", pTestedRef, apMBRef);
+				continue;
+			}
+
+#if 0
+			// Simple bound test
+			if (pTestedRef->CheckBound(apMultiBound)) {
+				PrintFail("Bound outside of the bound", pTestedRef, apMBRef);
+				continue;
+			}
+#endif
+
+			// Vertex test
+			BOOL uResult = TRUE;
+			if (!TestVertices(pRoot, apMultiBound, uResult, true)) {
+				PrintFail("Geometry outside of the bound", pTestedRef, apMBRef);
+				continue;
+			}
+
+			pTestedRef->AddMultiBound(apMBRef);
+			pTestedRef->MarkAsModified(true);
+			apMBRef->MarkAsModified(true);
+
+			Console_Print("Adding %s (%08X) to MultiBound %08X", pTestedRef->GetEditorID(), pTestedRef->refID, apMBRef->refID);
+
+			pTestedRef->flags |= 0x80000000;
+
+			uiCount++;
+		}
+
+		return uiCount;
+	}
+
+	void EvaluateReferences(const TESObjectREFR* apTestedRef, std::vector<TESObjectREFR*>& arRefList) {
+		TESForm* pBase = apTestedRef->baseForm;
+		if (!pBase)
+			return;
+
+		if (apTestedRef->refID == 0)
+			return;
+
+		switch (pBase->typeID) {
+		case kFormType_TESNPC:
+		case kFormType_TESCreature:
+		case kFormType_TESLevCreature:
+		case kFormType_TESLevCharacter:
+		case kFormType_BGSProjectile:
+		case kFormType_BGSExplosion:
+			PrintFail("Disallowed form type", apTestedRef);
+			return;
+		}
+		
+		if (apTestedRef->IsMultiBoundOrRoomMarker()) {
+			PrintFail("Is a MultiBound", apTestedRef);
+			return;
+		}
+
+		if (!apTestedRef->Get3D()) {
+			PrintFail("No 3D data", apTestedRef);
+			return;
+		}
+
+		if (apTestedRef->extraDataList.GetMultiBoundRef()) {
+			PrintFail("Already in a MultiBound", apTestedRef);
+			return;
+		}
+
+		arRefList.push_back(const_cast<TESObjectREFR*>(apTestedRef));
+	}
+
+	void GatherReferences(TESObjectREFR* apMBRef, BSMultiBound* apMultiBound, TESWorldSpace* apWorld, std::vector<TESObjectREFR*>& arRefList) {
+		if (!apWorld)
+			return;
+
+		double dRadius = apMultiBound->spShape->GetRadius();
+
+		std::vector<TESObjectCELL*> kCells;
+		NiPoint3 kWorldPos = *apMBRef->GetPos();
+
+		Console_Print("Testing MultiBound %s (%08X) at %f,%f", apMBRef->GetEditorID(), apMBRef->refID, kWorldPos.x, kWorldPos.y);
+
+		// Create a square around the MultiBound
+		struct IntPoint2 {
+			SInt32 x;
+			SInt32 y;
+		};
+
+		IntPoint2 kPoints[4];
+		kPoints[0].x = SInt32(kWorldPos.x - dRadius) >> 12;
+		kPoints[0].y = SInt32(kWorldPos.y - dRadius) >> 12;
+		kPoints[1].x = SInt32(kWorldPos.x + dRadius) >> 12;
+		kPoints[1].y = SInt32(kWorldPos.y - dRadius) >> 12;
+		kPoints[2].x = SInt32(kWorldPos.x + dRadius) >> 12;
+		kPoints[2].y = SInt32(kWorldPos.y + dRadius) >> 12;
+		kPoints[3].x = SInt32(kWorldPos.x - dRadius) >> 12;
+		kPoints[3].y = SInt32(kWorldPos.y + dRadius) >> 12;
+
+		// Calculate the size of the square
+		SInt32 iMinX = kPoints[0].x;
+		SInt32 iMaxX = kPoints[0].x;
+
+		for (UInt32 i = 1; i < 4; i++) {
+			if (kPoints[i].x < iMinX)
+				iMinX = kPoints[i].x;
+			if (kPoints[i].x > iMaxX)
+				iMaxX = kPoints[i].x;
+		}
+
+		SInt32 iMinY = kPoints[0].y;
+		SInt32 iMaxY = kPoints[0].y;
+
+		for (UInt32 i = 1; i < 4; i++) {
+			if (kPoints[i].y < iMinY)
+				iMinY = kPoints[i].y;
+			if (kPoints[i].y > iMaxY)
+				iMaxY = kPoints[i].y;
+		}
+
+		Console_Print("Testing range (%d, %d) x (%d, %d)", iMinX, iMaxX, iMinY, iMaxY);
+
+		// Get the cells in the square
+		for (SInt32 iX = iMinX; iX <= iMaxX; iX++) {
+			for (SInt32 iY = iMinY; iY <= iMaxY; iY++) {
+				TESObjectCELL* pCell = DataHandler::GetSingleton()->GetCellFromCellCoord(iX, iY, apWorld, true);
+				if (pCell)
+					kCells.push_back(pCell);
+			}
+		}
+
+
+		std::sort(kCells.begin(), kCells.end());
+		auto new_end = std::unique(kCells.begin(), kCells.end());
+		kCells.erase(new_end, kCells.end());
+
+		for (TESObjectCELL* pCell : kCells) {
+			if (!pCell)
+				continue;
+
+			//Console_Print("> Testing cell %08X", pCell->refID);
+
+			bool bLoaded = true;
+			if (!TES::GetSingleton()->IsCellLoaded(pCell, false)) {
+				SInt32 iX = pCell->GetPosX();
+				SInt32 iY = pCell->GetPosY();
+				pCell = LoadCell(iX, iY, apWorld);
+				bLoaded = false;
+			}
+
+			if (pCell->objectList.IsEmpty() || !pCell->renderData->multiboundRefMap.numItems) {
+				if (!bLoaded)
+					UnloadCell(pCell);
+
+				continue;
+			}
+
+			pCell->CellRefLockEnter();
+
+			auto pIter = pCell->objectList.Head();
+			while (pIter) {
+				TESObjectREFR* pRef = pIter->data;
+				pIter = pIter->next;
+
+				EvaluateReferences(pRef, arRefList);
+			}
+
+			if (!bLoaded)
+				UnloadCell(pCell);
+
+			pCell->CellRefLockLeave();
+		}
+	}
+
+	void TestCell(TESObjectCELL* apCell, TESWorldSpace* apWorld) {
 		const TESBoundObject* const pMultiBoundMarker = *(TESBoundObject**)0xEDDA40;
 		const TESBoundObject* const pPortalMarker = *(TESBoundObject**)0xEDDA4C;
 		const TESBoundObject* const pRoomMarker = *(TESBoundObject**)0xEDDA48;
 
-		if (!apCell->objectList.Count()) {
-			Console_Print("No loaded objects in the cell!");
+		if (!apCell->renderData) {
+			Console_Print("No data in the cell!");
 			return;
 		}
+
+		if (!apCell->renderData->multiboundRefMap.numItems) {
+			return;
+		}
+
+		if (apCell->objectList.IsEmpty()) {
+			return;
+		}
+
+		Console_Print("Testing cell %s (%08X)", apCell->GetEditorID(), apCell->refID);
 
 		bool bModified = false;
 
 		apCell->CellRefLockEnter();
 		std::vector<TESObjectREFR*> kValidRefs;
-		kValidRefs.reserve(apCell->objectList.Count());
+		UInt32 uiCount = apCell->objectList.Count();
+		kValidRefs.reserve(uiCount);
 
-		Console_Print("Evaluating %d objects", apCell->objectList.Count());
-		auto pIter = apCell->objectList.Head();
-		while (pIter) {
-			TESObjectREFR* pRef = pIter->data;
-			pIter = pIter->next;
 
-			TESForm* pBase = pRef->baseForm;
-			if (!pBase)
-				continue;
+		if (!apWorld) {
+			Console_Print("Evaluating %d objects", uiCount);
+			auto pIter = apCell->objectList.Head();
+			while (pIter) {
+				TESObjectREFR* pRef = pIter->data;
+				pIter = pIter->next;
 
-			if (pRef->refID == 0)
-				break;
-
-			bool bCanBeAttached = true;
-			switch (pBase->typeID) {
-			case kFormType_TESNPC:
-			case kFormType_TESCreature:
-			case kFormType_TESLevCreature:
-			case kFormType_TESLevCharacter:
-			case kFormType_BGSProjectile:
-			case kFormType_BGSExplosion:
-				bCanBeAttached = false;
-				break;
+				EvaluateReferences(pRef, kValidRefs);
 			}
+			Console_Print("Found %d candidates", kValidRefs.size());
 
-			if (bCanBeAttached)
-				bCanBeAttached = pBase != pPortalMarker && pBase != pRoomMarker && pBase != pMultiBoundMarker;
-
-			if (bCanBeAttached)
-				bCanBeAttached = pRef->Get3D() != nullptr;
-
-			if (bCanBeAttached)
-				bCanBeAttached = pRef->extraDataList.GetMultiBoundRef() == nullptr;
-
-			if (!bCanBeAttached)
-				continue;
-
-			kValidRefs.push_back(pRef);
+			if (kValidRefs.empty()) {
+				apCell->CellRefLockLeave();
+				return;
+			}
 		}
 
-		Console_Print("Found %d candidates", kValidRefs.size());
-		Console_Print("Evaluating them against %d MultiBounds", apCell->renderData->multiboundRefMap.numItems);
+
 		UInt32 uiAdded = 0;
-		for (TESObjectREFR* pTestedRef : kValidRefs) {
-			NiTMapIterator kIter = apCell->renderData->multiboundRefMap.GetFirstPos();
+		NiTMapIterator kIter = apCell->renderData->multiboundRefMap.GetFirstPos();
+		if (apWorld) {
 			while (kIter) {
 				TESObjectREFR* pMBRef = nullptr;
 				NiPointer<BSMultiBoundNode> spMBNode = nullptr;
 				apCell->renderData->multiboundRefMap.GetNext(kIter, pMBRef, spMBNode);
 
-				if (!pMBRef || !spMBNode)
-					continue;
+				GatherReferences(pMBRef, spMBNode->spMultiBound.data, apWorld, kValidRefs);
+			}
+			Console_Print("Found %d candidates", kValidRefs.size());
 
-				if (!TESObjectREFR::CanSetMultibound(pMBRef, pTestedRef)) {
-					PrintFail("Not allowed", pTestedRef, pMBRef);
-					continue;
-				}
+			Console_Print("Evaluating them against %d MultiBounds", apCell->renderData->multiboundRefMap.numItems);
+			kIter = apCell->renderData->multiboundRefMap.GetFirstPos();
+			while (kIter) {
+				TESObjectREFR* pMBRef = nullptr;
+				NiPointer<BSMultiBoundNode> spMBNode = nullptr;
+				apCell->renderData->multiboundRefMap.GetNext(kIter, pMBRef, spMBNode);
 
-				// Simple position test
-				if (!pTestedRef->IsInMultiBound(spMBNode->spMultiBound)) {
-					PrintFail("Position outside of the bound", pTestedRef, pMBRef);
-					continue;
-				}
+				uiAdded += TestMultibound(pMBRef, spMBNode->spMultiBound, kValidRefs);
+			}
+		}
+		else {
+			Console_Print("Evaluating them against %d MultiBounds", apCell->renderData->multiboundRefMap.numItems);
+			while (kIter) {
+				TESObjectREFR* pMBRef = nullptr;
+				NiPointer<BSMultiBoundNode> spMBNode = nullptr;
+				apCell->renderData->multiboundRefMap.GetNext(kIter, pMBRef, spMBNode);
 
-				NiNode* pRoot = pTestedRef->Get3D();
-				if (!pRoot) {
-					PrintFail("No 3D data", pTestedRef, pMBRef);
-					continue;
-				}
-
-				// Simple bound test
-				if (pTestedRef->CheckBound(spMBNode->spMultiBound)) {
-					PrintFail("Bound outside of the bound", pTestedRef, pMBRef);
-					continue;
-				}
-
-				// Vertex test
-				BOOL uResult = TRUE;
-				if (!TestVertices(pRoot, spMBNode->spMultiBound, uResult, true)) {
-					PrintFail("Geometry outside of the bound", pTestedRef, pMBRef);
-					continue;
-				}
-
-				pTestedRef->AddMultiBound(pMBRef);
-				pTestedRef->MarkAsModified(true);
-				pMBRef->MarkAsModified(true);
-				bModified = true;
-				Console_Print("Adding ref %08X to MultiBound %08X", pTestedRef->refID, pMBRef->refID);
-
-				pTestedRef->flags |= 0x80000000;
-
-				uiAdded++;
-				break;
+				uiAdded += TestMultibound(pMBRef, spMBNode->spMultiBound, kValidRefs);
 			}
 		}
 
-		if (bModified)
-			apCell->MarkAsModified(true);
 
-		if (uiAdded)
+		if (uiAdded) {
+			apCell->MarkAsModified(true);
 			Console_Print("Added %d objects to MultiBounds", uiAdded);
+		}
 		
 		apCell->CellRefLockLeave();
 	}
@@ -146,10 +366,10 @@ namespace MultiBoundsAdder {
 	void TestObjects() {
 		TESObjectCELL* pCell = TES::GetSingleton()->currentInterior;
 		if (pCell) {
-			TestCell(pCell);
+			TestCell(pCell, nullptr);
 		}
 		else if (TES::GetSingleton()->currentWrldspc) {
-#if 1
+#if 0
 			Setting* uGridsToLoad = (Setting*)0xED6550;
 			for (UInt32 x = 0; x < uGridsToLoad->data.i; x++) {
 				for (UInt32 y = 0; y < uGridsToLoad->data.i; y++) {
@@ -174,14 +394,22 @@ namespace MultiBoundsAdder {
 				if (!TES::GetSingleton()->IsCellLoaded(pCell, false)) {
 					SInt32 iX = pCell->GetPosX();
 					SInt32 iY = pCell->GetPosY();
-					pLoadedCell = DataHandler::GetSingleton()->GetCellFromCellCoord(iX, iY, pWorld, true);
-					ThisCall(0x6656D0, pWorld, pLoadedCell);
+					pLoadedCell = LoadCell(iX, iY, pWorld);
+					pCell = pLoadedCell;
 				}
 
-				TestCell(pCell);
+
+				//if (pCell->renderData)
+				//	Console_Print(">>>>>>>>> Render data loaded", pCell->refID);
+
+				//if (!pCell->objectList.IsEmpty())
+				//	Console_Print(">>>>>>>>> Objects loaded", pCell->refID);
+
+				TestCell(pCell, pWorld);
 
 				if (pLoadedCell) {
-					DataHandler::GetSingleton()->UnloadCell(pLoadedCell);
+					//Console_Print(">>>>>>>>> Unloading cell %08X", pLoadedCell->refID);
+					UnloadCell(pLoadedCell);
 				}
 			}
 #endif

@@ -61,10 +61,10 @@ public:
 	virtual void		Unk_77(void);
 	virtual void		Unk_78(void);
 	virtual void		Unk_79(void);
-	virtual void		Unk_7A(void);
-	virtual NiNode*		GenerateNiNode(void);
-	virtual void		Unk_7C(void);
-	virtual NiNode*		Get3D(void);
+	virtual void		InitHavok(void);
+	virtual NiNode*		Load3D(bool abBackgroundLoading);
+	virtual void		Set3D(NiNode* apNode, int unused);
+	virtual NiNode*		Get3D(void) const;
 	virtual void		Unk_7E(void);
 	virtual void		Unk_7F(void);
 	virtual void		Unk_80(void);
@@ -139,6 +139,12 @@ public:
 	static bool CanSetMultibound(const TESObjectREFR* apRef, const TESObjectREFR* apBound);
 
 	bool IsMultiBoundOrRoomMarker() const;
+
+	const char* GetEquippableModelPath() const;
+
+	void Set3DSimple(NiNode* apNode);
+
+	NiMatrix33& GetOrientation(NiMatrix33& arMatrix) const;
 
 	MEMBER_FN_PREFIX(TESObjectREFR);
 };

@@ -82,6 +82,17 @@ void CreateLogFile()
 	gLog.Open(logPath);
 }
 
+void* __cdecl ArchiveManager__OpenArchive(const char* apArchiveName, UInt16 aiForceArchiveType, bool abInvalidateOtherArchives) {
+	return CdeclCall<void*>(0x8A35C0, apArchiveName, aiForceArchiveType, true);
+}
+
+TESObjectREFR* __fastcall TESDataHandler__CreateReferenceAtLocation_(DataHandler* apThis, void*, TESBoundObject* apForm, NiPoint3* aPos, NiPoint3* aRot, float radius, void* apPrimitive, int a7) {
+	TESObjectREFR* pRet = ThisCall<TESObjectREFR*>(0x4D0940, apThis, apForm, aPos, aRot, radius, apPrimitive, a7);
+	pRet->parentCell->AddMultiBoundRef(pRet);
+	return pRet;
+
+}
+
 bool NVSEPlugin_Load(const NVSEInterface* nvse)
 {
 	if (!nvse->isEditor)
@@ -1011,6 +1022,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	// Fix geometry data created for SCOLs always using MUTABLE consistency, which increases memory usage
 	SCOLConsistencyFix::InitHooks();
+
+	WriteRelCall(0x4DD7F8, UInt32(ArchiveManager__OpenArchive));
+	WriteRelCall(0x45BC2A, UInt32(TESDataHandler__CreateReferenceAtLocation_));
 
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())

@@ -266,13 +266,13 @@ public:
 	virtual void		Unk_36();
 	virtual void		Unk_37();
 	virtual void		Unk_38();
-	virtual void		Unk_39();
+	virtual bool		IsActor() const;
 	virtual void		Unk_3A();
 	virtual void		Unk_3B();
 	virtual void		Unk_3C();
 	virtual void		Unk_3D();
 	virtual void		Unk_3E();
-	virtual const char*	GetEditorID();
+	virtual const char*	GetEditorID() const;
 	virtual void		Unk_40();
 	virtual void		Unk_41();
 	virtual void		Unk_42();
@@ -382,7 +382,7 @@ public:
 	virtual void		Unk_6A(void);						// Actor: GetMagicEffectList
 	virtual void		Unk_6B(void);
 	virtual void		Unk_6C(void);	// REFR: GetBSFaceGenNiNodeSkinned
-	virtual void		Unk_6D(void);
+	virtual NiNode*		LoadGraphics(TESForm* apBaseForm);
 };
 
 // 30
@@ -3679,11 +3679,31 @@ public:
 	};
 
 	typedef tList<TESObjectREFR> RefList;
-	struct CellCoordinates
-	{
-		UInt16	x;
-		UInt16	y;
-	}; // Exterior is 3 DWord, Interior is 5 DWord and 5 floats
+
+	struct ExteriorData {
+		SInt32	iCellX;
+		SInt32	iCellY;
+		UInt8	byte08;
+	};
+
+	struct InteriorData {
+		UInt32		uiAmbient;
+		UInt32		uiDirectional;
+		UInt32		uiFogColorNear;
+		float		fFogNear;
+		float		fFogFar;
+		SInt32		iDirectionalXY;
+		SInt32		iDirectionalZ;
+		float		fDirectionalFade;
+		float		fClipDist;
+		float		fFogPower;
+		void*		pGetValuesFrom;
+	};
+
+	union CellData {
+		ExteriorData* pCellDataExterior;
+		InteriorData* pCellDataInterior;
+	};
 
 	struct LOADED_CELL_DATA
 	{
@@ -3703,7 +3723,7 @@ public:
 	UInt8 byte3A;
 	UInt8 gap3B;
 	ExtraDataList extraDataList;
-	CellCoordinates coords;
+	CellData pCellData;
 	TESObjectLAND* land;
 	float waterHeight;
 	UInt8 bAutoWaterLoaded;
@@ -3756,6 +3776,14 @@ public:
 	void MarkAsModified(bool abModified) {
 		ThisCall(0x6286B0, this, abModified);
 	}
+
+	NiNode* Load3D();
+
+	void AttachModels(bool abSetupMopp);
+
+	void AddObjectsToLoadedRefCollection();
+
+	BSMultiBoundNode* AddMultiBoundRef(TESObjectREFR* apMultiBound);
 };
 static_assert(sizeof(TESObjectCELL) == 0x100);
 
@@ -3858,12 +3886,9 @@ public:
 	TESTexture			canopyShadow;		// 0D4 confirmed NNAM
 	TESTexture			waterNoiseTexture;	// 0E0 confirmed XNAM
 
-/*
-	Character			* character;		// 060
-	UInt32				unk060;				// 060
-	RefListPointerMap	* pointerMap064;	// 064 
-	BSPortalGraph		* portalGraph;		// 068
-*/
+	TESObjectCELL* GetCellAtCoord(SInt32 aiX, SInt32 aiY) const;
+	TESObjectCELL* GetCellAtPos(const NiPoint3& arPos) const;
+
 };	// I am seeing a tList at 60, a map at 50 indexed by XY coord !!!, another map at B0, indexed by modInfo::Unklist elements
 
 static_assert(sizeof(TESWorldSpace) == 0xFC);
