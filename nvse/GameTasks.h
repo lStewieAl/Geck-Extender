@@ -455,4 +455,6 @@ public:
 	void QueueReference(TESObjectREFR* apRef, UInt32 aePriority, bool abAllowQueueReferenceQueuing);
 
 	NiNode* LoadFile(const char* apPath, UInt32 aeLODFadeMult, bool abAssignShaders, int unused, bool abKeepUV, bool abNoUseCountIncrease);
+
+	void ClearUnusedModels(bool abMemoryPass = false);
 };

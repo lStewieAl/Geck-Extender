@@ -15,3 +15,8 @@ NiNode* ModelLoader::LoadFile(const char* apPath, UInt32 aeLODFadeMult, bool abA
 	return ThisCall<NiNode*>(0x4C0040, this, apPath, aeLODFadeMult, abAssignShaders, unused, abKeepUV, abNoUseCountIncrease);
 }
 
+// 0x4C5250
+void ModelLoader::ClearUnusedModels(bool abMemoryPass) {
+	ThisCall(0x4C5250, this, abMemoryPass);
+}
+

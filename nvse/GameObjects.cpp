@@ -27,6 +27,11 @@ bool TESObjectREFR::CanSetMultibound(const TESObjectREFR* apRef, const TESObject
 	return CdeclCall<bool>(0x642830, apRef, apBound);
 }
 
+// 0x6437A0
+void TESObjectREFR::SetMultiBound(TESObjectREFR* apBound) {
+	ThisCall(0x6437A0, this, apBound);
+}
+
 // 0x4BA240
 bool TESObjectREFR::IsMultiBoundOrRoomMarker() const {
 	return ThisCall<bool>(0x4BA240, this);

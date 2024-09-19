@@ -138,6 +138,8 @@ public:
 
 	static bool CanSetMultibound(const TESObjectREFR* apRef, const TESObjectREFR* apBound);
 
+	void SetMultiBound(TESObjectREFR* apBound);
+
 	bool IsMultiBoundOrRoomMarker() const;
 
 	const char* GetEquippableModelPath() const;

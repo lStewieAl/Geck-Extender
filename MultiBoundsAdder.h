@@ -11,7 +11,7 @@
 
 namespace MultiBoundsAdder {
 
-#define PRINT_FAILS 1
+#define PRINT_FAILS 0
 
 	static void LoadRefs(TESObjectCELL* apCell) {
 		apCell->CellRefLockEnter();
@@ -363,9 +363,33 @@ namespace MultiBoundsAdder {
 		apCell->CellRefLockLeave();
 	}
 
-	void TestObjects() {
+	void RemoveMultiBounds(TESObjectCELL* apCell) {
+		if (apCell->objectList.IsEmpty())
+			return;
+
+		apCell->CellRefLockEnter();
+
+		auto pIter = apCell->objectList.Head();
+		while (pIter) {
+			TESObjectREFR* pRef = pIter->data;
+			pIter = pIter->next;
+			if (!pRef)
+				continue;
+
+			if (pRef->extraDataList.GetMultiBoundRef()) {
+				pRef->SetMultiBound(nullptr);
+				pRef->MarkAsModified(true);
+			}
+		}
+
+		apCell->CellRefLockLeave();
+	}
+
+	void TestObjects(bool abReattach) {
 		TESObjectCELL* pCell = TES::GetSingleton()->currentInterior;
 		if (pCell) {
+			if (abReattach)
+				RemoveMultiBounds(pCell);
 			TestCell(pCell, nullptr);
 		}
 		else if (TES::GetSingleton()->currentWrldspc) {
@@ -383,6 +407,22 @@ namespace MultiBoundsAdder {
 #else
 			TESWorldSpace* pWorld = TES::GetSingleton()->currentWrldspc;
 			NiTMapIterator kIter = pWorld->cellMap->GetFirstPos();
+
+			UInt32 uiCellsProcessed = 0;
+			// Remove all MultiBounds in a separate loop, since if we were doing it in one pass, chances are we could remove MBs we have set ourselves
+			if (abReattach) {
+				NiTMapIterator kIter = pWorld->cellMap->GetFirstPos();
+				while (kIter) {
+					UInt32 uiCoords = 0;
+					TESObjectCELL* pCell = nullptr;
+					pWorld->cellMap->GetNext(kIter, uiCoords, pCell);
+					if (!pCell)
+						continue;
+
+					RemoveMultiBounds(pCell);
+				}
+			}
+
 			while (kIter) {
 				UInt32 uiCoords = 0;
 				TESObjectCELL* pCell = nullptr;
@@ -410,6 +450,16 @@ namespace MultiBoundsAdder {
 				if (pLoadedCell) {
 					//Console_Print(">>>>>>>>> Unloading cell %08X", pLoadedCell->refID);
 					UnloadCell(pLoadedCell);
+				}
+
+				uiCellsProcessed++;
+
+				if (uiCellsProcessed >= 8) {
+					uiCellsProcessed = 0;
+					CdeclCall(0x9DEC60, false); // NiObjectGarbage::ClearAll
+					ModelLoader::GetSingleton()->ClearUnusedModels();
+					TES::GetSingleton()->CleanUpUnusedTextures(true);
+					StdCall(0x81AF10); // NiGlobalStringTable::FreeUnusedStrings
 				}
 			}
 #endif
