@@ -971,6 +971,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// check if x/y/z are held while you move refs to fix the axis lock keys not working after closing a menu
 	WriteRelCall(0x45F490, UInt32(OnMoveRefCheckXYZHeld));
 
+	// prevent x/y/z keys moving the mouse when pressed during navmesh mode
+	SafeWriteBuf(0x41F3A0, "\xC2\x04\x00", 3);
+
 	NavMeshPickPreventer::Init();
 
 	// allow saving as ESM
