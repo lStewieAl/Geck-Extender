@@ -178,9 +178,9 @@ struct ModInfo		// referred to by game as TESFile
 	UInt32								unk3F0;				// 3F0
 	tList<MasterSize*>					* refModData;		// 3F4 most likely full of 0
 	UInt32								unk3F8;				// 3F8
-	UInt32								numRefMods;			// 3FC related to modindex; see 4472D0
+	UInt32								iMasterCount;		// 3FC related to modindex; see 4472D0
 																// formIDs in mod are as saved in GECK, must fix up at runtime
-	ModInfo								** refModInfo;		// 400 used to look up modInfo based on fixed mod index, double-check
+	ModInfo								** m_pMasterPtrs;	// 400 used to look up modInfo based on fixed mod index, double-check
 	UInt32								unk404;				// 404
 	UInt32								unk408;				// 408
 	UInt8								modIndex;			// 40C init to 0xFF
@@ -221,6 +221,18 @@ struct ModInfo		// referred to by game as TESFile
 		{
 			flags &= ~8u;
 		}
+	}
+
+	bool HasMaster(ModInfo* master)
+	{
+		for (int i = 0; i < iMasterCount; ++i)
+		{
+			if (m_pMasterPtrs[i] == master)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 #if !EDITOR
@@ -345,7 +357,7 @@ public:
 
 	static DataHandler* GetSingleton();
 	const ModInfo ** GetActiveModList();		// returns array of modEntry* corresponding to loaded mods sorted by mod index
-	const ModInfo* LookupModByName(const char* modName);
+	ModInfo* LookupModByName(const char* modName);
 	UInt8 GetModIndex(const char* modName);
 	UInt8 GetActiveModCount() const;
 	const char* GetNthModName(UInt32 modIndex);

@@ -251,7 +251,7 @@ public:
 	virtual void		Unk_27();
 	virtual void		Unk_28();
 	virtual void		Unk_29();
-	virtual void		Unk_2A();
+	virtual void		MarkAsModified(bool bModified = true);
 	virtual void		Unk_2B();
 	virtual void		Unk_2C();
 	virtual void		Unk_2D();
@@ -330,7 +330,15 @@ public:
 	UInt8	typeID;					// 004
 	UInt8	typeIDPad[3];			// 005
 	UInt32	flags;					// 008
-	UInt32	refID;					// 00C
+	union
+	{
+		UInt32		refID;			// 00C
+		struct
+		{
+			UInt8	id[3];
+			UInt8	modIndex;
+		};
+	};
 	EditorData	editorData;			// +10
 	tList<ModInfo> mods;			// 010 ModReferenceList in Oblivion	
 	UInt8 byte28;
@@ -2974,7 +2982,7 @@ public:
 	UInt32 GetItemModEffect(UInt8 which)	{ which -= 1; ASSERT(which < 3); return effectMods[which]; }
 	float GetItemModValue1(UInt8 which)		{ which -= 1; ASSERT(which < 3); return value1Mod[which]; }
 	float GetItemModValue2(UInt8 which)		{ which -= 1; ASSERT(which < 3); return value2Mod[which]; }
-
+	bool IsThrown() { return ThisCall<bool>(0x529D90, this); }
 };
 
 STATIC_ASSERT(offsetof(TESObjectWEAP, fullName) == 0x030);
