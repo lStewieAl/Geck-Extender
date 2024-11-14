@@ -510,7 +510,7 @@ ErrOutput::ErrOutput(_ShowError errorFunc, _ShowWarning warningFunc)
 void ErrOutput::vShow(ErrOutput::Message* msg, va_list args)
 {
 	char msgText[0x400];
-	vsprintf_s(msgText, sizeof(msgText), msg->fmt, args);
+	stbsp_vsnprintf(msgText, sizeof(msgText), msg->fmt, args);
 	if (msg->bCanDisable)
 	{
 		if (!msg->bDisabled)

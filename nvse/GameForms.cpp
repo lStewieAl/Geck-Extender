@@ -750,17 +750,17 @@ const char* TESPackage::LocationData::StringForLocationCodeAndData(void)
 			case kPackLocation_InCell:
 			case kPackLocation_ObjectID:
 				if (object.form)
-					sprintf_s(result, resultSize, "%s \"%s\" [%08X] with a radius of %u", TESPackage_LocationStrings[locationType], object.form->GetTheName(), 
+					stbsp_snprintf(result, resultSize, "%s \"%s\" [%08X] with a radius of %u", TESPackage_LocationStrings[locationType], object.form->GetTheName(), 
 						object.form->refID, radius);
 				else
-					sprintf_s(result, resultSize, "%s \"\" [%08X] with a radius of %u", TESPackage_LocationStrings[locationType], 0, radius);
+					stbsp_snprintf(result, resultSize, "%s \"\" [%08X] with a radius of %u", TESPackage_LocationStrings[locationType], 0, radius);
 				break;
 			case kPackLocation_ObjectType:
-				sprintf_s(result, resultSize, "%s \"%s\" [%04X] with a radius of %u", TESPackage_LocationStrings[locationType], StringForObjectCode(object.objectCode),
+				stbsp_snprintf(result, resultSize, "%s \"%s\" [%04X] with a radius of %u", TESPackage_LocationStrings[locationType], StringForObjectCode(object.objectCode),
 					object.objectCode, radius);
 				break;
 			default:
-				sprintf_s(result, resultSize, "%s with a radius of %u", TESPackage_LocationStrings[locationType], radius);
+				stbsp_snprintf(result, resultSize, "%s with a radius of %u", TESPackage_LocationStrings[locationType], radius);
 				break;
 		}
 		return result;
@@ -776,23 +776,23 @@ const char* TESPackage::TargetData::StringForTargetCodeAndData(void)
 		switch (targetType) { 
 			case kTargetType_Refr:
 				if (target.refr)
-					sprintf_s(result, resultSize, "%s \"%s\" [%08X] with a distance of %u", StringForTargetCode(targetType), target.refr->GetTheName(),
+					stbsp_snprintf(result, resultSize, "%s \"%s\" [%08X] with a distance of %u", StringForTargetCode(targetType), target.refr->GetTheName(),
 						target.refr->refID, count);
 				else
-					sprintf_s(result, resultSize, "%s [%08X] with a distance of %u", StringForTargetCode(targetType), 0, count);
+					stbsp_snprintf(result, resultSize, "%s [%08X] with a distance of %u", StringForTargetCode(targetType), 0, count);
 				break;
 			case kTargetType_BaseObject:
 				if (target.form)
-					sprintf_s(result, resultSize, "%s \"%s\" [%08X] with a count of %u", StringForTargetCode(targetType), target.form->GetTheName(), target.form->refID, count);
+					stbsp_snprintf(result, resultSize, "%s \"%s\" [%08X] with a count of %u", StringForTargetCode(targetType), target.form->GetTheName(), target.form->refID, count);
 				else
-					sprintf_s(result, resultSize, "%s [%08X] with a count of %u", StringForTargetCode(targetType), 0, count);
+					stbsp_snprintf(result, resultSize, "%s [%08X] with a count of %u", StringForTargetCode(targetType), 0, count);
 				break;
 			case kTargetType_TypeCode:
-				sprintf_s(result, resultSize, "%s \"%s\" [%04X] with a radius of %u", StringForTargetCode(targetType), StringForObjectCode(target.objectCode),
+				stbsp_snprintf(result, resultSize, "%s \"%s\" [%04X] with a radius of %u", StringForTargetCode(targetType), StringForObjectCode(target.objectCode),
 						target.objectCode, count);
 				break;
 			default:
-				sprintf_s(result, resultSize, "%s with a radius of %u", StringForTargetCode(targetType), count);
+				stbsp_snprintf(result, resultSize, "%s with a radius of %u", StringForTargetCode(targetType), count);
 				break;
 		}
 		return result;

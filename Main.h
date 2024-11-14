@@ -18,6 +18,8 @@
 #include "Settings.h"
 #include "NavMeshPickPreventer.h"
 
+#include "libs/stb_sprintf.h"
+
 #define GH_NAME				"ZeGaryHax"		// this is the string for IsPluginInstalled and GetPluginVersion (also shows in nvse.log)
 #define GH_VERSION			0.46
 #define RES_HACKER_ADDR_TO_ACTUAL 0x4CF800
@@ -1156,7 +1158,7 @@ LRESULT __stdcall UpdateTimeOfDayScrollbarHook(HWND hWnd, UINT Msg, WPARAM wPara
 	SendMessageA(g_trackBarHwnd, TBM_SETPOS, TRUE, scrollPos);
 
 	char timeBuf[100];
-	sprintf(timeBuf, "%.2f", scrollPos / 4.0F);
+	stbsp_sprintf(timeBuf, "%.2f", scrollPos / 4.0F);
 	SetWindowTextA(g_timeOfDayTextHwnd, timeBuf);
 
 	return scrollPos;
@@ -1167,7 +1169,7 @@ void __stdcall UpdateTimeOfDayInputBoxHook(HWND hWnd, UINT Msg, WPARAM wParam, L
 	SendMessageA(g_trackBarHwnd, TBM_SETPOS, TRUE, lParam);
 
 	char timeBuf[100];
-	sprintf(timeBuf, "%.2f", lParam / 4.0F);
+	stbsp_sprintf(timeBuf, "%.2f", lParam / 4.0F);
 	SetWindowTextA(g_timeOfDayTextHwnd, timeBuf);
 }
 
@@ -1469,7 +1471,7 @@ void __cdecl CrashSaveSetName(char* dst, size_t size, char* format, void* DEFAUL
 	{
 		modName = activeFile->name;
 	}
-	sprintf(dst, "%s", modName);
+	stbsp_sprintf(dst, "%s", modName);
 }
 
 LPTOP_LEVEL_EXCEPTION_FILTER s_originalFilter = nullptr;
@@ -1497,18 +1499,18 @@ LONG WINAPI DoCrashSave(EXCEPTION_POINTERS* info)
 
 	auto contextRecord = info->ContextRecord;
 
-	sprintf(buf, "The geck has quit unexpectedly. Please check the Data//CrashSaves folder for a crash save and verify it in xEdit.\r\nDebug Information:\r\nREGISTERS\r\neip: %08X", contextRecord->Eip);
-	sprintf(buf, "%s\r\neax: %08X", buf, contextRecord->Eax);
-	sprintf(buf, "%s\r\nebx: %08X", buf, contextRecord->Ebx);
-	sprintf(buf, "%s\r\necx: %08X", buf, contextRecord->Ecx);
-	sprintf(buf, "%s\r\nedx: %08X", buf, contextRecord->Edx);
-	sprintf(buf, "%s\r\nedi: %08X", buf, contextRecord->Edi);
-	sprintf(buf, "%s\r\nesi: %08X", buf, contextRecord->Esi);
-	sprintf(buf, "%s\r\nebp: %08X", buf, contextRecord->Ebp);
-	sprintf(buf, "%s\r\nesp: %08X", buf, contextRecord->Esp);
+	stbsp_sprintf(buf, "The geck has quit unexpectedly. Please check the Data//CrashSaves folder for a crash save and verify it in xEdit.\r\nDebug Information:\r\nREGISTERS\r\neip: %08X", contextRecord->Eip);
+	stbsp_sprintf(buf, "%s\r\neax: %08X", buf, contextRecord->Eax);
+	stbsp_sprintf(buf, "%s\r\nebx: %08X", buf, contextRecord->Ebx);
+	stbsp_sprintf(buf, "%s\r\necx: %08X", buf, contextRecord->Ecx);
+	stbsp_sprintf(buf, "%s\r\nedx: %08X", buf, contextRecord->Edx);
+	stbsp_sprintf(buf, "%s\r\nedi: %08X", buf, contextRecord->Edi);
+	stbsp_sprintf(buf, "%s\r\nesi: %08X", buf, contextRecord->Esi);
+	stbsp_sprintf(buf, "%s\r\nebp: %08X", buf, contextRecord->Ebp);
+	stbsp_sprintf(buf, "%s\r\nesp: %08X", buf, contextRecord->Esp);
 
 	UInt32* esp = (UInt32*)contextRecord->Esp;
-	sprintf(buf, "%s\r\n\r\nSTACK", buf);
+	stbsp_sprintf(buf, "%s\r\n\r\nSTACK", buf);
 
 	char stack[0x1000];
 	*stack = 0;
@@ -1518,14 +1520,14 @@ LONG WINAPI DoCrashSave(EXCEPTION_POINTERS* info)
 		{
 			for (int col = 0; col < 4; ++col)
 			{
-				sprintf(stack, "%s%08X |", stack, esp[row * 4 + col]);
+				stbsp_sprintf(stack, "%s%08X |", stack, esp[row * 4 + col]);
 			}
 			strcat(stack, "\r\n");
 		}
 	}
 	__except (EXCEPTION_EXECUTE_HANDLER) {};
 
-	sprintf(buf, "%s\r\n%s", buf, stack);
+	stbsp_sprintf(buf, "%s\r\n%s", buf, stack);
 	_MESSAGE("%s", buf);
 	MessageBoxA(nullptr, buf, "Error", MB_ICONERROR | MB_OK);
 	
@@ -1602,7 +1604,7 @@ BOOL __stdcall HavokPreviewCallback(HWND hWnd, UINT Message, WPARAM wParam, LPAR
 
 				SetHavokAnimationSpeed(speed);
 
-				sprintf(timeBuf, "%.2f", speed);
+				stbsp_sprintf(timeBuf, "%.2f", speed);
 				SetWindowTextA(GetDlgItem(hWnd, ID_ANIMATIONSPEED_EDIT), timeBuf);
 			}
 			return 0;
@@ -1680,7 +1682,7 @@ void AddAnimLengthColumnToHavokPreviewAnimsList()
 
 void __cdecl HavokPreviewSetAnimNameHook(char* dst, char* format, NiControllerSequence* anim)
 {
-	sprintf(dst, "%s (%.2fs)", anim->filePath, anim->end - anim->begin);
+	stbsp_sprintf(dst, "%s (%.2fs)", anim->filePath, anim->end - anim->begin);
 }
 
 void HavokPreview_AddAnimLengthToName()
@@ -2529,7 +2531,7 @@ void PreserveTESFileTimeStamp(ModInfo* apFile, bool State)
 	}
 
 	char filePath[0x200]; *filePath = '\0';
-	snprintf(filePath, sizeof(filePath), "%s\\%s", apFile->filepath, apFile->name);
+	stbsp_snprintf(filePath, sizeof(filePath), "%s\\%s", apFile->filepath, apFile->name);
 
 	HANDLE SaveFile = CreateFile(filePath, GENERIC_READ | GENERIC_WRITE, NULL, nullptr, OPEN_EXISTING, 0, nullptr);
 	if (SaveFile == INVALID_HANDLE_VALUE)
@@ -2624,7 +2626,7 @@ void __cdecl PrintScriptTypeChangedMessage(UInt32 script, UInt8 newType)
 	char* newTypeStr = scriptTypes[newType];
 
 	char errorMsg[100];
-	sprintf(errorMsg, "Script Type Changed, Previous: %s - New: %s", previousTypeStr, newTypeStr);
+	stbsp_sprintf(errorMsg, "Script Type Changed, Previous: %s - New: %s", previousTypeStr, newTypeStr);
 	MessageBoxA(nullptr, errorMsg, "Warning", MB_ICONWARNING);
 }
 
@@ -3176,7 +3178,7 @@ void __fastcall DoNumericEditorIDCheck(TESForm* Form, const char* EditorID)
 		(Form->flags & TESForm::kFormFlags_Temporary) == 0)
 	{
 		char buf[0x200];
-		snprintf(buf, sizeof(buf), 
+		stbsp_snprintf(buf, sizeof(buf), 
 			"The editorID '%s' begins with an integer.\n\nWhile this is generally accepted by the engine, scripts referring this form might fail to run or compile as the script compiler might attempt to parse it as an integer.\nConsider beginning the editorID with a letter.\n\nThis warning can be disabled in the INI.",
 			EditorID);
 		MessageBoxA(nullptr, buf, "Warning", MB_TASKMODAL | MB_TOPMOST | MB_SETFOREGROUND | MB_OK);

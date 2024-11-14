@@ -2,6 +2,8 @@
 #include <string>
 #include <functional>
 
+#include "libs/stb_sprintf.h"
+
 #define CALL_EAX(addr) __asm mov eax, addr __asm call eax
 #define JMP_EAX(addr)  __asm mov eax, addr __asm jmp eax
 #define JMP_EDX(addr)  __asm mov edx, addr __asm jmp edx

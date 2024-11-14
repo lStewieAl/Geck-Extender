@@ -3,6 +3,8 @@
 #include "common/IFileStream.h"
 #include <shlobj.h>
 
+#include "libs/stb_sprintf.h"
+
 std::FILE			* IDebugLog::logFile = NULL;
 char				IDebugLog::sourceBuf[16] = { 0 };
 char				IDebugLog::headerText[16] = { 0 };
@@ -42,7 +44,7 @@ void IDebugLog::Open(const char * path)
 
 		do
 		{
-			sprintf_s(name, sizeof(name), "%s%d", path, id);
+			stbsp_snprintf(name, sizeof(name), "%s%d", path, id);
 			id++;
 
 			logFile = NULL;
@@ -102,7 +104,7 @@ void IDebugLog::FormattedMessage(const char * fmt, ...)
 	va_list	argList;
 
 	va_start(argList, fmt);
-	vsprintf_s(formatBuf, sizeof(formatBuf), fmt, argList);
+	stbsp_vsnprintf(formatBuf, sizeof(formatBuf), fmt, argList);
 	Message(formatBuf);
 	va_end(argList);
 }
@@ -115,7 +117,7 @@ void IDebugLog::FormattedMessage(const char * fmt, ...)
  */
 void IDebugLog::FormattedMessage(const char * fmt, va_list args)
 {
-	vsprintf_s(formatBuf, sizeof(formatBuf), fmt, args);
+	stbsp_vsnprintf(formatBuf, sizeof(formatBuf), fmt, args);
 	Message(formatBuf);
 }
 
@@ -125,7 +127,7 @@ void IDebugLog::Log(LogLevel level, const char * fmt, va_list args)
 	bool	print = (level <= printLevel);
 
 	if(log || print)
-		vsprintf_s(formatBuf, sizeof(formatBuf), fmt, args);
+		stbsp_vsnprintf(formatBuf, sizeof(formatBuf), fmt, args);
 
 	if(log)
 		Message(formatBuf);
