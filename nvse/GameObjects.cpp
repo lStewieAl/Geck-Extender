@@ -145,4 +145,3 @@ ExtraContainerExtendDataArray	Actor::GetEquippedExtendDataList()
 
 	return outExtendData;
 }
-

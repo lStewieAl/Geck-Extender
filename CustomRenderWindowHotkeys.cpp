@@ -89,6 +89,37 @@ namespace CustomRenderWindowHotkeys
 		RunCallbackOnAllCellRefs(SetIsDisabledRefHidden);
 	}
 
+	void LinkSelectedRefs()
+	{
+		auto selected = RenderWindow::SelectedData::GetSelected();
+		if (selected->selectedForms && selected->selectedForms->next && selected->numItems == 2)
+		{
+			if (auto ref1 = CdeclCall<TESObjectREFR*>(0xC5D114, selected->selectedForms->ref, 0, 0xE8C57C, 0xE8E3E4, 0)) // DYNAMIC_CAST(TESForm, TESObjectREFR)
+			{
+				if (auto ref2 = CdeclCall<TESObjectREFR*>(0xC5D114, selected->selectedForms->next->ref, 0, 0xE8C57C, 0xE8E3E4, 0)) // DYNAMIC_CAST(TESForm, TESObjectREFR)
+				{
+					if (ref2->CanSetLinkedRef())
+					{
+						if (ref1->Unk_43() && ref1->Unk_4E())
+						{
+							ref1->MarkAsModified();
+							ref1->SetLinkedRef(ref2);
+							ref1->RedrawLinkedRefs();
+							SendMessageA(RenderWindow::GetWindow(), 0x40Au, 0, 0);
+							Console_Print("RENDER WINDOW: Linked %s (%08X) to %s (%08X)", ref1->GetEditorID(), ref1->refID, ref2->GetEditorID(), ref2->refID);
+							return;
+						}
+					}
+					else
+					{
+						Console_Print("RENDER WINDOW: %s (%08X) cannot be set as a linked ref", ref2->GetEditorID(), ref2->refID);
+					}
+				}
+			}
+		}
+		PlaySound("SystemExclamation", NULL, SND_ASYNC);
+	}
+
 	enum CustomHotkey
 	{
 		kHotkey_NONE = 0x47, // max ID of the vanilla IDs
@@ -99,6 +130,7 @@ namespace CustomRenderWindowHotkeys
 		kHotkey_NavMeshIgnoreLastPick,
 		kHotkey_NavMeshIgnoreSelectedPicks,
 		kHotkey_ToggleShowDisabledObjects,
+		kHotkey_LinkRefs,
 	};
 
 	static RenderWindowHotkey CustomHotkeys[] =
@@ -109,6 +141,7 @@ namespace CustomRenderWindowHotkeys
 		RenderWindowHotkey("Navmesh: Ignore last picked form", "NavMeshIgnoreLastPick", 'K', RenderWindowHotkey::kRenderWindowPreferenceFlag_Navmesh, RenderWindowHotkey::kRenderHotkeyCategory_Navmesh),
 		RenderWindowHotkey("Navmesh: Ignore selected forms", "NavMeshIgnoreSelectedPicks", 'K', RenderWindowHotkey::kRenderWindowPreferenceFlag_Shift, RenderWindowHotkey::kRenderHotkeyCategory_Navmesh),
 		RenderWindowHotkey("Toggle show disabled objects", "ToggleShowDisabledObjects", 'N', RenderWindowHotkey::kRenderWindowPreferenceFlag_NONE, RenderWindowHotkey::kRenderHotkeyCategory_Visibility),
+		RenderWindowHotkey("Link selected refs", "LinkRefs", 'J'),
 	};
 
 	void HandleHotkey(UInt32 hotkey)
@@ -137,6 +170,10 @@ namespace CustomRenderWindowHotkeys
 
 		case kHotkey_ToggleShowDisabledObjects:
 			ToggleShowDisabledObjects();
+			break;
+
+		case kHotkey_LinkRefs:
+			LinkSelectedRefs();
 			break;
 		}
 	}

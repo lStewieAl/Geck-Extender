@@ -276,7 +276,7 @@ public:
 	virtual void		Unk_40();
 	virtual void		Unk_41();
 	virtual void		Unk_42();
-	virtual void		Unk_43();
+	virtual bool		Unk_43();
 	virtual void		Unk_44();
 	virtual void		Unk_45();
 	virtual void		Unk_46();
@@ -287,7 +287,7 @@ public:
 	virtual void		Unk_4B();
 	virtual void		Unk_4C();
 	virtual void		Unk_4D();
-	virtual void		Unk_4E(void);
+	virtual bool		Unk_4E(void);
 	virtual void		Unk_4F(void);
 	virtual void		Unk_50(void);
 	virtual void		Unk_51(void);

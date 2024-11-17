@@ -129,6 +129,34 @@ public:
 	bool IsMapMarker();
 
 
+	void SetLinkedRef(TESObjectREFR* ref)
+	{
+		ThisCall(0x6437F0, this, ref);
+	};
+
+	void SetupPlaneLinkLines(bool bAttachLines)
+	{
+		ThisCall(0x643B70, this, bAttachLines);
+	}
+
+	void RedrawLinkedRefs()
+	{
+		for (bool isSecondPass : {false, true})
+		{
+			ThisCall(0x64BF00, this, isSecondPass, 0);
+			this->SetupPlaneLinkLines(isSecondPass);
+			ThisCall(0x6440F0, this, isSecondPass);
+			ThisCall(0x644F80, this, isSecondPass);
+			ThisCall(0x650460, this, isSecondPass);
+			ThisCall(0x644FD0, this, isSecondPass);
+		}
+	}
+
+	bool CanSetLinkedRef()
+	{
+		return (flags & 0x20) == 0 && (flags & 0x4000) == 0 && (flags & 0x400) != 0;
+	}
+
 	MEMBER_FN_PREFIX(TESObjectREFR);
 };
 
