@@ -3860,7 +3860,10 @@ STATIC_ASSERT(offsetof(TESWorldSpace, max) == 0x0A8);
 class TESObjectLAND;
 
 // NavMesh (108)
-class NavMesh;
+class NavMesh : public TESForm
+{
+
+};
 
 struct Condition
 {

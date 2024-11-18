@@ -974,6 +974,10 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// prevent x/y/z keys moving the mouse when pressed during navmesh mode
 	SafeWriteBuf(0x41F3A0, "\xC2\x04\x00", 3);
 
+	// show a warning when merging vertices from different navmeshes
+	WriteRelCall(0x40AAA7, UInt32(NavMeshManager__OnMergeVertices));
+	WriteRelCall(0x457E23, UInt32(NavMeshManager__OnMergeVertices));
+
 	NavMeshPickPreventer::Init();
 
 	// allow saving as ESM

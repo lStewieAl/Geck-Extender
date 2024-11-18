@@ -147,11 +147,47 @@ void SetFlycamMode(int state);
 int GetFlycamMode();
 
 
+class NiTriShape;
 class PathingSolution;
 class NavMesh;
+class NavMeshEditEdge;
 class NavMeshEditVertex;
 class NavMeshEditTriangle;
-class NavMeshEditEdge;
+class NavMeshEditObject
+{
+public:
+	virtual void* GetRTTI();
+
+	NiTriShape* triShape;
+	NavMesh* navMesh;
+	void* triShapeIdx;
+};
+
+class NavMeshEditVertex : public NavMeshEditObject
+{
+public:
+	BSSimpleArray<NavMeshEditTriangle> triangleArray;
+	BSSimpleArray<NavMeshEditEdge> edgeArray;
+	UInt16 vertexId;
+	UInt32 unk34;
+};
+
+class NavMeshEditTriangle : public NavMeshEditObject
+{
+public:
+	NavMeshEditVertex* vertices[3];
+	NavMeshEditEdge* edges[3];
+	UInt16 idx;
+	UInt32 unk2C;
+};
+
+class NavMeshEditEdge : public NavMeshEditObject
+{
+public:
+	BSSimpleArray<NavMeshEditVertex> vertexArray;
+	BSSimpleArray<NavMeshEditTriangle> triangleArray;
+};
+
 struct NavMeshManager
 {
 	struct UndoStack
@@ -170,11 +206,10 @@ struct NavMeshManager
 
 	struct VertexTriangleEdgeArrays
 	{
-		BSSimpleArray<NavMeshEditVertex> vertices;
-		BSSimpleArray<NavMeshEditTriangle> triangles;
-		BSSimpleArray<NavMeshEditEdge> edges;
+		BSSimpleArray<NavMeshEditVertex*> vertices;
+		BSSimpleArray<NavMeshEditTriangle*> triangles;
+		BSSimpleArray<NavMeshEditEdge*> edges;
 	};
-
 
 	UInt32 unk000;
 	UInt8 isSelectVertices;

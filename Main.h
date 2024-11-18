@@ -3859,3 +3859,30 @@ bool OnMoveRefCheckXYZHeld()
 	}
 	return *isXHeld;
 }
+
+void __fastcall NavMeshManager__OnMergeVertices(NavMeshManager* navMeshManager)
+{
+	bool isMergingDifferentRecords = false;
+	NavMesh* navMesh = nullptr;
+	for (int i = 0, n = navMeshManager->arrayData.vertices.size; i < n; ++i)
+	{
+		if (auto vertex = navMeshManager->arrayData.vertices.data[i])
+		{
+			if (!navMesh) navMesh = vertex->navMesh;
+			else if (navMesh != vertex->navMesh)
+			{
+				isMergingDifferentRecords = true;
+				break;
+			}
+		}
+	}
+
+	if (isMergingDifferentRecords)
+	{
+		if (MessageBoxA(g_MainHwnd, "You are about to merge Navmesh records which will cause one to be deleted, do you wish to proceed?", "Geck Extender", MB_YESNOCANCEL) != IDYES)
+		{
+			return;
+		}
+	}
+	ThisCall(0x4267B0, navMeshManager);
+}
