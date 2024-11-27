@@ -575,6 +575,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		SafeWrite32(patchAddr, UInt32(UseReportCallback));
 	}
 
+	// allow resizing the BGSListForm dialog (3274)
+	originalBGSListFormDialogFn = DetourVtable(0xD5BABC, UInt32(BGSListForm__DialogCallback));
+
 	// add modifier CAPSLOCK for placing a random object from the objects palette 
 	if (config.bObjectPaletteAllowRandom)
 	{

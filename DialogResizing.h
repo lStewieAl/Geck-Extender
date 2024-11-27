@@ -263,3 +263,16 @@ BOOL __stdcall UseReportCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPar
 	}
 	return StdCall<LRESULT>(0x468860, hDlg, msg, wParam, lParam);
 }
+
+
+UInt32 originalBGSListFormDialogFn;
+char __fastcall BGSListForm__DialogCallback(BGSListForm* listForm, void* edx, HWND hDlg, int msg, unsigned int wParam, int lParam, UInt32* a6)
+{
+	if (msg == WM_SIZE)
+	{
+		WORD width = LOWORD(lParam);
+		WORD height = HIWORD(lParam);
+		ResizeFormListWindow(hDlg, width, height);
+	}
+	return ThisCall<char>(originalBGSListFormDialogFn, listForm, hDlg, msg, wParam, lParam, a6);
+}
