@@ -978,6 +978,10 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x40AAA7, UInt32(NavMeshManager__OnMergeVertices));
 	WriteRelCall(0x457E23, UInt32(NavMeshManager__OnMergeVertices));
 
+	// clear the 'Creating Editor NavMeshes' print when it's done
+	WriteRelJump(0x42216C, UInt32(NavMeshManager__PostRenderCellClearPrintHook));
+	WriteRelJump(0x4220E2, UInt32(NavMeshManager__PostRenderCellClearPrintHook));
+
 	NavMeshPickPreventer::Init();
 
 	// allow saving as ESM

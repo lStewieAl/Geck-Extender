@@ -146,7 +146,7 @@ void SetIsShowSoundMarkers(bool state);
 void SetFlycamMode(int state);
 int GetFlycamMode();
 
-
+class NavMeshEditorData;
 class NiTriShape;
 class PathingSolution;
 class NavMesh;

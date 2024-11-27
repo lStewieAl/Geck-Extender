@@ -3887,3 +3887,17 @@ void __fastcall NavMeshManager__OnMergeVertices(NavMeshManager* navMeshManager)
 	}
 	ThisCall(0x4267B0, navMeshManager);
 }
+
+__HOOK NavMeshManager__PostRenderCellClearPrintHook()
+{
+	static const char* EmptyString = "";
+	_asm
+	{
+		push EmptyString
+		push 0x3
+		mov eax, 0x4657A0 // TESCSMain::WriteToStatusBar
+		call eax
+		add esp, 0x14
+		ret 0xC
+	}
+}
