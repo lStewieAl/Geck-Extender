@@ -3863,12 +3863,13 @@ bool OnMoveRefCheckXYZHeld()
 void __fastcall NavMeshManager__OnMergeVertices(NavMeshManager* navMeshManager)
 {
 	bool isMergingDifferentRecords = false;
-	NavMesh* navMesh = nullptr;
+	NavMesh* UNSET_MESH = (NavMesh*)-1;
+	NavMesh* navMesh = UNSET_MESH;
 	for (int i = 0, n = navMeshManager->arrayData.vertices.size; i < n; ++i)
 	{
 		if (auto vertex = navMeshManager->arrayData.vertices.data[i])
 		{
-			if (!navMesh) navMesh = vertex->navMesh;
+			if (navMesh == UNSET_MESH) navMesh = vertex->navMesh;
 			else if (navMesh != vertex->navMesh)
 			{
 				isMergingDifferentRecords = true;
