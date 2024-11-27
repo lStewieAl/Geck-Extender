@@ -982,6 +982,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelJump(0x42216C, UInt32(NavMeshManager__PostRenderCellClearPrintHook));
 	WriteRelJump(0x4220E2, UInt32(NavMeshManager__PostRenderCellClearPrintHook));
 
+	// fix crash when saving with a single vertex in a cell with no navmeshes
+	WriteRelJump(0x6ED482, UInt32(NavMeshInfoMap__CheckInfosHook));
+
 	NavMeshPickPreventer::Init();
 
 	// allow saving as ESM

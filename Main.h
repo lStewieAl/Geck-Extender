@@ -3901,3 +3901,21 @@ __HOOK NavMeshManager__PostRenderCellClearPrintHook()
 		ret 0xC
 	}
 }
+
+__HOOK NavMeshInfoMap__CheckInfosHook()
+{
+	_asm
+	{
+		test edx, edx
+		je skip
+
+		cmp byte ptr ds : [edx + 0x04] , bl
+		jne skip
+		
+		inc esi
+
+	skip:
+		mov edx, 0x6ED488
+		jmp edx
+	}
+}
