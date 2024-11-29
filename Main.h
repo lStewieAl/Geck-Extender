@@ -3887,7 +3887,6 @@ void __fastcall NavMeshManager__OnMergeVertices(NavMeshManager* navMeshManager)
 	}
 	ThisCall(0x4267B0, navMeshManager);
 }
-
 __HOOK NavMeshManager__PostRenderCellClearPrintHook()
 {
 	static const char* EmptyString = "";
@@ -3918,4 +3917,19 @@ __HOOK NavMeshInfoMap__CheckInfosHook()
 		mov edx, 0x6ED488
 		jmp edx
 	}
+}
+
+bool isLoadingCell;
+void __fastcall TESObjectCELL__OnLoad3D(TESObjectCELL* cell)
+{
+	isLoadingCell = true;
+	ThisCall<float*>(0x6361C0, cell); // TESObjectCELL::Load3D
+	isLoadingCell = false;
+}
+
+BOOL __fastcall IsMultiboundPointDifferent_IgnoreIfLoadingCell(NiPoint3* a1, void* edx, NiPoint3* a2)
+{
+	if (isLoadingCell) return false;
+	constexpr float THRESHOLD = 0.001F;
+	return abs(a1->x - a2->x) > THRESHOLD || abs(a1->y - a2->y) > THRESHOLD || abs(a1->z - a2->z) > THRESHOLD;
 }

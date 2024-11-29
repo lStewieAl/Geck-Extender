@@ -988,6 +988,10 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// fix crash when saving with a single vertex in a cell with no navmeshes
 	WriteRelJump(0x6ED482, UInt32(NavMeshInfoMap__CheckInfosHook));
 
+	// fix refs getting marked as modified if their primitives are slightly different during a cell load
+	WriteRelCall(0x643655, UInt32(IsMultiboundPointDifferent_IgnoreIfLoadingCell));
+	WriteRelCall(0x63A323, UInt32(TESObjectCELL__OnLoad3D));
+
 	NavMeshPickPreventer::Init();
 
 	// allow saving as ESM
