@@ -7,7 +7,6 @@
 void(__cdecl* SaveWindowPositionToINI)(HWND, const char*) = ((void(__cdecl*)(HWND hWnd, const char* Src))(0x43E170));
 HWND g_mainWindowToolbar = (HWND)0xECFC14;
 
-// functions for getting and setting the render window camera
 void GetCameraViewMatrix(NiMatrix33* out) {
 	auto current = &RenderData::GetSingleton()->pNode->m_localRotate;
 	*out = *current;
@@ -43,13 +42,10 @@ void SetCamera(NiPoint3* pos, NiMatrix33* direction) {
 }
 
 void SetTimeOfDay(float time) {
-	float* unknownStruct = *(float**)(0xECF93C);
-	if (!unknownStruct) return;
-
-	float* timeStruct = *(float**)(unknownStruct + 0x1A);
-	if (!timeStruct) return;
-
-	ThisCall(0x44CD00, timeStruct, time);
+	if (auto sky = TES::GetSingleton()->sky)
+	{
+		ThisCall(0x44CD00, sky, time); // Sky::SetTime
+	}
 }
 
 void ToggleRenderWindowAllowCellLoads(bool toggle) {
