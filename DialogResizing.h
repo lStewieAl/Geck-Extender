@@ -75,32 +75,6 @@ MultiCombo Boxes
 0x49A091
 */
 
-/* Load ESP/ESM Dialogs
-
-List1 1056
-Set as Active File 1121 -
-Details 1185 -
-"Created by" Edit 1025
-"Summary" Edit 1024
-"Parent Master" Edit 1057
-OK Button 1 -
-Cancel Button 2 -
-TES Files 1101
-Created By 1102
-Summary 1103
-Parent Masters 1104
-Created On 1105
-Last Modified 1106
-"Created On" Date 1026 -
-"Created On" Time 1027 -
-File Version 2406
-Current 2407
-"File Version" 1681
-"Current" 1682
-"Last Modified" Date 1028 -
-"Last Modified" Time 1029 -
-*/
-
 void ResizeFormListWindow(HWND hWnd, WORD newWidth, WORD newHeight)
 {
 	static const WORD RIGHT_PADDING = 50;
@@ -308,4 +282,55 @@ BOOL CALLBACK DialogueWindowCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM 
 		// TODO - the menu needs to resize when switching tabs too...
 	}
 	return CallWindowProc((WNDPROC)0x57FA00, hDlg, msg, wParam, lParam);
+}
+
+
+
+/* Load ESP/ESM Dialogs
+
+List1 1056
+Set as Active File 1121 -
+Details 1185 -
+"Created by" Edit 1025
+"Summary" Edit 1024
+"Parent Master" Edit 1057
+OK Button 1 -
+Cancel Button 2 -
+TES Files 1101
+Created By 1102
+Summary 1103
+Parent Masters 1104
+Created On 1105
+Last Modified 1106
+"Created On" Date 1026 -
+"Created On" Time 1027 -
+File Version 2406
+Current 2407
+"File Version" 1681
+"Current" 1682
+"Last Modified" Date 1028 -
+"Last Modified" Time 1029 -
+*/
+
+void ResizeLoadEspEsmWindow(HWND hWnd, WORD newWidth, WORD newHeight)
+{
+	RECT clientRect;
+	GetClientRect(hWnd, &clientRect);
+
+	HWND listView = GetDlgItem(hWnd, 1056);
+	SetWindowPos(listView, NULL, NULL, NULL, 531, newHeight - 80, SWP_NOMOVE);
+
+	// move the bottom buttons
+	HWND SetActiveFileButton = GetDlgItem(hWnd, 1121);
+	HWND DetailsButton = GetDlgItem(hWnd, 1185);
+	HWND OkButton = GetDlgItem(hWnd, 1);
+	HWND CancelButton = GetDlgItem(hWnd, 2);
+
+	int newButtonHeight = newHeight - 38;
+	SetWindowPos(SetActiveFileButton, NULL, 11, newButtonHeight, NULL, NULL, SWP_NOSIZE);
+	SetWindowPos(DetailsButton, NULL, 151, newButtonHeight, NULL, NULL, SWP_NOSIZE);
+	SetWindowPos(OkButton, NULL, newWidth - 189, newButtonHeight - 5, NULL, NULL, SWP_NOSIZE);
+	SetWindowPos(CancelButton, NULL, newWidth - 109, newButtonHeight - 5, NULL, NULL, SWP_NOSIZE);
+
+	InvalidateRect(hWnd, &clientRect, true);
 }

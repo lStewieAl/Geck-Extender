@@ -786,9 +786,9 @@ void ToggleSelectedFiles(HWND* pListView)
 }
 
 void doKonami(int);
+void ResizeLoadEspEsmWindow(HWND hWnd, WORD newWidth, WORD newHeight);
 WNDPROC originalLoadEspEsmFn;
-BOOL __stdcall LoadEspEsmCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
-	static RECT WindowSize;
+BOOL CALLBACK LoadEspEsmCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
 	if (msg == WM_NOTIFY && ((LPNMHDR)lParam)->code == LVN_KEYDOWN)
 	{
 		auto key = ((LPNMLVKEYDOWN)lParam)->wVKey;
@@ -811,6 +811,19 @@ BOOL __stdcall LoadEspEsmCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPa
 			ToggleSelectedFiles(pListView);
 			return true;
 		}
+	}
+	else if (msg == WM_SIZE)
+	{
+		WORD width = LOWORD(lParam);
+		WORD height = HIWORD(lParam);
+		ResizeLoadEspEsmWindow(hDlg, width, height);
+	}
+	else if (msg == WM_INITDIALOG)
+	{
+		auto result = CallWindowProc(originalLoadEspEsmFn, hDlg, msg, wParam, lParam);
+		auto listView = GetDlgItem(hDlg, 1056);
+		PostMessageA(listView, LVM_SETCOLUMNWIDTH, 0, LVSCW_AUTOSIZE_USEHEADER);
+		return result;
 	}
 	return CallWindowProc(originalLoadEspEsmFn, hDlg, msg, wParam, lParam);
 }
