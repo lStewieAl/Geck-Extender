@@ -576,9 +576,13 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		SafeWrite32(patchAddr, UInt32(UseReportCallback));
 	}
 
+	// allow resizing the dialogue window
 	SafeWrite32(0x441C8F, UInt32(DialogueWindowCallback));
 	SafeWrite32(0x4EDC5E, UInt32(DialogueWindowCallback));
 	SafeWrite32(0x5805A6, UInt32(DialogueWindowCallback));
+
+	SafeWrite32(0x441CE9, UInt32(GlobalsWindowCallback));
+	SafeWrite32(0x441B11, UInt32(GamesettingsWindowCallback));
 
 	// add modifier CAPSLOCK for placing a random object from the objects palette 
 	if (config.bObjectPaletteAllowRandom)

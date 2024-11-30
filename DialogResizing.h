@@ -334,3 +334,51 @@ void ResizeLoadEspEsmWindow(HWND hWnd, WORD newWidth, WORD newHeight)
 
 	InvalidateRect(hWnd, &clientRect, true);
 }
+
+void ResizeGlobalsWindow(HWND hWnd, WORD newWidth, WORD newHeight)
+{
+	RECT clientRect;
+	GetClientRect(hWnd, &clientRect);
+
+	static const WORD LIST_VIEW_OFFSET = 22;
+	static const WORD LIST_VIEW_WIDTH = 477;
+	auto listView = GetDlgItem(hWnd, 2064);
+	SetWindowPos(listView, NULL, NULL, NULL, LIST_VIEW_WIDTH, newHeight - LIST_VIEW_OFFSET, SWP_NOMOVE);
+
+	InvalidateRect(hWnd, &clientRect, true);
+}
+
+void ResizeGamesettingsWindow(HWND hWnd, WORD newWidth, WORD newHeight)
+{
+	RECT clientRect;
+	GetClientRect(hWnd, &clientRect);
+
+	static const WORD LIST_VIEW_OFFSET = 40;
+	static const WORD LIST_VIEW_WIDTH = 612;
+	auto listView = GetDlgItem(hWnd, 2064);
+	SetWindowPos(listView, NULL, NULL, NULL, LIST_VIEW_WIDTH, newHeight - LIST_VIEW_OFFSET, SWP_NOMOVE);
+
+	InvalidateRect(hWnd, &clientRect, true);
+}
+
+BOOL CALLBACK GlobalsWindowCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	if (msg == WM_SIZE)
+	{
+		WORD width = LOWORD(lParam);
+		WORD height = HIWORD(lParam);
+		ResizeGlobalsWindow(hDlg, width, height);
+	}
+	return CallWindowProc((WNDPROC)0x480B70, hDlg, msg, wParam, lParam);
+}
+
+BOOL CALLBACK GamesettingsWindowCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	if (msg == WM_SIZE)
+	{
+		WORD width = LOWORD(lParam);
+		WORD height = HIWORD(lParam);
+		ResizeGamesettingsWindow(hDlg, width, height);
+	}
+	return CallWindowProc((WNDPROC)0x480B70, hDlg, msg, wParam, lParam);
+}
