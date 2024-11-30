@@ -273,3 +273,8 @@ BOOL __stdcall _CreateProcessA(LPSTR exePath, LPPROCESS_INFORMATION lpProcessInf
 	startupInfo.cb = sizeof(startupInfo);
 	return StdCall<BOOL>(*(UInt32*)0xD232D8, NULL, exePath, NULL, NULL, FALSE, 0, NULL, NULL, &startupInfo, lpProcessInformation);
 }
+
+void* Window_GetExtraData(HWND hWnd, int code)
+{
+	return CdeclCall<void*>(0x47AB70, hWnd, code);
+}

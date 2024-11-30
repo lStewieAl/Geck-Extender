@@ -147,7 +147,7 @@ void ResizeFormListWindow(HWND hWnd, WORD newWidth, WORD newHeight)
 }
 
 // FormList dialog (3274)
-BOOL __stdcall FormListCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+BOOL CALLBACK FormListCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	if (msg == WM_SIZE)
 	{
@@ -167,7 +167,7 @@ BOOL __stdcall FormListCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 			return true;
 		}
 	}
-	return StdCall<LRESULT>(0x480110, hDlg, msg, wParam, lParam);
+	return CallWindowProc((WNDPROC)0x480110, hDlg, msg, wParam, lParam);
 }
 
 void ResizeObjectPalette(HWND hWnd, WORD newWidth, WORD newHeight)
@@ -195,7 +195,7 @@ void ResizeObjectPalette(HWND hWnd, WORD newWidth, WORD newHeight)
 }
 
 // objects palette window (375)
-BOOL __stdcall ObjectPaletteCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+BOOL CALLBACK ObjectPaletteCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	if (msg == WM_SIZE)
 	{
@@ -203,7 +203,7 @@ BOOL __stdcall ObjectPaletteCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM 
 		WORD height = HIWORD(lParam);
 		ResizeObjectPalette(hDlg, width, height);
 	}
-	return StdCall<LRESULT>(0x40D190, hDlg, msg, wParam, lParam);
+	return CallWindowProc((WNDPROC)0x40D190, hDlg, msg, wParam, lParam);
 }
 
 #define USE_REPORT_USED_IN_THESE_CELLS_TEXT_ID 1102
@@ -242,7 +242,7 @@ void ResizeUseReportWindow(HWND hWnd, WORD newWidth, WORD newHeight)
 }
 
 // Use Report window (220)
-BOOL __stdcall UseReportCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+BOOL CALLBACK UseReportCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	if (msg == WM_SIZE)
 	{
@@ -250,7 +250,7 @@ BOOL __stdcall UseReportCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPar
 		WORD height = HIWORD(lParam);
 		ResizeUseReportWindow(hDlg, width, height);
 	}
-	return StdCall<LRESULT>(0x468860, hDlg, msg, wParam, lParam);
+	return CallWindowProc((WNDPROC)0x468860, hDlg, msg, wParam, lParam);
 }
 
 UInt32 originalBGSListFormDialogFn;
@@ -263,4 +263,49 @@ char __fastcall BGSListForm__DialogCallback(BGSListForm* listForm, void* edx, HW
 		ResizeFormListWindow(hDlg, width, height);
 	}
 	return ThisCall<char>(originalBGSListFormDialogFn, listForm, hDlg, msg, wParam, lParam, a6);
+}
+
+void ResizeDialogueWindow(HWND hWnd, WORD newWidth, WORD newHeight)
+{
+	constexpr int TOPIC_EDITOR = 151;
+	constexpr int DIALOGUE_TREE = 347;
+	if (auto xSubWindow = (DialogExtraSubWindow*)Window_GetExtraData(hWnd, kMenuExtra_DialogExtraSubWindow))
+	{
+		if (xSubWindow->subWindow)
+		{
+			auto dialogWindow = xSubWindow->subWindow->dialogWindow;
+
+			if (xSubWindow->menuID == TOPIC_EDITOR)
+			{
+				static const WORD LIST_VIEW_OFFSET = 200;
+				static const WORD LIST_VIEW_WIDTH = 195;
+				auto leftListView = GetDlgItem(hWnd, 2064);
+				SetWindowPos(leftListView, NULL, NULL, NULL, LIST_VIEW_WIDTH, newHeight - LIST_VIEW_OFFSET, SWP_NOMOVE);
+
+				auto topicListView = GetDlgItem(hWnd, 1448);
+				SetWindowPos(topicListView, NULL, NULL, NULL, LIST_VIEW_WIDTH + 2, newHeight - 73, SWP_NOMOVE);
+
+				// TODO - handle resizing the rest of the controls
+			}
+			else if (xSubWindow->menuID == DIALOGUE_TREE)
+			{
+			}
+		}
+
+		RECT clientRect;
+		GetClientRect(hWnd, &clientRect);
+		InvalidateRect(hWnd, &clientRect, true);
+	}
+}
+
+BOOL CALLBACK DialogueWindowCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	if (msg == WM_SIZE)
+	{
+		WORD width = LOWORD(lParam);
+		WORD height = HIWORD(lParam);
+		ResizeDialogueWindow(hDlg, width, height);
+		// TODO - the menu needs to resize when switching tabs too...
+	}
+	return CallWindowProc((WNDPROC)0x57FA00, hDlg, msg, wParam, lParam);
 }

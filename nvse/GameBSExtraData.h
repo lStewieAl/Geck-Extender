@@ -55,3 +55,45 @@ struct ExtraDataList : public BaseExtraList
 
 STATIC_ASSERT(offsetof(BaseExtraList, m_presenceBitfield) == 0x008);
 STATIC_ASSERT(sizeof(ExtraDataList) == 0x020);
+
+class DialogExtraSubWindow : BSExtraData
+{
+	struct ExtraSubWindow
+	{
+		UInt32 unk00;
+		UInt32 unk04;
+		HWND parent;
+		UInt32 _hInstance;
+		UInt32 posX;
+		UInt32 posY;
+		HWND unkDlgItem;
+		HWND dialogWindow;
+	};
+
+public:
+	ExtraSubWindow* subWindow;
+	UInt32 menuID;
+};
+
+enum MenuExtraData
+{
+	kMenuExtra_DialogExtraParam = 0x0,
+	kMenuExtra_DialogExtraLocalCopy = 0x1,
+	kMenuExtra_DialogExtraColorControl = 0x2,
+	kMenuExtra_DialogExtraSubWindow = 0x4,
+	kMenuExtra_DialogExtraCurrCondItem = 0x5,
+	kMenuExtra_DialogExtraWorkingData = 0x6,
+	kMenuExtra_DialogExtraFactionData = 0x7,
+	kMenuExtra_DialogExtraPopupMenu = 0x8,
+	kMenuExtra_DialogExtraRefSelectControl = 0x9,
+	kMenuExtra_DialogExtraReactionData = 0xB,
+	kMenuExtra_DialogExtraPreviewControl = 0xC,
+	kMenuExtra_DialogExtraFreeformFaceControl = 0xD,
+	kMenuExtra_DialogExtraDialogData = 0xE,
+	kMenuExtra_DialogExtraNotifyInfo = 0xF,
+	kMenuExtra_DialogExtraQuestStageData = 0x10,
+	kMenuExtra_DialogExtraTimer = 0x11,
+	kMenuExtra_DialogExtraQuestFilter = 0x12,
+	kMenuExtra_DialogExtraRects = 0x13,
+	kMenuExtra_ConversationEditorExtraData = 0x15,
+};

@@ -2465,28 +2465,9 @@ __HOOK StopSound_ResetRecordAudioPopupIfInvalidHook()
 	}
 }
 
-class DialogExtraSubWindow : BSExtraData
-{
-	struct ExtraSubWindow
-	{
-		UInt32 unk00;
-		UInt32 unk04;
-		HWND parent;
-		UInt32 _hInstance;
-		UInt32 posX;
-		UInt32 posY;
-		HWND unkDlgItem;
-		HWND dialogWindow;
-	};
-
-public:
-	ExtraSubWindow* subWindow;
-	UInt32 menuID;
-};
-
 bool __fastcall IsWeaponModSubViewActive(HWND hWnd)
 {
-	if (auto xSubWindow = CdeclCall< DialogExtraSubWindow*>(0x47AB70, hWnd, 4))
+	if (auto xSubWindow = (DialogExtraSubWindow*)Window_GetExtraData(hWnd, kMenuExtra_DialogExtraSubWindow))
 	{
 		return xSubWindow->menuID != 3327;
 	}

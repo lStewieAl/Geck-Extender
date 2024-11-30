@@ -576,6 +576,10 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		SafeWrite32(patchAddr, UInt32(UseReportCallback));
 	}
 
+	SafeWrite32(0x441C8F, UInt32(DialogueWindowCallback));
+	SafeWrite32(0x4EDC5E, UInt32(DialogueWindowCallback));
+	SafeWrite32(0x5805A6, UInt32(DialogueWindowCallback));
+
 	// add modifier CAPSLOCK for placing a random object from the objects palette 
 	if (config.bObjectPaletteAllowRandom)
 	{

@@ -413,3 +413,5 @@ void OpenForm(TESForm* form, HWND parentHwnd = nullptr);
 void RunCallbackOnAllCellRefs(void (*callback)(TESObjectREFR*));
 
 BOOL __stdcall _CreateProcessA(LPSTR exePath, LPPROCESS_INFORMATION lpProcessInformation);
+
+void* Window_GetExtraData(HWND hWnd, int code);
