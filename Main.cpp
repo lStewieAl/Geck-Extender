@@ -563,8 +563,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelJump(0x4585B3, UInt32(RefreshCellHook));
 	WriteRelJz(0x4585BF, UInt32(RefreshCellHook));
 
-	// allow resizing the FormList dialog (3274)
+	// allow resizing the FormList and BGSListForm dialog (3274)
 	SafeWrite32(0x43768B, UInt32(FormListCallback));
+	originalBGSListFormDialogFn = DetourVtable(0xD5BABC, UInt32(BGSListForm__DialogCallback));
 
 	// allow resizing the objects palette window (375)
 	SafeWrite32(0x4440FA, UInt32(ObjectPaletteCallback));
@@ -574,9 +575,6 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	{
 		SafeWrite32(patchAddr, UInt32(UseReportCallback));
 	}
-
-	// allow resizing the BGSListForm dialog (3274)
-	originalBGSListFormDialogFn = DetourVtable(0xD5BABC, UInt32(BGSListForm__DialogCallback));
 
 	// add modifier CAPSLOCK for placing a random object from the objects palette 
 	if (config.bObjectPaletteAllowRandom)

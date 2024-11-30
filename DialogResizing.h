@@ -75,10 +75,8 @@ MultiCombo Boxes
 0x49A091
 */
 
-//432A80 LoadESPESMCallback
-//44192A set callback
+/* Load ESP/ESM Dialogs
 
-/*
 List1 1056
 Set as Active File 1121 -
 Details 1185 -
@@ -128,31 +126,22 @@ void ResizeFormListWindow(HWND hWnd, WORD newWidth, WORD newHeight)
 	HWND RightArrowButton = GetDlgItem(hWnd, 4009);
 
 	POINT pos;
-	for (HWND button : {OkButton, CancelButton, LeftArrowButton, RightArrowButton})
-	{
-		if (button == OkButton)
-		{
-			pos.x = newWidth / 2 - 90;
-			pos.y = newHeight - BUTTON_BOTTOM_PADDING;
-		}
-		else if (button == CancelButton)
-		{
-			pos.x = newWidth / 2 + 20;
-			pos.y = newHeight - BUTTON_BOTTOM_PADDING;
-		}
-		else if (button == LeftArrowButton)
-		{
-			pos.x = newWidth / 2 - 30;
-			pos.y = newHeight - BUTTON_BOTTOM_PADDING - 25;
-		}
-		else if (button == RightArrowButton)
-		{
-			pos.x = newWidth / 2 + 10;
-			pos.y = newHeight - BUTTON_BOTTOM_PADDING - 25;
-		}
 
-		SetWindowPos(button, NULL, pos.x, pos.y, NULL, NULL, SWP_NOSIZE);
-	}
+	pos.x = newWidth / 2 - 90;
+	pos.y = newHeight - BUTTON_BOTTOM_PADDING;
+	SetWindowPos(OkButton, NULL, pos.x, pos.y, NULL, NULL, SWP_NOSIZE);
+
+	pos.x = newWidth / 2 + 20;
+	pos.y = newHeight - BUTTON_BOTTOM_PADDING;
+	SetWindowPos(CancelButton, NULL, pos.x, pos.y, NULL, NULL, SWP_NOSIZE);
+
+	pos.x = newWidth / 2 - 30;
+	pos.y = newHeight - BUTTON_BOTTOM_PADDING - 25;
+	SetWindowPos(LeftArrowButton, NULL, pos.x, pos.y, NULL, NULL, SWP_NOSIZE);
+
+	pos.x = newWidth / 2 + 10;
+	pos.y = newHeight - BUTTON_BOTTOM_PADDING - 25;
+	SetWindowPos(RightArrowButton, NULL, pos.x, pos.y, NULL, NULL, SWP_NOSIZE);
 
 	InvalidateRect(hWnd, &clientRect, true);
 }
@@ -263,7 +252,6 @@ BOOL __stdcall UseReportCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPar
 	}
 	return StdCall<LRESULT>(0x468860, hDlg, msg, wParam, lParam);
 }
-
 
 UInt32 originalBGSListFormDialogFn;
 char __fastcall BGSListForm__DialogCallback(BGSListForm* listForm, void* edx, HWND hDlg, int msg, unsigned int wParam, int lParam, UInt32* a6)
