@@ -3927,3 +3927,33 @@ BOOL __fastcall IsMultiboundPointDifferent_IgnoreIfLoadingCell(NiPoint3* a1, voi
 	constexpr float THRESHOLD = 0.001F;
 	return abs(a1->x - a2->x) > THRESHOLD || abs(a1->y - a2->y) > THRESHOLD || abs(a1->z - a2->z) > THRESHOLD;
 }
+
+enum BoundMode
+{
+	kBoundMode_CubicActivator = 0x1,
+	kBoundMode_CubicMultibound = 0x2,
+	kBoundMode_OcclusionPlane = 0x3,
+	kBoundMode_Roombound = 0x4,
+	kBoundMode_Portal = 0x5,
+	kBoundMode_SoundEmitter = 0x6,
+	kBoundMode_AcousticSpace = 0x7,
+	kBoundMode_Collision = 0x8,
+};
+
+void InitCustomPrimitiveColors()
+{
+	NiColorAlpha* kPrimitiveColors = (NiColorAlpha*)0xE8EEA0;
+	Color uColor;
+	for (int mode = kBoundMode_CubicActivator; mode <= kBoundMode_Collision; ++mode)
+	{
+		uColor.rgba = config.uPrimitiveColors[mode - 1];
+		if (uColor.rgba)
+		{
+			NiColorAlpha* color = &kPrimitiveColors[mode];
+			color->r = uColor.r * 1.0F / 255;
+			color->g = uColor.g * 1.0F / 255;
+			color->b = uColor.b * 1.0F / 255;
+			color->a = uColor.a * 1.0F / 255;
+		}
+	}
+}

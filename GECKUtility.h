@@ -415,3 +415,12 @@ void RunCallbackOnAllCellRefs(void (*callback)(TESObjectREFR*));
 BOOL __stdcall _CreateProcessA(LPSTR exePath, LPPROCESS_INFORMATION lpProcessInformation);
 
 void* Window_GetExtraData(HWND hWnd, int code);
+
+union Color
+{
+	UInt32 rgba;
+	struct
+	{
+		UInt8 a, b, g, r;
+	};
+};
