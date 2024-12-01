@@ -3957,3 +3957,24 @@ void InitCustomPrimitiveColors()
 		}
 	}
 }
+
+bool bTextSearchLoadingTopicInfo;
+void __stdcall TextSearchOnOpenInfo(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc, LPARAM dwInitParam)
+{
+	bTextSearchLoadingTopicInfo = true;
+	hk_CreateDialogParamA(hInstance, lpTemplateName, hWndParent, lpDialogFunc, dwInitParam);
+	bTextSearchLoadingTopicInfo = false;
+}
+
+__HOOK OnLoadQuestGetTextSearchWindowHook()
+{
+	_asm
+	{
+		xor eax, eax
+		cmp bTextSearchLoadingTopicInfo, al
+		jne skip
+		mov eax, dword ptr ds : [0xECFCDC]
+	skip:
+		ret
+	}
+}

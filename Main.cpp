@@ -1041,6 +1041,11 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	InitCustomPrimitiveColors();
 
+	// prevent the infos refreshing when clicking on a result in the 'Find Text' window
+	WriteRelCall(0x57D402, UInt32(OnLoadQuestGetTextSearchWindowHook));
+	WriteRelCall(0x486F1A, UInt32(TextSearchOnOpenInfo));
+	SafeWrite8(0x486F1A + 5, 0x90);
+
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
 	{
