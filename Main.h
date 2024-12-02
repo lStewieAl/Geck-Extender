@@ -2936,15 +2936,46 @@ LRESULT CALLBACK CellWindowListViewCallback(HWND Hwnd, UINT Message, WPARAM wPar
 	return DefSubclassProc(Hwnd, Message, wParam, lParam);
 }
 
+void ReadDialogPosition(HWND Hwnd, UINT dialogID, LPRECT pRect)
+{
+	HWND hDlg = GetDlgItem(Hwnd, dialogID);
+
+	POINT point;
+	GetWindowRect(hDlg, pRect);
+	point.x = pRect->left;
+	point.y = pRect->top;
+	ScreenToClient(Hwnd, &point);
+	GetClientRect(hDlg, pRect);
+	pRect->left = point.x;
+	pRect->top = point.y;
+}
+
 WNDPROC originalCellWindowCallback;
 LRESULT CALLBACK CellWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
+	static RECT xLabelPos;
+	static RECT yLabelPos;
+	static RECT xEditControlPos;
+	static RECT yEditControlPos;
+	static RECT goButtonPos;
+	static RECT cellFilterPos;
+	static RECT cellFilterLabelPos;
+
 	if (Message == WM_INITDIALOG)
 	{
 		auto pCellList = GetDlgItem(Hwnd, 1155);
 		auto pObjectList = GetDlgItem(Hwnd, 1156);
 		SetWindowSubclass(pCellList, CellWindowListViewCallback, 0, 0);
 		SetWindowSubclass(pObjectList, CellWindowListViewCallback, 0, 0);
+
+		ReadDialogPosition(Hwnd, 5281, &xLabelPos);
+		ReadDialogPosition(Hwnd, 5282, &yLabelPos);
+		ReadDialogPosition(Hwnd, 5283, &xEditControlPos);
+		ReadDialogPosition(Hwnd, 5099, &yEditControlPos);
+		ReadDialogPosition(Hwnd, 3681, &goButtonPos);
+
+		ReadDialogPosition(Hwnd, 2558, &cellFilterPos);
+		ReadDialogPosition(Hwnd, 1007, &cellFilterLabelPos);
 	}
 	else if (Message == WM_COMMAND)
 	{
@@ -2960,7 +2991,40 @@ LRESULT CALLBACK CellWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 			}
 		}
 	}
-	return CallWindowProc(originalCellWindowCallback, Hwnd, Message, wParam, lParam);
+	auto result = CallWindowProc(originalCellWindowCallback, Hwnd, Message, wParam, lParam);
+	if (Message == WM_SIZE && wParam != SIZE_MINIMIZED)
+	{
+		WORD width = LOWORD(lParam);
+		WORD height = HIWORD(lParam);
+		RECT rect;
+		SetRect(&rect, 0, 0, width, height);
+		LPRECT cellWindowRect = (LPRECT)0xECF580;
+
+		auto halfDeltaX = (rect.right - cellWindowRect->right) / 2;
+
+		auto xLabel = GetDlgItem(Hwnd, 5281);
+		auto yLabel = GetDlgItem(Hwnd, 5282);
+		auto xEditControl = GetDlgItem(Hwnd, 5283);
+		auto yEditControl = GetDlgItem(Hwnd, 5099);
+		auto goButton = GetDlgItem(Hwnd, 3681);
+		auto cellFilterControl = GetDlgItem(Hwnd, 2558);
+
+		LPRECT baseCellListRect = (LPRECT)0xECF590;
+
+		HDWP DeferPosData = BeginDeferWindowPos(6);
+		if (DeferPosData) DeferPosData = DeferWindowPos(DeferPosData, xLabel, NULL, halfDeltaX + xLabelPos.left, xLabelPos.top, 0, 0, SWP_NOSIZE);
+		if (DeferPosData) DeferPosData = DeferWindowPos(DeferPosData, yLabel, NULL, halfDeltaX + yLabelPos.left, yLabelPos.top, 0, 0, SWP_NOSIZE);
+		if (DeferPosData) DeferPosData = DeferWindowPos(DeferPosData, xEditControl, NULL, halfDeltaX + xEditControlPos.left, xEditControlPos.top, 0, 0, SWP_NOSIZE);
+		if (DeferPosData) DeferPosData = DeferWindowPos(DeferPosData, yEditControl, NULL, halfDeltaX + yEditControlPos.left, yEditControlPos.top, 0, 0, SWP_NOSIZE);
+		if (DeferPosData) DeferPosData = DeferWindowPos(DeferPosData, goButton, NULL, halfDeltaX + goButtonPos.left, goButtonPos.top, 0, 0, SWP_NOSIZE);
+		if (DeferPosData) DeferPosData = DeferWindowPos(DeferPosData, cellFilterControl, NULL, 0, 0, baseCellListRect->right + halfDeltaX - cellFilterLabelPos.right - 7, cellFilterPos.bottom, SWP_NOMOVE);
+
+		InvalidateRect(xLabel, NULL, true);
+		InvalidateRect(yLabel, NULL, true);
+
+		if (DeferPosData) EndDeferWindowPos(DeferPosData);
+	}
+	return result;
 }
 
 void __fastcall OnMainWindowUndo(HistoryManager* historyMgr, void* edx, int formal)
