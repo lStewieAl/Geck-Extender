@@ -1968,6 +1968,13 @@ void PatchClearLandscapeEditUndoStackIfNearlyOOM()
 	WriteRelJump(0x45E101, UInt32(LandscapePaintHook2));
 }
 
+std::string ToLower(const std::string& str) {
+	std::string lower_str = str;
+	std::transform(lower_str.begin(), lower_str.end(), lower_str.begin(),
+		[](unsigned char c) { return std::tolower(c); });
+	return lower_str;
+}
+
 std::unordered_set<std::string> FileCacheMap;
 
 void __cdecl hk_call_sub_41E8F0(bool a1)
@@ -1981,7 +1988,7 @@ void __cdecl hk_call_sub_41E8F0(bool a1)
                 continue;
 
             // Temp.lip/Temp.wav/FonixData.cdf/temp_resampled_audio.wav should probably be blacklisted here
-            FileCacheMap.emplace(p.path().string());
+            FileCacheMap.emplace(ToLower(p.path().string()));
         }
     }
 
@@ -1992,7 +1999,7 @@ void __cdecl hk_call_sub_41E8F0(bool a1)
 int __fastcall hk_sub_8A1FC0(void *thisptr, void *_EDX, const char *Path, const char *a2, int a3, int a4)
 {
     // Short circuit for GetFileAttributesA()
-    if (!FileCacheMap.empty() && !FileCacheMap.count(Path))
+    if (!FileCacheMap.empty() && !FileCacheMap.count(ToLower(Path)))
         return 0;
 
     return ThisCall<int>(0x008A1FC0, thisptr, Path, a2, a3, a4);
