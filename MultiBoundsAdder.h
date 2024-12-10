@@ -192,7 +192,6 @@ namespace MultiBoundsAdder {
 
 		double dRadius = apMultiBound->spShape->GetRadius();
 
-		std::vector<TESObjectCELL*> kCells;
 		NiPoint3 kWorldPos = *apMBRef->GetPos();
 
 		Console_Print("Testing MultiBound %s (%08X) at %f,%f", apMBRef->GetEditorID(), apMBRef->refID, kWorldPos.x, kWorldPos.y);
@@ -216,18 +215,15 @@ namespace MultiBoundsAdder {
 		// Calculate the size of the square
 		SInt32 iMinX = kPoints[0].x;
 		SInt32 iMaxX = kPoints[0].x;
+		SInt32 iMinY = kPoints[0].y;
+		SInt32 iMaxY = kPoints[0].y;
 
 		for (UInt32 i = 1; i < 4; i++) {
 			if (kPoints[i].x < iMinX)
 				iMinX = kPoints[i].x;
 			if (kPoints[i].x > iMaxX)
 				iMaxX = kPoints[i].x;
-		}
 
-		SInt32 iMinY = kPoints[0].y;
-		SInt32 iMaxY = kPoints[0].y;
-
-		for (UInt32 i = 1; i < 4; i++) {
 			if (kPoints[i].y < iMinY)
 				iMinY = kPoints[i].y;
 			if (kPoints[i].y > iMaxY)
@@ -237,6 +233,7 @@ namespace MultiBoundsAdder {
 		Console_Print("Testing range (%d, %d) x (%d, %d)", iMinX, iMaxX, iMinY, iMaxY);
 
 		// Get the cells in the square
+		std::vector<TESObjectCELL*> kCells;
 		for (SInt32 iX = iMinX; iX <= iMaxX; iX++) {
 			for (SInt32 iY = iMinY; iY <= iMaxY; iY++) {
 				TESObjectCELL* pCell = DataHandler::GetSingleton()->GetCellFromCellCoord(iX, iY, apWorld, true);
@@ -289,10 +286,6 @@ namespace MultiBoundsAdder {
 	}
 
 	void TestCell(TESObjectCELL* apCell, TESWorldSpace* apWorld) {
-		const TESBoundObject* const pMultiBoundMarker = *(TESBoundObject**)0xEDDA40;
-		const TESBoundObject* const pPortalMarker = *(TESBoundObject**)0xEDDA4C;
-		const TESBoundObject* const pRoomMarker = *(TESBoundObject**)0xEDDA48;
-
 		if (!apCell->renderData) {
 			Console_Print("No data in the cell!");
 			return;

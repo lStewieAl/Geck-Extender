@@ -473,8 +473,6 @@ public:
 
 	NiPoint3 Center;
 	NiPoint3 HalfExtents;
-
-	void GetVertices(BoundVertices* apVerts);
 };
 
 class BSMultiBoundOBB : public BSMultiBoundAABB {
@@ -483,8 +481,6 @@ public:
 	virtual ~BSMultiBoundOBB();
 
 	NiMatrix33 Axis;
-
-	void GetVertices(BoundVertices* apPoints);
 };
 
 class BSMultiBound : public NiObject {
