@@ -45,6 +45,7 @@
 #include "FaceGenExporter.h"
 #include "ONAMFix.h"
 #include "SCOLConsistencyFix.h"
+#include "MultiBoundsAdder.h"
 
 #include "Events/EventManager.h"
 #include "Events/Events.h"
@@ -80,13 +81,6 @@ void CreateLogFile()
 
 	strncpy(last_slash, "\\EditorWarnings.log", sizeof(logPath) - (last_slash - logPath) - 1);
 	gLog.Open(logPath);
-}
-
-TESObjectREFR* __fastcall TESDataHandler__CreateReferenceAtLocation_(DataHandler* apThis, void*, TESBoundObject* apForm, NiPoint3* aPos, NiPoint3* aRot, float radius, void* apPrimitive, int a7) {
-	TESObjectREFR* pRet = ThisCall<TESObjectREFR*>(0x4D0940, apThis, apForm, aPos, aRot, radius, apPrimitive, a7);
-	pRet->parentCell->AddMultiBoundRef(pRet);
-	return pRet;
-
 }
 
 bool NVSEPlugin_Load(const NVSEInterface* nvse)
@@ -1019,7 +1013,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// Fix geometry data created for SCOLs always using MUTABLE consistency, which increases memory usage
 	SCOLConsistencyFix::InitHooks();
 
-	WriteRelCall(0x45BC2A, UInt32(TESDataHandler__CreateReferenceAtLocation_));
+	// Fix newly created multibound not being registered in cells they were created in
+	MultiBoundsAdder::InitHooks();
 
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
