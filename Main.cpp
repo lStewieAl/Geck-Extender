@@ -49,6 +49,9 @@
 #include "Events/EventManager.h"
 #include "Events/Events.h"
 
+#define STB_SPRINTF_IMPLEMENTATION
+#include "PrintReplacer.hpp"
+
 extern "C"
 {
 	BOOL WINAPI DllMain(HANDLE  hDllHandle, DWORD dwReason, LPVOID lpreserved)
@@ -89,6 +92,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		LaunchGame::OnGamePluginLoad(nvse);
 		return true;
 	}
+
+	PrintReplacer::InitHooks();
 
 	CreateLogFile();
 

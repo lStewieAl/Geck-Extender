@@ -1,6 +1,8 @@
 #include "IDirectoryIterator.h"
 #include <string>
 
+#include "libs/stb_sprintf.h"
+
 IDirectoryIterator::IDirectoryIterator(const char * path, const char * match)
 :m_searchHandle(INVALID_HANDLE_VALUE), m_done(false)
 {
@@ -9,7 +11,7 @@ IDirectoryIterator::IDirectoryIterator(const char * path, const char * match)
 	strcpy_s(m_path, sizeof(m_path), path);
 
 	char	wildcardPath[MAX_PATH];
-	sprintf_s(wildcardPath, sizeof(wildcardPath), "%s\\%s", path, match);
+	stbsp_snprintf(wildcardPath, sizeof(wildcardPath), "%s\\%s", path, match);
 
 	m_searchHandle = FindFirstFile(wildcardPath, &m_result);
 	if(m_searchHandle == INVALID_HANDLE_VALUE)
@@ -24,7 +26,7 @@ IDirectoryIterator::~IDirectoryIterator()
 
 void IDirectoryIterator::GetFullPath(char * out, UInt32 outLen)
 {
-	sprintf_s(out, outLen, "%s\\%s", m_path, m_result.cFileName);
+	stbsp_snprintf(out, outLen, "%s\\%s", m_path, m_result.cFileName);
 }
 
 std::string IDirectoryIterator::GetFullPath(void)

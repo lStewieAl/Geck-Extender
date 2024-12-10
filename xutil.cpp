@@ -1,5 +1,7 @@
 #include "xutil.h"
 
+#include "libs/stb_sprintf.h"
+
 VtableIndexUtil *VtableIndexUtil::GlobalInstance;
 
 VtableIndexUtil *VtableIndexUtil::Instance()
@@ -84,8 +86,8 @@ void XUtil::XAssert(const char *File, int Line, const char *Format, ...)
 	va_list ap;
 	va_start(ap, Format);
 
-	_vsnprintf_s(buffer, _TRUNCATE, Format, ap);
-	sprintf_s(message, "%s(%d):\n\n%s", File, Line, buffer);
+	stbsp_vsnprintf(buffer, sizeof(buffer), Format, ap);
+	stbsp_snprintf(message, sizeof(message), "%s(%d):\n\n%s", File, Line, buffer);
 
 	MessageBoxA(nullptr, message, "ASSERTION", MB_ICONERROR);
 

@@ -191,6 +191,10 @@
     <ClInclude Include="FaceGenExporter.h" />
     <ClInclude Include="ONAMFix.h" />
     <ClInclude Include="SCOLConsistencyFix.h" />
+    <ClInclude Include="libs\stb_sprintf.h">
+      <Filter>libs</Filter>
+    </ClInclude>
+    <ClInclude Include="PrintReplacer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

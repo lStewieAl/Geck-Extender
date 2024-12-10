@@ -2,6 +2,7 @@
 #include "nvse/GameObjects.h"
 #include "Utilities.h"
 
+#include "libs/stb_sprintf.h"
 #include "libs/nlohmann/json.hpp"
 #include <fstream>
 #include <string>
@@ -38,7 +39,7 @@ namespace CreatureMarkerSwapper
 	{
 		if (!SwapMarkerModel(actorBase, ref, dst, sizeInBytes))
 		{
-			snprintf(dst, sizeInBytes, format, sMeshes);
+			stbsp_snprintf(dst, sizeInBytes, format, sMeshes);
 		}
 	}
 

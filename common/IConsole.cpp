@@ -3,6 +3,8 @@
 #include <cstring>
 #include <Windows.h>
 
+#include "libs/stb_sprintf.h"
+
 IConsole::IConsole()
 {
 	AllocConsole();
@@ -56,7 +58,7 @@ void IConsole::Write(char * buf, UInt32 bufLen, const char * fmt, ...)
 	va_list	args;
 	
 	va_start(args, fmt);
-	vsprintf_s(buf, bufLen, fmt, args);
+	stbsp_vsnprintf(buf, bufLen, fmt, args);
 	va_end(args);
 	
 	Write(buf);

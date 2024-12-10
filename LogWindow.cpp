@@ -15,7 +15,7 @@ extern bool g_bPauseLogging = false;
 void Console_PrintVa(const char* Format, va_list Va)
 {
 	char buffer[2048];
-	int len = _vsnprintf_s(buffer, _TRUNCATE, Format, Va);
+	int len = stbsp_vsnprintf(buffer, sizeof(buffer), Format, Va);
 
 	if (len <= 0)
 		return;
