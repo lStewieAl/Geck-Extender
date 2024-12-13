@@ -4095,3 +4095,9 @@ __HOOK OnSetupRefFormControls_DisableEditBaseHook()
 		jmp OnSetupRefFormControls_DisableEditBase
 	}
 }
+
+void __cdecl OnInitSelectFormWindow(HWND hWnd, WPARAM index, char* pszText, int width, int format)
+{
+	CdeclCall(0x419F50, hWnd, index, pszText, width, format);
+	SetFocus(hWnd);
+}

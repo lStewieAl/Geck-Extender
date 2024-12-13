@@ -1056,6 +1056,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x65B3F1, UInt32(OnSetupRefFormControls_DisableEditBaseHook)); // disable most buttons
 	SafeWrite8(0x65B3F1 + 5, 0x90);
 
+	// automatically focus the form list when opening a Select Form window
+	WriteRelCall(0x482634, UInt32(OnInitSelectFormWindow));
+
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
 	{
