@@ -50,6 +50,9 @@
 #include "Events/EventManager.h"
 #include "Events/Events.h"
 
+#define STB_SPRINTF_IMPLEMENTATION
+#include "PrintReplacer.hpp"
+
 extern "C"
 {
 	BOOL WINAPI DllMain(HANDLE  hDllHandle, DWORD dwReason, LPVOID lpreserved)
@@ -90,6 +93,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		LaunchGame::OnGamePluginLoad(nvse);
 		return true;
 	}
+
+	PrintReplacer::InitHooks();
 
 	CreateLogFile();
 
@@ -564,8 +569,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelJump(0x4585B3, UInt32(RefreshCellHook));
 	WriteRelJz(0x4585BF, UInt32(RefreshCellHook));
 
-	// allow resizing the FormList dialog (3274)
+	// allow resizing the FormList and BGSListForm dialog (3274)
 	SafeWrite32(0x43768B, UInt32(FormListCallback));
+	originalBGSListFormDialogFn = DetourVtable(0xD5BABC, UInt32(BGSListForm__DialogCallback));
 
 	// allow resizing the objects palette window (375)
 	SafeWrite32(0x4440FA, UInt32(ObjectPaletteCallback));
@@ -575,6 +581,14 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	{
 		SafeWrite32(patchAddr, UInt32(UseReportCallback));
 	}
+
+	// allow resizing the dialogue window
+	SafeWrite32(0x441C8F, UInt32(DialogueWindowCallback));
+	SafeWrite32(0x4EDC5E, UInt32(DialogueWindowCallback));
+	SafeWrite32(0x5805A6, UInt32(DialogueWindowCallback));
+
+	SafeWrite32(0x441CE9, UInt32(GlobalsWindowCallback));
+	SafeWrite32(0x441B11, UInt32(GamesettingsWindowCallback));
 
 	// add modifier CAPSLOCK for placing a random object from the objects palette 
 	if (config.bObjectPaletteAllowRandom)
@@ -972,6 +986,24 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// check if x/y/z are held while you move refs to fix the axis lock keys not working after closing a menu
 	WriteRelCall(0x45F490, UInt32(OnMoveRefCheckXYZHeld));
 
+	// prevent x/y/z keys moving the mouse when pressed during navmesh mode
+	SafeWriteBuf(0x41F3A0, "\xC2\x04\x00", 3);
+
+	// show a warning when merging vertices from different navmeshes
+	WriteRelCall(0x40AAA7, UInt32(NavMeshManager__OnMergeVertices));
+	WriteRelCall(0x457E23, UInt32(NavMeshManager__OnMergeVertices));
+
+	// clear the 'Creating Editor NavMeshes' print when it's done
+	WriteRelJump(0x42216C, UInt32(NavMeshManager__PostRenderCellClearPrintHook));
+	WriteRelJump(0x4220E2, UInt32(NavMeshManager__PostRenderCellClearPrintHook));
+
+	// fix crash when saving with a single vertex in a cell with no navmeshes
+	WriteRelJump(0x6ED482, UInt32(NavMeshInfoMap__CheckInfosHook));
+
+	// fix refs getting marked as modified if their primitives are slightly different during a cell load
+	WriteRelCall(0x643655, UInt32(IsMultiboundPointDifferent_IgnoreIfLoadingCell));
+	WriteRelCall(0x63A323, UInt32(TESObjectCELL__OnLoad3D));
+
 	NavMeshPickPreventer::Init();
 
 	// allow saving as ESM
@@ -1013,8 +1045,29 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// Fix geometry data created for SCOLs always using MUTABLE consistency, which increases memory usage
 	SCOLConsistencyFix::InitHooks();
 
-	// Fix newly created multibound not being registered in cells they were created in
+  // Fix newly created multibound not being registered in cells they were created in
 	MultiBoundsAdder::InitHooks();
+
+  InitCustomPrimitiveColors();
+
+	// prevent the infos refreshing when clicking on a result in the 'Find Text' window
+	WriteRelCall(0x57D402, UInt32(OnLoadQuestGetTextSearchWindowHook));
+	WriteRelCall(0x486F1A, UInt32(TextSearchOnOpenInfo));
+	SafeWrite8(0x486F1A + 5, 0x90);
+
+	// add recusive master loading
+	WriteRelJump(0x4DD1A7, UInt32(CompileFilesHook));
+
+	// allow opening a door marker form
+	WriteRelJnz(0x45949E, UInt32(OnClickDoorMarkerHook));
+	SafeWrite8(0x459485, MB_YESNOCANCEL);
+	WriteRelJump(0x65AB1C, UInt32(OnSetupRefFormControlsHook)); // skip adding data tabs
+	WriteRelCall(0x65B3F1, UInt32(OnSetupRefFormControls_DisableEditBaseHook)); // disable most buttons
+	SafeWrite8(0x65B3F1 + 5, 0x90);
+
+	// automatically focus the form list when opening a Select Form window
+	WriteRelCall(0x482634, UInt32(OnInitSelectFormWindow));
+
 
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())

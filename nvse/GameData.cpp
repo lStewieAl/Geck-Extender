@@ -18,7 +18,7 @@ public:
 	}
 };
 
-const ModInfo * DataHandler::LookupModByName(const char * modName)
+ModInfo * DataHandler::LookupModByName(const char * modName)
 {
 	LoadedModFinder finder = LoadedModFinder(modName);
 	return modList.modInfoList.Find(finder);

@@ -18,8 +18,10 @@
 #include "Settings.h"
 #include "NavMeshPickPreventer.h"
 
+#include "libs/stb_sprintf.h"
+
 #define GH_NAME				"ZeGaryHax"		// this is the string for IsPluginInstalled and GetPluginVersion (also shows in nvse.log)
-#define GH_VERSION			0.45
+#define GH_VERSION			0.46
 #define RES_HACKER_ADDR_TO_ACTUAL 0x4CF800
 
 HMODULE ZeGaryHaxHandle;
@@ -786,9 +788,9 @@ void ToggleSelectedFiles(HWND* pListView)
 }
 
 void doKonami(int);
+void ResizeLoadEspEsmWindow(HWND hWnd, WORD newWidth, WORD newHeight);
 WNDPROC originalLoadEspEsmFn;
-BOOL __stdcall LoadEspEsmCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
-	static RECT WindowSize;
+BOOL CALLBACK LoadEspEsmCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam) {
 	if (msg == WM_NOTIFY && ((LPNMHDR)lParam)->code == LVN_KEYDOWN)
 	{
 		auto key = ((LPNMLVKEYDOWN)lParam)->wVKey;
@@ -811,6 +813,19 @@ BOOL __stdcall LoadEspEsmCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPa
 			ToggleSelectedFiles(pListView);
 			return true;
 		}
+	}
+	else if (msg == WM_SIZE)
+	{
+		WORD width = LOWORD(lParam);
+		WORD height = HIWORD(lParam);
+		ResizeLoadEspEsmWindow(hDlg, width, height);
+	}
+	else if (msg == WM_INITDIALOG)
+	{
+		auto result = CallWindowProc(originalLoadEspEsmFn, hDlg, msg, wParam, lParam);
+		auto listView = GetDlgItem(hDlg, 1056);
+		PostMessageA(listView, LVM_SETCOLUMNWIDTH, 0, LVSCW_AUTOSIZE_USEHEADER);
+		return result;
 	}
 	return CallWindowProc(originalLoadEspEsmFn, hDlg, msg, wParam, lParam);
 }
@@ -1156,7 +1171,7 @@ LRESULT __stdcall UpdateTimeOfDayScrollbarHook(HWND hWnd, UINT Msg, WPARAM wPara
 	SendMessageA(g_trackBarHwnd, TBM_SETPOS, TRUE, scrollPos);
 
 	char timeBuf[100];
-	sprintf(timeBuf, "%.2f", scrollPos / 4.0F);
+	stbsp_sprintf(timeBuf, "%.2f", scrollPos / 4.0F);
 	SetWindowTextA(g_timeOfDayTextHwnd, timeBuf);
 
 	return scrollPos;
@@ -1167,7 +1182,7 @@ void __stdcall UpdateTimeOfDayInputBoxHook(HWND hWnd, UINT Msg, WPARAM wParam, L
 	SendMessageA(g_trackBarHwnd, TBM_SETPOS, TRUE, lParam);
 
 	char timeBuf[100];
-	sprintf(timeBuf, "%.2f", lParam / 4.0F);
+	stbsp_sprintf(timeBuf, "%.2f", lParam / 4.0F);
 	SetWindowTextA(g_timeOfDayTextHwnd, timeBuf);
 }
 
@@ -1469,7 +1484,7 @@ void __cdecl CrashSaveSetName(char* dst, size_t size, char* format, void* DEFAUL
 	{
 		modName = activeFile->name;
 	}
-	sprintf(dst, "%s", modName);
+	stbsp_sprintf(dst, "%s", modName);
 }
 
 LPTOP_LEVEL_EXCEPTION_FILTER s_originalFilter = nullptr;
@@ -1497,18 +1512,18 @@ LONG WINAPI DoCrashSave(EXCEPTION_POINTERS* info)
 
 	auto contextRecord = info->ContextRecord;
 
-	sprintf(buf, "The geck has quit unexpectedly. Please check the Data//CrashSaves folder for a crash save and verify it in xEdit.\r\nDebug Information:\r\nREGISTERS\r\neip: %08X", contextRecord->Eip);
-	sprintf(buf, "%s\r\neax: %08X", buf, contextRecord->Eax);
-	sprintf(buf, "%s\r\nebx: %08X", buf, contextRecord->Ebx);
-	sprintf(buf, "%s\r\necx: %08X", buf, contextRecord->Ecx);
-	sprintf(buf, "%s\r\nedx: %08X", buf, contextRecord->Edx);
-	sprintf(buf, "%s\r\nedi: %08X", buf, contextRecord->Edi);
-	sprintf(buf, "%s\r\nesi: %08X", buf, contextRecord->Esi);
-	sprintf(buf, "%s\r\nebp: %08X", buf, contextRecord->Ebp);
-	sprintf(buf, "%s\r\nesp: %08X", buf, contextRecord->Esp);
+	stbsp_sprintf(buf, "The geck has quit unexpectedly. Please check the Data//CrashSaves folder for a crash save and verify it in xEdit.\r\nDebug Information:\r\nREGISTERS\r\neip: %08X", contextRecord->Eip);
+	stbsp_sprintf(buf, "%s\r\neax: %08X", buf, contextRecord->Eax);
+	stbsp_sprintf(buf, "%s\r\nebx: %08X", buf, contextRecord->Ebx);
+	stbsp_sprintf(buf, "%s\r\necx: %08X", buf, contextRecord->Ecx);
+	stbsp_sprintf(buf, "%s\r\nedx: %08X", buf, contextRecord->Edx);
+	stbsp_sprintf(buf, "%s\r\nedi: %08X", buf, contextRecord->Edi);
+	stbsp_sprintf(buf, "%s\r\nesi: %08X", buf, contextRecord->Esi);
+	stbsp_sprintf(buf, "%s\r\nebp: %08X", buf, contextRecord->Ebp);
+	stbsp_sprintf(buf, "%s\r\nesp: %08X", buf, contextRecord->Esp);
 
 	UInt32* esp = (UInt32*)contextRecord->Esp;
-	sprintf(buf, "%s\r\n\r\nSTACK", buf);
+	stbsp_sprintf(buf, "%s\r\n\r\nSTACK", buf);
 
 	char stack[0x1000];
 	*stack = 0;
@@ -1518,14 +1533,14 @@ LONG WINAPI DoCrashSave(EXCEPTION_POINTERS* info)
 		{
 			for (int col = 0; col < 4; ++col)
 			{
-				sprintf(stack, "%s%08X |", stack, esp[row * 4 + col]);
+				stbsp_sprintf(stack, "%s%08X |", stack, esp[row * 4 + col]);
 			}
 			strcat(stack, "\r\n");
 		}
 	}
 	__except (EXCEPTION_EXECUTE_HANDLER) {};
 
-	sprintf(buf, "%s\r\n%s", buf, stack);
+	stbsp_sprintf(buf, "%s\r\n%s", buf, stack);
 	_MESSAGE("%s", buf);
 	MessageBoxA(nullptr, buf, "Error", MB_ICONERROR | MB_OK);
 	
@@ -1602,7 +1617,7 @@ BOOL __stdcall HavokPreviewCallback(HWND hWnd, UINT Message, WPARAM wParam, LPAR
 
 				SetHavokAnimationSpeed(speed);
 
-				sprintf(timeBuf, "%.2f", speed);
+				stbsp_sprintf(timeBuf, "%.2f", speed);
 				SetWindowTextA(GetDlgItem(hWnd, ID_ANIMATIONSPEED_EDIT), timeBuf);
 			}
 			return 0;
@@ -1680,7 +1695,7 @@ void AddAnimLengthColumnToHavokPreviewAnimsList()
 
 void __cdecl HavokPreviewSetAnimNameHook(char* dst, char* format, NiControllerSequence* anim)
 {
-	sprintf(dst, "%s (%.2fs)", anim->filePath, anim->end - anim->begin);
+	stbsp_sprintf(dst, "%s (%.2fs)", anim->filePath, anim->end - anim->begin);
 }
 
 void HavokPreview_AddAnimLengthToName()
@@ -1804,7 +1819,6 @@ _declspec(naked) void RenderWindowHandleRefRotationHook()
 		jmp retnAddr
 	}
 }
-
 
 _declspec(naked) void ExportFaceGenCheckIsFormEdited()
 {
@@ -1955,6 +1969,13 @@ void PatchClearLandscapeEditUndoStackIfNearlyOOM()
 	WriteRelJump(0x45E101, UInt32(LandscapePaintHook2));
 }
 
+std::string ToLower(const std::string& str) {
+	std::string lower_str = str;
+	std::transform(lower_str.begin(), lower_str.end(), lower_str.begin(),
+		[](unsigned char c) { return std::tolower(c); });
+	return lower_str;
+}
+
 std::unordered_set<std::string> FileCacheMap;
 
 void __cdecl hk_call_sub_41E8F0(bool a1)
@@ -1968,7 +1989,7 @@ void __cdecl hk_call_sub_41E8F0(bool a1)
                 continue;
 
             // Temp.lip/Temp.wav/FonixData.cdf/temp_resampled_audio.wav should probably be blacklisted here
-            FileCacheMap.emplace(p.path().string());
+            FileCacheMap.emplace(ToLower(p.path().string()));
         }
     }
 
@@ -1979,7 +2000,7 @@ void __cdecl hk_call_sub_41E8F0(bool a1)
 int __fastcall hk_sub_8A1FC0(void *thisptr, void *_EDX, const char *Path, const char *a2, int a3, int a4)
 {
     // Short circuit for GetFileAttributesA()
-    if (!FileCacheMap.empty() && !FileCacheMap.count(Path))
+    if (!FileCacheMap.empty() && !FileCacheMap.count(ToLower(Path)))
         return 0;
 
     return ThisCall<int>(0x008A1FC0, thisptr, Path, a2, a3, a4);
@@ -2036,7 +2057,6 @@ void PatchCellExtraDataCrash()
 {
 	WriteRelCall(0x4B0025, UInt32(LoadCellCheckLinkedRefNullHook));
 }
-
 
 void* g_heapManager = reinterpret_cast<void*>(0xF21B5C);
 
@@ -2465,28 +2485,9 @@ __HOOK StopSound_ResetRecordAudioPopupIfInvalidHook()
 	}
 }
 
-class DialogExtraSubWindow : BSExtraData
-{
-	struct ExtraSubWindow
-	{
-		UInt32 unk00;
-		UInt32 unk04;
-		HWND parent;
-		UInt32 _hInstance;
-		UInt32 posX;
-		UInt32 posY;
-		HWND unkDlgItem;
-		HWND dialogWindow;
-	};
-
-public:
-	ExtraSubWindow* subWindow;
-	UInt32 menuID;
-};
-
 bool __fastcall IsWeaponModSubViewActive(HWND hWnd)
 {
-	if (auto xSubWindow = CdeclCall< DialogExtraSubWindow*>(0x47AB70, hWnd, 4))
+	if (auto xSubWindow = (DialogExtraSubWindow*)Window_GetExtraData(hWnd, kMenuExtra_DialogExtraSubWindow))
 	{
 		return xSubWindow->menuID != 3327;
 	}
@@ -2529,7 +2530,7 @@ void PreserveTESFileTimeStamp(ModInfo* apFile, bool State)
 	}
 
 	char filePath[0x200]; *filePath = '\0';
-	snprintf(filePath, sizeof(filePath), "%s\\%s", apFile->filepath, apFile->name);
+	stbsp_snprintf(filePath, sizeof(filePath), "%s\\%s", apFile->filepath, apFile->name);
 
 	HANDLE SaveFile = CreateFile(filePath, GENERIC_READ | GENERIC_WRITE, NULL, nullptr, OPEN_EXISTING, 0, nullptr);
 	if (SaveFile == INVALID_HANDLE_VALUE)
@@ -2624,7 +2625,7 @@ void __cdecl PrintScriptTypeChangedMessage(UInt32 script, UInt8 newType)
 	char* newTypeStr = scriptTypes[newType];
 
 	char errorMsg[100];
-	sprintf(errorMsg, "Script Type Changed, Previous: %s - New: %s", previousTypeStr, newTypeStr);
+	stbsp_sprintf(errorMsg, "Script Type Changed, Previous: %s - New: %s", previousTypeStr, newTypeStr);
 	MessageBoxA(nullptr, errorMsg, "Warning", MB_ICONWARNING);
 }
 
@@ -3176,7 +3177,7 @@ void __fastcall DoNumericEditorIDCheck(TESForm* Form, const char* EditorID)
 		(Form->flags & TESForm::kFormFlags_Temporary) == 0)
 	{
 		char buf[0x200];
-		snprintf(buf, sizeof(buf), 
+		stbsp_snprintf(buf, sizeof(buf), 
 			"The editorID '%s' begins with an integer.\n\nWhile this is generally accepted by the engine, scripts referring this form might fail to run or compile as the script compiler might attempt to parse it as an integer.\nConsider beginning the editorID with a letter.\n\nThis warning can be disabled in the INI.",
 			EditorID);
 		MessageBoxA(nullptr, buf, "Warning", MB_TASKMODAL | MB_TOPMOST | MB_SETFOREGROUND | MB_OK);
@@ -3858,4 +3859,244 @@ bool OnMoveRefCheckXYZHeld()
 		}
 	}
 	return *isXHeld;
+}
+
+void __fastcall NavMeshManager__OnMergeVertices(NavMeshManager* navMeshManager)
+{
+	bool isMergingDifferentRecords = false;
+	NavMesh* UNSET_MESH = (NavMesh*)-1;
+	NavMesh* navMesh = UNSET_MESH;
+	for (int i = 0, n = navMeshManager->arrayData.vertices.size; i < n; ++i)
+	{
+		if (auto vertex = navMeshManager->arrayData.vertices.data[i])
+		{
+			if (navMesh == UNSET_MESH) navMesh = vertex->navMesh;
+			else if (navMesh != vertex->navMesh)
+			{
+				isMergingDifferentRecords = true;
+				break;
+			}
+		}
+	}
+
+	if (isMergingDifferentRecords)
+	{
+		if (MessageBoxA(g_MainHwnd, "You are about to merge Navmesh records which will cause one to be deleted, do you wish to proceed?", "Geck Extender", MB_YESNOCANCEL) != IDYES)
+		{
+			return;
+		}
+	}
+	ThisCall(0x4267B0, navMeshManager);
+}
+__HOOK NavMeshManager__PostRenderCellClearPrintHook()
+{
+	static const char* EmptyString = "";
+	_asm
+	{
+		push EmptyString
+		push 0x3
+		mov eax, 0x4657A0 // TESCSMain::WriteToStatusBar
+		call eax
+		add esp, 0x14
+		ret 0xC
+	}
+}
+
+__HOOK NavMeshInfoMap__CheckInfosHook()
+{
+	_asm
+	{
+		test edx, edx
+		je skip
+
+		cmp byte ptr ds : [edx + 0x04] , bl
+		jne skip
+		
+		inc esi
+
+	skip:
+		mov edx, 0x6ED488
+		jmp edx
+	}
+}
+
+bool isLoadingCell;
+void __fastcall TESObjectCELL__OnLoad3D(TESObjectCELL* cell)
+{
+	isLoadingCell = true;
+	ThisCall<float*>(0x6361C0, cell); // TESObjectCELL::Load3D
+	isLoadingCell = false;
+}
+
+BOOL __fastcall IsMultiboundPointDifferent_IgnoreIfLoadingCell(NiPoint3* a1, void* edx, NiPoint3* a2)
+{
+	if (isLoadingCell) return false;
+	constexpr float THRESHOLD = 0.001F;
+	return abs(a1->x - a2->x) > THRESHOLD || abs(a1->y - a2->y) > THRESHOLD || abs(a1->z - a2->z) > THRESHOLD;
+}
+
+enum BoundMode
+{
+	kBoundMode_CubicActivator = 0x1,
+	kBoundMode_CubicMultibound = 0x2,
+	kBoundMode_OcclusionPlane = 0x3,
+	kBoundMode_Roombound = 0x4,
+	kBoundMode_Portal = 0x5,
+	kBoundMode_SoundEmitter = 0x6,
+	kBoundMode_AcousticSpace = 0x7,
+	kBoundMode_Collision = 0x8,
+};
+
+void InitCustomPrimitiveColors()
+{
+	NiColorAlpha* kPrimitiveColors = (NiColorAlpha*)0xE8EEA0;
+	Color uColor;
+	for (int mode = kBoundMode_CubicActivator; mode <= kBoundMode_Collision; ++mode)
+	{
+		uColor.rgba = config.uPrimitiveColors[mode - 1];
+		if (uColor.rgba)
+		{
+			NiColorAlpha* color = &kPrimitiveColors[mode];
+			color->r = uColor.r * 1.0F / 255;
+			color->g = uColor.g * 1.0F / 255;
+			color->b = uColor.b * 1.0F / 255;
+			color->a = uColor.a * 1.0F / 255;
+		}
+	}
+}
+
+bool bTextSearchLoadingTopicInfo;
+void __stdcall TextSearchOnOpenInfo(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc, LPARAM dwInitParam)
+{
+	bTextSearchLoadingTopicInfo = true;
+	hk_CreateDialogParamA(hInstance, lpTemplateName, hWndParent, lpDialogFunc, dwInitParam);
+	bTextSearchLoadingTopicInfo = false;
+}
+
+__HOOK OnLoadQuestGetTextSearchWindowHook()
+{
+	_asm
+	{
+		xor eax, eax
+		cmp bTextSearchLoadingTopicInfo, al
+		jne skip
+		mov eax, dword ptr ds : [0xECFCDC]
+	skip:
+		ret
+	}
+}
+
+bool __fastcall CompileFilesLoadRecursiveMasters(DataHandler* dataHandler)
+{
+	auto modList = &dataHandler->modList.modInfoList;
+	auto iter = modList->Head();
+	if (iter && iter->data)
+	{
+		do
+		{
+			if (auto file = iter->data)
+			{
+				if (file->IsEnabled())
+				{
+					file->LoadHeader();
+					file->GenIndexTable(modList);
+					if (file->IsBadVersion())
+					{
+						file->SetEnabled(false);
+					}
+					else
+					{
+						for (int i = 0, n = file->iMasterCount; i < n; ++i)
+						{
+							auto nthMaster = file->m_pMasterPtrs[i];
+							if (nthMaster && !nthMaster->IsBadVersion())
+							{
+								nthMaster->SetEnabled(true);
+							}
+							else
+							{
+								return false;
+							}
+						}
+					}
+				}
+			}
+		}
+		while (iter = iter->next);
+	}
+
+	return true;
+}
+
+__HOOK CompileFilesHook()
+{
+	_asm
+	{
+		mov ecx, edi
+		call CompileFilesLoadRecursiveMasters
+		test al, al
+		mov eax, 0x4DD1B0 // loadSuccessAddr
+		mov ecx, 0x4DD363 // loadFailedAddr
+		cmove eax, ecx
+		jmp eax
+	}
+}
+
+__HOOK OnClickDoorMarkerHook()
+{
+	_asm
+	{
+		cmp eax, IDCANCEL
+		mov eax, 0x4593D7 // view form addr
+		mov ecx, 0x462C7A // cancelAddr
+		cmove eax, ecx
+		jmp eax
+	}
+}
+
+__HOOK OnSetupRefFormControlsHook()
+{
+	static const UInt32 retnAddr = 0x65AB23;
+	_asm
+	{
+		mov ecx, dword ptr ss : [ebp + 0x34] // TESForm
+		cmp dword ptr ds : [ecx + 0xC] , 1 // form->refID == 1
+		je doorMarker
+
+		movzx eax, byte ptr ds : [ecx + 0x04]
+		mov edx, 0x65AB23
+		jmp edx
+
+	doorMarker:
+		mov eax, 0x65AECA
+		jmp eax
+	}
+}
+
+bool __fastcall OnSetupRefFormControls_DisableEditBase(TESForm* baseForm, void* edx, HWND hDlg, int nIDButton, UINT uCheck)
+{
+	if (baseForm->refID == 1) // DoorMarker
+	{
+		for (auto dlgId : { 1489, 1006, 4019, 5276, 5132, 5500, 1585, 2086 })
+		{
+			auto editBaseButton = GetDlgItem(hDlg, dlgId);
+			EnableWindow(editBaseButton, 0);
+		}
+	}
+	return CheckDlgButton(hDlg, nIDButton, uCheck);
+}
+
+__HOOK OnSetupRefFormControls_DisableEditBaseHook()
+{
+	_asm
+	{
+		mov ecx, [ebp + 0x34]
+		jmp OnSetupRefFormControls_DisableEditBase
+	}
+}
+
+void __cdecl OnInitSelectFormWindow(HWND hWnd, WPARAM index, char* pszText, int width, int format)
+{
+	CdeclCall(0x419F50, hWnd, index, pszText, width, format);
+	SetFocus(hWnd);
 }

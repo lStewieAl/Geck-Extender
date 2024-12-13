@@ -710,7 +710,7 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 	{
 		//	Continue normal execution but with a custom string
 		char customTitle[256];
-		sprintf_s(customTitle, "%s -= Extender Rev. 0.45 =-", (const char*)lParam);
+		stbsp_snprintf(customTitle, sizeof(customTitle), "%s -= Extender Rev. 0.46 =-", (const char*)lParam);
 
 		return CallWindowProc(originalMainWindowCallback, Hwnd, Message, wParam, (LPARAM)customTitle);
 	}
@@ -724,7 +724,7 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 				float time = HIWORD(wParam) * 0.25;
 				SetTimeOfDay(time);
 
-				sprintf(timeBuf, "%.2f", time);
+				stbsp_sprintf(timeBuf, "%.2f", time);
 				SetWindowTextA(g_timeOfDayTextHwnd, timeBuf);
 			}
 			else if (LOWORD(wParam) == SB_ENDSCROLL)
@@ -732,7 +732,7 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 				float time = SendMessageA(g_trackBarHwnd, TBM_GETPOS, 0, 0) * 0.25;
 				SetTimeOfDay(time);
 
-				sprintf(timeBuf, "%.2f", time);
+				stbsp_sprintf(timeBuf, "%.2f", time);
 				SetWindowTextA(g_timeOfDayTextHwnd, timeBuf);
 			}
 			return 0;

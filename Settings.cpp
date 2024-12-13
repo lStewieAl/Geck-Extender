@@ -3,7 +3,6 @@ Settings config;
 char IniPath[MAX_PATH];
 void ReadAllSettings()
 {
-	//	ini thing - credit to carxt
 	GetModuleFileNameA(NULL, IniPath, MAX_PATH);
 	strcpy((char*)(strrchr(IniPath, '\\') + 1), "Data\\nvse\\plugins\\geckextender.ini");
 
@@ -88,14 +87,34 @@ void ReadAllSettings()
 	config.bHideRenderWindow = GetOrCreateINIValue("Windows", "bHideRenderWindow", 0, IniPath);
 	config.bHideObjectWindow = GetOrCreateINIValue("Windows", "bHideObjectWindow", 0, IniPath);
 	config.bHideCellViewWindow = GetOrCreateINIValue("Windows", "bHideCellViewWindow", 0, IniPath);
+
+	config.uPrimitiveColor_CubicActivator = GetOrCreateINIValueHex("Primitive Colors", "uCubicActivator", 0xCC4C3326, IniPath);
+	config.uPrimitiveColor_CubicMultibound = GetOrCreateINIValueHex("Primitive Colors", "uCubicMultibound", 0x4CCC1926, IniPath);
+	config.uPrimitiveColor_OcclusionPlane = GetOrCreateINIValueHex("Primitive Colors", "uOcclusionPlane", 0x19191919, IniPath);
+	config.uPrimitiveColor_Roombound = GetOrCreateINIValueHex("Primitive Colors", "uRoombound", 0x007FFF19, IniPath);
+	config.uPrimitiveColor_Portal = GetOrCreateINIValueHex("Primitive Colors", "uPortal", 0x0000003F, IniPath);
+	config.uPrimitiveColor_SoundEmitter = GetOrCreateINIValueHex("Primitive Colors", "uSoundEmitter", 0xFF33E50C, IniPath);
+	config.uPrimitiveColor_AcousticSpace = GetOrCreateINIValueHex("Primitive Colors", "uAcousticSpace", 0xFF33E50C, IniPath);
+	config.uPrimitiveColor_Collision = GetOrCreateINIValueHex("Primitive Colors", "uCollision", 0x1919195E, IniPath);
 }
 
 #define INI_SETTING_NOT_FOUND -1
 int GetOrCreateINIValue(const char* sectionName, const char* keyName, int defaultValue, const char* filename) {
 	int settingValue = GetPrivateProfileIntA(sectionName, keyName, INI_SETTING_NOT_FOUND, filename);
 	if (settingValue == INI_SETTING_NOT_FOUND) {
-		char arr[11];
+		char arr[12];
 		WritePrivateProfileString(sectionName, keyName, _itoa(defaultValue, arr, 10), filename);
+		settingValue = defaultValue;
+	}
+	return settingValue;
+}
+
+unsigned int GetOrCreateINIValueHex(const char* sectionName, const char* keyName, unsigned int defaultValue, const char* filename) {
+	int settingValue = GetPrivateProfileIntA(sectionName, keyName, INI_SETTING_NOT_FOUND, filename);
+	if (settingValue == INI_SETTING_NOT_FOUND) {
+		char buf[12];
+		snprintf(buf, sizeof(buf), "0x%08X", defaultValue);
+		WritePrivateProfileString(sectionName, keyName, buf, filename);
 		settingValue = defaultValue;
 	}
 	return settingValue;

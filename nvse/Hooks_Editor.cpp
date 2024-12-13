@@ -233,7 +233,7 @@ void EditorHookWindow::OnButtonHit(void)
 	{
 		void	* ptr = LookupFormByID(id);
 		
-		sprintf_s(text, sizeof(text), "%08X = %08X (%s)", id, (UInt32)ptr, GetObjectClassName(ptr));
+		stbsp_snprintf(text, sizeof(text), "%08X = %08X (%s)", id, (UInt32)ptr, GetObjectClassName(ptr));
 		_MESSAGE("%s", text);
 
 		MessageBox(m_window, text, "receive bacon", MB_OK);
@@ -241,9 +241,9 @@ void EditorHookWindow::OnButtonHit(void)
 		static int idx = 0;
 		char	fileName[256];
 		if(comment[0])
-			sprintf_s(fileName, sizeof(fileName), "mem%08X_%08X_%08X_%s", idx, id, (UInt32)ptr, comment);
+			stbsp_snprintf(fileName, sizeof(fileName), "mem%08X_%08X_%08X_%s", idx, id, (UInt32)ptr, comment);
 		else
-			sprintf_s(fileName, sizeof(fileName), "mem%08X_%08X_%08X", idx, id, (UInt32)ptr);
+			stbsp_snprintf(fileName, sizeof(fileName), "mem%08X_%08X_%08X", idx, id, (UInt32)ptr);
 		idx++;
 
 		IFileStream	dst;

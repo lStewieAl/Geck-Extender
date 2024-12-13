@@ -54,7 +54,7 @@ static void ShowError(const char* msg)
 static bool ShowWarning(const char* msg)
 {
 	char msgText[0x400];
-	sprintf_s(msgText, sizeof(msgText), "%s\n\n'Cancel' will disable this message for the remainder of the session.", msg);
+	stbsp_snprintf(msgText, sizeof(msgText), "%s\n\n'Cancel' will disable this message for the remainder of the session.", msg);
 	int result = MessageBox(NULL, msgText, "NVSE", MB_OKCANCEL | MB_ICONEXCLAMATION);
 	return result == IDCANCEL;
 }
@@ -771,7 +771,7 @@ ScriptToken* Eval_ToString_String(OperatorType op, ScriptToken* lh, ScriptToken*
 ScriptToken* Eval_ToString_Number(OperatorType op, ScriptToken* lh, ScriptToken* rh, ExpressionEvaluator* context)
 {
 	char buf[0x20];
-	sprintf_s(buf, sizeof(buf), "%g", lh->GetNumber());
+	stbsp_snprintf(buf, sizeof(buf), "%g", lh->GetNumber());
 	return ScriptToken::Create(std::string(buf));
 }
 
@@ -783,7 +783,7 @@ ScriptToken* Eval_ToString_Form(OperatorType op, ScriptToken* lh, ScriptToken* r
 ScriptToken* Eval_ToString_Array(OperatorType op, ScriptToken* lh, ScriptToken* rh, ExpressionEvaluator* context)
 {
 	char buf[0x20];
-	sprintf_s(buf, sizeof(buf), "Array ID %d", lh->GetArray());
+	stbsp_snprintf(buf, sizeof(buf), "Array ID %d", lh->GetArray());
 	return ScriptToken::Create(std::string(buf));
 }
 
@@ -1307,7 +1307,7 @@ ScriptToken Number_To_Bool(ScriptToken* token, ExpressionEvaluator* context)
 ScriptToken Number_To_String(ScriptToken* token, ExpressionEvaluator* context)
 {
 	char str[0x20];
-	sprintf_s(str, sizeof(str), "%f", token->value.num);
+	stbsp_snprintf(str, sizeof(str), "%f", token->value.num);
 	return ScriptToken(std::string(str));
 }
 
@@ -1513,7 +1513,7 @@ void ExpressionEvaluator::Error(const char* fmt, ...)
 	va_start(args, fmt);
 
 	char	errorMsg[0x400];
-	vsprintf_s(errorMsg, 0x400, fmt, args);
+	stbsp_vsnprintf(errorMsg, 0x400, fmt, args);
 
 	// include script data offset and command name/opcode
 	UInt16* opcodePtr = (UInt16*)((UInt8*)script->data + m_baseOffset);
@@ -1540,7 +1540,7 @@ void ExpressionEvaluator::PrintStackTrace() {
 	ExpressionEvaluator* eval = this;
 	while (eval) {
 		CommandInfo* cmd = g_scriptCommands.GetByOpcode(*((UInt16*)((UInt8*)eval->script->data + eval->m_baseOffset)));
-		sprintf_s(output, sizeof(output), "  %s @%04X script %08X", cmd ? cmd->longName : "<unknown>", eval->m_baseOffset, eval->script->refID);
+		stbsp_snprintf(output, sizeof(output), "  %s @%04X script %08X", cmd ? cmd->longName : "<unknown>", eval->m_baseOffset, eval->script->refID);
 		_MESSAGE(output);
 		Console_Print(output);
 
@@ -1564,9 +1564,9 @@ void PrintCompiledCode(ScriptLineBuffer* buf)
 	for (UInt32 i = 0; i < buf->dataOffset; i++)
 	{
 		if (isprint(buf->dataBuf[i]))
-			sprintf_s(byte, 4, "%c", buf->dataBuf[i]);
+			stbsp_snprintf(byte, 4, "%c", buf->dataBuf[i]);
 		else
-			sprintf_s(byte, 4, "%02X", buf->dataBuf[i]);
+			stbsp_snprintf(byte, 4, "%02X", buf->dataBuf[i]);
 
 		bytes.append(byte);
 		bytes.append(" ");
@@ -2131,10 +2131,10 @@ void ExpressionParser::Message(UInt32 errorCode, ...)
 	{
 		char msgText[0x400];
 		#if RUNTIME
-			sprintf_s(msgText, sizeof(msgText), "Error line %d\n\n%s", m_lineBuf->lineNumber, msg->fmt);
+			stbsp_snprintf(msgText, sizeof(msgText), "Error line %d\n\n%s", m_lineBuf->lineNumber, msg->fmt);
 			g_ErrOut.vShow(msgText, args);
 		#else
-			vsprintf_s(msgText, sizeof(msgText), msg->fmt, args);
+			stbsp_vsnprintf(msgText, sizeof(msgText), msg->fmt, args);
 			ShowCompilerError(m_scriptBuf, "%s", msgText);
 		#endif
 	}
@@ -2731,13 +2731,13 @@ std::string ExpressionParser::GetCurToken()
 void ShowRuntimeError(Script* script, const char* fmt, ...)
 {
 	char errorHeader[0x400];
-	sprintf_s(errorHeader, 0x400, "Error in script %08x", script ? script->refID : 0);
+	stbsp_snprintf(errorHeader, 0x400, "Error in script %08x", script ? script->refID : 0);
 
 	va_list args;
 	va_start(args, fmt);
 
 	char	errorMsg[0x400];
-	vsprintf_s(errorMsg, 0x400, fmt, args);
+	stbsp_vsnprintf(errorMsg, 0x400, fmt, args);
 
 	Console_Print(errorHeader);
 	_MESSAGE(errorHeader);

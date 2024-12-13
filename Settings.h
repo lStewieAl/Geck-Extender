@@ -78,6 +78,22 @@ struct Settings
 	UInt8 iPreviewWindowRed, iPreviewWindowGreen, iPreviewWindowBlue;
 
 	char* sLaunchExeName;
+
+	union
+	{
+		unsigned int uPrimitiveColors[8];
+		struct
+		{
+			unsigned int uPrimitiveColor_CubicActivator;
+			unsigned int uPrimitiveColor_CubicMultibound;
+			unsigned int uPrimitiveColor_OcclusionPlane;
+			unsigned int uPrimitiveColor_Roombound;
+			unsigned int uPrimitiveColor_Portal;
+			unsigned int uPrimitiveColor_SoundEmitter;
+			unsigned int uPrimitiveColor_AcousticSpace;
+			unsigned int uPrimitiveColor_Collision;
+		};
+	};
 };
 
 extern Settings config;
@@ -85,4 +101,5 @@ extern char IniPath[MAX_PATH];
 
 int GetOrCreateINIValue(const char* sectionName, const char* keyName, int defaultValue, const char* filename);
 char* GetOrCreateINIValue(const char* sectionName, const char* keyName, const char* defaultValue, const char* filename);
+unsigned int GetOrCreateINIValueHex(const char* sectionName, const char* keyName, unsigned int defaultValue, const char* filename);
 void ReadAllSettings();

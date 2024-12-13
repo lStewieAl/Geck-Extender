@@ -268,6 +268,7 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
       </SubType>
     </ClInclude>
     <ClInclude Include="libs\nlohmann\json.hpp" />
+    <ClInclude Include="libs\stb_sprintf.h" />
     <ClInclude Include="ModifiedFormViewer.h">
       <SubType>
       </SubType>
@@ -300,6 +301,7 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="PrintReplacer.hpp" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="SCOLConsistencyFix.h" />
     <ClInclude Include="Settings.h">

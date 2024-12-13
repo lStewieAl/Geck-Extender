@@ -49,7 +49,6 @@ void SafeWriteBuf(UInt32 addr, const char* data, UInt32 len) {
 	SafeWriteBuf(addr, (void*)data, len);
 }
 
-
 void SafeWriteFloat(UInt32 addr, float data)
 {
 	UInt32 oldProtect;
@@ -93,7 +92,6 @@ void WriteRelJle(UInt32 jumpSrc, UInt32 jumpTgt)
 	SafeWrite16(jumpSrc, 0x8E0F);
 	SafeWrite32(jumpSrc + 2, jumpTgt - jumpSrc - 2 - 4);
 }
-
 
 [[nodiscard]] __declspec(noinline) UInt32 __stdcall DetourRelCall(UInt32 jumpSrc, UInt32 jumpTgt)
 {

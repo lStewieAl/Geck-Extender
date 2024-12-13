@@ -830,17 +830,17 @@ char * GetExtraDataValue(BSExtraData* traverse)
 		case	kExtraData_Script                   	: 
 			pXScript = (ExtraScript*)traverse;
 			if (pXScript->script)
-				sprintf_s(buffer, sizeof(buffer), "script:[%#10X] eventList:[%#10X]  flags:{%#10x}", pXScript->script->refID, pXScript->eventList, pXScript->script->flags);
+				stbsp_snprintf(buffer, sizeof(buffer), "script:[%#10X] eventList:[%#10X]  flags:{%#10x}", pXScript->script->refID, pXScript->eventList, pXScript->script->flags);
 			else
-				sprintf_s(buffer, sizeof(buffer), "script:[%#10X] eventList:[%#10X]  flags:{%#10x}", pXScript->script, pXScript->eventList, pXScript->script->flags);
+				stbsp_snprintf(buffer, sizeof(buffer), "script:[%#10X] eventList:[%#10X]  flags:{%#10x}", pXScript->script, pXScript->eventList, pXScript->script->flags);
 			return buffer;
 			break;
 		case	kExtraData_Action                   	: 
 			pXAction = (ExtraAction*)traverse;
 			if (pXAction->actionRef && pXAction->actionRef->GetFullName())
-				sprintf_s(buffer, sizeof(buffer), "{%#2X} [%#10X] (%s)", pXAction->flags0C, pXAction->actionRef->refID, pXAction->actionRef->GetFullName()->name);
+				stbsp_snprintf(buffer, sizeof(buffer), "{%#2X} [%#10X] (%s)", pXAction->flags0C, pXAction->actionRef->refID, pXAction->actionRef->GetFullName()->name);
 			else
-				sprintf_s(buffer, sizeof(buffer), "{%#2X} [%#10X] ()", pXAction->flags0C, pXAction->actionRef->refID);
+				stbsp_snprintf(buffer, sizeof(buffer), "{%#2X} [%#10X] ()", pXAction->flags0C, pXAction->actionRef->refID);
 			return buffer; break;
 		case	kExtraData_StartingPosition         	: return ""; break;
 		case	kExtraData_Anim                     	: return ""; break;
@@ -857,9 +857,9 @@ char * GetExtraDataValue(BSExtraData* traverse)
 		case	kExtraData_ReferencePointer         	: 
 			refr = ((ExtraReferencePointer*)traverse)->refr;
 			if (refr && refr->GetFullName())
-				sprintf_s(buffer, sizeof(buffer), "[%#10X] (%s) [%#10X]", refr->refID, refr->GetFullName()->name, refr->extraDataList.m_data);
+				stbsp_snprintf(buffer, sizeof(buffer), "[%#10X] (%s) [%#10X]", refr->refID, refr->GetFullName()->name, refr->extraDataList.m_data);
 			else
-				sprintf_s(buffer, sizeof(buffer), "[%#10X] () [%#10X]", refr->refID, refr->extraDataList.m_data);
+				stbsp_snprintf(buffer, sizeof(buffer), "[%#10X] () [%#10X]", refr->refID, refr->extraDataList.m_data);
 			return buffer; break;
 		case	kExtraData_Follower                 	: return ""; break;
 		case	kExtraData_LevCreaModifier          	: return ""; break;
@@ -869,28 +869,28 @@ char * GetExtraDataValue(BSExtraData* traverse)
 			pXOwner = (ExtraOwnership*)traverse;
 			if (pXOwner->owner)
 				if (pXOwner->owner->GetFullName())
-					sprintf_s(buffer, sizeof(buffer), "[%#10X] (%s)", pXOwner->owner->refID, pXOwner->owner->GetFullName()->name);
+					stbsp_snprintf(buffer, sizeof(buffer), "[%#10X] (%s)", pXOwner->owner->refID, pXOwner->owner->GetFullName()->name);
 				else
-					sprintf_s(buffer, sizeof(buffer), "[%#10X]", pXOwner->owner->refID);
+					stbsp_snprintf(buffer, sizeof(buffer), "[%#10X]", pXOwner->owner->refID);
 			else
-				sprintf_s(buffer, sizeof(buffer), "[]");
+				stbsp_snprintf(buffer, sizeof(buffer), "[]");
 			return buffer;
 			break;
 		case	kExtraData_Global                   	: 
 			return "Global"; break;
 		case	kExtraData_Rank                     	: 
 			pXRank = (ExtraRank*)traverse;
-			sprintf_s(buffer, sizeof(buffer), "%d", pXRank->rank);
+			stbsp_snprintf(buffer, sizeof(buffer), "%d", pXRank->rank);
 			return buffer;
 			break;
 		case	kExtraData_Count                    	: 
 			pXCount = (ExtraCount*)traverse;
-			sprintf_s(buffer, sizeof(buffer), "%d", pXCount->count);
+			stbsp_snprintf(buffer, sizeof(buffer), "%d", pXCount->count);
 			return buffer;
 			break;
 		case	kExtraData_Health                   	: 
 			pXHealth = (ExtraHealth*)traverse;
-			sprintf_s(buffer, sizeof(buffer), "%f", pXHealth->health);
+			stbsp_snprintf(buffer, sizeof(buffer), "%f", pXHealth->health);
 			return buffer;
 			break;
 		case	kExtraData_Uses                     	: return ""; break;
@@ -924,7 +924,7 @@ char * GetExtraDataValue(BSExtraData* traverse)
 		case	kExtraData_StartingWorldOrCell      	: return ""; break;
 		case	kExtraData_Hotkey:
 			pXHotkey = (ExtraHotkey*)traverse;
-			sprintf_s(buffer, sizeof(buffer), "%d", pXHotkey->index);
+			stbsp_snprintf(buffer, sizeof(buffer), "%d", pXHotkey->index);
 			return buffer;
 			break;
 		case	kExtraData_EditorRefMovedData       	: return ""; break;
@@ -989,7 +989,7 @@ char * GetExtraDataValue(BSExtraData* traverse)
 		case kExtraData_WeaponModFlags:
 			ExtraWeaponModFlags* modflags;
 			modflags = (ExtraWeaponModFlags*)traverse;
-			sprintf_s(buffer, sizeof(buffer), "%d", modflags->flags);
+			stbsp_snprintf(buffer, sizeof(buffer), "%d", modflags->flags);
 			return buffer;
 			break;
 	};

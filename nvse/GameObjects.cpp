@@ -55,3 +55,15 @@ NiMatrix33& TESObjectREFR::GetOrientation(NiMatrix33& arMatrix) const {
 
 	return arMatrix;
 }
+
+ExtraContainerExtendDataArray	Actor::GetEquippedExtendDataList()
+{
+	ExtraContainerDataArray itemArray;
+	ExtraContainerExtendDataArray outExtendData;
+
+	ExtraContainerChanges	* xChanges = static_cast <ExtraContainerChanges *>(extraDataList.GetByType(kExtraData_ContainerChanges));
+	if(xChanges)
+		xChanges->GetAllEquipped(itemArray, outExtendData);
+
+	return outExtendData;
+}

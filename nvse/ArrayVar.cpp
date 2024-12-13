@@ -65,12 +65,12 @@ std::string ArrayElement::ToString() const
 	switch (m_dataType)
 	{
 	case kDataType_Numeric:
-		sprintf_s(buf, sizeof(buf), "%f", m_data.num);
+		stbsp_snprintf(buf, sizeof(buf), "%f", m_data.num);
 		return buf;
 	case kDataType_String:
 		return m_data.str;
 	case kDataType_Array:
-		sprintf_s(buf, sizeof(buf), "Array ID %.0f", m_data.num);
+		stbsp_snprintf(buf, sizeof(buf), "Array ID %.0f", m_data.num);
 		return buf;
 	case kDataType_Form:
 		{
@@ -82,7 +82,7 @@ std::string ArrayElement::ToString() const
 				if (formName)
 					return formName;
 			}
-			sprintf_s(buf, sizeof(buf), "%08x", refID);
+			stbsp_snprintf(buf, sizeof(buf), "%08x", refID);
 			return buf;
 		}
 	default:
@@ -380,7 +380,7 @@ void ArrayVar::Dump()
 		switch (KeyType())
 		{
 		case kDataType_Numeric:
-			sprintf_s(numBuf, sizeof(numBuf), "%f", iter->first.Key().num);
+			stbsp_snprintf(numBuf, sizeof(numBuf), "%f", iter->first.Key().num);
 			elementInfo += numBuf;
 			break;
 		case kDataType_String:
@@ -395,7 +395,7 @@ void ArrayVar::Dump()
 		switch (iter->second.m_dataType)
 		{
 		case kDataType_Numeric:
-			sprintf_s(numBuf, sizeof(numBuf), "%f", iter->second.m_data.num);
+			stbsp_snprintf(numBuf, sizeof(numBuf), "%f", iter->second.m_data.num);
 			elementInfo += numBuf;
 			break;
 		case kDataType_String:
@@ -403,14 +403,14 @@ void ArrayVar::Dump()
 			break;
 		case kDataType_Array:
 			elementInfo += "(Array ID #";
-			sprintf_s(numBuf, sizeof(numBuf), "%.0f", iter->second.m_data.num);
+			stbsp_snprintf(numBuf, sizeof(numBuf), "%.0f", iter->second.m_data.num);
 			elementInfo += numBuf;
 			elementInfo += ")";
 			break;
 		case kDataType_Form:
 			{
 				UInt32 refID = iter->second.m_data.formID;
-				sprintf_s(numBuf, sizeof(numBuf), "%08X", refID);
+				stbsp_snprintf(numBuf, sizeof(numBuf), "%08X", refID);
 				TESForm* form = LookupFormByID(refID);
 				if (form)
 					elementInfo += GetFullName(form);

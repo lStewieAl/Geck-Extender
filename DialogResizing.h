@@ -75,34 +75,6 @@ MultiCombo Boxes
 0x49A091
 */
 
-//432A80 LoadESPESMCallback
-//44192A set callback
-
-/*
-List1 1056
-Set as Active File 1121 -
-Details 1185 -
-"Created by" Edit 1025
-"Summary" Edit 1024
-"Parent Master" Edit 1057
-OK Button 1 -
-Cancel Button 2 -
-TES Files 1101
-Created By 1102
-Summary 1103
-Parent Masters 1104
-Created On 1105
-Last Modified 1106
-"Created On" Date 1026 -
-"Created On" Time 1027 -
-File Version 2406
-Current 2407
-"File Version" 1681
-"Current" 1682
-"Last Modified" Date 1028 -
-"Last Modified" Time 1029 -
-*/
-
 void ResizeFormListWindow(HWND hWnd, WORD newWidth, WORD newHeight)
 {
 	static const WORD RIGHT_PADDING = 50;
@@ -128,37 +100,28 @@ void ResizeFormListWindow(HWND hWnd, WORD newWidth, WORD newHeight)
 	HWND RightArrowButton = GetDlgItem(hWnd, 4009);
 
 	POINT pos;
-	for (HWND button : {OkButton, CancelButton, LeftArrowButton, RightArrowButton})
-	{
-		if (button == OkButton)
-		{
-			pos.x = newWidth / 2 - 90;
-			pos.y = newHeight - BUTTON_BOTTOM_PADDING;
-		}
-		else if (button == CancelButton)
-		{
-			pos.x = newWidth / 2 + 20;
-			pos.y = newHeight - BUTTON_BOTTOM_PADDING;
-		}
-		else if (button == LeftArrowButton)
-		{
-			pos.x = newWidth / 2 - 30;
-			pos.y = newHeight - BUTTON_BOTTOM_PADDING - 25;
-		}
-		else if (button == RightArrowButton)
-		{
-			pos.x = newWidth / 2 + 10;
-			pos.y = newHeight - BUTTON_BOTTOM_PADDING - 25;
-		}
 
-		SetWindowPos(button, NULL, pos.x, pos.y, NULL, NULL, SWP_NOSIZE);
-	}
+	pos.x = newWidth / 2 - 90;
+	pos.y = newHeight - BUTTON_BOTTOM_PADDING;
+	SetWindowPos(OkButton, NULL, pos.x, pos.y, NULL, NULL, SWP_NOSIZE);
+
+	pos.x = newWidth / 2 + 20;
+	pos.y = newHeight - BUTTON_BOTTOM_PADDING;
+	SetWindowPos(CancelButton, NULL, pos.x, pos.y, NULL, NULL, SWP_NOSIZE);
+
+	pos.x = newWidth / 2 - 30;
+	pos.y = newHeight - BUTTON_BOTTOM_PADDING - 25;
+	SetWindowPos(LeftArrowButton, NULL, pos.x, pos.y, NULL, NULL, SWP_NOSIZE);
+
+	pos.x = newWidth / 2 + 10;
+	pos.y = newHeight - BUTTON_BOTTOM_PADDING - 25;
+	SetWindowPos(RightArrowButton, NULL, pos.x, pos.y, NULL, NULL, SWP_NOSIZE);
 
 	InvalidateRect(hWnd, &clientRect, true);
 }
 
 // FormList dialog (3274)
-BOOL __stdcall FormListCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+BOOL CALLBACK FormListCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	if (msg == WM_SIZE)
 	{
@@ -178,7 +141,7 @@ BOOL __stdcall FormListCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 			return true;
 		}
 	}
-	return StdCall<LRESULT>(0x480110, hDlg, msg, wParam, lParam);
+	return CallWindowProc((WNDPROC)0x480110, hDlg, msg, wParam, lParam);
 }
 
 void ResizeObjectPalette(HWND hWnd, WORD newWidth, WORD newHeight)
@@ -206,7 +169,7 @@ void ResizeObjectPalette(HWND hWnd, WORD newWidth, WORD newHeight)
 }
 
 // objects palette window (375)
-BOOL __stdcall ObjectPaletteCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+BOOL CALLBACK ObjectPaletteCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	if (msg == WM_SIZE)
 	{
@@ -214,7 +177,7 @@ BOOL __stdcall ObjectPaletteCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM 
 		WORD height = HIWORD(lParam);
 		ResizeObjectPalette(hDlg, width, height);
 	}
-	return StdCall<LRESULT>(0x40D190, hDlg, msg, wParam, lParam);
+	return CallWindowProc((WNDPROC)0x40D190, hDlg, msg, wParam, lParam);
 }
 
 #define USE_REPORT_USED_IN_THESE_CELLS_TEXT_ID 1102
@@ -253,7 +216,7 @@ void ResizeUseReportWindow(HWND hWnd, WORD newWidth, WORD newHeight)
 }
 
 // Use Report window (220)
-BOOL __stdcall UseReportCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+BOOL CALLBACK UseReportCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	if (msg == WM_SIZE)
 	{
@@ -261,5 +224,161 @@ BOOL __stdcall UseReportCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPar
 		WORD height = HIWORD(lParam);
 		ResizeUseReportWindow(hDlg, width, height);
 	}
-	return StdCall<LRESULT>(0x468860, hDlg, msg, wParam, lParam);
+	return CallWindowProc((WNDPROC)0x468860, hDlg, msg, wParam, lParam);
+}
+
+UInt32 originalBGSListFormDialogFn;
+char __fastcall BGSListForm__DialogCallback(BGSListForm* listForm, void* edx, HWND hDlg, int msg, unsigned int wParam, int lParam, UInt32* a6)
+{
+	if (msg == WM_SIZE)
+	{
+		WORD width = LOWORD(lParam);
+		WORD height = HIWORD(lParam);
+		ResizeFormListWindow(hDlg, width, height);
+	}
+	return ThisCall<char>(originalBGSListFormDialogFn, listForm, hDlg, msg, wParam, lParam, a6);
+}
+
+void ResizeDialogueWindow(HWND hWnd, WORD newWidth, WORD newHeight)
+{
+	constexpr int TOPIC_EDITOR = 151;
+	constexpr int DIALOGUE_TREE = 347;
+	if (auto xSubWindow = (DialogExtraSubWindow*)Window_GetExtraData(hWnd, kMenuExtra_DialogExtraSubWindow))
+	{
+		if (xSubWindow->subWindow)
+		{
+			auto dialogWindow = xSubWindow->subWindow->dialogWindow;
+
+			if (xSubWindow->menuID == TOPIC_EDITOR)
+			{
+				static const WORD LIST_VIEW_OFFSET = 200;
+				static const WORD LIST_VIEW_WIDTH = 195;
+				auto leftListView = GetDlgItem(hWnd, 2064);
+				SetWindowPos(leftListView, NULL, NULL, NULL, LIST_VIEW_WIDTH, newHeight - LIST_VIEW_OFFSET, SWP_NOMOVE);
+
+				auto topicListView = GetDlgItem(hWnd, 1448);
+				SetWindowPos(topicListView, NULL, NULL, NULL, LIST_VIEW_WIDTH + 2, newHeight - 73, SWP_NOMOVE);
+
+				// TODO - handle resizing the rest of the controls
+			}
+			else if (xSubWindow->menuID == DIALOGUE_TREE)
+			{
+			}
+		}
+
+		RECT clientRect;
+		GetClientRect(hWnd, &clientRect);
+		InvalidateRect(hWnd, &clientRect, true);
+	}
+}
+
+BOOL CALLBACK DialogueWindowCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	if (msg == WM_SIZE)
+	{
+		WORD width = LOWORD(lParam);
+		WORD height = HIWORD(lParam);
+		ResizeDialogueWindow(hDlg, width, height);
+		// TODO - the menu needs to resize when switching tabs too...
+	}
+	return CallWindowProc((WNDPROC)0x57FA00, hDlg, msg, wParam, lParam);
+}
+
+
+
+/* Load ESP/ESM Dialogs
+
+List1 1056
+Set as Active File 1121 -
+Details 1185 -
+"Created by" Edit 1025
+"Summary" Edit 1024
+"Parent Master" Edit 1057
+OK Button 1 -
+Cancel Button 2 -
+TES Files 1101
+Created By 1102
+Summary 1103
+Parent Masters 1104
+Created On 1105
+Last Modified 1106
+"Created On" Date 1026 -
+"Created On" Time 1027 -
+File Version 2406
+Current 2407
+"File Version" 1681
+"Current" 1682
+"Last Modified" Date 1028 -
+"Last Modified" Time 1029 -
+*/
+
+void ResizeLoadEspEsmWindow(HWND hWnd, WORD newWidth, WORD newHeight)
+{
+	RECT clientRect;
+	GetClientRect(hWnd, &clientRect);
+
+	HWND listView = GetDlgItem(hWnd, 1056);
+	SetWindowPos(listView, NULL, NULL, NULL, 531, newHeight - 80, SWP_NOMOVE);
+
+	// move the bottom buttons
+	HWND SetActiveFileButton = GetDlgItem(hWnd, 1121);
+	HWND DetailsButton = GetDlgItem(hWnd, 1185);
+	HWND OkButton = GetDlgItem(hWnd, 1);
+	HWND CancelButton = GetDlgItem(hWnd, 2);
+
+	int newButtonHeight = newHeight - 38;
+	SetWindowPos(SetActiveFileButton, NULL, 11, newButtonHeight, NULL, NULL, SWP_NOSIZE);
+	SetWindowPos(DetailsButton, NULL, 151, newButtonHeight, NULL, NULL, SWP_NOSIZE);
+	SetWindowPos(OkButton, NULL, newWidth - 189, newButtonHeight - 5, NULL, NULL, SWP_NOSIZE);
+	SetWindowPos(CancelButton, NULL, newWidth - 109, newButtonHeight - 5, NULL, NULL, SWP_NOSIZE);
+
+	InvalidateRect(hWnd, &clientRect, true);
+}
+
+void ResizeGlobalsWindow(HWND hWnd, WORD newWidth, WORD newHeight)
+{
+	RECT clientRect;
+	GetClientRect(hWnd, &clientRect);
+
+	static const WORD LIST_VIEW_OFFSET = 22;
+	static const WORD LIST_VIEW_WIDTH = 477;
+	auto listView = GetDlgItem(hWnd, 2064);
+	SetWindowPos(listView, NULL, NULL, NULL, LIST_VIEW_WIDTH, newHeight - LIST_VIEW_OFFSET, SWP_NOMOVE);
+
+	InvalidateRect(hWnd, &clientRect, true);
+}
+
+void ResizeGamesettingsWindow(HWND hWnd, WORD newWidth, WORD newHeight)
+{
+	RECT clientRect;
+	GetClientRect(hWnd, &clientRect);
+
+	static const WORD LIST_VIEW_OFFSET = 40;
+	static const WORD LIST_VIEW_WIDTH = 612;
+	auto listView = GetDlgItem(hWnd, 2064);
+	SetWindowPos(listView, NULL, NULL, NULL, LIST_VIEW_WIDTH, newHeight - LIST_VIEW_OFFSET, SWP_NOMOVE);
+
+	InvalidateRect(hWnd, &clientRect, true);
+}
+
+BOOL CALLBACK GlobalsWindowCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	if (msg == WM_SIZE)
+	{
+		WORD width = LOWORD(lParam);
+		WORD height = HIWORD(lParam);
+		ResizeGlobalsWindow(hDlg, width, height);
+	}
+	return CallWindowProc((WNDPROC)0x480B70, hDlg, msg, wParam, lParam);
+}
+
+BOOL CALLBACK GamesettingsWindowCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	if (msg == WM_SIZE)
+	{
+		WORD width = LOWORD(lParam);
+		WORD height = HIWORD(lParam);
+		ResizeGamesettingsWindow(hDlg, width, height);
+	}
+	return CallWindowProc((WNDPROC)0x480B70, hDlg, msg, wParam, lParam);
 }
