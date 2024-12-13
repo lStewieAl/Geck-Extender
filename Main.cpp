@@ -45,6 +45,7 @@
 #include "FaceGenExporter.h"
 #include "ONAMFix.h"
 #include "SCOLConsistencyFix.h"
+#include "UnserializedIO.h"
 
 #include "Events/EventManager.h"
 #include "Events/Events.h"
@@ -94,6 +95,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	}
 
 	PrintReplacer::InitHooks();
+
+	UnserializedIO::InitHooks();
 
 	CreateLogFile();
 

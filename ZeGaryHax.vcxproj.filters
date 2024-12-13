@@ -195,6 +195,7 @@
       <Filter>libs</Filter>
     </ClInclude>
     <ClInclude Include="PrintReplacer.hpp" />
+    <ClInclude Include="UnserializedIO.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
