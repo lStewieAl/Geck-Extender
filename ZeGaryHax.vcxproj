@@ -123,6 +123,8 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Allocator\BSMemory.cpp" />
+    <ClCompile Include="Allocator\MemoryManager.cpp" />
     <ClCompile Include="BetterFloatingFormList.cpp">
       <SubType>
       </SubType>
@@ -221,6 +223,8 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
     <ClCompile Include="LogWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Allocator\BSMemory.hpp" />
+    <ClInclude Include="Allocator\MemoryManager.hpp" />
     <ClInclude Include="BetterFloatingFormList.h">
       <SubType>
       </SubType>

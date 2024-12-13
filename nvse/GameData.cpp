@@ -96,3 +96,21 @@ TESObjectCELL* GridCellArray::GetCell(int x, int y)
 }
 
 bool TES::GetLandHeight(NiPoint3* cameraPos, float* heightOut) { return ThisCall<bool>(0x4C9A00, this, cameraPos, heightOut); };
+
+struct _TEB {
+	UInt32 padding[0x2C / 4];
+	struct TLSData** ThreadLocalStoragePointer;
+};
+
+TLSData* TLSData::GetTLSData() {
+	UInt32* pIndex = (UInt32*)0xF9879C;
+	return NtCurrentTeb()->ThreadLocalStoragePointer[*pIndex];
+}
+
+UInt32 TLSData::GetHeapIndex() {
+	return GetTLSData()->uiHeapIndex;
+}
+
+void TLSData::SetHeapIndex(UInt32 index) {
+	GetTLSData()->uiHeapIndex = index;
+}
