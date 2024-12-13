@@ -425,7 +425,7 @@ namespace BetterFloatingFormList
 		{
 			if (displayInfo->item.iSubItem == COLUMN_TYPE)
 			{
-				sprintf(displayInfo->item.pszText, FormToTypeStr(form));
+				stbsp_sprintf(displayInfo->item.pszText, FormToTypeStr(form));
 			}
 		}
 		return form->SetupListViewDisplayInfo(displayInfo);

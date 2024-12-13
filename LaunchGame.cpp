@@ -4,6 +4,8 @@
 #include "Settings.h"
 #include "GECKUtility.h"
 
+#include "libs/stb_sprintf.h"
+
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -135,7 +137,7 @@ namespace LaunchGame
 	{
 		char exePath[MAX_PATH];
 		auto commandLineDir = (const char*)0xECFE30;
-		_snprintf(exePath, sizeof(exePath), "%s\\%s", commandLineDir, config.sLaunchExeName);
+		stbsp_snprintf(exePath, sizeof(exePath), "%s\\%s", commandLineDir, config.sLaunchExeName);
 		exePath[sizeof(exePath) - 1] = '\0'; // ensure exePath is null terminated
 
 		PROCESS_INFORMATION processInfo;
