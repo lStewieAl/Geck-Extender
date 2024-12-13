@@ -1046,6 +1046,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x486F1A, UInt32(TextSearchOnOpenInfo));
 	SafeWrite8(0x486F1A + 5, 0x90);
 
+	// add recusive master loading
+	WriteRelJump(0x4DD1A7, UInt32(CompileFilesHook));
+
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
 	{

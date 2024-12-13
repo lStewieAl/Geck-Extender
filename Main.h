@@ -3985,3 +3985,60 @@ __HOOK OnLoadQuestGetTextSearchWindowHook()
 		ret
 	}
 }
+
+bool __fastcall CompileFilesLoadRecursiveMasters(DataHandler* dataHandler)
+{
+	auto modList = &dataHandler->modList.modInfoList;
+	auto iter = modList->Head();
+	if (iter && iter->data)
+	{
+		do
+		{
+			if (auto file = iter->data)
+			{
+				if (file->IsEnabled())
+				{
+					file->LoadHeader();
+					file->GenIndexTable(modList);
+					if (file->IsBadVersion())
+					{
+						file->SetEnabled(false);
+					}
+					else
+					{
+						int numMasters = file->iMasterCount;
+						for (int i = 0; i < numMasters; ++i)
+						{
+							auto nthMaster = file->m_pMasterPtrs[i];
+							if (nthMaster && !nthMaster->IsBadVersion())
+							{
+								nthMaster->SetEnabled(true);
+							}
+							else
+							{
+								return false;
+							}
+						}
+					}
+				}
+			}
+		}
+		while (iter = iter->next);
+	}
+
+	return true;
+}
+
+__HOOK CompileFilesHook()
+{
+	_asm
+	{
+		mov ecx, edi
+		call CompileFilesLoadRecursiveMasters
+		test al, al
+		mov eax, 0x4DD1B0 // loadSuccessAddr
+		mov ecx, 0x4DD363 // loadFailedAddr
+		cmove eax, ecx
+		jmp eax
+	}
+}

@@ -235,6 +235,26 @@ struct ModInfo		// referred to by game as TESFile
 		return false;
 	}
 
+	bool GenIndexTable(tList<ModInfo>* apFiles, bool abShowError = true)
+	{
+		return ThisCall<bool>(0x4DEDC0, this, apFiles, abShowError);
+	}
+
+	signed int LoadHeader()
+	{
+		return ThisCall<signed int>(0x4E2580, this);
+	}
+
+	bool IsBadVersion()
+	{
+		return ThisCall<bool>(0x4DE990, this);
+	}
+	
+	const char* FindMissingMaster(int auiIndex)
+	{
+		return ThisCall<const char*>(0x4DEEB0, this, auiIndex);
+	}
+
 #if !EDITOR
 	/*** used by TESForm::LoadForm() among others ***/
 	MEMBER_FN_PREFIX(ModInfo);
