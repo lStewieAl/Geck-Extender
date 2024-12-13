@@ -4042,3 +4042,56 @@ __HOOK CompileFilesHook()
 		jmp eax
 	}
 }
+
+__HOOK OnClickDoorMarkerHook()
+{
+	_asm
+	{
+		cmp eax, IDCANCEL
+		mov eax, 0x4593D7 // view form addr
+		mov ecx, 0x462C7A // cancelAddr
+		cmove eax, ecx
+		jmp eax
+	}
+}
+
+__HOOK OnSetupRefFormControlsHook()
+{
+	static const UInt32 retnAddr = 0x65AB23;
+	_asm
+	{
+		mov ecx, dword ptr ss : [ebp + 0x34] // TESForm
+		cmp dword ptr ds : [ecx + 0xC] , 1 // form->refID == 1
+		je doorMarker
+
+		movzx eax, byte ptr ds : [ecx + 0x04]
+		mov edx, 0x65AB23
+		jmp edx
+
+	doorMarker:
+		mov eax, 0x65AECA
+		jmp eax
+	}
+}
+
+bool __fastcall OnSetupRefFormControls_DisableEditBase(TESForm* baseForm, void* edx, HWND hDlg, int nIDButton, UINT uCheck)
+{
+	if (baseForm->refID == 1) // DoorMarker
+	{
+		for (auto dlgId : { 1489, 1006, 4019, 5276, 5132, 5500, 1585, 2086 })
+		{
+			auto editBaseButton = GetDlgItem(hDlg, dlgId);
+			EnableWindow(editBaseButton, 0);
+		}
+	}
+	return CheckDlgButton(hDlg, nIDButton, uCheck);
+}
+
+__HOOK OnSetupRefFormControls_DisableEditBaseHook()
+{
+	_asm
+	{
+		mov ecx, [ebp + 0x34]
+		jmp OnSetupRefFormControls_DisableEditBase
+	}
+}

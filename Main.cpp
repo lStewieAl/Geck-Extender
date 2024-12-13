@@ -1049,6 +1049,13 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// add recusive master loading
 	WriteRelJump(0x4DD1A7, UInt32(CompileFilesHook));
 
+	// allow opening a door marker form
+	WriteRelJnz(0x45949E, UInt32(OnClickDoorMarkerHook));
+	SafeWrite8(0x459485, MB_YESNOCANCEL);
+	WriteRelJump(0x65AB1C, UInt32(OnSetupRefFormControlsHook)); // skip adding data tabs
+	WriteRelCall(0x65B3F1, UInt32(OnSetupRefFormControls_DisableEditBaseHook)); // disable most buttons
+	SafeWrite8(0x65B3F1 + 5, 0x90);
+
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
 	{
