@@ -18,14 +18,4 @@ public:
 	void Initialize();
 
 	static MemoryManager* GetSingleton();
-
-	[[nodiscard]]
-	__declspec(restrict) __declspec(allocator) void* Allocate(size_t aSize);
-
-	[[nodiscard]]
-	__declspec(restrict) __declspec(allocator) void* Reallocate(void* apOldMem, size_t auiNewSize);
-
-	void Deallocate(void* apMemory);
-
-	size_t Size(void* apMemory) const;
 };

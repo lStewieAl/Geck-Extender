@@ -95,9 +95,8 @@ struct Settings
 		};
 	};
 
-	// In MB
-	UInt32 uiHeapMaxSize;
-	UInt32 uiHeapInitialSize;
+	UInt32 uiHeapMaxSizeMB;
+	UInt32 uiHeapInitialSizeMB;
 };
 
 extern Settings config;

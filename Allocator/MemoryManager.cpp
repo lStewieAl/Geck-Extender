@@ -26,7 +26,7 @@ void MemoryManager::SpecifyMemoryLayout() {
 
 	// MemoryHeap constructor
 	ppHeaps[0] = BSNew(0x20F4);
-	ThisCall(0x854ED0, ppHeaps[0], B_MiB(config.uiHeapMaxSize), B_MiB(config.uiHeapInitialSize), "Default Heap", 0);
+	ThisCall(0x854ED0, ppHeaps[0], B_MiB(config.uiHeapMaxSizeMB), B_MiB(config.uiHeapInitialSizeMB), "Default Heap", 0);
 	pHeapsByContext[65] = ppHeaps[0];
 }
 
@@ -85,25 +85,5 @@ void MemoryManager::Initialize() {
 }
 
 MemoryManager* MemoryManager::GetSingleton() {
-	return &*(MemoryManager*)0xF21B5C;
-}
-
-// 0x8540A0
-void* MemoryManager::Allocate(size_t aSize) {
-	return ThisCall<void*>(0x8540A0, this, aSize);
-}
-
-// 0x8543B0
-void* MemoryManager::Reallocate(void* apOldMem, size_t auiNewSize) {
-	return ThisCall<void*>(0x8543B0, this, apOldMem, auiNewSize);
-}
-
-// 0x8542C0
-void MemoryManager::Deallocate(void* apMemory) {
-	ThisCall(0x8542C0, this, apMemory);
-}
-
-// 0x854720
-size_t MemoryManager::Size(void* apMemory) const {
-	return ThisCall<size_t>(0x854720, this, apMemory);
+	return (MemoryManager*)0xF21B5C;
 }

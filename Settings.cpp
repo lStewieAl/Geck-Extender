@@ -97,8 +97,8 @@ void ReadAllSettings()
 	config.uPrimitiveColor_AcousticSpace = GetOrCreateINIValueHex("Primitive Colors", "uAcousticSpace", 0xFF33E50C, IniPath);
 	config.uPrimitiveColor_Collision = GetOrCreateINIValueHex("Primitive Colors", "uCollision", 0x1919195E, IniPath);
 
-	config.uiHeapMaxSize = GetOrCreateINIValue("Heap", "uiHeapMaxSize", 800, IniPath);
-	config.uiHeapInitialSize = GetOrCreateINIValue("Heap", "uiHeapInitialSize", 600, IniPath);
+	config.uiHeapMaxSizeMB = GetOrCreateINIValue("Heap", "uiHeapMaxSizeMB", 800, IniPath);
+	config.uiHeapInitialSizeMB = GetOrCreateINIValue("Heap", "uiHeapInitialSizeMB", 600, IniPath);
 }
 
 #define INI_SETTING_NOT_FOUND -1
