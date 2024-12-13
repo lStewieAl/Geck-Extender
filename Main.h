@@ -1820,7 +1820,6 @@ _declspec(naked) void RenderWindowHandleRefRotationHook()
 	}
 }
 
-
 _declspec(naked) void ExportFaceGenCheckIsFormEdited()
 {
 	static const UInt32 retnAddr = 0x442055;
@@ -2058,7 +2057,6 @@ void PatchCellExtraDataCrash()
 {
 	WriteRelCall(0x4B0025, UInt32(LoadCellCheckLinkedRefNullHook));
 }
-
 
 void* g_heapManager = reinterpret_cast<void*>(0xF21B5C);
 
@@ -4008,8 +4006,7 @@ bool __fastcall CompileFilesLoadRecursiveMasters(DataHandler* dataHandler)
 					}
 					else
 					{
-						int numMasters = file->iMasterCount;
-						for (int i = 0; i < numMasters; ++i)
+						for (int i = 0, n = file->iMasterCount; i < n; ++i)
 						{
 							auto nthMaster = file->m_pMasterPtrs[i];
 							if (nthMaster && !nthMaster->IsBadVersion())

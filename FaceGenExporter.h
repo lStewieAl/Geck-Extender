@@ -66,7 +66,6 @@ namespace FaceGenExporter {
 			return D3DERR_INVALIDCALL;
 		}
 
-
 		// Get texture description
 		D3DSURFACE_DESC kDesc;
 		spSourceTexture->GetLevelDesc(0, &kDesc);

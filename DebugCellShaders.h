@@ -15,8 +15,6 @@ enum DebugRenderModes {
 #define ShaderConstant_AmbientColor30 (*(NiColorAlpha*)0xF2B988)
 #define BSBatchRenderer_pCurrentPass (*(BSShaderProperty::RenderPass**)0xF23C30)
 
-
-
 static const NiColorAlpha LightCountDebugColors[] = {
 	NiColorAlpha(0.0f, 1.0f, 0.0f, 1.0f),
 	NiColorAlpha(0.0f, 0.8f, 0.2f, 1.0f),
@@ -50,7 +48,6 @@ static const NiColorAlpha PassCountDebugColors[] = {
 	NiColorAlpha(0.875f, 0.0f, 0.125f, 1.0f),
 	NiColorAlpha(1.0f, 0.0f, 0.0f, 1.0f),
 };
-
 
 _declspec(naked) void DebugShaderHook925E80()
 {
@@ -146,7 +143,6 @@ _declspec(naked) void DebugShaderHook965B40()
 	}
 }
 
-
 // TODO - Wall
 // Attach bAutoLightWarnings to some button or a hotkey
 // Finish Lighting30Shader variant
@@ -216,7 +212,6 @@ void __stdcall Lighting30Shader_UpdateAmbientColor30Ex(NiMaterialProperty* apMat
 	HandleDebugRender(nullptr, apShaderProperty, nullptr, nullptr, apMaterialProperty, true);
 }
 
-
 void __fastcall BSShaderPPLightingProperty__AddPass_Opt(void* apThis, void*, void* apGeometry, void* apLight0, UInt16* apusPassCount, BOOL abAddPass, bool* abEnable, bool abSkinned, bool abGlowMap, bool abSpecular, bool bFacegen, bool abHasLights) {
 	if (abAddPass == 0) {
 		(*apusPassCount)++;
@@ -237,7 +232,6 @@ void __fastcall ShadowLightShader__SetAmbientColor(void* apThis) {
 	}
 }
 
-
 void RestoreRenderWindowDebugShaders()
 {
 	// Needs more decoding. They are for 3.0 shaders which are not that important for now - Wall
@@ -251,7 +245,6 @@ void RestoreRenderWindowDebugShaders()
 
 	WriteRelCall(0x94FD81, UInt32(ShadowLightShader__SetAmbientColor));
 	WriteRelCall(0x94FFC1, UInt32(ShadowLightShader__SetAmbientColor));
-
 
 	// Crash fix
 	WriteRelCall(0x98158C, UInt32(BSShaderPPLightingProperty__AddPass_Opt));
