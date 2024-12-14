@@ -111,3 +111,8 @@ UInt32 __stdcall GetRelJumpAddr(UInt32 jumpSrc)
 {
 	return *(UInt32*)(jumpSrc + 1) + jumpSrc + 5;
 }
+
+void ReplaceCall(UInt32 jumpSrc, UInt32 jumpTgt)
+{
+	SafeWrite32(jumpSrc + 1, jumpTgt - jumpSrc - 1 - 4);
+}

@@ -522,3 +522,19 @@ public:
 	void CleanUpUnusedTextures(bool bEmergencyTextureRelease = false) { ThisCall(0x4C7D70, this, bEmergencyTextureRelease); };
 	bool GetLandHeight(NiPoint3* cameraPos, float* heightOut);
 };
+
+class TLSData {
+public:
+	UInt32					unk000;
+	UInt32					unk004;
+	struct ExtraDataList*	pLastExtraList;
+	UInt32					uiDirtyCount;
+	class BSExtraData*		pLastExtraDatas[0x93];
+	UInt32					unk[13];
+	UInt32					uiHeapIndex;
+
+
+	static TLSData* GetTLSData();
+	static UInt32 GetHeapIndex();
+	static void SetHeapIndex(UInt32 index);
+};

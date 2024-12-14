@@ -20,3 +20,17 @@ void WriteRelJle(UInt32 jumpSrc, UInt32 jumpTgt);
 [[nodiscard]] __declspec(noinline) UInt32 __stdcall DetourVtable(UInt32 addr, UInt32 dst);
 [[nodiscard]] __declspec(noinline) UInt32 __stdcall DetourRelCall(UInt32 jumpSrc, UInt32 jumpTgt);
 UInt32 __stdcall GetRelJumpAddr(UInt32 jumpSrc);
+
+void ReplaceCall(UInt32 jumpSrc, UInt32 jumpTgt);
+
+template <typename C, typename Ret, typename... Args>
+void ReplaceCallEx(UInt32 source, Ret(C::* const target)(Args...)) {
+	union
+	{
+		Ret(C::* tgt)(Args...);
+		UInt32 funcPtr;
+	} conversion;
+	conversion.tgt = target;
+
+	ReplaceCall(source, conversion.funcPtr);
+}

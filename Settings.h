@@ -94,6 +94,9 @@ struct Settings
 			unsigned int uPrimitiveColor_Collision;
 		};
 	};
+
+	UInt32 uiHeapMaxSizeMB;
+	UInt32 uiHeapInitialSizeMB;
 };
 
 extern Settings config;

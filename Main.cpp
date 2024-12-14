@@ -45,12 +45,16 @@
 #include "FaceGenExporter.h"
 #include "ONAMFix.h"
 #include "SCOLConsistencyFix.h"
+#include "Allocator/MemoryManager.hpp"
+#include "Allocator/BSMemory.hpp"
 
 #include "Events/EventManager.h"
 #include "Events/Events.h"
 
 #define STB_SPRINTF_IMPLEMENTATION
 #include "PrintReplacer.hpp"
+
+BS_ALLOCATORS
 
 extern "C"
 {
@@ -99,6 +103,10 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	_DMESSAGE("Geck Extender Base Address: %08X", GetModuleHandle("ZeGaryHax.dll"));
 	ReadAllSettings();
+
+	// Increase heap size and add memory pools for a hefty performance boost
+	ReplaceCallEx(0x853BF1, &MemoryManager::Initialize);
+
 	EventManager::InitHooks();
 
 	DisableProcessWindowsGhosting();
