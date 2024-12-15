@@ -299,7 +299,10 @@ namespace MultiBoundsAdder {
 			return;
 		}
 
-		Console_Print("Testing cell %s (%08X)", apCell->GetEditorID(), apCell->refID);
+		char buf[0x200];
+		stbsp_snprintf(buf, sizeof(buf), "Testing cell %s (%08X)", apCell->GetEditorID(), apCell->refID);
+		TESCSMain__WriteToStatusBar(3, buf);
+		Console_Print("%s", buf);
 
 		bool bModified = false;
 
@@ -489,6 +492,9 @@ namespace MultiBoundsAdder {
 				}
 			}
 		}
+
+		PlaySound("MouseClick", NULL, SND_ASYNC);
+		TESCSMain__WriteToStatusBar(3, "Done.");
 	}
 
 	void InitHooks() {
