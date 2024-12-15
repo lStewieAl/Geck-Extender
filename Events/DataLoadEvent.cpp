@@ -1,5 +1,6 @@
 #include "DataLoadEvent.h"
 #include "Utilities.h"
+#include "GECKUtility.h"
 
 namespace DataLoadEvent
 {
@@ -20,7 +21,7 @@ namespace DataLoadEvent
 
 	void __cdecl OnEndLoading(int statusBarId, const char* msg)
 	{
-		CdeclCall(0x4657A0, statusBarId, msg);
+		TESCSMain__WriteToStatusBar(statusBarId, msg);
 
 		for (auto& listener : listeners) {
 			listener();

@@ -424,3 +424,5 @@ union Color
 		UInt8 a, b, g, r;
 	};
 };
+
+LRESULT __cdecl TESCSMain__WriteToStatusBar(unsigned int statusBarId, const char* msg);

@@ -2186,10 +2186,10 @@ struct EntryPointFieldTypeInfoArray
 	EntryPointFieldTypeInfo infos[9];
 } *entryPointInfoArray = (EntryPointFieldTypeInfoArray*)0xE97D74;
 
-void __cdecl ExportDialogueEndPlaySound(WPARAM wParam, LPARAM lParam)
+void __cdecl ExportDialogueEndPlaySound(WPARAM statusBarId, const char* msg)
 {
 	PlaySound("MouseClick", NULL, SND_ASYNC);
-	CdeclCall(0x4657A0, wParam, lParam);
+	TESCSMain__WriteToStatusBar(statusBarId, msg);
 }
 
 errno_t __cdecl OnGetMeshPathModifyIfDragDrop(char* Dst, rsize_t SizeInBytes, const char* Src)
@@ -3148,7 +3148,7 @@ __HOOK CellViewWindowResizeFixHook()
 	}
 }
 
-void __cdecl HideCSMainDialogsStartup(WPARAM wParam, LPARAM lParam)
+void __cdecl HideCSMainDialogsStartup(unsigned int statusBarId, const char* msg)
 {
 	if (config.bHideRenderWindow)
 	{
@@ -3165,7 +3165,7 @@ void __cdecl HideCSMainDialogsStartup(WPARAM wParam, LPARAM lParam)
 		SendMessage(g_MainHwnd, WM_COMMAND, 40200, NULL); // kMainMenu_View_CellWindow
 	}
 
-	return CdeclCall(0x4657A0, wParam, lParam);
+	TESCSMain__WriteToStatusBar(statusBarId, msg);
 }
 
 void __fastcall DoNumericEditorIDCheck(TESForm* Form, const char* EditorID)

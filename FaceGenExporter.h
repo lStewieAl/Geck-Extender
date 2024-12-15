@@ -15,8 +15,6 @@ namespace fs = std::filesystem;
 
 extern bool g_bPauseLogging;
 
-LRESULT (__cdecl* FooterPrint)(WPARAM, LPARAM) = (LRESULT(__cdecl*)(WPARAM, LPARAM))(0x4657A0);
-
 using namespace ABI::Windows::Foundation;
 using namespace Microsoft::WRL;
 using namespace Microsoft::WRL::Wrappers;
@@ -192,15 +190,15 @@ namespace FaceGenExporter {
 		}
 	}
 
-	LRESULT __cdecl ActionStart2(WPARAM wParam, LPARAM lParam)  {
-		LRESULT result = CdeclCall<LRESULT>(0x4657A0, wParam, lParam);
+	LRESULT __cdecl ActionStart2(unsigned int statusBarId, const char* msg)  {
+		LRESULT result = TESCSMain__WriteToStatusBar(statusBarId, msg);
 		g_bPauseLogging = true;
 		return result;
 	}
 
-	LRESULT __cdecl ActionEnd(WPARAM wParam, LPARAM lParam) {
+	LRESULT __cdecl ActionEnd(unsigned int statusBarId, const char* msg) {
 		g_bPauseLogging = false;
-		return CdeclCall<LRESULT>(0x4657A0, wParam, lParam);
+		return TESCSMain__WriteToStatusBar(statusBarId, msg);
 	}
 
 	static void InitHooks() {
