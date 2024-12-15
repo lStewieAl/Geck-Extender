@@ -116,9 +116,10 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
     </Link>
     <PostBuildEvent>
       <Message>Installing DLL...</Message>
-      <Command>taskkill /F /IM x32dbg.exe 2&amp;gt;nul
+      <Command>taskkill /F /IM x32dbg.exe 2&gt;nul
 copy "$(TargetPath)" "$(FalloutNVPath)\Data\nvse\plugins\$(TargetFileName)"
-copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(TargetName).pdb" "$(MO2Path)\ModOrganizer.exe" "moshortcut://:GECK x32dbg"</Command>
+copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(TargetName).pdb"
+"$(MO2Path)\ModOrganizer.exe" "moshortcut://:GECK x32dbg"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

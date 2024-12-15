@@ -81,10 +81,10 @@ const char* TESBipedModelForm::GetPath(UInt32 whichPath, bool bFemalePath)
 
 SInt8 TESActorBaseData::GetFactionRank(TESFaction* faction)
 {
-	for(tList<FactionListData>::Iterator iter = factionList.Begin(); !iter.End(); ++iter)
+	for (tList<FactionListData>::Iterator iter = factionList.Begin(); !iter.End(); ++iter)
 	{
-		FactionListData	* data = iter.Get();
-		if(data && (data->faction == faction))
+		FactionListData* data = iter.Get();
+		if (data && (data->faction == faction))
 			return data->rank;
 	}
 
@@ -95,19 +95,19 @@ void TESActorBaseData::SetFactionRank(TESFaction* faction, SInt8 rank)
 	bool found = false;
 	int count = 0;
 	TESActorBaseData::FactionListData* entry = NULL;
-	for(auto iter = factionList.Begin(); !iter.End(); ++iter)
+	for (auto iter = factionList.Begin(); !iter.End(); ++iter)
 	{
 		entry = iter.Get();
-		if(entry->faction == faction)
+		if (entry->faction == faction)
 		{
 			found = true;
 			break;
 		}
 		count++;	// oh, iterators...
 	}
-	if(found)
+	if (found)
 	{
-		if(rank > -1) factionList.GetNthItem(count)->rank = rank;
+		if (rank > -1) factionList.GetNthItem(count)->rank = rank;
 		else
 		{	// SetFactionRank deletes the faction if the rank is negative
 			factionList.RemoveNth(count);
@@ -136,8 +136,8 @@ static const UInt8 kHandGripTable[] =
 
 UInt8 TESObjectWEAP::HandGrip() const
 {
-	for(UInt32 i = 0; i < sizeof(kHandGripTable) / sizeof(kHandGripTable[0]); i++)
-		if(handGrip == kHandGripTable[i])
+	for (UInt32 i = 0; i < sizeof(kHandGripTable) / sizeof(kHandGripTable[0]); i++)
+		if (handGrip == kHandGripTable[i])
 			return i;
 
 	return 0;
@@ -145,193 +145,145 @@ UInt8 TESObjectWEAP::HandGrip() const
 
 void TESObjectWEAP::SetHandGrip(UInt8 _handGrip)
 {
-	if(_handGrip < sizeof(kHandGripTable) / sizeof(kHandGripTable[0]))
+	if (_handGrip < sizeof(kHandGripTable) / sizeof(kHandGripTable[0]))
 		handGrip = kHandGripTable[_handGrip];
 }
 
 UInt8 TESObjectWEAP::AttackAnimation() const
 {
-	switch(attackAnim) {
-		case eAttackAnim_Default:		return 0;
-		case eAttackAnim_Attack3:		return 1;
-		case eAttackAnim_Attack4:		return 2;
-		case eAttackAnim_Attack5:		return 3;
-		case eAttackAnim_Attack6:		return 4;
-		case eAttackAnim_Attack7:		return 5;
-		case eAttackAnim_Attack8:		return 6;
-		case eAttackAnim_AttackLeft:	return 7;
-		case eAttackAnim_AttackLoop:	return 8;
-		case eAttackAnim_AttackRight:	return 9;
-		case eAttackAnim_AttackSpin:	return 10;
-		case eAttackAnim_AttackSpin2:	return 11;
-		case eAttackAnim_AttackThrow:	return 12;
-		case eAttackAnim_AttackThrow2:	return 13;
-		case eAttackAnim_AttackThrow3:	return 14;
-		case eAttackAnim_AttackThrow4:	return 15;
-		case eAttackAnim_AttackThrow5:	return 16;
-		case eAttackAnim_PlaceMine:		return 17;
-		case eAttackAnim_PlaceMine2:	return 18;
+	switch (attackAnim) {
+	case eAttackAnim_Default:		return 0;
+	case eAttackAnim_Attack3:		return 1;
+	case eAttackAnim_Attack4:		return 2;
+	case eAttackAnim_Attack5:		return 3;
+	case eAttackAnim_Attack6:		return 4;
+	case eAttackAnim_Attack7:		return 5;
+	case eAttackAnim_Attack8:		return 6;
+	case eAttackAnim_AttackLeft:	return 7;
+	case eAttackAnim_AttackLoop:	return 8;
+	case eAttackAnim_AttackRight:	return 9;
+	case eAttackAnim_AttackSpin:	return 10;
+	case eAttackAnim_AttackSpin2:	return 11;
+	case eAttackAnim_AttackThrow:	return 12;
+	case eAttackAnim_AttackThrow2:	return 13;
+	case eAttackAnim_AttackThrow3:	return 14;
+	case eAttackAnim_AttackThrow4:	return 15;
+	case eAttackAnim_AttackThrow5:	return 16;
+	case eAttackAnim_PlaceMine:		return 17;
+	case eAttackAnim_PlaceMine2:	return 18;
 
-		default:
-			return -1;
+	default:
+		return -1;
 	}
 }
 
 void TESObjectWEAP::SetAttackAnimation(UInt8 _attackAnim)
 {
-	switch(_attackAnim) {
-		case 0: {
-			attackAnim = eAttackAnim_Default; 
-			break;
-		}
-		case 1: {
-			attackAnim = eAttackAnim_Attack3; 
-			break;
-		}
-		case 2: {
-			attackAnim = eAttackAnim_Attack4;
-			break;
-		}
-		case 3: {
-			attackAnim = eAttackAnim_Attack5;
-			break;
-		}
-		case 4: {
-			attackAnim = eAttackAnim_Attack6;
-			break;
-		}
-		case 5: {
-			attackAnim = eAttackAnim_Attack7;
-			break;
-		}
-		case 6: {
-			attackAnim = eAttackAnim_Attack8;
-			break;
-		}
-		
-		case 7: {
-			attackAnim = eAttackAnim_AttackLeft;
-			break;
-		}
-		case 8: {
-			attackAnim = eAttackAnim_AttackLoop;
-			break;
-		}
-		case 9: {
-			attackAnim = eAttackAnim_AttackRight;
-			break;
-		}
-		case 10: {
-			attackAnim = eAttackAnim_AttackSpin;
-			break;
-		}
-		case 11: {
-			attackAnim = eAttackAnim_AttackSpin2;
-			break;
-		}
-		case 12: {
-			attackAnim = eAttackAnim_AttackThrow;
-			break;
-		}
-		case 13: {
-			eAttackAnim_AttackThrow2;
-			break;
-		}
-		case 14: {
-			attackAnim = eAttackAnim_AttackThrow3;
-			break;
-		}
-		case 15: {
-			attackAnim = eAttackAnim_AttackThrow4;
-			break;
-		}
-		case 16: {
-			attackAnim = eAttackAnim_AttackThrow5;
-			break;
-		}
-		case 17: {
-			attackAnim = eAttackAnim_PlaceMine;
-			break;
-		}
-		case 18: {
-			attackAnim = eAttackAnim_PlaceMine2;
-			break;
-		}
-		default:
-			break;
+	switch (_attackAnim) {
+	case 0: {
+		attackAnim = eAttackAnim_Default;
+		break;
+	}
+	case 1: {
+		attackAnim = eAttackAnim_Attack3;
+		break;
+	}
+	case 2: {
+		attackAnim = eAttackAnim_Attack4;
+		break;
+	}
+	case 3: {
+		attackAnim = eAttackAnim_Attack5;
+		break;
+	}
+	case 4: {
+		attackAnim = eAttackAnim_Attack6;
+		break;
+	}
+	case 5: {
+		attackAnim = eAttackAnim_Attack7;
+		break;
+	}
+	case 6: {
+		attackAnim = eAttackAnim_Attack8;
+		break;
+	}
+
+	case 7: {
+		attackAnim = eAttackAnim_AttackLeft;
+		break;
+	}
+	case 8: {
+		attackAnim = eAttackAnim_AttackLoop;
+		break;
+	}
+	case 9: {
+		attackAnim = eAttackAnim_AttackRight;
+		break;
+	}
+	case 10: {
+		attackAnim = eAttackAnim_AttackSpin;
+		break;
+	}
+	case 11: {
+		attackAnim = eAttackAnim_AttackSpin2;
+		break;
+	}
+	case 12: {
+		attackAnim = eAttackAnim_AttackThrow;
+		break;
+	}
+	case 13: {
+		eAttackAnim_AttackThrow2;
+		break;
+	}
+	case 14: {
+		attackAnim = eAttackAnim_AttackThrow3;
+		break;
+	}
+	case 15: {
+		attackAnim = eAttackAnim_AttackThrow4;
+		break;
+	}
+	case 16: {
+		attackAnim = eAttackAnim_AttackThrow5;
+		break;
+	}
+	case 17: {
+		attackAnim = eAttackAnim_PlaceMine;
+		break;
+	}
+	case 18: {
+		attackAnim = eAttackAnim_PlaceMine2;
+		break;
+	}
+	default:
+		break;
 	}
 }
 
 TESObjectIMOD* TESObjectWEAP::GetItemMod(UInt8 which)
 {
 	TESObjectIMOD* pMod = NULL;
-	switch(which) {
-		case 1: pMod = itemMod1; break;
-		case 2: pMod = itemMod2; break;
-		case 3: pMod = itemMod3; break;
+	switch (which) {
+	case 1: pMod = itemMod1; break;
+	case 2: pMod = itemMod2; break;
+	case 3: pMod = itemMod3; break;
 	}
 	return pMod;
-}
-
-
-class FindByForm {
-	TESForm* m_pForm;
-public:
-	FindByForm(TESForm* pForm) : m_pForm(pForm) {}
-	bool Accept(TESForm* pForm) const {
-		return pForm && (pForm->refID == m_pForm->refID) ? true : false;
-	}
-};
-
-SInt32 BGSListForm::GetIndexOf(TESForm* pForm)
-{
-	return list.GetIndexOf(FindByForm(pForm));
-}
-
-SInt32 BGSListForm::RemoveForm(TESForm* pForm)
-{
-	SInt32 index = GetIndexOf(pForm);
-	if (index >= 0) {
-		RemoveNthForm(index);
-	}
-	return index;
-}
-
-SInt32 BGSListForm::ReplaceForm(TESForm* pForm, TESForm* pReplaceWith)
-{
-	SInt32 index = GetIndexOf(pForm);
-	if (index >= 0) {
-		list.ReplaceNth(index, pReplaceWith);
-	}
-	return index;
-}
-
-bool TESForm::IsInventoryObject() const
-{
-	typedef bool (* _IsInventoryObjectType)(UInt32 formType);
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
-	static _IsInventoryObjectType IsInventoryObjectType = (_IsInventoryObjectType)0x00481F30;	// first call from first case of main switch in _ExtractArg
-#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-	static _IsInventoryObjectType IsInventoryObjectType = (_IsInventoryObjectType)0x00482F50;	// first call from first case of main switch in _ExtractArg
-#elif EDITOR
-	static _IsInventoryObjectType IsInventoryObjectType = (_IsInventoryObjectType)0x004F4100;	// first call from first case of main switch in Cmd_DefaultParse
-#else
-#error
-#endif
-	return IsInventoryObjectType(typeID);
 }
 
 const char* TESPackage::TargetData::StringForTargetCode(UInt8 targetCode)
 {
 	switch (targetCode) {
-		case TESPackage::kTargetType_Refr:
-			return "Reference";
-		case TESPackage::kTargetType_BaseObject:
-			return "Object";
-		case TESPackage::kTargetType_TypeCode:
-			return "ObjectType";
-		default:
-			return NULL;
+	case TESPackage::kTargetType_Refr:
+		return "Reference";
+	case TESPackage::kTargetType_BaseObject:
+		return "Object";
+	case TESPackage::kTargetType_TypeCode:
+		return "ObjectType";
+	default:
+		return NULL;
 	}
 }
 
@@ -398,7 +350,7 @@ void TESPackage::SetTarget(UInt8 typeCode, UInt32 count)
 		TargetData* tdata = GetTargetData();
 		tdata->targetType = kTargetType_TypeCode;
 		tdata->target.objectCode = typeCode;
-		tdata->count= count;
+		tdata->count = count;
 	}
 }
 
@@ -491,13 +443,13 @@ static const char* TESPackage_TypeStrings[] = {
 };
 
 static const char* TESPackage_ProcedureStrings[] = {
-	"TRAVEL", "ACTIVATE", "ACQUIRE", "WAIT", "DIALOGUE", "GREET", "GREET DEAD", "WANDER", "SLEEP", 
-	"OBSERVE COMBAT", "EAT", "FOLLOW", "ESCORT", "COMBAT", "ALARM", "PURSUE", "FLEE", "DONE", "YELD", 
+	"TRAVEL", "ACTIVATE", "ACQUIRE", "WAIT", "DIALOGUE", "GREET", "GREET DEAD", "WANDER", "SLEEP",
+	"OBSERVE COMBAT", "EAT", "FOLLOW", "ESCORT", "COMBAT", "ALARM", "PURSUE", "FLEE", "DONE", "YELD",
 	"TRAVEL TARGET", "CREATE FOLLOW", "GET UP", "MOUNT HORSE", "DISMOUNT HORSE", "DO NOTHING", "UNKNOWN 019", "UNKNOWN 01B",
-	"ACCOMPANY", "USE ITEM AT", "AIM", "NOTIFY", "SANDMAN", "WAIT AMBUSH", "SURFACE", "WAIT FOR SPELL", "CHOOSE CAST", 
-	"FLEE NON COMBAT", "REMOVE WORN ITEMS", "SEARCH", "CLEAR MOUNT POSITION", "SUMMON CREATURE DEFEND", "AVOID AREA", 
-	"UNEQUIP ARMOR", "PATROL", "USE WEAPON", "DIALOGUE ACTIVATE", "GUARD", "SANDBOX", "USE IDLE MARKER", "TAKE BACK ITEM", 
-	"SITTING", "MOVEMENT BLOCKED", "CANIBAL FEED", 
+	"ACCOMPANY", "USE ITEM AT", "AIM", "NOTIFY", "SANDMAN", "WAIT AMBUSH", "SURFACE", "WAIT FOR SPELL", "CHOOSE CAST",
+	"FLEE NON COMBAT", "REMOVE WORN ITEMS", "SEARCH", "CLEAR MOUNT POSITION", "SUMMON CREATURE DEFEND", "AVOID AREA",
+	"UNEQUIP ARMOR", "PATROL", "USE WEAPON", "DIALOGUE ACTIVATE", "GUARD", "SANDBOX", "USE IDLE MARKER", "TAKE BACK ITEM",
+	"SITTING", "MOVEMENT BLOCKED", "CANIBAL FEED",
 };
 
 const char* TESPackage::StringForPackageType(UInt32 pkgType)
@@ -529,7 +481,7 @@ UInt8 TESPackage::ObjectCodeForString(const char* objString)
 }
 
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525 || RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-	static const char** s_procNames = (const char**)0x011A3CC0;
+static const char** s_procNames = (const char**)0x011A3CC0;
 #elif EDITOR
 #else
 #error unsupported Fallout version
@@ -583,7 +535,7 @@ UInt8 TESPackage::PackageTime::CodeForDay(const char* dayStr)
 {
 	for (UInt8 i = 0; i < sizeof(TESPackage_DayStrings); i++) {
 		if (!_stricmp(dayStr, TESPackage_DayStrings[i])) {
-			return i-1;
+			return i - 1;
 		}
 	}
 
@@ -594,7 +546,7 @@ UInt8 TESPackage::PackageTime::CodeForMonth(const char* monthStr)
 {
 	for (UInt8 i = 0; i < sizeof(TESPackage_MonthString); i++) {
 		if (!_stricmp(monthStr, TESPackage_MonthString[i])) {
-			return i-1;
+			return i - 1;
 		}
 	}
 
@@ -613,55 +565,23 @@ const char* TESPackage::LocationData::StringForLocationCodeAndData(void)
 #define resultSize 256
 	static char result[resultSize];
 	if (locationType < kPackLocation_Max) {
-		switch (locationType) { 
-			case kPackLocation_NearReference:
-			case kPackLocation_InCell:
-			case kPackLocation_ObjectID:
-				if (object.form)
-					stbsp_snprintf(result, resultSize, "%s \"%s\" [%08X] with a radius of %u", TESPackage_LocationStrings[locationType], object.form->GetTheName(), 
-						object.form->refID, radius);
-				else
-					stbsp_snprintf(result, resultSize, "%s \"\" [%08X] with a radius of %u", TESPackage_LocationStrings[locationType], 0, radius);
-				break;
-			case kPackLocation_ObjectType:
-				stbsp_snprintf(result, resultSize, "%s \"%s\" [%04X] with a radius of %u", TESPackage_LocationStrings[locationType], StringForObjectCode(object.objectCode),
-					object.objectCode, radius);
-				break;
-			default:
-				stbsp_snprintf(result, resultSize, "%s with a radius of %u", TESPackage_LocationStrings[locationType], radius);
-				break;
-		}
-		return result;
-	}
-	return "";
-}
-
-const char* TESPackage::TargetData::StringForTargetCodeAndData(void)
-{
-#define resultSize 256
-	static char result[resultSize];
-	if (targetType < kTargetType_Max) {
-		switch (targetType) { 
-			case kTargetType_Refr:
-				if (target.refr)
-					stbsp_snprintf(result, resultSize, "%s \"%s\" [%08X] with a distance of %u", StringForTargetCode(targetType), target.refr->GetTheName(),
-						target.refr->refID, count);
-				else
-					stbsp_snprintf(result, resultSize, "%s [%08X] with a distance of %u", StringForTargetCode(targetType), 0, count);
-				break;
-			case kTargetType_BaseObject:
-				if (target.form)
-					stbsp_snprintf(result, resultSize, "%s \"%s\" [%08X] with a count of %u", StringForTargetCode(targetType), target.form->GetTheName(), target.form->refID, count);
-				else
-					stbsp_snprintf(result, resultSize, "%s [%08X] with a count of %u", StringForTargetCode(targetType), 0, count);
-				break;
-			case kTargetType_TypeCode:
-				stbsp_snprintf(result, resultSize, "%s \"%s\" [%04X] with a radius of %u", StringForTargetCode(targetType), StringForObjectCode(target.objectCode),
-						target.objectCode, count);
-				break;
-			default:
-				stbsp_snprintf(result, resultSize, "%s with a radius of %u", StringForTargetCode(targetType), count);
-				break;
+		switch (locationType) {
+		case kPackLocation_NearReference:
+		case kPackLocation_InCell:
+		case kPackLocation_ObjectID:
+			if (object.form)
+				stbsp_snprintf(result, resultSize, "%s \"%s\" [%08X] with a radius of %u", TESPackage_LocationStrings[locationType], object.form->GetTheName(),
+					object.form->refID, radius);
+			else
+				stbsp_snprintf(result, resultSize, "%s \"\" [%08X] with a radius of %u", TESPackage_LocationStrings[locationType], 0, radius);
+			break;
+		case kPackLocation_ObjectType:
+			stbsp_snprintf(result, resultSize, "%s \"%s\" [%04X] with a radius of %u", TESPackage_LocationStrings[locationType], StringForObjectCode(object.objectCode),
+				object.objectCode, radius);
+			break;
+		default:
+			stbsp_snprintf(result, resultSize, "%s with a radius of %u", TESPackage_LocationStrings[locationType], radius);
+			break;
 		}
 		return result;
 	}
@@ -707,24 +627,10 @@ EffectItem* EffectItemList::ItemAt(UInt32 whichItem)
 	return list.GetNthItem(whichItem);
 }
 
-const char* EffectItemList::GetNthEIName(UInt32 whichEffect) const
-{
-	EffectItem* effItem = list.GetNthItem(whichEffect);
-	if (effItem->setting)
-		return GetFullName(effItem->setting);
-	else
-		return "<no name>";
-}
-
-BGSDefaultObjectManager* BGSDefaultObjectManager::GetSingleton()
-{
-	return *g_defaultObjectManager;
-}
-
-Script* EffectSetting::	SetScript(Script* newScript)
+Script* EffectSetting::SetScript(Script* newScript)
 {
 	Script* oldScript = NULL;
-	if (1 == archtype )
+	if (1 == archtype)
 	{
 		oldScript = (Script*)associatedItem;
 		associatedItem = (TESForm*)newScript;
@@ -732,7 +638,7 @@ Script* EffectSetting::	SetScript(Script* newScript)
 	return oldScript;
 };
 
-Script* EffectSetting::	RemoveScript()
+Script* EffectSetting::RemoveScript()
 {
 	return SetScript(NULL);
 };

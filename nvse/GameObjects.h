@@ -134,7 +134,7 @@ public:
 	bool CheckBound(const BSMultiBound* apBound) const;
 	bool IsInMultiBound(const BSMultiBound* apBound) const;
 
-	void MarkAsModified(bool abModified);
+	void MarkAsModified(bool abModified = true);
 
 	static bool CanSetMultibound(const TESObjectREFR* apRef, const TESObjectREFR* apBound);
 
