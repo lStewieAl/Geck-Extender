@@ -201,6 +201,7 @@
       <Filter>libs</Filter>
     </ClInclude>
     <ClInclude Include="PrintReplacer.hpp" />
+    <ClInclude Include="UnserializedIO.h" />
     <ClInclude Include="Allocator\BSMemory.hpp">
       <Filter>allocator</Filter>
     </ClInclude>

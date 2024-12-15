@@ -45,6 +45,7 @@
 #include "FaceGenExporter.h"
 #include "ONAMFix.h"
 #include "SCOLConsistencyFix.h"
+#include "UnserializedIO.h"
 #include "Allocator/MemoryManager.hpp"
 #include "Allocator/BSMemory.hpp"
 
@@ -98,6 +99,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	}
 
 	PrintReplacer::InitHooks();
+
+	UnserializedIO::InitHooks();
 
 	CreateLogFile();
 
