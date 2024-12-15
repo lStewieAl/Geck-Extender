@@ -19,8 +19,6 @@ using namespace ABI::Windows::Foundation;
 using namespace Microsoft::WRL;
 using namespace Microsoft::WRL::Wrappers;
 
-#pragma comment(lib, "DirectXTex/DirectXTex/Lib/DirectXTex.lib")
-
 namespace FaceGenExporter {
 	DXGI_FORMAT D3DToDXGI(D3DFORMAT aeFormat) {
 		switch (aeFormat) {
