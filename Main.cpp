@@ -1056,10 +1056,10 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// Fix geometry data created for SCOLs always using MUTABLE consistency, which increases memory usage
 	SCOLConsistencyFix::InitHooks();
 
-  // Fix newly created multibound not being registered in cells they were created in
+    // Fix newly created multibound not being registered in cells they were created in
 	MultiBoundsAdder::InitHooks();
 
-  InitCustomPrimitiveColors();
+    InitCustomPrimitiveColors();
 
 	// prevent the infos refreshing when clicking on a result in the 'Find Text' window
 	WriteRelCall(0x57D402, UInt32(OnLoadQuestGetTextSearchWindowHook));

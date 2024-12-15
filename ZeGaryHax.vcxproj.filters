@@ -90,6 +90,7 @@
     <ClCompile Include="Allocator\MemoryManager.cpp">
       <Filter>allocator</Filter>
     </ClCompile>
+    <ClCompile Include="MultiBoundsAdder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Main.h" />

@@ -173,6 +173,7 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="MultiBoundsAdder.cpp" />
     <ClCompile Include="NavMeshPickPreventer.cpp" />
     <ClCompile Include="nvse\GameAPI.cpp" />
     <ClCompile Include="nvse\GameBSExtraData.cpp">
