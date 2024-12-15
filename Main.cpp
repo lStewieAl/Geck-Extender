@@ -601,11 +601,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SafeWrite32(0x441CE9, UInt32(GlobalsWindowCallback));
 	SafeWrite32(0x441B11, UInt32(GamesettingsWindowCallback));
 
-	// add modifier CAPSLOCK for placing a random object from the objects palette 
-	if (config.bObjectPaletteAllowRandom)
-	{
-		WriteRelCall(0x45A6B8, UInt32(PlaceOPALObjectHook));
-	}
+	// add modifier CAPSLOCK for placing a random object from the objects palette, or select randomly if multiple items are highlighted
+	WriteRelCall(0x45A6B8, UInt32(PlaceOPALObjectHook));
 
 	// make the preferences window use 4 decimal places for config
 	for (UInt32 patchAddr : {0x44DC03, 0x44DC1D, 0x44DC51, 0x44D483, 0x44D4D5, 0x44D573, 0x44D58D, 0x44D5C1, 0x44D5DB})

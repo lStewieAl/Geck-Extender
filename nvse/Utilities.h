@@ -231,6 +231,7 @@ bool IsOnlyAlphaNumeric(const char* str);
 char* trim(char* str);
 
 void SelectAllItemsInListView(HWND listView);
+void* GetNthListItem(HWND hWnd, int n);
 TESForm* GetNthListForm(HWND hWnd, int n);
 void SetDeferListUpdate(HWND hWnd, bool bDefer = true);
 bool IsDialog(HWND hWnd);

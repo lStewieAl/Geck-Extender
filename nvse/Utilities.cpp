@@ -611,7 +611,7 @@ void SelectAllItemsInListView(HWND listView)
 	}
 }
 
-TESForm* GetNthListForm(HWND hWnd, int n)
+void* GetNthListItem(HWND hWnd, int n)
 {
 	if (n == -1)
 	{
@@ -623,7 +623,12 @@ TESForm* GetNthListForm(HWND hWnd, int n)
 	itemA.iItem = n;
 	itemA.mask = LVIS_CUT;
 	SendMessageA(hWnd, LVM_GETITEMA, 0, (LPARAM)&itemA);
-	return (TESForm*)itemA.lParam;
+	return (void*)itemA.lParam;
+}
+
+TESForm* GetNthListForm(HWND hWnd, int n)
+{
+	return (TESForm*)GetNthListItem(hWnd, n);
 }
 
 void SetDeferListUpdate(HWND hWnd, bool bDefer)

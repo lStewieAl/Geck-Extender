@@ -5,6 +5,12 @@ extern HWND g_mainWindowToolbar;
 
 struct ObjectPalette
 {
+	enum
+	{
+		kListView = 1018,
+		kComboBox = 1021
+	};
+
 	struct Object
 	{
 		char* name;			// 00
@@ -30,6 +36,7 @@ struct ObjectPalette
 	char* paletteName;					// 10
 
 	static ObjectPalette* GetSingleton();
+	static HWND GetWindow();
 };
 
 struct RenderWindow

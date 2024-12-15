@@ -129,6 +129,7 @@ int GetFlycamMode() {
 }
 
 ObjectPalette* ObjectPalette::GetSingleton() { return (ObjectPalette*)0xECE248; };
+HWND ObjectPalette::GetWindow() { return *(HWND*)0xECE23C; };
 
 HWND RenderWindow::GetWindow() { return *(HWND*)0xECFB40; };
 bool RenderWindow::GetMousePos(NiPoint3* aPosOut, NiPoint3* aRotOut) {

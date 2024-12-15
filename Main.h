@@ -1768,12 +1768,43 @@ _declspec(naked) void RefreshCellHook()
 UInt32 __fastcall PlaceOPALObjectHook(ObjectPalette::Object* current, void* edx, float* point1, float* point2)
 {
 	ObjectPalette::Object* toPlace = current;
-	if ((GetAsyncKeyState(VK_CAPITAL) < 0) ^ config.bObjectPaletteRandomByDefault)
-	{
-		ObjectPalette* opal = ObjectPalette::GetSingleton();
 
-		UInt32 randomIndex = rand() % opal->list.Count();
-		toPlace = opal->list.GetNthItem(randomIndex);
+	UInt32 randomIndex = -1;
+	if (auto hWnd = ObjectPalette::GetWindow())
+	{
+		auto listView = GetDlgItem(hWnd, ObjectPalette::kListView);
+		int selectedCount = ListView_GetSelectedCount(listView);
+		if (selectedCount > 1)
+		{
+			randomIndex = rand() % selectedCount;
+			unsigned int index = SendMessageA(listView, LVM_GETNEXTITEM, 0xFFFFFFFF, LVNI_SELECTED);
+
+			if (randomIndex)
+			{
+				do
+				{
+					auto startIndex = index;
+					index = SendMessageA(listView, LVM_GETNEXTITEM, startIndex, LVNI_SELECTED);
+				} while (index != -1 && --randomIndex);
+			}
+
+			auto randomItem = (ObjectPalette::Object*)GetNthListItem(listView, index);
+			if (randomIndex == 0 && randomItem) // if we've successfully looped and found an item
+			{
+				toPlace = randomItem;
+			}
+		}
+	}
+
+	if (randomIndex != 0 && config.bObjectPaletteAllowRandom)
+	{
+		if ((GetAsyncKeyState(VK_CAPITAL) < 0) ^ config.bObjectPaletteRandomByDefault)
+		{
+			ObjectPalette* opal = ObjectPalette::GetSingleton();
+
+			randomIndex = rand() % opal->list.Count();
+			toPlace = opal->list.GetNthItem(randomIndex);
+		}
 	}
 
 	return ThisCall(0x40BF90, toPlace, point1, point2);
