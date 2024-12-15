@@ -129,3 +129,21 @@ bool TES::IsCellLoaded(TESObjectCELL* apCell, bool abIgnoreBuffered) {
 void TES::LoadCell(TESObjectCELL* apCell) {
 	ThisCall(0x4CCAF0, this, apCell);
 };
+
+struct _TEB {
+	UInt32 padding[0x2C / 4];
+	struct TLSData** ThreadLocalStoragePointer;
+};
+
+TLSData* TLSData::GetTLSData() {
+	UInt32* pIndex = (UInt32*)0xF9879C;
+	return NtCurrentTeb()->ThreadLocalStoragePointer[*pIndex];
+}
+
+UInt32 TLSData::GetHeapIndex() {
+	return GetTLSData()->uiHeapIndex;
+}
+
+void TLSData::SetHeapIndex(UInt32 index) {
+	GetTLSData()->uiHeapIndex = index;
+}

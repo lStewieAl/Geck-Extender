@@ -84,6 +84,12 @@
       <Filter>Events</Filter>
     </ClCompile>
     <ClCompile Include="LaunchGame.cpp" />
+    <ClCompile Include="Allocator\BSMemory.cpp">
+      <Filter>allocator</Filter>
+    </ClCompile>
+    <ClCompile Include="Allocator\MemoryManager.cpp">
+      <Filter>allocator</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Main.h" />
@@ -196,6 +202,13 @@
       <Filter>libs</Filter>
     </ClInclude>
     <ClInclude Include="PrintReplacer.hpp" />
+    <ClInclude Include="UnserializedIO.h" />
+    <ClInclude Include="Allocator\BSMemory.hpp">
+      <Filter>allocator</Filter>
+    </ClInclude>
+    <ClInclude Include="Allocator\MemoryManager.hpp">
+      <Filter>allocator</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
@@ -209,6 +222,9 @@
     </Filter>
     <Filter Include="Events">
       <UniqueIdentifier>{1bb380f6-56f4-4fc9-ba3a-e62c69fdde31}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="allocator">
+      <UniqueIdentifier>{cb22c53f-26c7-42db-a540-6be8f8de712d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
