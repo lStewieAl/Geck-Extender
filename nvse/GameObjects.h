@@ -9,6 +9,7 @@ struct ScriptEventList;
 class ActiveEffect;
 class NiNode;
 class Animation;
+class BSMultiBound;
 
 // 008
 class TESChildCell
@@ -60,10 +61,10 @@ public:
 	virtual void		Unk_77(void);
 	virtual void		Unk_78(void);
 	virtual void		Unk_79(void);
-	virtual void		Unk_7A(void);
-	virtual NiNode*		GenerateNiNode(void);
-	virtual void		Unk_7C(void);
-	virtual NiNode*		Get3D(void);
+	virtual void		InitHavok(void);
+	virtual NiNode*		Load3D(bool abBackgroundLoading);
+	virtual void		Set3D(NiNode* apNode, int unused);
+	virtual NiNode*		Get3D(void) const;
 	virtual void		Unk_7E(void);
 	virtual void		Unk_7F(void);
 	virtual void		Unk_80(void);
@@ -72,7 +73,7 @@ public:
 	virtual UInt32		Unk_83(void);
 	virtual void		Unk_84(UInt32 arg0);
 	virtual UInt32		Unk_85(void);
-	virtual NiPoint3*	GetPos(void);
+	virtual NiPoint3*	GetPos(void) const;
 	virtual bool		Unk_87(void);
 	virtual bool		Unk_88(void);
 	virtual bool		Unk_89(void);
@@ -128,6 +129,24 @@ public:
 	TESContainer* GetContainer();
 	bool IsMapMarker();
 
+	void AddMultiBound(TESObjectREFR* apMultiBoundRef);
+
+	bool CheckBound(const BSMultiBound* apBound) const;
+	bool IsInMultiBound(const BSMultiBound* apBound) const;
+
+	void MarkAsModified(bool abModified);
+
+	static bool CanSetMultibound(const TESObjectREFR* apRef, const TESObjectREFR* apBound);
+
+	void SetMultiBound(TESObjectREFR* apBound);
+
+	bool IsMultiBoundOrRoomMarker() const;
+
+	const char* GetEquippableModelPath() const;
+
+	void Set3DSimple(NiNode* apNode);
+
+	NiMatrix33& GetOrientation(NiMatrix33& arMatrix) const;
 
 	void SetLinkedRef(TESObjectREFR* ref)
 	{

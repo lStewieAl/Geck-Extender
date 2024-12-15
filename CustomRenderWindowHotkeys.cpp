@@ -56,7 +56,7 @@ namespace CustomRenderWindowHotkeys
 		{
 			if (auto node = ref->Get3D())
 			{
-				if (node->GetAsNiNode())
+				if (node->IsNiNode())
 				{
 					if (node->IsVisible())
 					{
@@ -73,7 +73,7 @@ namespace CustomRenderWindowHotkeys
 		{
 			if (auto node = ref->Get3D())
 			{
-				if (node->GetAsNiNode())
+				if (node->IsNiNode())
 				{
 					node->SetVisible(!bAllDisabledRefsHidden);
 				}

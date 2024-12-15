@@ -1,165 +1,33 @@
 #include "GameForms.h"
 
-#include "GameAPI.h"
-#include "GameRTTI.h"
-#include "GameObjects.h"
-#include "GameData.h"
-
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
-static const ActorValueInfo** ActorValueInfoPointerArray = (const ActorValueInfo**)0x0011D61C8;		// See GetActorValueInfo
-static const _GetActorValueInfo GetActorValueInfo = (_GetActorValueInfo)0x00066E920;	// See GetActorValueName
-BGSDefaultObjectManager ** g_defaultObjectManager = (BGSDefaultObjectManager**)0x011CA80C;
-#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-static const ActorValueInfo** ActorValueInfoPointerArray = (const ActorValueInfo**)0x0011D61C8;		// See GetActorValueInfo (same as gore)
-static const _GetActorValueInfo GetActorValueInfo = (_GetActorValueInfo)0x0066E480;	// See GetActorValueName
-BGSDefaultObjectManager ** g_defaultObjectManager = (BGSDefaultObjectManager**)0x011CA80C;
-#else
-static const ActorValueInfo** ActorValueInfoPointerArray = (const ActorValueInfo**)0xED20A8;
-static const _GetActorValueInfo GetActorValueInfo = (_GetActorValueInfo)0x4912C0;
-BGSDefaultObjectManager ** g_defaultObjectManager = (BGSDefaultObjectManager**)0xED9650;
-#endif
-
-TESForm * TESForm::TryGetREFRParent(void)
-{
-	TESForm			* result = this;
-	if(result) {
-		TESObjectREFR	* refr = DYNAMIC_CAST(this, TESForm, TESObjectREFR);
-		if(refr && refr->baseForm)
-			result = refr->baseForm;
-	}
-	return result;
+// 0x6662D0
+TESObjectCELL* TESWorldSpace::GetCellAtCoord(SInt32 aiX, SInt32 aiY) const {
+	return ThisCall<TESObjectCELL*>(0x6662D0, this, aiX, aiY);
 }
 
-UInt8 TESForm::GetModIndex() const
-{
-	return (refID >> 24);
+// 0x6699B0
+TESObjectCELL* TESWorldSpace::GetCellAtPos(const NiPoint3& arPos) const {
+	return GetCellAtCoord(SInt32(arPos.x) >> 12, SInt32(arPos.y) >> 12);
 }
 
-TESFullName* TESForm::GetFullName()
-{
-	TESForm* baseForm = this;
-	TESFullName* fullName = NULL;
-
-	if (typeID >= kFormType_Reference && typeID <= kFormType_ACRE)	//handle MapMarkers and references
-	{
-		TESObjectREFR* refr = DYNAMIC_CAST(this, TESForm, TESObjectREFR);
-		//if (refr->baseForm->typeID == kFormType_Static)
-		//{
-		//	ExtraMapMarker* mapMarker = (ExtraMapMarker*)refr->extraDataList.GetByType(kExtraData_MapMarker);
-		//	if (mapMarker && mapMarker->data)
-		//		fullName = &mapMarker->data->fullName;
-		//}
-
-		if (!fullName)		//if not a mapmarker, use the base form instead
-			baseForm = refr->baseForm;
-	}
-	else if (typeID == kFormType_Cell)		// some exterior cells inherit name of parent worldspace
-	{
-		TESObjectCELL* cell = DYNAMIC_CAST(this, TESForm, TESObjectCELL);
-		if (cell && cell->worldSpace)
-			if (!cell->fullName.name.m_data || !cell->fullName.name.m_dataLen)
-					baseForm = cell->worldSpace;
-	}
-
-	if(!fullName)
-		fullName = DYNAMIC_CAST(baseForm, TESForm, TESFullName);
-	return fullName;
+// 0x6361C0
+NiNode* TESObjectCELL::Load3D() {
+	return ThisCall<NiNode*>(0x6361C0, this);
 }
 
-const char* TESForm::GetTheName()
-{
-	TESForm* baseForm = this;
-	TESFullName* fullName = GetFullName();
-	if (fullName)
-		return fullName->name.CStr();
-	return "";
+// 0x637610
+void TESObjectCELL::AttachModels(bool abSetupMopp) {
+	ThisCall(0x637610, this, abSetupMopp);
 }
 
-void TESForm::DoAddForm(TESForm* newForm, bool persist, bool record) const
-{
-	CALL_MEMBER_FN(DataHandler::GetSingleton(), DoAddForm)(newForm);
-
-	if(persist)
-	{
-		// Only some forms can be safely saved as SaveForm. ie TESPackage at the moment.
-		bool canSave = true;
-		TESPackage* package = DYNAMIC_CAST(newForm, TESForm, TESPackage);
-		if (package)
-			canSave = true;
-		// ... more ?
-
-		if (canSave)
-			CALL_MEMBER_FN(TESSaveLoadGame::Get(), AddCreatedForm)(newForm);
-	}
+// 0x629120
+void TESObjectCELL::AddObjectsToLoadedRefCollection() {
+	ThisCall(0x629120, this);
 }
 
-TESForm * TESForm::CloneForm(bool persist) const
-{
-	TESForm	* result = CreateFormInstance(typeID);
-	if(result)
-	{
-		result->CopyFrom(this);
-		// it looks like some fields are not copied, case in point: TESObjectCONT does not copy BoundObject information.
-		TESBoundObject* boundObject = DYNAMIC_CAST(result, TESForm, TESBoundObject);
-		if (boundObject)
-		{
-			TESBoundObject* boundSource = DYNAMIC_CAST(this, TESForm, TESBoundObject);
-			if (boundSource)
-			{
-				for (UInt8 i=0; i<6; i++)
-					boundObject->bounds[i] = boundSource->bounds[i];
-			}
-		}
-		DoAddForm(result, persist);
-	}
-
-	return result;
-}
-
-bool TESForm::IsCloned() const
-{
-	return GetModIndex() == 0xff;
-}
-
-// static
-UInt32 TESBipedModelForm::MaskForSlot(UInt32 slot)
-{
-	switch(slot) {
-		case ePart_Head:		return eSlot_Head;
-		case ePart_Hair:		return eSlot_Hair;
-		case ePart_UpperBody:	return eSlot_UpperBody;
-		case ePart_LeftHand:	return eSlot_LeftHand;
-		case ePart_RightHand:	return eSlot_RightHand;
-		case ePart_Weapon:		return eSlot_Weapon;
-		case ePart_PipBoy:		return eSlot_PipBoy;
-		case ePart_Backpack:	return eSlot_Backpack;
-		case ePart_Necklace:	return eSlot_Necklace;
-		case ePart_Headband:	return eSlot_Headband;
-		case ePart_Hat:			return eSlot_Hat;
-		case ePart_Eyeglasses:	return eSlot_Eyeglasses;
-		case ePart_Nosering:	return eSlot_Nosering;
-		case ePart_Earrings:	return eSlot_Earrings;
-		case ePart_Mask:		return eSlot_Mask;
-		case ePart_Choker:		return eSlot_Choker;
-		case ePart_MouthObject:	return eSlot_MouthObject;
-		case ePart_BodyAddon1:	return eSlot_BodyAddon1;
-		case ePart_BodyAddon2:	return eSlot_BodyAddon2;
-		case ePart_BodyAddon3:	return eSlot_BodyAddon3;
-		default:				return -1;
-	}
-}
-
-UInt32 TESBipedModelForm::GetSlotsMask() const {
-	return partMask;
-}
-
-void TESBipedModelForm::SetSlotsMask(UInt32 mask)
-{
-	partMask = (mask & ePartBitMask_Full);
-}
-
-UInt32 TESBipedModelForm::GetBipedMask() const {
-	return bipedFlags & 0xFF;
+// 0x62CEF0
+BSMultiBoundNode* TESObjectCELL::AddMultiBoundRef(TESObjectREFR* apMultiBound) {
+	return ThisCall<BSMultiBoundNode*>(0x62CEF0, this, apMultiBound);
 }
 
 void TESBipedModelForm::SetBipedMask(UInt32 mask)

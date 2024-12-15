@@ -450,6 +450,27 @@ class TESObjectCELL;
 class TESObjectREFR;
 class TESEffectShader;
 class ActiveEffect;
+class bhkBlendCollisionObject;
+class bhkNiCollisionObject;
+class bhkLimitedHingeConstraint;
+class bhkRigidBody;
+class BSFadeNode;
+class BSMultiBoundNode;
+class BSResizableTriShape;
+class BSSegmentedTriShape;
+class NiCloningProcess;
+class NiGeometry;
+class NiLines;
+class NiNode;
+class NiParticles;
+class NiStream;
+class NiTriBasedGeom;
+class NiTriShape;
+class NiTriStrips;
+class NiControllerManager;
+class NiObjectGroup;
+class NiBound;
+class NiViewerStringsArray;
 
 // member fn addresses
 #if RUNTIME
@@ -461,6 +482,12 @@ class ActiveEffect;
 		#error unsupported Runtime version
 	#endif
 #endif
+
+class NiFixedString {
+public:
+	char* m_kHandle;
+};
+
 
 struct NiMemObject
 {
@@ -477,6 +504,15 @@ public:
 
 //	void		** _vtbl;		// 000
 	UInt32		m_uiRefCount;	// 004 - name known
+
+	inline void IncRefCount() {
+		InterlockedIncrement(&m_uiRefCount);
+	}
+
+	inline void DecRefCount() {
+		if (!InterlockedDecrement(&m_uiRefCount))
+			DeleteThis();
+	}
 };
 
 // 008
@@ -486,39 +522,39 @@ public:
 	NiObject();
 	virtual ~NiObject();
 
-	virtual NiRTTI *	GetType(void);		// 02
-	virtual NiNode *	GetAsNiNode(void);	// 03 
-	virtual UInt32		Unk_04(void);		// 04
-	virtual UInt32		Unk_05(void);		// 05
-	virtual UInt32		Unk_06(void);		// 06
-	virtual UInt32		Unk_07(void);		// 07
-	virtual UInt32		Unk_08(void);		// 08
-	virtual UInt32		Unk_09(void);		// 09
-	virtual UInt32		Unk_0A(void);		// 0A
-	virtual UInt32		Unk_0B(void);		// 0B
-	virtual UInt32		Unk_0C(void);		// 0C
-	virtual UInt32		Unk_0D(void);		// 0D
-	virtual UInt32		Unk_0E(void);		// 0E
-	virtual UInt32		Unk_0F(void);		// 0F
-	virtual UInt32		Unk_10(void);		// 10
-	virtual UInt32		Unk_11(void);		// 11
-	virtual NiObject *	Copy(void);			// 12 (returns this, GetAsNiObject ?). Big doubt with everything below, except last which is 022
-	virtual void		Load(NiStream * stream);
-	virtual void		PostLoad(NiStream * stream);
-	virtual void		FindNodes(NiStream * stream);	// give NiStream all of the NiNodes we own
-	virtual void		Save(NiStream * stream);
-	virtual bool		Compare(NiObject * obj);
-	virtual void		DumpAttributes(NiTArray <char *> * dst);
-	virtual void		DumpChildAttributes(NiTArray <char *> * dst);
-	virtual void		Unk_1A(void);
-	virtual void		Unk_1B(UInt32 arg);
-	virtual void		Unk_1C(void);
-	virtual void		GetType2(void);					// calls GetType
-	virtual void		Unk_1E(UInt32 arg);
-	virtual void		Unk_1F(void);
-	virtual void		Unk_20(void);
-	virtual void		Unk_21(void);
-	virtual void		Unk_22(void);
+	virtual const NiRTTI*				GetRTTI() const;												// 02 | Returns NiRTTI of the object
+	virtual NiNode*						IsNiNode() const;												// 03 | Returns this if it's a NiNode, otherwise nullptr
+	virtual BSFadeNode*					IsFadeNode() const;												// 04 | Returns this if it's a BSFadeNode, otherwise nullptr
+	virtual BSMultiBoundNode*			IsMultiBoundNode() const;										// 05 | Returns this if it's a BSMultiBoundNode, otherwise nullptr
+	virtual NiGeometry*					IsGeometry() const;												// 06 | Returns this if it's a NiGeometry, otherwise nullptr
+	virtual NiTriBasedGeom*				IsTriBasedGeometry() const;										// 07 | Returns this if it's a NiTriBasedGeom, otherwise nullptr
+	virtual NiTriStrips*				IsTriStrips() const;											// 08 | Returns this if it's a NiTriStrips, otherwise nullptr
+	virtual NiTriShape*					IsTriShape() const;												// 09 | Returns this if it's a NiTriShape, otherwise nullptr
+	virtual BSSegmentedTriShape*		IsSegmentedTriShape() const;									// 10 | Returns this if it's a BSSegmentedTriShape, otherwise nullptr
+	virtual BSResizableTriShape*		IsResizableTriShape() const;									// 11 | Returns this if it's a BSResizableTriShape, otherwise nullptr
+	virtual NiParticles*				IsParticlesGeom() const;										// 12 | Returns this if it's a NiParticles, otherwise nullptr
+	virtual NiLines*					IsLinesGeom() const;											// 13 | Returns this if it's a NiLines, otherwise nullptr
+	virtual bhkNiCollisionObject*		IsBhkNiCollisionObject() const;									// 14 | Returns this if it's a bhkNiCollisionObject, otherwise nullptr
+	virtual bhkBlendCollisionObject*	IsBhkBlendCollisionObject() const;								// 15 | Returns this if it's a bhkBlendCollisionObject, otherwise nullptr
+	virtual bhkRigidBody*				IsBhkRigidBody() const;											// 16 | Returns this if it's a bhkRigidBody, otherwise nullptr
+	virtual bhkLimitedHingeConstraint*	IsBhkLimitedHingeConstraint() const;							// 17 | Returns this if it's a bhkLimitedHingeConstraint, otherwise nullptr
+	virtual NiObject*					CreateClone(NiCloningProcess& arCloning);						// 18 | Creates a clone of this object
+	virtual void						LoadBinary(NiStream* apStream);									// 19 | Loads objects from disk
+	virtual void						LinkObject(NiStream* apStream);									// 20 | Called by the streaming system to resolve links to other objects once it can be guaranteed that all objects have been loaded
+	virtual void						RegisterStreamables(NiStream* apStream);						// 21 | When an object is inserted into a stream, it calls register streamables to make sure that any contained objects or objects linked in a scene graph are streamed as well
+	virtual void						SaveBinary(NiStream* apStream);									// 22 | Saves objects to disk
+	virtual bool						IsEqual(NiObject* apObject) const;								// 23 | Compares this object with another
+	virtual void						GetViewerStrings(NiViewerStringsArray* apStrings);				// 24 | Gets strings containing information about the object
+	virtual void						AddViewerStrings(NiViewerStringsArray* apStrings);				// 25 | Adds additional strings containing information about the object
+	virtual void						ProcessClone(NiCloningProcess& arCloning);						// 26 | Post process for CreateClone
+	virtual void						PostLinkObject(NiStream* apStream);								// 27 | Called by the streaming system to resolve any tasks that require other objects to be correctly linked. It is called by the streaming system after LinkObject has been called on all streamed objects
+	virtual bool						StreamCanSkip();												// 28
+	virtual const NiRTTI*				GetStreamableRTTI();											// 29
+	virtual void						SetBound(NiBound* apNewBound);									// 30 | Replaces the bound of the object
+	virtual void						GetBlockAllocationSize();										// 31 | Used by geometry data
+	virtual NiObjectGroup*				GetGroup();														// 32 | Used by geometry data
+	virtual void						SetGroup(NiObjectGroup* apGroup);								// 33 | Used by geometry data
+	virtual NiControllerManager*		IsControllerManager() const;									// 34 | Returns this if it's a NiControllerManager, otherwise nullptr
 };
 
 class RefNiObject
@@ -538,7 +574,7 @@ public:
 	DEFINE_MEMBER_FN(GetExtraData, NiExtraData*, kNiObjectNET_GetExtraData, const char* name);
 #endif
 
-	const char			* m_pcName;						// 008 - name known
+	NiFixedString			m_pcName;						// 008 - name known
 	NiTimeController	* m_controller;					// 00C - size ok
 
 	// doesn't appear to be part of a class?

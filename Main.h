@@ -3405,7 +3405,7 @@ void ToggleCullActivatorRef(TESObjectREFR* ref)
 	{
 		if (auto node = ref->Get3D())
 		{
-			if (node->GetAsNiNode())
+			if (node->IsNiNode())
 			{
 				Setting* bShowActivators = (Setting*)0xECEE10;
 				node->SetVisible(bShowActivators->data.i);

@@ -9,6 +9,7 @@
 #include "NavMeshPickPreventer.h"
 #include "LaunchGame.h"
 #include "Events/MainWindowLoadEvent.h"
+#include "MultiBoundsAdder.h"
 
 #define UI_EXTMENU_ID			51001
 #define UI_EXTMENU_SHOWLOG		51002
@@ -31,6 +32,8 @@
 #define UI_EXTMENU_LOOKUPFORM 51019
 #define UI_EXTMENU_VIEW_MODIFIED_FORMS 51020
 #define UI_EXTMENU_VIEW_NAVMESH_IGNORED_FORMS 51021
+#define UI_EXTMENU_AUTO_ADD_TO_MULTIBOUNDS 51022
+#define UI_EXTMENU_READD_TO_MULTIBOUNDS 51023
 #define MAIN_WINDOW_CALLBACK 0xFEED
 
 // unused button in vanilla menu
@@ -116,6 +119,8 @@ bool CreateExtensionMenu(HWND MainWindow, HMENU MainMenu)
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_LOOKUPFORM, "Lookup Form");
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_VIEW_MODIFIED_FORMS, "View Modified Forms");
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_VIEW_NAVMESH_IGNORED_FORMS, "View Navmesh Ignored Forms");
+	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_AUTO_ADD_TO_MULTIBOUNDS, "Attach Objects to Multibounds");
+	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_READD_TO_MULTIBOUNDS, "Reattach All Objects to Multibounds");
 
 	MENUITEMINFO menuInfo;
 	memset(&menuInfo, 0, sizeof(MENUITEMINFO));
@@ -426,6 +431,18 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 		case UI_EXTMENU_VIEW_NAVMESH_IGNORED_FORMS:
 		{
 			NavMeshPickPreventer::ShowList();
+		}
+		return 0;
+
+		case UI_EXTMENU_AUTO_ADD_TO_MULTIBOUNDS:
+		{
+			MultiBoundsAdder::TestObjects(false);
+		}
+		return 0;
+
+		case UI_EXTMENU_READD_TO_MULTIBOUNDS:
+		{
+			MultiBoundsAdder::TestObjects(true);
 		}
 		return 0;
 

@@ -45,6 +45,7 @@
 #include "FaceGenExporter.h"
 #include "ONAMFix.h"
 #include "SCOLConsistencyFix.h"
+#include "MultiBoundsAdder.h"
 #include "UnserializedIO.h"
 #include "Allocator/MemoryManager.hpp"
 #include "Allocator/BSMemory.hpp"
@@ -1055,7 +1056,10 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// Fix geometry data created for SCOLs always using MUTABLE consistency, which increases memory usage
 	SCOLConsistencyFix::InitHooks();
 
-	InitCustomPrimitiveColors();
+  // Fix newly created multibound not being registered in cells they were created in
+	MultiBoundsAdder::InitHooks();
+
+  InitCustomPrimitiveColors();
 
 	// prevent the infos refreshing when clicking on a result in the 'Find Text' window
 	WriteRelCall(0x57D402, UInt32(OnLoadQuestGetTextSearchWindowHook));
@@ -1074,6 +1078,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	// automatically focus the form list when opening a Select Form window
 	WriteRelCall(0x482634, UInt32(OnInitSelectFormWindow));
+
 
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())

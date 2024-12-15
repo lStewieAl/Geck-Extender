@@ -266,13 +266,13 @@ public:
 	virtual void		Unk_36();
 	virtual void		Unk_37();
 	virtual void		Unk_38();
-	virtual void		Unk_39();
+	virtual bool		IsActor() const;
 	virtual void		Unk_3A();
 	virtual void		Unk_3B();
 	virtual void		Unk_3C();
 	virtual void		Unk_3D();
 	virtual void		Unk_3E();
-	virtual const char*	GetEditorID();
+	virtual const char*	GetEditorID() const;
 	virtual void		Unk_40();
 	virtual void		Unk_41();
 	virtual void		Unk_42();
@@ -390,7 +390,7 @@ public:
 	virtual void		Unk_6A(void);						// Actor: GetMagicEffectList
 	virtual void		Unk_6B(void);
 	virtual void		Unk_6C(void);	// REFR: GetBSFaceGenNiNodeSkinned
-	virtual void		Unk_6D(void);
+	virtual NiNode*		LoadGraphics(TESForm* apBaseForm);
 };
 
 // 30
@@ -433,7 +433,12 @@ public:
 	virtual char *	GetPathRoot(void);
 
 	String ddsPath;
+	UInt32 unk;
+	UInt32 textFieldControlId;
+	UInt32 editButtonControlId;
+	UInt32 iconControlId;
 };
+static_assert(sizeof(TESTexture) == 0x1C);
 
 // 00C
 class TESIcon : public TESTexture
@@ -3663,47 +3668,76 @@ public:
 class NavMeshInfoMap;
 class NavMesh;
 class TESObjectLAND;
+class BSMultiBoundNode;
 
-class TESObjectCELL : public TESForm
+class TESObjectCELL : public TESForm, public TESFullName
 {
 public:
 	TESObjectCELL();
 	~TESObjectCELL();
 
+	enum CELL_STATE {
+		CS_NOTLOADED	= 0,
+		CS_UNLOADING	= 1,
+		CS_LOADING		= 2,
+		CS_LOADED		= 3,
+		CS_DETACHING	= 4,
+		CS_ATTACHING	= 5,
+		CS_ATTACHED		= 6,
+	};
+
 	typedef tList<TESObjectREFR> RefList;
-	struct CellCoordinates
-	{
-		UInt32	x;
-		UInt32	y;
-	}; // Exterior is 3 DWord, Interior is 5 DWord and 5 floats
+
+	struct ExteriorData {
+		SInt32	iCellX;
+		SInt32	iCellY;
+		UInt8	byte08;
+	};
+
+	struct InteriorData {
+		UInt32		uiAmbient;
+		UInt32		uiDirectional;
+		UInt32		uiFogColorNear;
+		float		fFogNear;
+		float		fFogFar;
+		SInt32		iDirectionalXY;
+		SInt32		iDirectionalZ;
+		float		fDirectionalFade;
+		float		fClipDist;
+		float		fFogPower;
+		void*		pGetValuesFrom;
+	};
+
+	union CellData {
+		ExteriorData* pCellDataExterior;
+		InteriorData* pCellDataInterior;
+	};
 
 	struct LOADED_CELL_DATA
 	{
 		NiNode* masterNode;
-		tList<TESObjectREFR> refList04;
-		NiTMapBase<TESObjectREFR*, NiNode*> refNodeMap0C;
-		NiTMapBase < void*, void*> formRefMap1C;
-		NiTMapBase < void*, void*> formNodeMap2C;
-		NiTMapBase < void*, void*> refMultiBoundNodeMap3C;
+		tList<TESObjectREFR> largeAnimatedRefs;
+		NiTMapBase<TESObjectREFR*, NiNode*> animatedRefs;
+		NiTMapBase < TESForm*, TESObjectREFR*> emittanceSourceRefMap;
+		NiTMapBase < TESObjectREFR*, NiNode*> emittanceLightRefMap;
+		NiTMapBase < TESObjectREFR*, NiPointer<BSMultiBoundNode>> multiboundRefMap;
 		tList<TESObjectREFR> scriptedRefs;
 		tList<TESObjectREFR> activateRefChildren;
 		tList<TESObjectREFR> placeableWatersList;
 	};
 
-	TESFullName fullName;
 	UInt8 cellFlags;
 	UInt8 cellState;
 	UInt8 byte3A;
 	UInt8 gap3B;
 	ExtraDataList extraDataList;
-	CellCoordinates coords;
+	CellData pCellData;
 	TESObjectLAND* land;
 	float waterHeight;
 	UInt8 bAutoWaterLoaded;
-	UInt8 gap69[3];
 	TESTexture noiseTexture;
 	NavMesh** navMeshArray;
-	UInt32 unk80[8];
+	UInt32 unk80[5];
 	RTL_CRITICAL_SECTION refLockSemaphore;
 	UInt32 unkB8;
 	UInt32 unkBC;
@@ -3712,8 +3746,8 @@ public:
 	UInt16 countVisibleDistant;
 	UInt16 visibleWhenDistantCountLoaded;
 	tList<TESObjectREFR> objectList;
-	NiNode* niNodeD4;
-	NiNode* niNodeD8;
+	NiPointer<NiNode>	spLightMarkerNode;
+	NiPointer<NiNode>	spSoundMarkerNode;
 	UInt32 unkDC;
 	LOADED_CELL_DATA* renderData;
 	float unkE4;
@@ -3738,12 +3772,33 @@ public:
 		auto land = ThisCall<TESObjectLAND*>(0x627140, this);
 		return ThisCall<bool>(0x61A810, land, pos, heightOut);
 	}
+
+	void CellRefLockEnter() {
+		ThisCall(0x625850, this);
+	}
+
+	void CellRefLockLeave() {
+		ThisCall(0x625870, this);
+	}
+
+	void MarkAsModified(bool abModified) {
+		ThisCall(0x6286B0, this, abModified);
+	}
+
+	NiNode* Load3D();
+
+	void AttachModels(bool abSetupMopp);
+
+	void AddObjectsToLoadedRefCollection();
+
+	BSMultiBoundNode* AddMultiBoundRef(TESObjectREFR* apMultiBound);
 };
-STATIC_ASSERT(sizeof(TESObjectCELL) == 0x100);
+static_assert(sizeof(TESObjectCELL) == 0x100);
 
 // TESObjectREFR (60) - see GameObjects.h
 
 struct LODdata;	// 03C
+class BSPortalGraph;
 
 // TESWorldSpace (EC)
 class TESWorldSpace : public TESForm
@@ -3821,11 +3876,7 @@ public:
 	TESImageSpace		* imageSpace;		// 044 confirmed INAM
 	ImpactData			* impacts;			// 048 confirmed
 	UInt8				flags;				// 04C confirmed DATA
-	UInt8				unk04D;				// 04D filler
-	UInt16				parentFlags;		// 04E init'd to FF if has a parent. 5 is use ImageSpace, 4 is use parent climate, 3 is use parent Water, 1 is use parent LOD data, 0 is use parent LAND data
-	RefListPointerMap	pointerMap;			// 050 confirmed
-	tList<TESObjectREFR>	persistentRefs;	// 060 (list of persistent refs across CELLs in the worldspace)
-	tList<TESForm>		lst068;				// 068 confirmed as tList
+	BSPortalGraph*		portalGraph;
 	TESWorldSpace		* parent;			// 070 confirmed
 	TESWaterForm		* waterFormFirst;	// 074 confirmed NAM2
 	TESWaterForm		* waterFormLast;	// 078 confirmed NAM3 LOD Water type for xEdit
@@ -3837,24 +3888,18 @@ public:
 	BGSMusicType		* music;			// 09C confirmed ZNAM
 	CoordXY				min;				// 0A0 confirmed NAM0 min of all Offset_Data.min
 	CoordXY				max;				// 0A8 confirmed NAM9 max of all Offset_data.max
-	OffsetDataMap		offsetMap;			// 0B0 guarded by an isESM
-	String				str0C0;				// 0C0
 	float				defaultLandHeight;	// 0C8 confirmed DNAM for the two
 	float				defaultWaterHeight;	// 0CC
 	BGSEncounterZone	* encounterZone;	// 0D0 confirmed	
 	TESTexture			canopyShadow;		// 0D4 confirmed NNAM
 	TESTexture			waterNoiseTexture;	// 0E0 confirmed XNAM
 
-/*
-	Character			* character;		// 060
-	UInt32				unk060;				// 060
-	RefListPointerMap	* pointerMap064;	// 064 
-	BSPortalGraph		* portalGraph;		// 068
-*/
+	TESObjectCELL* GetCellAtCoord(SInt32 aiX, SInt32 aiY) const;
+	TESObjectCELL* GetCellAtPos(const NiPoint3& arPos) const;
+
 };	// I am seeing a tList at 60, a map at 50 indexed by XY coord !!!, another map at B0, indexed by modInfo::Unklist elements
 
-STATIC_ASSERT(sizeof(TESWorldSpace) == 0xEC);
-STATIC_ASSERT(offsetof(TESWorldSpace, max) == 0x0A8);
+static_assert(sizeof(TESWorldSpace) == 0xFC);
 
 // TESObjectLAND (2C)
 class TESObjectLAND;

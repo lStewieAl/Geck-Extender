@@ -89,13 +89,46 @@ TESObjectREFR* DataHandler::CreateReferenceAtLocation(TESBoundObject* object, co
 	return ThisCall<TESObjectREFR*>(0x4D0940, this, object, aPos, aRot, radius, 0, 0);
 }
 
+// 0x4CF1D0
+TESObjectCELL* DataHandler::GetCellFromCellCoord(SInt32 aiX, SInt32 aiY, TESWorldSpace* apWorldSpace, bool abUnk) {
+	return ThisCall<TESObjectCELL*>(0x4CF1D0, this, aiX, aiY, apWorldSpace, abUnk);
+}
+
+void DataHandler::UnloadCell(TESObjectCELL* apCell) {
+	ThisCall(0x4CDF10, this, apCell);
+}
+
 TESObjectCELL* GridCellArray::GetCell(int x, int y)
 {
 	auto pCell = ThisCall<TESObjectCELL**>(0x5296F0, this, x, y);
 	return pCell ? *pCell : nullptr;
 }
 
-bool TES::GetLandHeight(NiPoint3* cameraPos, float* heightOut) { return ThisCall<bool>(0x4C9A00, this, cameraPos, heightOut); };
+bool TES::GetLandHeight(NiPoint3* cameraPos, float* heightOut) { return ThisCall<bool>(0x4C9A00, this, cameraPos, heightOut); }
+
+bool TES::IsCellLoaded(TESObjectCELL* apCell, bool abIgnoreBuffered) {
+	if (!apCell)
+		return false;
+	switch (apCell->cellState)
+	{
+	case TESObjectCELL::CS_LOADING:
+	case TESObjectCELL::CS_LOADED:
+	case TESObjectCELL::CS_DETACHING:
+		if (abIgnoreBuffered)
+			return false;
+		break;
+	case TESObjectCELL::CS_ATTACHING:
+	case TESObjectCELL::CS_ATTACHED:
+		return true;
+	default:
+		return false;
+	}
+	return true;
+};
+
+void TES::LoadCell(TESObjectCELL* apCell) {
+	ThisCall(0x4CCAF0, this, apCell);
+};
 
 struct _TEB {
 	UInt32 padding[0x2C / 4];

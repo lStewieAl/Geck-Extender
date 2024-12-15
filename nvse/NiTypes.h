@@ -15,6 +15,8 @@ const UInt32 _NiTMap_Lookup = 0x00844740;
 const UInt32 _NiTMap_Lookup = 0;
 #endif
 
+typedef void* NiTMapIterator;
+
 // 8
 struct NiRTTI
 {
@@ -37,7 +39,68 @@ struct NiVector4
 struct NiPoint3
 {
 	float x, y, z;
+
+	static const NiPoint3 UNIT_X;
+	static const NiPoint3 UNIT_Y;
+	static const NiPoint3 UNIT_Z;
+	static const NiPoint3 UNIT_ALL;
 	static const NiPoint3 ZERO;
+
+	NiPoint3& operator= (const NiPoint3& pt) {
+		x = pt.x;
+		y = pt.y;
+		z = pt.z;
+		return *this;
+	};
+
+	NiPoint3& operator= (const NiPoint3* pt) {
+		x = pt->x;
+		y = pt->y;
+		z = pt->z;
+		return *this;
+	};
+
+	NiPoint3 operator+ (const NiPoint3& pt) const { return NiPoint3(x + pt.x, y + pt.y, z + pt.z); };
+	NiPoint3& operator+= (const NiPoint3& pt) {
+		x += pt.x;
+		y += pt.y;
+		z += pt.z;
+		return *this;
+	};
+
+	NiPoint3 operator- (const NiPoint3& pt) const { return NiPoint3(x - pt.x, y - pt.y, z - pt.z); };
+	NiPoint3 operator- () const { return NiPoint3(-x, -y, -z); };
+	NiPoint3& operator-= (const NiPoint3& pt) {
+		x -= pt.x;
+		y -= pt.y;
+		z -= pt.z;
+		return *this;
+	};
+
+	float operator* (const NiPoint3& pt) const { return x * pt.x + y * pt.y + z * pt.z; };
+
+	NiPoint3 operator* (float fScalar) const { return NiPoint3(fScalar * x, fScalar * y, fScalar * z); };
+	friend NiPoint3 operator* (float fScalar, const NiPoint3& pt) { return NiPoint3(fScalar * pt.x, fScalar * pt.y, fScalar * pt.z); };
+	NiPoint3& operator*= (float fScalar) {
+		x *= fScalar;
+		y *= fScalar;
+		z *= fScalar;
+		return *this;
+	};
+
+
+
+	NiPoint3 operator/ (float fScalar) const {
+		float fInvScalar = 1.0f / fScalar;
+		return NiPoint3(fInvScalar * x, fInvScalar * y, fInvScalar * z);
+	};
+
+	NiPoint3& operator/= (float fScalar) {
+		x /= fScalar;
+		y /= fScalar;
+		z /= fScalar;
+		return *this;
+	};
 };
 
 struct NiPoint4
@@ -54,15 +117,125 @@ struct NiQuaternion
 // 24
 struct NiMatrix33
 {
-	float	data[9];
+	float	data[3][3];
+
+	__forceinline float GetEntry(UInt32 uiRow, UInt32 uiCol) const {
+		return data[uiRow][uiCol];
+	}
+
+	NiPoint3 operator*(const NiPoint3& pt) const {
+		return NiPoint3(
+			data[0][0] * pt.x + data[0][1] * pt.y + data[0][2] * pt.z,
+			data[1][0] * pt.x + data[1][1] * pt.y + data[1][2] * pt.z,
+			data[2][0] * pt.x + data[2][1] * pt.y + data[2][2] * pt.z);
+	}
+
+	NiMatrix33 operator* (const NiMatrix33& mat) const {
+		NiMatrix33 result;
+		result.data[0][0] =
+			data[0][0] * mat.data[0][0] +
+			data[0][1] * mat.data[1][0] +
+			data[0][2] * mat.data[2][0];
+		result.data[1][0] =
+			data[1][0] * mat.data[0][0] +
+			data[1][1] * mat.data[1][0] +
+			data[1][2] * mat.data[2][0];
+		result.data[2][0] =
+			data[2][0] * mat.data[0][0] +
+			data[2][1] * mat.data[1][0] +
+			data[2][2] * mat.data[2][0];
+		result.data[0][1] =
+			data[0][0] * mat.data[0][1] +
+			data[0][1] * mat.data[1][1] +
+			data[0][2] * mat.data[2][1];
+		result.data[1][1] =
+			data[1][0] * mat.data[0][1] +
+			data[1][1] * mat.data[1][1] +
+			data[1][2] * mat.data[2][1];
+		result.data[2][1] =
+			data[2][0] * mat.data[0][1] +
+			data[2][1] * mat.data[1][1] +
+			data[2][2] * mat.data[2][1];
+		result.data[0][2] =
+			data[0][0] * mat.data[0][2] +
+			data[0][1] * mat.data[1][2] +
+			data[0][2] * mat.data[2][2];
+		result.data[1][2] =
+			data[1][0] * mat.data[0][2] +
+			data[1][1] * mat.data[1][2] +
+			data[1][2] * mat.data[2][2];
+		result.data[2][2] =
+			data[2][0] * mat.data[0][2] +
+			data[2][1] * mat.data[1][2] +
+			data[2][2] * mat.data[2][2];
+		return result;
+	}
+
+	void MakeXRotation(float fAngle) {
+		float sn = std::sin(fAngle);
+		float cs = std::cos(fAngle);
+
+		data[0][0] = 1.0f;
+		data[0][1] = 0.0f;
+		data[0][2] = 0.0f;
+		data[1][0] = 0.0f;
+		data[1][1] = cs;
+		data[1][2] = sn;
+		data[2][0] = 0.0f;
+		data[2][1] = -sn;
+		data[2][2] = cs;
+	}
+
+	void MakeYRotation(float fAngle) {
+		float sn = std::sin(fAngle);
+		float cs = std::cos(fAngle);
+
+		data[0][0] = cs;
+		data[0][1] = 0.0f;
+		data[0][2] = -sn;
+		data[1][0] = 0.0f;
+		data[1][1] = 1.0f;
+		data[1][2] = 0.0f;
+		data[2][0] = sn;
+		data[2][1] = 0.0f;
+		data[2][2] = cs;
+	}
+
+	void MakeZRotation(float fAngle) {
+		float sn = std::sin(fAngle);
+		float cs = std::cos(fAngle);
+
+		data[0][0] = cs;
+		data[0][1] = sn;
+		data[0][2] = 0.0f;
+		data[1][0] = -sn;
+		data[1][1] = cs;
+		data[1][2] = 0.0f;
+		data[2][0] = 0.0f;
+		data[2][1] = 0.0f;
+		data[2][2] = 1.0f;
+	}
+
+	void FromEulerAnglesXYZ(float fXAngle, float fYAngle, float fZAngle) {
+		NiMatrix33 kXRot, kYRot, kZRot;
+		kXRot.MakeXRotation(fXAngle);
+		kYRot.MakeYRotation(fYAngle);
+		kZRot.MakeZRotation(fZAngle);
+		*this = kXRot * (kYRot * kZRot);
+	}
 };
 
 // 34
 struct NiTransform
 {
 	NiMatrix33	rotate;		// 00
-	NiVector3	translate;	// 24
+	NiPoint3	translate;	// 24
 	float		scale;		// 30
+
+	// 0x524C40
+	inline NiPoint3 operator*(const NiPoint3& kPoint) const {
+		return(((rotate * kPoint) * scale) + translate);
+	};
 };
 
 // 10
@@ -259,8 +432,8 @@ public:
 		UInt32		m_bucket;
 	};
 
-	virtual UInt32	CalculateBucket(UInt32 key);
-	virtual bool	CompareKey(UInt32 lhs, UInt32 rhs);
+	virtual UInt32	KeyToHashIndex(UInt32 key);
+	virtual bool	IsKeysEqual(UInt32 lhs, UInt32 rhs);
 	virtual void	Fn_03(UInt32 arg0, UInt32 arg1, UInt32 arg2);	// assign to entry
 	virtual void	Fn_04(UInt32 arg);
 	virtual void	Fn_05(void);	// locked operations
@@ -273,6 +446,39 @@ public:
 	UInt32	m_numBuckets;	// 4
 	Entry	** m_buckets;	// 8
 	UInt32	m_numItems;		// C
+
+	NiTMapIterator GetFirstPos() const {
+		for (UInt32 i = 0; i < m_numBuckets; i++) {
+			if (m_buckets[i])
+				return m_buckets[i];
+		}
+		return 0;
+	}
+
+	void GetNext(NiTMapIterator& pos, UInt32& key, T_Data*& val) {
+		Entry* pItem = (Entry*)pos;
+
+		key = pItem->key;
+		val = pItem->data;
+
+		if (pItem->next) {
+			pos = pItem->next;
+			return;
+		}
+
+		UInt32 i = KeyToHashIndex(pItem->key);
+		for (++i; i < m_numBuckets; i++)
+		{
+			pItem = m_buckets[i];
+			if (pItem)
+			{
+				pos = pItem;
+				return;
+			}
+		}
+
+		pos = 0;
+	}
 };
 
 template <typename T_Data>
@@ -370,6 +576,8 @@ void NiTPointerMap <T_Data>::Iterator::FindValid(void)
 	}
 }
 
+
+
 // 10
 // todo: NiTPointerMap should derive from this
 // cleaning that up now could cause problems, so it will wait
@@ -388,19 +596,51 @@ public:
 	};
 
 	virtual NiTMapBase<T_Key, T_Data>*	Destructor(bool doFree);						// 000
-	virtual UInt32						Hash(T_Key key);								// 001
-	virtual void						Equal(T_Key key1, T_Key key2);					// 002
-	virtual void						FillEntry(Entry entry, T_Key key, T_Data data);	// 003
-	virtual	void						Unk_004(void * arg0);							// 004
-	virtual	void						Unk_005(void);									// 005
-	virtual	void						Unk_006();										// 006
+	virtual UInt32						KeyToHashIndex(T_Key key);								// 001
+	virtual void						IsKeysEqual(T_Key key1, T_Key key2);					// 002
+	virtual void						SetValue(Entry entry, T_Key key, T_Data data);	// 003
+	virtual	void						ClearValue(void * arg0);							// 004
+	virtual	void						NewItem(void);									// 005
+	virtual	void						DeleteItem();										// 006
 
-	//void	** _vtbl;	// 0
 	UInt32	numBuckets;	// 4
 	Entry	** buckets;	// 8
 	UInt32	numItems;	// C
 
 	DEFINE_MEMBER_FN_LONG(NiTMapBase, Lookup, bool, _NiTMap_Lookup, T_Key key, T_Data * dataOut);
+
+	NiTMapIterator GetFirstPos() const {
+		for (UInt32 i = 0; i < numBuckets; i++) {
+			if (buckets[i])
+				return buckets[i];
+		}
+		return 0;
+	}
+
+	void GetNext(NiTMapIterator& pos, T_Key& key, T_Data& val) {
+		Entry* pItem = (Entry*) pos;
+
+		key = pItem->key;
+		val = pItem->data;
+
+		if (pItem->next) {
+			pos = pItem->next;
+			return;
+		}
+
+		UInt32 i = KeyToHashIndex(pItem->key);
+		for (++i; i < numBuckets; i++)
+		{
+			pItem = buckets[i];
+			if (pItem)
+			{
+				pos = pItem;
+				return;
+			}
+		}
+
+		pos = 0;
+	}
 };
 
 // 14
@@ -470,8 +710,38 @@ public:
 	const T&	operator *() const { return *data; }
 	T&			operator *() { return *data; }
 
+	T* operator->() const { return data; }
+
 	operator const T*() const { return data; }
 	operator T*() { return data; }
+
+	__forceinline NiPointer<T>& operator =(const NiPointer& ptr) {
+		if (data != ptr.data) {
+			if (data)
+				data->DecRefCount();
+			data = ptr.data;
+			if (data)
+				data->IncRefCount();
+		}
+		return *this;
+	}
+
+	__forceinline NiPointer<T>& operator =(T* pObject) {
+		if (data != pObject) {
+			if (data)
+				data->DecRefCount();
+			data = pObject;
+			if (data)
+				data->IncRefCount();
+		}
+		return *this;
+	}
+
+	__forceinline bool operator==(T* apObject) const { return (data == apObject); }
+
+	__forceinline bool operator==(const NiPointer& ptr) const { return (data == ptr.data); }
+
+	__forceinline operator bool() const { return data != nullptr; }
 };
 
 // 14

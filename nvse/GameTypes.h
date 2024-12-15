@@ -159,7 +159,7 @@ public:
 
 	Node* Head() const { return const_cast<Node*>(&m_listHead); }
 
-	bool IsEmpty() const { return !m_listHead.data; }
+	bool IsEmpty() const { return !m_listHead.data && !m_listHead.next; }
 
 	class Iterator
 	{
