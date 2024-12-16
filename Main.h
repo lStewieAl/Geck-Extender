@@ -4130,3 +4130,66 @@ void __cdecl OnInitSelectFormWindow(HWND hWnd, WPARAM index, char* pszText, int 
 	CdeclCall(0x419F50, hWnd, index, pszText, width, format);
 	SetFocus(hWnd);
 }
+
+HTREEITEM __cdecl ObjectWindowTreeView__FindItemRecurseCached(HWND hWnd, HTREEITEM apItem, int aiNodeID, int aiRootNodeID, char* apName)
+{
+	// Cache Size -> Cache Hits
+	// 1 -> 879
+	// 2 -> 1183
+	// 3 -> 1376
+	// 4 -> 1500
+	// 8 -> 1752
+	// 16 -> 1884
+	// 32 -> 1967
+	// 64 -> 2001
+	constexpr int CACHE_SIZE = 8;
+
+	static struct
+	{
+		HTREEITEM pItem;
+		int iNodeID;
+		int iRootNodeID;
+		char kName[0x80];
+		HTREEITEM result;
+
+		bool Equals(HTREEITEM apItem, int aiNodeID, int aiRootNodeID, char* apName)
+		{
+			return apItem == pItem && aiNodeID == iNodeID && aiRootNodeID == iRootNodeID && apName && !strcmp(apName, kName);
+		}
+
+		void Set(HTREEITEM apItem, int aiNodeID, int aiRootNodeID, char* apName, HTREEITEM ahResult)
+		{
+			result = ahResult;
+			iRootNodeID = aiRootNodeID;
+			iNodeID = aiNodeID;
+			pItem = apItem;
+			if (apName)
+			{
+				strncpy(kName, apName, sizeof(kName));
+			}
+			else
+			{
+				*kName = '\xFF';
+				kName[1] = '\0';
+			}
+		}
+	} LAST[CACHE_SIZE];
+	static int lastIndex;
+
+	for (UInt32 i = 0; i < CACHE_SIZE; ++i)
+	{
+		UInt32 index = (lastIndex - i) % CACHE_SIZE;
+		if (LAST[index].Equals(apItem, aiNodeID, aiRootNodeID, apName))
+		{
+			return LAST[index].result;
+		}
+	}
+
+	auto result = CdeclCall<HTREEITEM>(0x448E70, hWnd, apItem, aiNodeID, aiRootNodeID, apName);
+	if (result)
+	{
+		LAST[lastIndex].Set(apItem, aiNodeID, aiRootNodeID, apName, result);
+		lastIndex = (lastIndex + 1) % CACHE_SIZE;
+	}
+	return result;
+}
