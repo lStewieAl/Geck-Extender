@@ -4239,7 +4239,6 @@ void __cdecl ObjectWindowTreeView__ExpandIfExpandedInINI(HWND hWnd, HTREEITEM ah
 
 char** ObjectWindow__kNodeNames = (char**)0xEA6DB8;
 char** ObjectWindow__kRootNodeNames = (char**)0xEA6D94;
-
 HTREEITEM __cdecl ObjectWindowTreeView__FindItemRecurse(
 	HWND hWnd,
 	HTREEITEM apItem,
@@ -4250,15 +4249,13 @@ HTREEITEM __cdecl ObjectWindowTreeView__FindItemRecurse(
 	HTREEITEM next = apItem;
 	HTREEITEM result = NULL;
 	ObjectWindowTreeViewItem* item = nullptr;
-	if (apItem)
+	if (apItem && hWnd)
 	{
 		while (1)
 		{
 			if (result)
 				return result;
 			if (!next)
-				break;
-			if (!hWnd)
 				break;
 
 			tagTVITEMA lParam;
@@ -4275,18 +4272,13 @@ HTREEITEM __cdecl ObjectWindowTreeView__FindItemRecurse(
 				break;
 			}
 
-			if (apSrc)
+			if (apSrc ? _stricmp(apSrc, item->fullPath) : item->fullPath[0])
 			{
-				if (_stricmp(apSrc, item->fullPath))
-					break;
-				result = next;
+				break;
 			}
-			else
-			{
-				if (item->fullPath[0])
-					break;
-				result = next;
-			}
+
+			result = next;
+
 		LABEL_16:
 			next = (HTREEITEM)SendMessageA(hWnd, TVM_GETNEXTITEM, TVGN_NEXT, (LPARAM)next);
 			if (!next)
@@ -4296,12 +4288,15 @@ HTREEITEM __cdecl ObjectWindowTreeView__FindItemRecurse(
 		if (child)
 		{
 			result = ObjectWindowTreeView__FindItemRecurse(hWnd, child, aiNodeID, aiRootNodeID, apSrc);
+			if (result)
+			{
+				return result;
+			}
 		}
 		goto LABEL_16;
 	}
 	return result;
 }
-
 
 HTREEITEM __cdecl ObjectWindowTreeView__FindItemRecurseCached(HWND hWnd, HTREEITEM apItem, int aiNodeID, int aiRootNodeID, char* apName)
 {
@@ -4399,21 +4394,31 @@ HTREEITEM __cdecl ObjectWindowTreeView__SetupNodeNameRecurse(HWND hWnd, int node
 		LABEL_14:
 			HTREEITEM hParent = TVI_ROOT;
 
-			char Dst[MAX_PATH];
 			if (nodeId != -1)
 			{
+				char replacedChar;
+				char* lastSlash = nullptr;
+
 				int otherNodeId = -1;
-				strcpy_s(Dst, sizeof(Dst), item->fullPath);
 				if (item->fullPath[0])
 				{
-					auto lastSlash = strrchr(Dst, '\\');
+					lastSlash = strrchr(item->fullPath, '\\');
 					if (!lastSlash)
-						lastSlash = Dst;
+					{
+						lastSlash = item->fullPath;
+					}
+					replacedChar = *lastSlash;
 					*lastSlash = '\0';
+
 					otherNodeId = nodeId;
 				}
 
-				hParent = ObjectWindowTreeView__SetupNodeNameRecurse(hWnd, otherNodeId, rootNodeId, Dst);
+				hParent = ObjectWindowTreeView__SetupNodeNameRecurse(hWnd, otherNodeId, rootNodeId, item->fullPath);
+				if (lastSlash)
+				{
+					*lastSlash = replacedChar;
+				}
+
 				if (!hParent)
 					hParent = TVI_ROOT;
 			}
