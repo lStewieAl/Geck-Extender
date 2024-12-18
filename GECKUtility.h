@@ -68,6 +68,7 @@ struct RenderWindow
 struct ObjectsView
 {
 	static HWND GetWindow();
+	static HWND GetListView();
 	static void Refresh();
 };
 

@@ -4131,6 +4131,180 @@ void __cdecl OnInitSelectFormWindow(HWND hWnd, WPARAM index, char* pszText, int 
 	SetFocus(hWnd);
 }
 
+struct ObjectWindowTreeViewItem
+{
+	UInt32 nodeId;
+	UInt32 rootNodeId;
+	char fullPath[MAX_PATH];
+	char nodeName[MAX_PATH];
+};
+
+enum ObjectWindow__eNode
+{
+	kObjWndNode_Activator = 0x0,
+	kObjWndNode_Armor = 0x1,
+	kObjWndNode_Book = 0x2,
+	kObjWndNode_Container = 0x3,
+	kObjWndNode_Door = 0x4,
+	kObjWndNode_Ingredient = 0x5,
+	kObjWndNode_Light = 0x6,
+	kObjWndNode_MiscItem = 0x7,
+	kObjWndNode_Static = 0x8,
+	kObjWndNode_Grass = 0x9,
+	kObjWndNode_Tree = 0xA,
+	kObjWndNode_Weapon = 0xB,
+	kObjWndNode_NPC = 0xC,
+	kObjWndNode_Creature = 0xD,
+	kObjWndNode_LeveledCreature = 0xE,
+	kObjWndNode_LeveledCharacter = 0xF,
+	kObjWndNode_ActorEffect = 0x10,
+	kObjWndNode_ObjectEffect = 0x11,
+	kObjWndNode_Ingestible = 0x12,
+	kObjWndNode_LeveledItem = 0x13,
+	kObjWndNode_Key = 0x14,
+	kObjWndNode_Ammo = 0x15,
+	kObjWndNode_Flora = 0x16,
+	kObjWndNode_Furniture = 0x17,
+	kObjWndNode_Sound = 0x18,
+	kObjWndNode_LandTexture = 0x19,
+	kObjWndNode_CombatStyle = 0x1A,
+	kObjWndNode_LoadScreen = 0x1B,
+	kObjWndNode_LeveledSpell = 0x1C,
+	kObjWndNode_AnimObject = 0x1D,
+	kObjWndNode_WaterType = 0x1E,
+	kObjWndNode_IdleMarker = 0x1F,
+	kObjWndNode_EffectShader = 0x20,
+	kObjWndNode_Projectile = 0x21,
+	kObjWndNode_TalkingActivator = 0x22,
+	kObjWndNode_Explosion = 0x23,
+	kObjWndNode_TextureSet = 0x24,
+	kObjWndNode_Debris = 0x25,
+	kObjWndNode_MenuIcon = 0x26,
+	kObjWndNode_FormList = 0x27,
+	kObjWndNode_Perk = 0x28,
+	kObjWndNode_BodyPartData = 0x29,
+	kObjWndNode_AddOnNode = 0x2A,
+	kObjWndNode_MovableStatic = 0x2B,
+	kObjWndNode_Terminal = 0x2C,
+	kObjWndNode_PlaceableWater = 0x2D,
+	kObjWndNode_CameraShot = 0x2E,
+	kObjWndNode_ImpactData = 0x2F,
+	kObjWndNode_ImpactDataSet = 0x30,
+	kObjWndNode_Quest = 0x31,
+	kObjWndNode_Package = 0x32,
+	kObjWndNode_VoiceType = 0x33,
+	kObjWndNode_Class = 0x34,
+	kObjWndNode_Race = 0x35,
+	kObjWndNode_Eyes = 0x36,
+	kObjWndNode_HeadPart = 0x37,
+	kObjWndNode_Faction = 0x38,
+	kObjWndNode_Note = 0x39,
+	kObjWndNode_Weather = 0x3A,
+	kObjWndNode_Climate = 0x3B,
+	kObjWndNode_ArmorAddon = 0x3C,
+	kObjWndNode_Global = 0x3D,
+	kObjWndNode_Imagespace = 0x3E,
+	kObjWndNode_ImagespaceModifier = 0x3F,
+	kObjWndNode_EncounterZone = 0x40,
+	kObjWndNode_Message = 0x41,
+	kObjWndNode_ConstructibleObject = 0x42,
+	kObjWndNode_AcousticSpace = 0x43,
+	kObjWndNode_Ragdoll = 0x44,
+	kObjWndNode_Script = 0x45,
+	kObjWndNode_BaseEffect = 0x46,
+	kObjWndNode_MusicType = 0x47,
+	kObjWndNode_StaticCollection = 0x48,
+	kObjWndNode_ItemMod = 0x49,
+	kObjWndNode_Reputation = 0x4A,
+	kObjWndNode_Recipe = 0x4B,
+	kObjWndNode_RecipeCategory = 0x4C,
+	kObjWndNode_CasinoChip = 0x4D,
+	kObjWndNode_Casino = 0x4E,
+	kObjWndNode_LoadScreenType = 0x4F,
+	kObjWndNode_MediaSet = 0x50,
+	kObjWndNode_MediaLocationController = 0x51,
+	kObjWndNode_Challenge = 0x52,
+	kObjWndNode_AmmoEffect = 0x53,
+	kObjWndNode_CaravanCard = 0x54,
+	kObjWndNode_CaravanMoney = 0x55,
+	kObjWndNode_CaravanDeck = 0x56,
+	kObjWndNode_ALL = 0x57,
+	kObjWndNode_NavMesh_Unimplemented = 0x59,
+};
+
+void __cdecl ObjectWindowTreeView__ExpandIfExpandedInINI(HWND hWnd, HTREEITEM ahTreeItem)
+{
+	CdeclCall(0x448F80, hWnd, ahTreeItem);
+}
+
+char** ObjectWindow__kNodeNames = (char**)0xEA6DB8;
+char** ObjectWindow__kRootNodeNames = (char**)0xEA6D94;
+
+HTREEITEM __cdecl ObjectWindowTreeView__FindItemRecurse(
+	HWND hWnd,
+	HTREEITEM apItem,
+	int aiNodeID,
+	int aiRootNodeID,
+	char* apSrc)
+{
+	HTREEITEM next = apItem;
+	HTREEITEM result = NULL;
+	ObjectWindowTreeViewItem* item = nullptr;
+	if (apItem)
+	{
+		while (1)
+		{
+			if (result)
+				return result;
+			if (!next)
+				break;
+			if (!hWnd)
+				break;
+
+			tagTVITEMA lParam;
+			memset(&lParam.state, 0, 32);
+			lParam.hItem = next;
+			lParam.mask = TVIF_PARAM;
+			if (!SendMessageA(hWnd, TVM_GETITEMA, 0, (LPARAM)&lParam)
+				|| !lParam.lParam)
+			{
+				break;
+			}
+
+			item = (ObjectWindowTreeViewItem*)lParam.lParam;
+			if (item->nodeId != aiNodeID || item->rootNodeId != aiRootNodeID)
+			{
+				break;
+			}
+
+			if (apSrc)
+			{
+				if (_stricmp(apSrc, item->fullPath))
+					break;
+				result = next;
+			}
+			else
+			{
+				if (item->fullPath[0])
+					break;
+				result = next;
+			}
+		LABEL_16:
+			next = (HTREEITEM)SendMessageA(hWnd, TVM_GETNEXTITEM, TVGN_NEXT, (LPARAM)next);
+			if (!next)
+				return result;
+		}
+		auto child = (HTREEITEM)SendMessageA(hWnd, TVM_GETNEXTITEM, TVGN_CHILD, (LPARAM)next);
+		if (child)
+		{
+			result = ObjectWindowTreeView__FindItemRecurse(hWnd, child, aiNodeID, aiRootNodeID, apSrc);
+		}
+		goto LABEL_16;
+	}
+	return result;
+}
+
+
 HTREEITEM __cdecl ObjectWindowTreeView__FindItemRecurseCached(HWND hWnd, HTREEITEM apItem, int aiNodeID, int aiRootNodeID, char* apName)
 {
 	// Cache Size -> Cache Hits
@@ -4185,11 +4359,94 @@ HTREEITEM __cdecl ObjectWindowTreeView__FindItemRecurseCached(HWND hWnd, HTREEIT
 		}
 	}
 
-	auto result = CdeclCall<HTREEITEM>(0x448E70, hWnd, apItem, aiNodeID, aiRootNodeID, apName);
+	auto result = ObjectWindowTreeView__FindItemRecurse(hWnd, apItem, aiNodeID, aiRootNodeID, apName);
 	if (result)
 	{
 		LAST[lastIndex].Set(apItem, aiNodeID, aiRootNodeID, apName, result);
 		lastIndex = (lastIndex + 1) % CACHE_SIZE;
 	}
 	return result;
+}
+
+HTREEITEM __cdecl ObjectWindowTreeView__SetupNodeNameRecurse(HWND hWnd, int nodeId, int rootNodeId, char* Src)
+{
+	HTREEITEM rootNode = (HTREEITEM)SendMessageA(hWnd, TVM_GETNEXTITEM, 0, 0);
+	
+	auto result = ObjectWindowTreeView__FindItemRecurseCached(hWnd, rootNode, nodeId, rootNodeId, Src);
+	if (result)
+	{
+		return result;
+	}
+
+	ObjectWindowTreeViewItem* item = (ObjectWindowTreeViewItem*)FormHeap_Allocate(sizeof(ObjectWindowTreeViewItem));
+	item->fullPath[0] = '\0';
+	item->nodeName[0] = '\0';
+	item->nodeId = nodeId;
+	item->rootNodeId = rootNodeId;
+
+	const char* nodeName = nullptr;
+	if (nodeId != -1)
+	{
+		if (Src)
+		{
+			strncpy(item->fullPath, Src, sizeof(item->fullPath));
+			auto v7 = strrchr(Src, '\\');
+			char* v14 = v7 ? v7 + 1 : Src;
+			strncpy(item->nodeName, v14, sizeof(item->nodeName));
+			goto LABEL_14;
+		}
+		if (nodeId >= 87)
+		{
+			strcpy(item->nodeName, "*All");
+		LABEL_14:
+			HTREEITEM hParent = (HTREEITEM)-65536;
+
+			char Dst[MAX_PATH];
+			if (nodeId != -1)
+			{
+				int otherNodeId = -1;
+				strcpy_s(Dst, 0x104u, item->fullPath);
+				if (item->fullPath[0])
+				{
+					auto v11 = strrchr(Dst, '\\');
+					if (!v11)
+						v11 = Dst;
+					*v11 = 0;
+					otherNodeId = nodeId;
+				}
+
+				hParent = ObjectWindowTreeView__SetupNodeNameRecurse(hWnd, otherNodeId, rootNodeId, Dst);
+				if (!hParent)
+					hParent = (HTREEITEM)-65536;
+			}
+
+			tagTVINSERTSTRUCTW lParam;
+			memset(&lParam, 0, 0x40u);
+			lParam.itemex.mask = 5;
+			lParam.hInsertAfter = (HTREEITEM)((nodeId != kObjWndNode_ALL) - 65534);
+			lParam.hParent = hParent;
+			lParam.itemex.lParam = (LPARAM)item;
+			lParam.itemex.pszText = LPSTR_TEXTCALLBACKW;
+			HTREEITEM v12 = (HTREEITEM)SendMessageA(hWnd, TVM_INSERTITEM, 0, (LPARAM)&lParam);
+			result = v12;
+			if (nodeId != -1)
+			{
+				if (v12)
+				{
+					ObjectWindowTreeView__ExpandIfExpandedInINI(hWnd, v12);
+				}
+			}
+			return result;
+		}
+		nodeName = ObjectWindow__kNodeNames[nodeId];
+	LABEL_13:
+		strncpy(item->nodeName, nodeName, sizeof(item->nodeName));
+		goto LABEL_14;
+	}
+	if (rootNodeId < 8)
+	{
+		nodeName = ObjectWindow__kRootNodeNames[rootNodeId];
+		goto LABEL_13;
+	}
+	return 0;
 }

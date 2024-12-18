@@ -13,14 +13,13 @@ void hk_UpdateCellViewListView(HWND ControlHandle, void* a2, void* a3)
 // fix object list caching for speed - credit to nukem
 LRESULT __fastcall hk_ObjectListViewListView(DWORD* thisptr, void* ignorethisthing, char* a2, char* a3)
 {
-	HWND listWindow = GetDlgItem(*(HWND*)0x00ECFB70, 1041);
+	HWND listWindow = ObjectsView::GetListView();
 	SendMessage(listWindow, WM_SETREDRAW, FALSE, 0);
 	ThisCall(0x439630, thisptr, a2, a3);
 	SendMessage(listWindow, WM_SETREDRAW, TRUE, 0);
 	RedrawWindow(listWindow, nullptr, nullptr, RDW_ERASE | RDW_INVALIDATE | RDW_NOCHILDREN);
 	return 0;
 }
-
 
 void __cdecl OnPopulateFloatingObjectsList(HWND listWindow, tList<TESForm>* list, unsigned __int8(__cdecl* filterFn)(TESForm*, int), int filterData)
 {
@@ -34,8 +33,6 @@ void __fastcall sub_406C40(void* thiss, void* edx, HWND comboBox, TESForm* a3)
 {
 	SendMessage(comboBox, WM_SETREDRAW, FALSE, 0);
 	ThisCall(0x406C40, thiss, comboBox, a3);
-	WM_CLOSE;
-	WM_DESTROY;
 	SendMessage(comboBox, WM_SETREDRAW, TRUE, 0);
 	RedrawWindow(comboBox, nullptr, nullptr, RDW_ERASE | RDW_INVALIDATE | RDW_NOCHILDREN);
 }

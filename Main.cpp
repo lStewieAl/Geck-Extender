@@ -1078,6 +1078,10 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	// speed up the object window insertions (~10%) by caching some results
 	WriteRelCall(0x449129, UInt32(ObjectWindowTreeView__FindItemRecurseCached));
+	WriteRelJump(0x4490E0, UInt32(ObjectWindowTreeView__SetupNodeNameRecurse));
+	WriteRelCall(0x44C9D0, UInt32(ObjectWindowTreeView__SetupNodeNameRecurse));
+	WriteRelCall(0x4499C5, UInt32(ObjectWindowTreeView__SetupNodeNameRecurse));
+	WriteRelCall(0x4499A6, UInt32(ObjectWindowTreeView__SetupNodeNameRecurse));
 
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())

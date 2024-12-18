@@ -160,6 +160,7 @@ RenderWindow::SelectedData* RenderWindow::SelectedData::GetSelected() { return *
 RenderWindow::SelectedData* RenderWindow::SelectedData::GetClipboard() { return *(SelectedData**)0xECFB90; }
 
 HWND ObjectsView::GetWindow() { return *(HWND*)0xECFB70; };
+HWND ObjectsView::GetListView() { return *(HWND*)0xED1114; };
 void ObjectsView::Refresh() { SendMessageA(GetWindow(), 1042, NULL, NULL); };
 
 HWND CellView::GetWindow() { return *(HWND*)0xECFB78; };
