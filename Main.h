@@ -4277,7 +4277,7 @@ HTREEITEM __cdecl ObjectWindowTreeView__FindItemRecurse(
 				break;
 			}
 
-			result = next;
+			return next;
 
 		LABEL_16:
 			next = (HTREEITEM)SendMessageA(hWnd, TVM_GETNEXTITEM, TVGN_NEXT, (LPARAM)next);

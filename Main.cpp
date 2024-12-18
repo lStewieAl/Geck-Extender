@@ -1076,8 +1076,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// automatically focus the form list when opening a Select Form window
 	WriteRelCall(0x482634, UInt32(OnInitSelectFormWindow));
 
-	// speed up the object window insertions (~10%) by caching some results
-	WriteRelCall(0x449129, UInt32(ObjectWindowTreeView__FindItemRecurseCached));
+	// speed up the object window insertions (~20%) by caching some results and skipping unnecessary strcpys
 	WriteRelJump(0x4490E0, UInt32(ObjectWindowTreeView__SetupNodeNameRecurse));
 	WriteRelCall(0x44C9D0, UInt32(ObjectWindowTreeView__SetupNodeNameRecurse));
 	WriteRelCall(0x4499C5, UInt32(ObjectWindowTreeView__SetupNodeNameRecurse));
