@@ -4262,11 +4262,9 @@ HTREEITEM __cdecl ObjectWindowTreeView__FindItemRecurse(
 				break;
 
 			tagTVITEMA lParam;
-			memset(&lParam.state, 0, 32);
 			lParam.hItem = next;
-			lParam.mask = TVIF_PARAM;
-			if (!SendMessageA(hWnd, TVM_GETITEMA, 0, (LPARAM)&lParam)
-				|| !lParam.lParam)
+			lParam.mask = TVIF_HANDLE;
+			if (!SendMessageA(hWnd, TVM_GETITEMA, 0, (LPARAM)&lParam) || !lParam.lParam)
 			{
 				break;
 			}
@@ -4390,9 +4388,9 @@ HTREEITEM __cdecl ObjectWindowTreeView__SetupNodeNameRecurse(HWND hWnd, int node
 		if (Src)
 		{
 			strncpy(item->fullPath, Src, sizeof(item->fullPath));
-			auto v7 = strrchr(Src, '\\');
-			char* v14 = v7 ? v7 + 1 : Src;
-			strncpy(item->nodeName, v14, sizeof(item->nodeName));
+			auto lastSlash = strrchr(Src, '\\');
+			char* tail = lastSlash ? lastSlash + 1 : Src;
+			strncpy(item->nodeName, tail, sizeof(item->nodeName));
 			goto LABEL_14;
 		}
 		if (nodeId >= 87)
@@ -4405,13 +4403,13 @@ HTREEITEM __cdecl ObjectWindowTreeView__SetupNodeNameRecurse(HWND hWnd, int node
 			if (nodeId != -1)
 			{
 				int otherNodeId = -1;
-				strcpy_s(Dst, 0x104u, item->fullPath);
+				strcpy_s(Dst, sizeof(Dst), item->fullPath);
 				if (item->fullPath[0])
 				{
-					auto v11 = strrchr(Dst, '\\');
-					if (!v11)
-						v11 = Dst;
-					*v11 = 0;
+					auto lastSlash = strrchr(Dst, '\\');
+					if (!lastSlash)
+						lastSlash = Dst;
+					*lastSlash = '\0';
 					otherNodeId = nodeId;
 				}
 
@@ -4421,19 +4419,17 @@ HTREEITEM __cdecl ObjectWindowTreeView__SetupNodeNameRecurse(HWND hWnd, int node
 			}
 
 			tagTVINSERTSTRUCTW lParam;
-			memset(&lParam, 0, 0x40u);
-			lParam.itemex.mask = 5;
+			lParam.itemex.mask = TVIF_TEXT | TVIF_PARAM;
 			lParam.hInsertAfter = nodeId == kObjWndNode_ALL ? TVI_LAST : TVI_SORT;
 			lParam.hParent = hParent;
 			lParam.itemex.lParam = (LPARAM)item;
 			lParam.itemex.pszText = LPSTR_TEXTCALLBACKW;
-			HTREEITEM v12 = (HTREEITEM)SendMessageA(hWnd, TVM_INSERTITEM, 0, (LPARAM)&lParam);
-			result = v12;
+			HTREEITEM result = (HTREEITEM)SendMessageA(hWnd, TVM_INSERTITEM, 0, (LPARAM)&lParam);
 			if (nodeId != -1)
 			{
-				if (v12)
+				if (result)
 				{
-					ObjectWindowTreeView__ExpandIfExpandedInINI(hWnd, v12);
+					ObjectWindowTreeView__ExpandIfExpandedInINI(hWnd, result);
 				}
 			}
 			return result;
