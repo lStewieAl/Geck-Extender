@@ -69,6 +69,7 @@ struct ObjectsView
 {
 	static HWND GetWindow();
 	static HWND GetListView();
+	static HWND GetTreeView();
 	static void Refresh();
 };
 
