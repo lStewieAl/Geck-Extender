@@ -21,28 +21,6 @@ LRESULT __fastcall hk_ObjectListViewListView(DWORD* thisptr, void* ignorethisthi
 	return 0;
 }
 
-void DisableObjectWindowTreeRedraw()
-{
-	auto objectWindowTree = ObjectsView::GetTreeView();
-	SendMessage(objectWindowTree, WM_SETREDRAW, FALSE, 0);
-}
-
-__HOOK OnSetupObjectWindowTreeViewHook()
-{
-	_asm
-	{
-		push 0x44C5AF
-		jmp DisableObjectWindowTreeRedraw
-	}
-}
-
-ObjectWindowTreeViewItem* __cdecl PostSetupObjectWindowTreeView(HWND objectWindowTree, HTREEITEM hTreeItem)
-{
-	SendMessage(objectWindowTree, WM_SETREDRAW, TRUE, 0);
-	RedrawWindow(objectWindowTree, nullptr, nullptr, RDW_ERASE | RDW_INVALIDATE | RDW_NOCHILDREN);
-	return CdeclCall<ObjectWindowTreeViewItem*>(0x448E00, objectWindowTree, hTreeItem);
-}
-
 void __cdecl OnPopulateFloatingObjectsList(HWND listWindow, tList<TESForm>* list, unsigned __int8(__cdecl* filterFn)(TESForm*, int), int filterData)
 {
 	SendMessage(listWindow, WM_SETREDRAW, FALSE, 0);
@@ -231,10 +209,6 @@ void WriteUIHooks() {
 	WriteRelCall(0x0044A439, (UInt32)hk_ObjectListViewListView);
 	WriteRelCall(0x0044B375, (UInt32)hk_ObjectListViewListView);
 	WriteRelCall(0x0044BE68, (UInt32)hk_ObjectListViewListView);
-
-	// speed up the object window tree view
-	WriteRelJz(0x44C1C9, UInt32(OnSetupObjectWindowTreeViewHook));
-	WriteRelCall(0x44C5F5, UInt32(PostSetupObjectWindowTreeView));
 
 	/* speed up the dialogue views - credit to Nukem */
 	WriteRelJump(0x419BC0, UInt32(InsertComboBoxItem));

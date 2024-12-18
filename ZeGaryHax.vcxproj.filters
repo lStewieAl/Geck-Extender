@@ -91,6 +91,7 @@
       <Filter>allocator</Filter>
     </ClCompile>
     <ClCompile Include="MultiBoundsAdder.cpp" />
+    <ClCompile Include="ObjectWindowTreeHooks.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Main.h" />
@@ -210,6 +211,7 @@
     <ClInclude Include="Allocator\MemoryManager.hpp">
       <Filter>allocator</Filter>
     </ClInclude>
+    <ClInclude Include="ObjectWindowTreeHooks.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

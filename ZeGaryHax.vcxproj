@@ -221,6 +221,10 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
     <ClCompile Include="nvse\NiTypes.cpp" />
     <ClCompile Include="nvse\SafeWrite.cpp" />
     <ClCompile Include="nvse\Utilities.cpp" />
+    <ClCompile Include="ObjectWindowTreeHooks.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="OutOfMemoryHelper.cpp">
       <SubType>
       </SubType>
@@ -312,6 +316,10 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
     <ClInclude Include="nvse\prefix.h" />
     <ClInclude Include="nvse\SafeWrite.h" />
     <ClInclude Include="nvse\Utilities.h" />
+    <ClInclude Include="ObjectWindowTreeHooks.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="ONAMFix.h" />
     <ClInclude Include="OutOfMemoryHelper.h">
       <SubType>

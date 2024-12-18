@@ -31,6 +31,7 @@
 #include "WarningHooks.h"
 #include "Editor.h"
 #include "UISpeedHooks.h"
+#include "ObjectWindowTreeHooks.h"
 #include "DebugCellShaders.h"
 #include "DialogResizing.h"
 #include "CreatureMarkerSwapper.h"
@@ -1076,11 +1077,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// automatically focus the form list when opening a Select Form window
 	WriteRelCall(0x482634, UInt32(OnInitSelectFormWindow));
 
-	// speed up the object window insertions (~20%) by caching some results and skipping unnecessary strcpys
-	WriteRelJump(0x4490E0, UInt32(ObjectWindowTreeView__SetupNodeNameRecurse));
-	WriteRelCall(0x44C9D0, UInt32(ObjectWindowTreeView__SetupNodeNameRecurse));
-	WriteRelCall(0x4499C5, UInt32(ObjectWindowTreeView__SetupNodeNameRecurse));
-	WriteRelCall(0x4499A6, UInt32(ObjectWindowTreeView__SetupNodeNameRecurse));
+	ObjectWindowTreeHooks::InitHooks();
 
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
