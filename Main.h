@@ -4399,7 +4399,7 @@ HTREEITEM __cdecl ObjectWindowTreeView__SetupNodeNameRecurse(HWND hWnd, int node
 		{
 			strcpy(item->nodeName, "*All");
 		LABEL_14:
-			HTREEITEM hParent = (HTREEITEM)-65536;
+			HTREEITEM hParent = TVI_ROOT;
 
 			char Dst[MAX_PATH];
 			if (nodeId != -1)
@@ -4417,13 +4417,13 @@ HTREEITEM __cdecl ObjectWindowTreeView__SetupNodeNameRecurse(HWND hWnd, int node
 
 				hParent = ObjectWindowTreeView__SetupNodeNameRecurse(hWnd, otherNodeId, rootNodeId, Dst);
 				if (!hParent)
-					hParent = (HTREEITEM)-65536;
+					hParent = TVI_ROOT;
 			}
 
 			tagTVINSERTSTRUCTW lParam;
 			memset(&lParam, 0, 0x40u);
 			lParam.itemex.mask = 5;
-			lParam.hInsertAfter = (HTREEITEM)((nodeId != kObjWndNode_ALL) - 65534);
+			lParam.hInsertAfter = nodeId == kObjWndNode_ALL ? TVI_LAST : TVI_SORT;
 			lParam.hParent = hParent;
 			lParam.itemex.lParam = (LPARAM)item;
 			lParam.itemex.pszText = LPSTR_TEXTCALLBACKW;
