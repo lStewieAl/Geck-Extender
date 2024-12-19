@@ -431,6 +431,48 @@ namespace BetterFloatingFormList
 		return form->SetupListViewDisplayInfo(displayInfo);
 	}
 
+	const char* GetSelectedTreeViewItemFullPath()
+	{
+		auto hSelection = TreeView_GetSelection(ObjectsView::GetTreeView());
+
+		TVITEM tvItem;
+		tvItem.mask = TVIF_HANDLE;
+		tvItem.hItem = hSelection;
+		if (SendMessageA(ObjectsView::GetTreeView(), TVM_GETITEM, 0, (LPARAM)&tvItem))
+		{
+			if (auto item = (ObjectsView::TreeViewItem*)tvItem.lParam)
+			{
+				return item->fullPath;
+			}
+		}
+
+		return nullptr;
+	}
+
+	bool __cdecl FormPathMatches(TESForm* form, const char* filterData)
+	{
+		String str;
+		str.m_bufLen = 0;
+		str.m_data = 0;
+		str.m_dataLen = 0;
+		form->GetFormPath(&str);
+		return !strnicmp(str.CStr(), filterData, strlen(filterData));
+	}
+
+	void __cdecl OnInitListViewForms(HWND listView, tList<TESForm>* list, bool(__cdecl* filterFn)(TESForm*, const char*), const char* filterData)
+	{
+		if (auto fullPath = GetSelectedTreeViewItemFullPath())
+		{
+			if (*fullPath)
+			{
+				filterFn = FormPathMatches;
+				filterData = fullPath;
+			}
+		}
+
+		CdeclCall(0x47E410, listView, list, filterFn, filterData);
+	}
+
 	void Init()
 	{
 		// don't close the list view when clicking on an item
@@ -450,5 +492,7 @@ namespace BetterFloatingFormList
 		SafeWrite8(0x4836AD, 0xB8);
 		SafeWrite32(0x4836AD + 1, UInt32(SetupRow));
 		SafeWrite8(0x4836AD + 1 + 4, 0x90);
+
+		WriteRelCall(0x4838C1, UInt32(OnInitListViewForms));
 	}
 }

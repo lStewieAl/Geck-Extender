@@ -2,14 +2,6 @@
 #include <GECKUtility.h>
 namespace ObjectWindowTreeHooks
 {
-	struct ObjectWindowTreeViewItem
-	{
-		UInt32 nodeId;
-		UInt32 rootNodeId;
-		char fullPath[MAX_PATH];
-		char nodeName[MAX_PATH];
-	};
-
 	enum ObjectWindow__eNode
 	{
 		kObjWndNode_Activator = 0x0,
@@ -100,6 +92,7 @@ namespace ObjectWindowTreeHooks
 		kObjWndNode_CaravanMoney = 0x55,
 		kObjWndNode_CaravanDeck = 0x56,
 		kObjWndNode_ALL = 0x57,
+		kObjWndNode_COUNT = 0x57,
 		kObjWndNode_NavMesh_Unimplemented = 0x59,
 	};
 
@@ -110,6 +103,7 @@ namespace ObjectWindowTreeHooks
 
 	char** ObjectWindow__kNodeNames = (char**)0xEA6DB8;
 	char** ObjectWindow__kRootNodeNames = (char**)0xEA6D94;
+	int* ObjectWindow__kNodeToRootNode = (int*)0xEA6F18;
 	HTREEITEM __cdecl ObjectWindowTreeView__FindItemRecurse(
 		HWND hWnd,
 		HTREEITEM apItem,
@@ -119,7 +113,7 @@ namespace ObjectWindowTreeHooks
 	{
 		HTREEITEM next = apItem;
 		HTREEITEM result = NULL;
-		ObjectWindowTreeViewItem* item = nullptr;
+		ObjectsView::TreeViewItem* item = nullptr;
 		if (apItem && hWnd)
 		{
 			while (1)
@@ -137,7 +131,7 @@ namespace ObjectWindowTreeHooks
 					break;
 				}
 
-				item = (ObjectWindowTreeViewItem*)lParam.lParam;
+				item = (ObjectsView::TreeViewItem*)lParam.lParam;
 				if (item->nodeId != aiNodeID || item->rootNodeId != aiRootNodeID)
 				{
 					break;
@@ -242,7 +236,7 @@ namespace ObjectWindowTreeHooks
 			return result;
 		}
 
-		ObjectWindowTreeViewItem* item = (ObjectWindowTreeViewItem*)FormHeap_Allocate(sizeof(ObjectWindowTreeViewItem));
+		ObjectsView::TreeViewItem* item = (ObjectsView::TreeViewItem*)FormHeap_Allocate(sizeof(ObjectsView::TreeViewItem));
 		item->fullPath[0] = '\0';
 		item->nodeName[0] = '\0';
 		item->nodeId = nodeId;
@@ -338,11 +332,12 @@ namespace ObjectWindowTreeHooks
 		}
 	}
 
-	ObjectWindowTreeViewItem* __cdecl PostSetupObjectWindowTreeView(HWND objectWindowTree, HTREEITEM hTreeItem)
+	ObjectsView::TreeViewItem* __cdecl PostSetupObjectWindowTreeView(HWND objectWindowTree, HTREEITEM hTreeItem)
 	{
 		SendMessage(objectWindowTree, WM_SETREDRAW, TRUE, 0);
 		RedrawWindow(objectWindowTree, nullptr, nullptr, RDW_ERASE | RDW_INVALIDATE | RDW_NOCHILDREN);
-		return CdeclCall<ObjectWindowTreeViewItem*>(0x448E00, objectWindowTree, hTreeItem);
+
+		return CdeclCall<ObjectsView::TreeViewItem*>(0x448E00, objectWindowTree, hTreeItem);
 	}
 
 	void InitHooks()

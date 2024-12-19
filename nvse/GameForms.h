@@ -278,7 +278,7 @@ public:
 	virtual void		Unk_42();
 	virtual bool		Unk_43();
 	virtual void		Unk_44();
-	virtual void		Unk_45();
+	virtual void		GetFormPath(String* str);
 	virtual void		Unk_46();
 	virtual void		Unk_47();
 	virtual void		Unk_48();

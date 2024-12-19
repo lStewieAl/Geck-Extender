@@ -71,6 +71,14 @@ struct ObjectsView
 	static HWND GetListView();
 	static HWND GetTreeView();
 	static void Refresh();
+
+	struct TreeViewItem
+	{
+		UInt32 nodeId;
+		UInt32 rootNodeId;
+		char fullPath[MAX_PATH];
+		char nodeName[MAX_PATH];
+	};
 };
 
 struct CellView
