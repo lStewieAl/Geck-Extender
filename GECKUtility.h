@@ -67,6 +67,133 @@ struct RenderWindow
 
 struct ObjectsView
 {
+	enum Columns : UInt8
+	{
+		kCol_EditorID = 0x0,
+		kCol_FormID = 0x1,
+		kCol_Count = 0x2,
+		kCol_Users = 0x3,
+		kCol_Model = 0x4,
+		kCol_Size = 0x5,
+		kCol_Name = 0x6,
+		kCol_Race = 0x7,
+		kCol_Class = 0x8,
+		kCol_Faction = 0x9,
+		kCol_Script = 0xA,
+		kCol_Rank = 0xB,
+		kCol_Type = 0xC,
+		kCol_Weight = 0xD,
+		kCol_Value = 0xE,
+		kCol_Health = 0xF,
+		kCol_Quality = 0x10,
+		kCol_Icon = 0x11,
+		kCol_ObjectEffectAmount = 0x12,
+		kCol_Rating = 0x13,
+		kCol_ClipCount = 0x14,
+		kCol_Ammo = 0x15,
+		kCol_Speed = 0x16,
+		kCol_Reach = 0x17,
+		kCol_AttackDamage = 0x18,
+		kCol_Automatic = 0x19,
+		kCol_MinSpread = 0x1A,
+		kCol_Spread = 0x1B,
+		kCol_RateofFire = 0x1C,
+		kCol_CritMult = 0x1D,
+		kCol_BaseVatstoHit = 0x1E,
+		kCol_IgnoresResist = 0x1F,
+		kCol_Part = 0x20,
+		kCol_Female = 0x21,
+		kCol_Scroll = 0x22,
+		kCol_Teaches = 0x23,
+		kCol_Level = 0x24,
+		kCol_Effect1 = 0x25,
+		kCol_Effect2 = 0x26,
+		kCol_Effect3 = 0x27,
+		kCol_Effect4 = 0x28,
+		kCol_Time = 0x29,
+		kCol_Radius = 0x2A,
+		kCol_Uses = 0x2B,
+		kCol_Cost = 0x2C,
+		kCol_Animation = 0x2D,
+		kCol_LeveledList = 0x2E,
+		kCol_Inventory = 0x2F,
+		kCol_ObjectEffect = 0x30,
+		kCol_Playable = 0x31,
+		kCol_Charge = 0x32,
+		kCol_WeightClass = 0x33,
+		kCol_AutoCalc = 0x34,
+		kCol_Essential = 0x35,
+		kCol_Respawns = 0x36,
+		kCol_MovementType = 0x37,
+		kCol_BipedAnim = 0x38,
+		kCol_AllPC = 0x39,
+		kCol_QuestObject = 0x3A,
+		kCol_PCStartEffect = 0x3B,
+		kCol_Sound = 0x3C,
+		kCol_Texture = 0x3D,
+		kCol_LevelSchool = 0x3E,
+		kCol_Poison = 0x3F,
+		kCol_FlickerEffect = 0x40,
+		kCol_Material = 0x41,
+		kCol_IdleAnim = 0x42,
+		kCol_OpenSound = 0x43,
+		kCol_CloseSound = 0x44,
+		kCol_PickUpSound = 0x45,
+		kCol_PutDownSound = 0x46,
+		kCol_Text = 0x47,
+		kCol_Index = 0x48,
+		kCol_WaterType = 0x49,
+		kCol_Priority = 0x4A,
+		kCol_DayofWeek = 0x4B,
+		kCol_Month = 0x4C,
+		kCol_Date = 0x4D,
+		kCol_Duration = 0x4E,
+		kCol_TargetData = 0x4F,
+		kCol_LocationData = 0x50,
+		kCol_ConditionData = 0x51,
+		kCol_FormType = 0x52,
+		kCol_VoiceType = 0x53,
+		kCol_NoteMedium = 0x54,
+		kCol_NumRanks = 0x55,
+		kCol_Trait = 0x56,
+		kCol_PerkEntries = 0x57,
+		kCol_Messagetype = 0x58,
+		kCol_Flags = 0x59,
+		kCol_AssociatedItem = 0x5A,
+		kCol_ResistValue = 0x5B,
+		kCol_Shader = 0x5C,
+		kCol_Template = 0x5D,
+		kCol_MinLvl = 0x5E,
+		kCol_MatchPCLevel = 0x5F,
+		kCol_NeverResets = 0x60,
+		kCol_Owner = 0x61,
+		kCol_HasDelay = 0x62,
+		kCol_Delay = 0x63,
+		kCol_StartGameEnabled = 0x64,
+		kCol_RepeatedTopics = 0x65,
+		kCol_RepeatedStages = 0x66,
+		kCol_PowerArmor = 0x67,
+		kCol_NoVATSMelee = 0x68,
+		kCol_EffectList = 0x69,
+		kCol_Addiction = 0x6A,
+		kCol_EquipType = 0x6B,
+		kCol_Skill = 0x6C,
+		kCol_UsesSight = 0x6D,
+		kCol_CriticalDamage = 0x6E,
+		kCol_ActionPoints = 0x6F,
+		kCol_PCLevelMulti = 0x70,
+		kCol_CalcMin = 0x71,
+		kCol_CalcMax = 0x72,
+		kCol_MeleeDmg = 0x73,
+		kCol_UnarmedDmg = 0x74,
+		kCol_COUNT,
+		kColEx_DT
+	};
+
+	static void SetColumnWidth(Columns column, short width);
+	static short GetColumnWidth(Columns column);
+	static void SetColumnHeading(Columns column, const char* heading);
+
 	static HWND GetWindow();
 	static HWND GetListView();
 	static HWND GetTreeView();
@@ -79,6 +206,14 @@ struct ObjectsView
 		char fullPath[MAX_PATH];
 		char nodeName[MAX_PATH];
 	};
+};
+
+struct ObjectWindowNodeData
+{
+	UInt8 formType;
+	UInt32 numColumns;
+	UInt32 iLvmTopIndex;
+	tList<TESForm> forms;
 };
 
 struct CellView

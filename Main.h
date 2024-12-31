@@ -4130,3 +4130,37 @@ void __cdecl OnInitSelectFormWindow(HWND hWnd, WPARAM index, char* pszText, int 
 	CdeclCall(0x419F50, hWnd, index, pszText, width, format);
 	SetFocus(hWnd);
 }
+
+LRESULT __fastcall ObjectWindowNodeData__OnAddArmorRatingColumn(ObjectWindowNodeData* nodeData, void* edx, HWND hWnd, ObjectsView::Columns columnID, int format, int mask)
+{
+	tagLVCOLUMNA column;
+	column.mask = mask;
+	column.fmt = format;
+	column.pszText = (LPSTR)"DT";
+	column.cx = ObjectsView::GetColumnWidth(ObjectsView::kCol_Rating);
+	column.iSubItem = ObjectsView::kColEx_DT;
+
+	short* columnIds = (short*)0xECF648;
+	columnIds[nodeData->numColumns] = ObjectsView::kColEx_DT;
+	SendMessageA(hWnd, LVM_INSERTCOLUMNA, nodeData->numColumns, (LPARAM)&column);
+	++nodeData->numColumns;
+
+	return ThisCall<LRESULT>(0x437C50, nodeData, hWnd, columnID, format, mask);
+}
+
+__HOOK ObjectWindowListView_OnPopulateColumnExHook()
+{
+	enum { eDT = ObjectsView::kColEx_DT };
+	_asm
+	{
+		cmp eax, eDT
+		je populateDTColumn
+		mov eax, 0x43B65B
+		jmp eax
+
+	populateDTColumn:
+		fld dword ptr ds : [edi + 0x22C] // TESObjectWEAP->damageThreshold
+		mov eax, 0x439E67
+		jmp eax
+	}
+}

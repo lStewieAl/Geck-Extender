@@ -93,6 +93,13 @@ void WriteRelJle(UInt32 jumpSrc, UInt32 jumpTgt)
 	SafeWrite32(jumpSrc + 2, jumpTgt - jumpSrc - 2 - 4);
 }
 
+void WriteRelJa(UInt32 jumpSrc, UInt32 jumpTgt)
+{
+	// ja rel32
+	SafeWrite16(jumpSrc, 0x870F);
+	SafeWrite32(jumpSrc + 2, jumpTgt - jumpSrc - 2 - 4);
+}
+
 [[nodiscard]] __declspec(noinline) UInt32 __stdcall DetourRelCall(UInt32 jumpSrc, UInt32 jumpTgt)
 {
 	UInt32 originalFunction = *(UInt32*)(jumpSrc + 1) + jumpSrc + 5;

@@ -164,6 +164,39 @@ HWND ObjectsView::GetListView() { return *(HWND*)0xED1114; };
 HWND ObjectsView::GetTreeView() { return *(HWND*)0xED1118; };
 void ObjectsView::Refresh() { SendMessageA(GetWindow(), 1042, NULL, NULL); };
 
+void ObjectsView::SetColumnWidth(Columns column, short width)
+{
+	if (column >= kCol_COUNT)
+	{
+		return;
+	}
+
+	short* widths = (short*)0xE8E5C0;
+	widths[column] = width;
+}
+
+short ObjectsView::GetColumnWidth(Columns column)
+{
+	if (column >= kCol_COUNT)
+	{
+		return 0;
+	}
+
+	short* widths = (short*)0xE8E5C0;
+	return widths[column];
+}
+
+void ObjectsView::SetColumnHeading(Columns column, const char* heading)
+{
+	if (column >= kCol_COUNT)
+	{
+		return;
+	}
+
+	const char** headings = (const char**)0xE8E6B0;
+	headings[column] = heading;
+}
+
 HWND CellView::GetWindow() { return *(HWND*)0xECFB78; };
 
 HistoryManager* HistoryManager::GetSingleton() { return *(HistoryManager**)0xECFDF4; };

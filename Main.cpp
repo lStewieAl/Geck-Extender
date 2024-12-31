@@ -1077,6 +1077,13 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// automatically focus the form list when opening a Select Form window
 	WriteRelCall(0x482634, UInt32(OnInitSelectFormWindow));
 
+	// rename Rating to DR in object window armor tab
+	ObjectsView::SetColumnHeading(ObjectsView::kCol_Rating, (const char*)0xD8BF58); // Rating -> DR
+	ObjectsView::SetColumnWidth(ObjectsView::kCol_Rating, 0x30);
+	// add a DT column
+	WriteRelCall(0x437F5D, UInt32(ObjectWindowNodeData__OnAddArmorRatingColumn));
+	WriteRelJa(0x439901, UInt32(ObjectWindowListView_OnPopulateColumnExHook));
+
 	ObjectWindowTreeHooks::InitHooks();
 
 #ifdef _DEBUG

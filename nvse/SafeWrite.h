@@ -16,6 +16,7 @@ void WriteRelCall(UInt32 jumpSrc, UInt32 jumpTgt);
 void WriteRelJnz(UInt32 jumpSrc, UInt32 jumpTgt);
 void WriteRelJz(UInt32 jumpSrc, UInt32 jumpTgt);
 void WriteRelJle(UInt32 jumpSrc, UInt32 jumpTgt);
+void WriteRelJa(UInt32 jumpSrc, UInt32 jumpTgt);
 
 [[nodiscard]] __declspec(noinline) UInt32 __stdcall DetourVtable(UInt32 addr, UInt32 dst);
 [[nodiscard]] __declspec(noinline) UInt32 __stdcall DetourRelCall(UInt32 jumpSrc, UInt32 jumpTgt);
