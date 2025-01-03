@@ -1086,6 +1086,13 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	ObjectWindowTreeHooks::InitHooks();
 
+	// read the 4th tag skill combobox
+	static constexpr int kTagSkillDialogIDs[] = {1035, 1036, 1037, 1038};
+	SafeWrite32(0x560F44, UInt32(kTagSkillDialogIDs));
+	SafeWrite32(0x56111B, UInt32(kTagSkillDialogIDs));
+	SafeWrite32(0x560F93, UInt32(&kTagSkillDialogIDs[4]));
+	SafeWrite32(0x561163, UInt32(&kTagSkillDialogIDs[4]));
+
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
 	{
