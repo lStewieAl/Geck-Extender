@@ -1001,6 +1001,13 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// show a warning when merging vertices from different navmeshes
 	WriteRelCall(0x40AAA7, UInt32(NavMeshManager__OnMergeVertices));
 	WriteRelCall(0x457E23, UInt32(NavMeshManager__OnMergeVertices));
+	WriteRelCall(0x40A9FF, UInt32(NavMeshManager__OnCreateTriangle));
+	WriteRelCall(0x4288AC, UInt32(NavMeshManager__OnCreateTriangle));
+	WriteRelCall(0x4298CE, UInt32(NavMeshManager__OnCreateTriangle));
+	WriteRelCall(0x456FBF, UInt32(NavMeshManager__OnCreateTriangle));
+	WriteRelCall(0x4288BF, UInt32(NavMeshManager__OnCreateQuad));
+	WriteRelCall(0x40AA20, UInt32(NavMeshManager__OnCreateQuad));
+	WriteRelCall(0x456FD9, UInt32(NavMeshManager__OnCreateQuad));
 
 	// clear the 'Creating Editor NavMeshes' print when it's done
 	WriteRelJump(0x42216C, UInt32(NavMeshManager__PostRenderCellClearPrintHook));

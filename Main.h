@@ -3893,31 +3893,43 @@ bool OnMoveRefCheckXYZHeld()
 
 void __fastcall NavMeshManager__OnMergeVertices(NavMeshManager* navMeshManager)
 {
-	bool isMergingDifferentRecords = false;
-	NavMesh* UNSET_MESH = (NavMesh*)-1;
-	NavMesh* navMesh = UNSET_MESH;
-	for (int i = 0, n = navMeshManager->arrayData.vertices.size; i < n; ++i)
-	{
-		if (auto vertex = navMeshManager->arrayData.vertices.data[i])
-		{
-			if (navMesh == UNSET_MESH) navMesh = vertex->navMesh;
-			else if (navMesh != vertex->navMesh)
-			{
-				isMergingDifferentRecords = true;
-				break;
-			}
-		}
-	}
-
-	if (isMergingDifferentRecords)
+	if (navMeshManager->HasMultipleNavmeshesSelected())
 	{
 		if (MessageBoxA(g_MainHwnd, "You are about to merge Navmesh records which will cause one to be deleted, do you wish to proceed?", "Geck Extender", MB_YESNOCANCEL) != IDYES)
 		{
 			return;
 		}
 	}
+
 	ThisCall(0x4267B0, navMeshManager);
 }
+
+void __fastcall NavMeshManager__OnCreateTriangle(NavMeshManager* navMeshManager)
+{
+	if (navMeshManager->HasMultipleNavmeshesSelected())
+	{
+		if (MessageBoxA(g_MainHwnd, "You are about to merge Navmesh records which will cause one to be deleted, do you wish to proceed?", "Geck Extender", MB_YESNOCANCEL) != IDYES)
+		{
+			return;
+		}
+	}
+
+	ThisCall(0x427650, navMeshManager);
+}
+
+void __fastcall NavMeshManager__OnCreateQuad(NavMeshManager* navMeshManager, void* edx, char a2)
+{
+	if (navMeshManager->HasMultipleNavmeshesSelected())
+	{
+		if (MessageBoxA(g_MainHwnd, "You are about to merge Navmesh records which will cause one to be deleted, do you wish to proceed?", "Geck Extender", MB_YESNOCANCEL) != IDYES)
+		{
+			return;
+		}
+	}
+
+	ThisCall(0x427770, navMeshManager, a2);
+}
+
 __HOOK NavMeshManager__PostRenderCellClearPrintHook()
 {
 	static const char* EmptyString = "";

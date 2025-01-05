@@ -413,6 +413,7 @@ struct NavMeshManager
 
 	static NavMeshManager* GetSingleton();
 	static bool IsActive();
+	bool HasMultipleNavmeshesSelected();
 };
 
 enum WindowMessages

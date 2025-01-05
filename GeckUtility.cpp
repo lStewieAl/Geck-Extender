@@ -210,6 +210,23 @@ NavMeshManager* NavMeshManager::GetSingleton() { return (NavMeshManager*)0xECEFF
 
 bool NavMeshManager::IsActive() { return *(bool**)0xED1412; }
 void NavMeshManager::Undo() { ThisCall(0x4249F0, this); }
+bool NavMeshManager::HasMultipleNavmeshesSelected()
+{
+	NavMesh* UNSET_MESH = (NavMesh*)-1;
+	NavMesh* navMesh = UNSET_MESH;
+	for (int i = 0, n = arrayData.vertices.size; i < n; ++i)
+	{
+		if (auto vertex = arrayData.vertices.data[i])
+		{
+			if (navMesh == UNSET_MESH) navMesh = vertex->navMesh;
+			else if (navMesh != vertex->navMesh)
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}
 
 tList<HWND>* OpenWindows::GetWindowList() { return (tList<HWND>*)0xED033C; }
 
