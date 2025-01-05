@@ -456,7 +456,9 @@ namespace BetterFloatingFormList
 		str.m_data = 0;
 		str.m_dataLen = 0;
 		form->GetFormPath(&str);
-		return !strnicmp(str.CStr(), filterData, strlen(filterData));
+		auto result = !strnicmp(str.CStr(), filterData, strlen(filterData));
+		str.Set(nullptr);
+		return result;
 	}
 
 	void __cdecl OnInitListViewForms(HWND listView, tList<TESForm>* list, bool(__cdecl* filterFn)(TESForm*, const char*), const char* filterData)
