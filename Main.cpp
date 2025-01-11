@@ -1100,6 +1100,12 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SafeWrite32(0x560F93, UInt32(&kTagSkillDialogIDs[4]));
 	SafeWrite32(0x561163, UInt32(&kTagSkillDialogIDs[4]));
 
+	// add option for only finalizing navmeshes for cells from a specified esm
+	WriteRelCall(0x4446E1, UInt32(NavMeshManager__ShowFinalizeAllNavMeshesPopup));
+	WriteRelCall(0x426248, UInt32(OnForceFinalizeShouldProcessCell));
+	WriteRelCall(0x4262CF, UInt32(OnForceFinalizeShowMessageBox));
+
+
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
 	{

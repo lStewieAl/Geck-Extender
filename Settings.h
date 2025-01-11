@@ -78,6 +78,7 @@ struct Settings
 	UInt8 iPreviewWindowRed, iPreviewWindowGreen, iPreviewWindowBlue;
 
 	char* sLaunchExeName;
+	char* sForceFinalizeNavMeshModName;
 
 	union
 	{

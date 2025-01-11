@@ -4176,3 +4176,41 @@ __HOOK ObjectWindowListView_OnPopulateColumnExHook()
 		jmp eax
 	}
 }
+
+UInt8 forceFinalizeNavMeshModIndex = -1;
+void __fastcall NavMeshManager__ShowFinalizeAllNavMeshesPopup(NavMeshManager* navMeshManager)
+{
+	if (*config.sForceFinalizeNavMeshModName)
+	{
+		auto mod = DataHandler::GetSingleton()->LookupModByName(config.sForceFinalizeNavMeshModName);
+		if (mod)
+		{
+			forceFinalizeNavMeshModIndex = mod->modIndex;
+		}
+	}
+
+	ThisCall(0x426160, navMeshManager);
+
+	forceFinalizeNavMeshModIndex = -1;
+}
+
+void* __fastcall OnForceFinalizeShouldProcessCell(TESObjectCELL* cell)
+{
+	if (forceFinalizeNavMeshModIndex != -1)
+	{
+		if (cell->modIndex != forceFinalizeNavMeshModIndex)
+		{
+			return nullptr;
+		}
+	}
+	return cell->navMeshArray;
+}
+
+int __cdecl OnForceFinalizeShowMessageBox(char* DstBuf, size_t SizeInBytes, char* Format, UInt32 numCellsToFinalize)
+{
+	if (forceFinalizeNavMeshModIndex != -1)
+	{
+		return CdeclCall<int>(0x401190, DstBuf, SizeInBytes, "About to finalize %d cells with navmeshes for file %s. Finalizing and saving the entire worldspace could take a larger amount of time. Continue?", numCellsToFinalize, config.sForceFinalizeNavMeshModName);
+	}
+	return CdeclCall<int>(0x401190, DstBuf, SizeInBytes, Format, numCellsToFinalize);
+}
