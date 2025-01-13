@@ -92,6 +92,7 @@
     </ClCompile>
     <ClCompile Include="MultiBoundsAdder.cpp" />
     <ClCompile Include="ObjectWindowTreeHooks.cpp" />
+    <ClCompile Include="ToggleReferenceMovement.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Main.h" />
@@ -212,6 +213,7 @@
       <Filter>allocator</Filter>
     </ClInclude>
     <ClInclude Include="ObjectWindowTreeHooks.h" />
+    <ClInclude Include="ToggleReferenceMovement.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

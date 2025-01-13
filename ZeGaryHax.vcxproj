@@ -233,6 +233,10 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="ToggleReferenceMovement.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="xutil.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="LogWindow.cpp" />
@@ -329,6 +333,10 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
     <ClInclude Include="resource.h" />
     <ClInclude Include="SCOLConsistencyFix.h" />
     <ClInclude Include="Settings.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="ToggleReferenceMovement.h">
       <SubType>
       </SubType>
     </ClInclude>

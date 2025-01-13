@@ -48,6 +48,7 @@
 #include "SCOLConsistencyFix.h"
 #include "MultiBoundsAdder.h"
 #include "UnserializedIO.h"
+#include "ToggleReferenceMovement.h"
 #include "Allocator/MemoryManager.hpp"
 #include "Allocator/BSMemory.hpp"
 
@@ -1105,6 +1106,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x426248, UInt32(OnForceFinalizeShouldProcessCell));
 	WriteRelCall(0x4262CF, UInt32(OnForceFinalizeShowMessageBox));
 
+	ToggleReferenceMovement::InitHooks();
 
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())

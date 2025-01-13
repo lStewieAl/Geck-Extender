@@ -66,6 +66,7 @@ void ReadAllSettings()
 	config.bSnapToGridRotationUseDoublePrecision = GetOrCreateINIValue("Render Window", "bSnapToGridRotationUseDoublePrecision", 0, IniPath);
 	config.bAutoLightWarnings = GetOrCreateINIValue("Render Window", "bAutoLightWarnings", 0, IniPath);
 	config.iRenderFOV = GetOrCreateINIValue("Render Window", "iFOV", 90, IniPath);
+	config.bRenderWindowPreventRefMovementByDefault = GetOrCreateINIValue("Render Window", "bPreventRefMovement", 0, IniPath);
 
 	config.bSmoothFlycamRotation = GetOrCreateINIValue("Flycam", "bSmoothRotation", 1, IniPath);
 	config.bFlycamUpDownRelativeToWorld = GetOrCreateINIValue("Flycam", "bFlycamUpDownRelativeToWorld", 1, IniPath);

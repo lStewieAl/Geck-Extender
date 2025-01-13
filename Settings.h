@@ -61,6 +61,7 @@ struct Settings
 	bool bNewPluginsDefaultToESM;
 	bool bAllowHardDeletionInESMs;
 	bool bAddFilterCtrlBackspace;
+	bool bRenderWindowPreventRefMovementByDefault;
 
 	int bUseAltShiftMultipliers;
 	float fMovementAltMultiplier;

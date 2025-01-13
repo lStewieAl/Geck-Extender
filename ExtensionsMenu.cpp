@@ -10,6 +10,7 @@
 #include "LaunchGame.h"
 #include "Events/MainWindowLoadEvent.h"
 #include "MultiBoundsAdder.h"
+#include "ToggleReferenceMovement.h"
 
 #define UI_EXTMENU_ID			51001
 #define UI_EXTMENU_SHOWLOG		51002
@@ -34,6 +35,7 @@
 #define UI_EXTMENU_VIEW_NAVMESH_IGNORED_FORMS 51021
 #define UI_EXTMENU_AUTO_ADD_TO_MULTIBOUNDS 51022
 #define UI_EXTMENU_READD_TO_MULTIBOUNDS 51023
+#define UI_EXTMENU_TOGGLE_REF_MOVEMENT 51024
 #define MAIN_WINDOW_CALLBACK 0xFEED
 
 // unused button in vanilla menu
@@ -121,6 +123,7 @@ bool CreateExtensionMenu(HWND MainWindow, HMENU MainMenu)
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_VIEW_NAVMESH_IGNORED_FORMS, "View Navmesh Ignored Forms");
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_AUTO_ADD_TO_MULTIBOUNDS, "Attach Objects to Multibounds");
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_READD_TO_MULTIBOUNDS, "Reattach All Objects to Multibounds");
+	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_TOGGLE_REF_MOVEMENT, "Render Window: Allow Reference Movement");
 
 	MENUITEMINFO menuInfo;
 	memset(&menuInfo, 0, sizeof(MENUITEMINFO));
@@ -395,6 +398,15 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 				PostMessageA(g_ConsoleHwnd, UI_EXTMENU_TOGGLENAVEMESHBISECT, (WPARAM)true, 0);
 				ToggleNavmeshPlaceAboveOthers(true);
 			}
+
+			if (!config.bRenderWindowPreventRefMovementByDefault)
+			{
+				MENUITEMINFO menuInfo;
+				menuInfo.cbSize = sizeof(MENUITEMINFO);
+				menuInfo.fMask = MIIM_STATE;
+				menuInfo.fState = MFS_CHECKED;
+				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLE_REF_MOVEMENT, FALSE, &menuInfo);
+			}
 		}
 	}
 	else if (Message == WM_COMMAND)
@@ -443,6 +455,17 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 		case UI_EXTMENU_READD_TO_MULTIBOUNDS:
 		{
 			MultiBoundsAdder::TestObjects(true);
+		}
+		return 0;
+
+		case UI_EXTMENU_TOGGLE_REF_MOVEMENT:
+		{
+			auto isMovementAllowed = ToggleReferenceMovement::Toggle();
+			MENUITEMINFO menuInfo;
+			menuInfo.cbSize = sizeof(MENUITEMINFO);
+			menuInfo.fMask = MIIM_STATE;
+			menuInfo.fState = isMovementAllowed ? MFS_CHECKED : MFS_UNCHECKED;
+			SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLE_REF_MOVEMENT, FALSE, &menuInfo);
 		}
 		return 0;
 
