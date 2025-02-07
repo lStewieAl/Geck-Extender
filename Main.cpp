@@ -893,6 +893,15 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelJump(0x48CABC, UInt32(OnRenderWindowCallProcHook));
 	// fix crash with water type window
 	WriteRelJump(0x65F8EF, UInt32(OnWaterTypeCheckExtraSubWindowHook));
+	// fix region editor auto selecting 'Enable this type of Data' by adding a check for Msg == WM_COMMAND for the buttons
+	// otherwise they were toggling on WM_NOTIFY...
+	SafeWriteBuf(0x732982, "\x81\xFF\x11\x01\x00\x00\x90", 7); // grass
+	SafeWriteBuf(0x7345E2, "\x81\xFF\x11\x01\x00\x00\x90", 7); // imposter
+	SafeWriteBuf(0x73497B, "\x81\xFF\x11\x01\x00\x00\x90", 7); // landscape
+	SafeWriteBuf(0x735DF2, "\x81\xFF\x11\x01\x00\x00\x90", 7); // map
+	SafeWriteBuf(0x739132, "\x81\xFF\x11\x01\x00\x00\x90", 7); // objects
+	SafeWriteBuf(0x741302, "\x81\xFF\x11\x01\x00\x00\x90", 7); // sound
+	SafeWriteBuf(0x74267D, "\x81\xFF\x11\x01\x00\x00\x90", 7); // weather
 
 	// fix head preview not updating when adding head parts
 	WriteRelCall(0x5785EF, UInt32(InsertHeadPartsColumnsHookAdd));
