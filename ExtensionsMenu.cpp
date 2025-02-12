@@ -733,7 +733,7 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 	{
 		//	Continue normal execution but with a custom string
 		char customTitle[256];
-		stbsp_snprintf(customTitle, sizeof(customTitle), "%s -= Extender Rev. 0.47 =-", (const char*)lParam);
+		stbsp_snprintf(customTitle, sizeof(customTitle), "%s -= Extender Rev. 0.48 =-", (const char*)lParam);
 
 		return CallWindowProc(originalMainWindowCallback, Hwnd, Message, wParam, (LPARAM)customTitle);
 	}

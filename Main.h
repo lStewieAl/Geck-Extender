@@ -21,7 +21,7 @@
 #include "libs/stb_sprintf.h"
 
 #define GH_NAME				"ZeGaryHax"		// this is the string for IsPluginInstalled and GetPluginVersion (also shows in nvse.log)
-#define GH_VERSION			0.47
+#define GH_VERSION			0.48
 
 HMODULE ZeGaryHaxHandle;
 extern HWND g_trackBarHwnd;
