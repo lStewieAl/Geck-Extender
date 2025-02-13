@@ -4177,7 +4177,7 @@ __HOOK ObjectWindowListView_OnPopulateColumnExHook()
 	}
 }
 
-UInt8 forceFinalizeNavMeshModIndex = -1;
+UInt32 forceFinalizeNavMeshModIndex = -1;
 void __fastcall NavMeshManager__ShowFinalizeAllNavMeshesPopup(NavMeshManager* navMeshManager)
 {
 	if (*config.sForceFinalizeNavMeshModName)
