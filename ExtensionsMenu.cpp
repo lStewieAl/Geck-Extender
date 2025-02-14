@@ -399,11 +399,12 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 				ToggleNavmeshPlaceAboveOthers(true);
 			}
 
-			if (!config.bRenderWindowPreventRefMovementByDefault)
+			if (config.bRenderWindowPreventRefMovementByDefault)
 			{
-				MENUITEMINFO menuInfo;
-				menuInfo.cbSize = sizeof(MENUITEMINFO);
-				menuInfo.fMask = MIIM_STATE;
+				SendMessage(Hwnd, WM_COMMAND, UI_EXTMENU_TOGGLE_REF_MOVEMENT, NULL);
+			}
+			else
+			{
 				menuInfo.fState = MFS_CHECKED;
 				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLE_REF_MOVEMENT, FALSE, &menuInfo);
 			}
