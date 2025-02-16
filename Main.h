@@ -4187,6 +4187,10 @@ void __fastcall NavMeshManager__ShowFinalizeAllNavMeshesPopup(NavMeshManager* na
 		{
 			forceFinalizeNavMeshModIndex = mod->modIndex;
 		}
+		else
+		{
+			Console_Print("Force Finalize NavMesh: Unable to find mod %s", config.sForceFinalizeNavMeshModName);
+		}
 	}
 
 	ThisCall(0x426160, navMeshManager);
