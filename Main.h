@@ -1259,6 +1259,61 @@ BOOL __stdcall RenderWindowCallbackHook(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 	return StdCall<LRESULT>(0x455AA0, hWnd, msg, wParam, lParam);
 }
 
+class BGSPrimitive;
+TESObjectREFR* __fastcall OnRenderWindowDragDrop__CreateReferenceAtLocation(DataHandler* dataHandler, void* edx, TESBoundObject* form, NiPoint3* aPos, NiPoint3* aRot, float radius, BGSPrimitive* apPrimitive, int a7)
+{
+	if (form->typeID == kFormType_TESLevItem || form->typeID == kFormType_TESLevCharacter || form->typeID == kFormType_TESLevCreature)
+	{
+		auto levItem = (TESLevItem*)form;
+		TESBoundObject* newForm = nullptr;
+
+		// pick a random item from the list, this will be null if it's a nested list
+		if (auto item = levItem->list.list.GetRandomItem())
+		{
+			if (item->form)
+			{
+				if (auto boundObj = CdeclCall<TESBoundObject*>(0xC5D114, item->form, 0, 0xE8C57C, 0xE8C7D4, 0)) // DYNAMIC_CAST(TESForm, TESBoundObject))
+				{
+					newForm = boundObj;
+				}
+			}
+		}
+
+		// use calculate formlist if it's a nested list - note this can return no new form since it's chance based...
+		if (!newForm)
+		{
+			auto container = TESContainer::Create();
+
+			// try finding a random item 100 times... jank workaround for when the chance sometimes returns null
+			int attempts = 0;
+			do
+			{
+				levItem->list.CalculateCurrentFormList(100, 1, container, false);
+				if (auto data = container->formCountList.Head()->data)
+				{
+					if (data->form)
+					{
+						if (auto boundObj = CdeclCall<TESBoundObject*>(0xC5D114, data->form, 0, 0xE8C57C, 0xE8C7D4, 0)) // DYNAMIC_CAST(TESForm, TESBoundObject))
+						{
+							newForm = boundObj;
+						}
+					}
+				}
+				container->Destroy();
+			} while (!newForm && ++attempts < 100);
+			
+
+			FormHeap_Free(container);
+		}
+
+		if (newForm)
+		{
+			form = newForm;
+		}
+	}
+	return ThisCall<TESObjectREFR*>(0x4D0940, dataHandler, form, aPos, aRot, radius, apPrimitive, a7);
+}
+
 extern HWND g_MainHwnd;
 void ShowSaveFailureError()
 {

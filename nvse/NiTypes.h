@@ -108,6 +108,13 @@ struct NiPoint4
 	float x, y, z, r;
 };
 
+struct NiNPShortPoint3
+{
+	short x;
+	short y;
+	short z;
+};
+
 // 10 - always aligned?
 struct NiQuaternion
 {

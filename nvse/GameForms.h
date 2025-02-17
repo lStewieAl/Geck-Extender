@@ -391,6 +391,9 @@ public:
 	virtual void		Unk_6B(void);
 	virtual void		Unk_6C(void);	// REFR: GetBSFaceGenNiNodeSkinned
 	virtual NiNode* LoadGraphics(TESForm* apBaseForm);
+
+	UInt32 unk2C;
+	void* unk30;
 };
 
 // 30
@@ -405,10 +408,18 @@ public:
 	virtual void		Unk_70(void);
 	virtual void		Unk_71(void);
 
-	BoundObjectListHead* head;		// 018
-	TESBoundObject* prev;		// 01C
-	TESBoundObject* next;		// 020
-	SInt16					bounds[6];	// 024
+	struct BOUND_DATA
+	{
+		NiNPShortPoint3 min;
+		NiNPShortPoint3 max;
+	};
+
+	BoundObjectListHead* head;		// 034
+	TESBoundObject* prev;		// 038
+	TESBoundObject* next;		// 03C
+	UInt32 unk40;				// 040
+	BOUND_DATA					bounds;	// 044
+	UInt32 unk50;				// 050
 };
 
 // C
@@ -1043,6 +1054,9 @@ public:
 
 	typedef tList<FormCount> FormCountList;
 	FormCountList formCountList;	// 004
+
+	static TESContainer* Create();
+	void Destroy();
 	// 00C
 };
 
@@ -3277,36 +3291,15 @@ public:
 		kFlags_UseAll = 1 << 2,
 	};
 
-	struct ListEntry
-	{
-		ListData* data;		// 000
-		ListEntry* next;	// 004
-		ListData* Info() const { return data; }
-		ListEntry* Next() const { return next; }
-		void Delete();
-		void DeleteHead(ListEntry* replaceWith);
-		void SetNext(ListEntry* nextEntry) { next = nextEntry; }
-	}; // 008
-
-	ListEntry			list;			// 004
+	tList<ListData> list;			// 004
 	UInt8				chanceNone;		// 00C
 	UInt8				flags;			// 00D
 	UInt16				pad00E;			// 00E
 	TESGlobal* unk010;			// 010 use global value for chance none?
 	ExtraDataList		extraDatas;		// 014 ??? BaseExtraList::DebugDump() shows no data
 
-	ListData* CreateData(TESForm* form, UInt16 level, UInt16 count, float health);
-	ListData* CreateData(TESForm* form, UInt16 level, UInt16 count, float health, TESForm* owner, UInt32 rank);
-	ListEntry* CreateEntry(ListData* data);
-	void			AddItem(TESForm* form, UInt16 level, UInt16 count, float health);
-	void			AddItem(TESForm* form, UInt32 rank, TESForm* owner, float health, UInt16 count, UInt16 level); // order reversed for VC's order of evaluating function args
-	UInt32			RemoveItem(TESForm* form);
-	void			Dump();
-	bool			RemoveNthItem(UInt32 itemIndex);
-	UInt32			GetItemIndexByForm(TESForm* form);
-	UInt32			GetItemIndexByLevel(UInt32 level);
+	void CalculateCurrentFormList(signed int ausLevel, int ausCount, TESContainer* apOut, int aeAllBelowForce);
 };	// 034
-typedef Visitor<TESLeveledList::ListEntry, TESLeveledList::ListData> LeveledListVisitor;
 
 // TESLevCreature (68)
 class TESLevCreature : public TESBoundObject

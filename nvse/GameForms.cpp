@@ -642,3 +642,20 @@ Script* EffectSetting::RemoveScript()
 {
 	return SetScript(NULL);
 };
+
+TESContainer* TESContainer::Create()
+{
+	TESContainer* container = (TESContainer*)FormHeap_Allocate(sizeof(TESContainer));
+	ThisCall(0x4F4440, container); // TESContainer::TESContainer
+	return container;
+}
+
+void TESContainer::Destroy()
+{
+	ThisCall(0x4F5760, this);
+}
+
+void TESLeveledList::CalculateCurrentFormList(signed int ausLevel, int ausCount, TESContainer* apOut, int aeAllBelowForce)
+{
+	ThisCall(0x4FF6B0, this, ausLevel, ausCount, apOut, aeAllBelowForce);
+}

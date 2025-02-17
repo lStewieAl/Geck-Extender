@@ -252,7 +252,12 @@ public:
 	Item* GetRandomItem() const
 	{
 		int numItems = Count();
-		int itemIdx = GetRandomIntBelow(numItems);
+		if (!numItems)
+		{
+			return nullptr;
+		}
+
+		int itemIdx = rand() % numItems;
 		return GetNthItem(itemIdx);
 	}
 
