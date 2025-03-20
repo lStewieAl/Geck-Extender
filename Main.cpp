@@ -1120,6 +1120,12 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x426248, UInt32(OnForceFinalizeShouldProcessCell));
 	WriteRelCall(0x4262CF, UInt32(OnForceFinalizeShowMessageBox));
 
+	// fix TESChallenge 'Craft using an item' combobox only containing casino chips
+	// and 'Acquire an item' only including armors
+	SafeWrite8(0x5600FE, 0xB5);
+	SafeWrite8(0x560159, 0x65);
+	SafeWriteBuf(0x560160, "\x83\xC4\x18\xE9\x3B\xFF\xFF\xFF", 8);
+
 	ToggleReferenceMovement::InitHooks();
 
 #ifdef _DEBUG
