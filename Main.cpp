@@ -1106,6 +1106,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x437F5D, UInt32(ObjectWindowNodeData__OnAddArmorRatingColumn));
 	WriteRelJa(0x439901, UInt32(ObjectWindowListView_OnPopulateColumnExHook));
 
+	// add Challenges to the Object Window 'All' node
+	WriteRelCall(0x439272, UInt32(ObjectWindowNodeData__OnPopulateReputationList));
+
 	ObjectWindowTreeHooks::InitHooks();
 
 	// read the 4th tag skill combobox

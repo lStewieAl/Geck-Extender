@@ -4273,3 +4273,11 @@ int __cdecl OnForceFinalizeShowMessageBox(char* DstBuf, size_t SizeInBytes, char
 	}
 	return CdeclCall<int>(0x401190, DstBuf, SizeInBytes, Format, numCellsToFinalize);
 }
+
+void __fastcall ObjectWindowNodeData__OnPopulateReputationList(ObjectWindowNodeData* apNodeData, void* edx, tList<TESForm>* apReputationList, char abClear, int formal)
+{
+	ThisCall(0x438C70, apNodeData, apReputationList, abClear, formal);
+
+	auto challengesList = reinterpret_cast<tList<TESForm>*>((UInt32)apReputationList + 8); // &DataHandler->reputationList -> &DataHandler->challengesList
+	ThisCall(0x438C70, apNodeData, challengesList, abClear, formal);
+}
