@@ -517,6 +517,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x46193B, UInt32(OnRenderWindowDragDrop__CreateReferenceAtLocation));
 	SafeWrite32(0x4411A1, UInt32(RenderWindowCallbackHook));
 
+	// fix lights not updating when dragged unless a multibound is in the cell (thanks Pr0bability)
+	SafeWrite16(0x90C136, 0x9066); // remove check that the node is the root in ShadowSceneNode::UpdateQueuedLight 
+
 	// allow toggling of "scroll" in TESObjectBOOK dialog
 	SafeWrite8(0x10CD577, 0x50);
 
