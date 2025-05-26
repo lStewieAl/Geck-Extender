@@ -350,6 +350,7 @@ public:
 	const char* GetTheName() { return CdeclCall <const char*>(0x437DB0, this); };
 	bool			IsCloned() const;
 	bool IsDisabled() { return flags & kFormFlags_InitiallyDisabled; };
+	void SetDisabled(bool abDisabled);
 
 	bool IsWeapon() { return typeID == kFormType_TESObjectWEAP; }
 	bool IsArmor() { return typeID == kFormType_TESObjectARMO; }

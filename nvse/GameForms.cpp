@@ -659,3 +659,15 @@ void TESLeveledList::CalculateCurrentFormList(signed int ausLevel, int ausCount,
 {
 	ThisCall(0x4FF6B0, this, ausLevel, ausCount, apOut, aeAllBelowForce);
 }
+
+void TESForm::SetDisabled(bool abDisabled)
+{
+	if (abDisabled)
+	{
+		flags |= kFormFlags_InitiallyDisabled;
+	}
+	else
+	{
+		flags &= ~kFormFlags_InitiallyDisabled;
+	}
+}
