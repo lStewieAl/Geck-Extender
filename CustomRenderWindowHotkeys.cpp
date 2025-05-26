@@ -135,7 +135,11 @@ namespace CustomRenderWindowHotkeys
 		
 		for (auto ref : *selected)
 		{
-			ref->SetPersistent(bHasNonPersistentRefs);
+			if (bHasNonPersistentRefs != ref->IsPersistent())
+			{
+				ref->SetPersistent(bHasNonPersistentRefs);
+				ref->MarkAsModified();
+			}
 		}
 	}
 
