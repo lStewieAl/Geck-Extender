@@ -121,6 +121,7 @@ public:
 
 	bool IsTaken() const { return (flags & kFlags_Taken) == kFlags_Taken; } // Need to implement
 	bool IsPersistent() const { return (flags & kFlags_Persistent) != 0; }
+	void SetPersistent(bool abPersistent);
 	bool IsTemporary() { return (flags & kFlags_Temporary) ? true : false; }
 	bool IsDeleted() { return (flags & kFlags_Deleted) ? true : false; }
 	bool IsDestroyed() { return (flags & kFlags_Destroyed) ? true : false; }

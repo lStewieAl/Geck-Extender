@@ -68,19 +68,13 @@ namespace NavMeshPickPreventer
 		bool bItemsAdded = false;
 
 		auto selected = RenderWindow::SelectedData::GetSelected();
-		if (auto selectedFormIter = selected->selectedForms)
+		for (auto ref : *selected)
 		{
-			do
+			if (ref->baseForm)
 			{
-				if (auto form = selectedFormIter->ref)
-				{
-					if (form->baseForm)
-					{
-						AddFormToIgnoredList(form->baseForm);
-						bItemsAdded = true;
-					}
-				}
-			} while (selectedFormIter = selectedFormIter->next);
+				AddFormToIgnoredList(ref->baseForm);
+				bItemsAdded = true;
+			}
 		}
 		return bItemsAdded;
 	}

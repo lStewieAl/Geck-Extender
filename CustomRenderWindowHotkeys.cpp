@@ -120,6 +120,25 @@ namespace CustomRenderWindowHotkeys
 		PlaySound("SystemExclamation", NULL, SND_ASYNC);
 	}
 
+	void ToggleSelectedRefPersists()
+	{
+		auto selected = RenderWindow::SelectedData::GetSelected();
+		bool bHasNonPersistentRefs = false;
+		for (auto ref : *selected)
+		{
+			if (!ref->IsPersistent())
+			{
+				bHasNonPersistentRefs = true;
+				break;
+			}
+		}
+		
+		for (auto ref : *selected)
+		{
+			ref->SetPersistent(bHasNonPersistentRefs);
+		}
+	}
+
 	enum CustomHotkey
 	{
 		kHotkey_NONE = 0x47, // max ID of the vanilla IDs
@@ -131,6 +150,7 @@ namespace CustomRenderWindowHotkeys
 		kHotkey_NavMeshIgnoreSelectedPicks,
 		kHotkey_ToggleShowDisabledObjects,
 		kHotkey_LinkRefs,
+		kHotkey_ToggleRefPersists,
 	};
 
 	static RenderWindowHotkey CustomHotkeys[] =
@@ -142,6 +162,7 @@ namespace CustomRenderWindowHotkeys
 		RenderWindowHotkey("Navmesh: Ignore selected forms", "NavMeshIgnoreSelectedPicks", 'K', RenderWindowHotkey::kRenderWindowPreferenceFlag_Shift, RenderWindowHotkey::kRenderHotkeyCategory_Navmesh),
 		RenderWindowHotkey("Toggle show disabled objects", "ToggleShowDisabledObjects", 'N', RenderWindowHotkey::kRenderWindowPreferenceFlag_NONE, RenderWindowHotkey::kRenderHotkeyCategory_Visibility),
 		RenderWindowHotkey("Link selected refs", "LinkRefs", 'J'),
+		RenderWindowHotkey("Toggle ref persists", "ToggleRefPersists", 'K'),
 	};
 
 	void HandleHotkey(UInt32 hotkey)
@@ -174,6 +195,9 @@ namespace CustomRenderWindowHotkeys
 
 		case kHotkey_LinkRefs:
 			LinkSelectedRefs();
+			break;
+		case kHotkey_ToggleRefPersists:
+			ToggleSelectedRefPersists();
 			break;
 		}
 	}

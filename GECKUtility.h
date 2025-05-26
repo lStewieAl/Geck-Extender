@@ -53,6 +53,58 @@ struct RenderWindow
 			List* next;
 		};
 
+		struct ListIterator
+		{
+			using iterator_category = std::forward_iterator_tag;
+			using value_type = TESObjectREFR*;
+			using difference_type = std::ptrdiff_t;
+			using pointer = TESObjectREFR**;
+			using reference = TESObjectREFR*&;
+
+			List* current_node;
+
+			// Constructor
+			explicit ListIterator(List* node) : current_node(node) {}
+
+			TESObjectREFR* operator*() const
+			{
+				return current_node->ref;
+			}
+
+			TESObjectREFR* operator->() const
+			{
+				return current_node->ref;
+			}
+
+			ListIterator& operator++()
+			{
+				if (current_node) {
+					current_node = current_node->next;
+				}
+				return *this;
+			}
+
+			bool operator==(const ListIterator& other) const
+			{
+				return current_node == other.current_node;
+			}
+
+			bool operator!=(const ListIterator& other) const
+			{
+				return current_node != other.current_node;
+			}
+		};
+
+		ListIterator begin()
+		{
+			return ListIterator(selectedForms);
+		}
+
+		ListIterator end()
+		{
+			return ListIterator(nullptr); // The end is when the node pointer is null
+		}
+
 		List* selectedForms;
 		UInt32 numItems;
 		NiPoint3 pos;

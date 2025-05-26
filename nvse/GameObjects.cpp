@@ -1,6 +1,10 @@
 #include "GameObjects.h"
 #include "NiObjects.h"
 
+// 0x63DC10
+void TESObjectREFR::SetPersistent(bool abPersistent) {
+	ThisCall(0x63DC10, this, abPersistent);
+}
 
 // 0x6437A0
 void TESObjectREFR::AddMultiBound(TESObjectREFR* apMultiBoundRef) {
