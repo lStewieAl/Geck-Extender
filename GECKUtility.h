@@ -115,6 +115,8 @@ struct RenderWindow
 	static bool GetMousePos(NiPoint3* aPosOut, NiPoint3* aRotOut = nullptr);
 	static TESObjectCELL* GetCurrentCell();
 	static bool InLandscapeEditingMode();
+	static bool IsLandscapePainting();
+	static void ResetLandscapePainting();
 };
 
 struct ObjectsView

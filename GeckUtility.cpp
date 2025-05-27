@@ -155,6 +155,11 @@ bool RenderWindow::GetMousePos(NiPoint3* aPosOut, NiPoint3* aRotOut) {
 
 TESObjectCELL* RenderWindow::GetCurrentCell() { return *(TESObjectCELL**)0xED1174; };
 bool RenderWindow::InLandscapeEditingMode() { return *(bool*)0xED142D; };
+bool RenderWindow::IsLandscapePainting() { return *(bool*)0xED13D8 || *(bool*)0xED13E6; };
+void RenderWindow::ResetLandscapePainting() { 
+	*(bool*)0xED13D8 = false;;
+	*(bool*)0xED13E6 = false;
+}
 
 RenderWindow::SelectedData* RenderWindow::SelectedData::GetSelected() { return *(SelectedData**)0xECFB8C; }
 RenderWindow::SelectedData* RenderWindow::SelectedData::GetClipboard() { return *(SelectedData**)0xECFB90; }

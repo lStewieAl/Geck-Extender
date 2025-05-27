@@ -1994,6 +1994,11 @@ BOOL __stdcall LandscapeEditCallback(HWND hWnd, UINT Message, WPARAM wParam, LPA
 	{
 		SetWindowPos(hWnd, NULL, savedLandscapeEditPos.x, savedLandscapeEditPos.y, NULL, NULL, SWP_NOSIZE);
 	}
+	else if (Message == WM_COMMAND && wParam == 2) {
+		// Avoid closing window if landscape painting is in progress.
+		if (RenderWindow::IsLandscapePainting())
+			return 0;
+	}
 	return CallWindowProc(originalLandscapeEditCallback, hWnd, Message, wParam, lParam);
 }
 
