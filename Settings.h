@@ -62,6 +62,7 @@ struct Settings
 	bool bAllowHardDeletionInESMs;
 	bool bAddFilterCtrlBackspace;
 	bool bRenderWindowPreventRefMovementByDefault;
+	bool bRenderWindowRefreshAfterLandscapeEdit;
 
 	int bUseAltShiftMultipliers;
 	float fMovementAltMultiplier;

@@ -1256,7 +1256,19 @@ BOOL __stdcall RenderWindowCallbackHook(HWND hWnd, UINT msg, WPARAM wParam, LPAR
 	else if (msg == WM_RBUTTONDOWN) {
 		SetFlycamMode(0);
 	}
-	return StdCall<LRESULT>(0x455AA0, hWnd, msg, wParam, lParam);
+	else if (msg == 0x416u && wParam == 0) {
+		// Disabling landscape editing.
+		RenderWindow::ResetLandscapePainting();
+	}
+
+	LRESULT res = StdCall<LRESULT>(0x455AA0, hWnd, msg, wParam, lParam);
+
+	if (msg == 0x416u && wParam == 0 && config.bRenderWindowRefreshAfterLandscapeEdit) {
+		// Refresh render window after landscape editing disabled.
+		StdCall<LRESULT>(0x455AA0, hWnd, WM_KEYDOWN, VK_F5, lParam);
+	}
+
+	return res;
 }
 
 class BGSPrimitive;
@@ -1993,6 +2005,11 @@ BOOL __stdcall LandscapeEditCallback(HWND hWnd, UINT Message, WPARAM wParam, LPA
 	else if (Message == WM_INITDIALOG)
 	{
 		SetWindowPos(hWnd, NULL, savedLandscapeEditPos.x, savedLandscapeEditPos.y, NULL, NULL, SWP_NOSIZE);
+	}
+	else if (Message == WM_COMMAND && wParam == 2) {
+		// Avoid closing window if landscape painting is in progress.
+		if (RenderWindow::IsLandscapePainting())
+			return 0;
 	}
 	return CallWindowProc(originalLandscapeEditCallback, hWnd, Message, wParam, lParam);
 }
