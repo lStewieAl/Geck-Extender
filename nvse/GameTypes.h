@@ -50,6 +50,8 @@ template <typename T_Data> struct ListNode
 	T_Data* Data() const { return data; }
 	ListNode* Next() const { return next; }
 
+	bool IsEmpty() const { return !data && !next; }
+
 	ListNode* RemoveMe()
 	{
 		if (next)

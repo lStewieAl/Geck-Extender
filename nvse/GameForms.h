@@ -349,8 +349,10 @@ public:
 	TESFullName* GetFullName();
 	const char* GetTheName() { return CdeclCall <const char*>(0x437DB0, this); };
 	bool			IsCloned() const;
-	bool IsDisabled() { return flags & kFormFlags_InitiallyDisabled; };
+	bool IsDisabled() const { return flags & kFormFlags_InitiallyDisabled; };
 	void SetDisabled(bool abDisabled);
+
+	bool IsAltered() const { return flags & kFormFlags_Modified; };
 
 	bool IsWeapon() { return typeID == kFormType_TESObjectWEAP; }
 	bool IsArmor() { return typeID == kFormType_TESObjectARMO; }
