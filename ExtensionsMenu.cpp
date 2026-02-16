@@ -12,6 +12,8 @@
 #include "MultiBoundsAdder.h"
 #include "ToggleReferenceMovement.h"
 
+#define UI_MENU_LANDSCAPE_KEY	40190
+#define UI_MENU_LANDSCAPE_BAR	40191
 #define UI_EXTMENU_ID			51001
 #define UI_EXTMENU_SHOWLOG		51002
 #define UI_EXTMENU_CLEARLOG		51003
@@ -416,6 +418,15 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 
 		switch (param)
 		{
+		case UI_MENU_LANDSCAPE_KEY:
+		case UI_MENU_LANDSCAPE_BAR:
+		{
+			// Disallow closing the landscape dialog when painting is in progress.
+			if (RenderWindow::IsLandscapePainting())
+				return 0;
+		}
+		return CallWindowProc(originalMainWindowCallback, Hwnd, Message, wParam, lParam);
+
 		case UI_EXTMENU_SHOWLOG:
 		{
 			ShowWindow(g_ConsoleHwnd, SW_SHOW);
