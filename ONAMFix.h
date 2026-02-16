@@ -131,7 +131,65 @@ namespace ONAMFix
 		return ThisCall<UInt32>(0x4E1450, apThis);
 	}
 
+	bool __fastcall CellNeedsGroup(TESObjectCELL* apCell, ModInfo* apFile) {
+		auto iter = apCell->objectList.Head();
+		while (iter && !iter->IsEmpty()) {
+			TESObjectREFR* ref = iter->Data();
+			iter = iter->Next();
+
+			if (ref && !ref->IsTemporary() && !ref->IsDeleted()) {
+				ModInfo* file = ref->mods.GetLastItem();
+				if (file == apFile || ref->IsAltered()) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	class TESFile {
+	public:
+		uint32_t AddTESForm(TESForm* apForm) {
+			return ThisCall(0x4E1250, this, apForm);
+		}
+	};
+
+	void __declspec(naked) CellGroupFix_Save_Asm() {
+		static constexpr uint32_t uiReturnAddr = 0x635E1B;
+		static constexpr uint32_t uiCreateGroupAddr = 0x635DC0;
+		__asm {
+			call	TESFile::AddTESForm
+			mov     ecx, ebx  // TESObjectCELL*
+			mov     edx, [esp + 0x30] // ModInfo*
+			call	CellNeedsGroup
+			test    al, al
+			jz      SKIP_GROUP
+			jmp     uiCreateGroupAddr
+			SKIP_GROUP:
+			jmp     uiReturnAddr
+		}
+	}
+
+	void __declspec(naked) CellGroupFix_SaveEdit_Asm() {
+		static constexpr uint32_t uiReturnAddr = 0x635E8D;
+		static constexpr uint32_t uiCreateGroupAddr = 0x635E4A;
+		__asm {
+			call	TESFile::AddTESForm
+			mov     ecx, esi  // TESObjectCELL*
+			mov     edx, [esp + 0x24] // ModInfo*
+			call	CellNeedsGroup
+			test    al, al
+			jz      SKIP_GROUP
+			jmp     uiCreateGroupAddr
+			SKIP_GROUP:
+			jmp     uiReturnAddr
+		}
+	}
+
 	static void InitHooks() {
 		WriteRelCall(0x4D9CEA, UInt32(SavePlugin));
+		WriteRelJump(0x635DBB, UInt32(CellGroupFix_Save_Asm));
+		WriteRelJump(0x635E45, UInt32(CellGroupFix_SaveEdit_Asm));
 	}
 }
