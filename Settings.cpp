@@ -19,6 +19,7 @@ void ReadAllSettings()
 	config.bNoLODMeshMessage = GetOrCreateINIValue("General", "bNoLODMeshMessage", 0, IniPath);
 	config.bAutoLoadFiles = GetOrCreateINIValue("General", "bAutoLoadFiles", 0, IniPath);
 	config.bShowLoadFilesAtStartup = GetOrCreateINIValue("General", "bShowLoadFilesAtStartup", 0, IniPath) | config.bAutoLoadFiles;
+	config.bOpenScriptMenuAtStartup = GetOrCreateINIValue("General", "bOpenScriptMenuAtStartup", 0, IniPath);
 	config.bNoVersionControlWarning = GetOrCreateINIValue("General", "bNoVersionControlWarning", 0, IniPath);
 	config.bSkipVanillaLipGen = GetPrivateProfileIntA("General", "bSkipVanillaLipGen", 0, IniPath);
 	config.bShowAdditionalToolbarButtons = GetOrCreateINIValue("General", "bShowAdditionalToolbarButtons", 0, IniPath);

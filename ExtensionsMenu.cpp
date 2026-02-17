@@ -393,6 +393,13 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 				}
 			}
 
+			if (!config.bOpenScriptMenuAtStartup == 0) {
+				// open new script window at startup
+				if (*(BYTE*)(0xECFE16) != 1) { // is not NIF mode
+					PostMessageA(g_MainHwnd, WM_COMMAND, 0x9CE3, 0);
+				}
+			}
+
 			if (!config.bNavmeshAllowPlaceAboveOthers == 0)
 			{
 				menuInfo.fState = MFS_CHECKED;

@@ -19,6 +19,7 @@ struct Settings
 	int bSwapRenderCYKeys;
 	int bAutoLoadFiles;
 	int bShowLoadFilesAtStartup;
+	int bOpenScriptMenuAtStartup;
 	int bScriptCompileWarningPopup;
 	int bNoVersionControlWarning;
 	int bShowTimeOfDaySlider;

@@ -2747,7 +2747,15 @@ _declspec(naked) void SaveScriptChangedType()
 
 BOOL __stdcall ScriptEditCallback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	return StdCall<LRESULT>(0x5C3D40, hWnd, msg, wParam, lParam);
+	BOOL bResult = StdCall<LRESULT>(0x5C3D40, hWnd, msg, wParam, lParam);
+
+	static bool bFirstOpen = true;
+	if (msg == WM_INITDIALOG && config.bOpenScriptMenuAtStartup && bFirstOpen) {
+		bFirstOpen = false;
+		SendMessageA(hWnd, WM_COMMAND, 0x9CDB, NULL);
+	}
+
+	return bResult;
 }
 
 __HOOK NiTreeCtrl_CreateTreeRecursiveHook()
