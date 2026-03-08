@@ -1134,6 +1134,13 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	ToggleReferenceMovement::InitHooks();
 
+	// recompiling all scripts will only recompile SCPT forms, optionally only from a specified mod
+	if (config.bRecompileAllScriptsSCPTFormsOnly)
+	{
+		WriteRelJump(0x5C3A56, 0x5C3BC8);
+		WriteRelCall(0x5C397C, UInt32(OnRecompileAllShouldProcessScript));
+	}
+
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
 	{

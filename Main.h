@@ -706,10 +706,30 @@ _declspec(naked) void hk_PreviewWindowCheckForeground() {
 	}
 }
 
+UInt32 recompileAllScriptsModIndex = -1;
+void __fastcall setRecompileAllScriptsModIndex() {
+	if (*config.sRecompileAllScriptsModName && config.bRecompileAllScriptsSCPTFormsOnly)
+	{
+		auto mod = DataHandler::GetSingleton()->LookupModByName(config.sRecompileAllScriptsModName);
+		if (mod)
+		{
+			recompileAllScriptsModIndex = mod->modIndex;
+		}
+		else
+		{
+			Console_Print("Recompile all scripts: Unable to find mod %s", config.sRecompileAllScriptsModName);
+		}
+	}
+}
+
 const char* recompileAllWarning = { "Are you sure you want to recompile every script in every plugin?\nYou should never need to do this." };
 _declspec(naked) void RecompileAllWarningScriptHook() {
 	static const UInt32 retnAddr = 0x5C498A;
 	_asm {
+		pushad
+		call setRecompileAllScriptsModIndex
+		popad
+
 		push 0x104 // change default button to No
 		push 0xD2FA78
 		push recompileAllWarning
@@ -719,6 +739,10 @@ _declspec(naked) void RecompileAllWarningScriptHook() {
 _declspec(naked) void RecompileAllWarningMainHook() {
 	static const UInt32 retnAddr = 0x4442D3;
 	_asm {
+		pushad
+		call setRecompileAllScriptsModIndex
+		popad
+
 		push 0x104 // change default button to No
 		push 0xD2FA78
 		push recompileAllWarning
@@ -4305,4 +4329,15 @@ void __fastcall ObjectWindowNodeData__OnPopulateReputationList(ObjectWindowNodeD
 
 	auto challengesList = reinterpret_cast<tList<TESForm>*>((UInt32)apReputationList + 8); // &DataHandler->reputationList -> &DataHandler->challengesList
 	ThisCall(0x438C70, apNodeData, challengesList, abClear, formal);
+}
+
+bool __stdcall OnRecompileAllShouldProcessScript(Script* script, int iValue)
+{
+	if (recompileAllScriptsModIndex != -1 && script->modIndex != recompileAllScriptsModIndex) 
+	{
+		return false;
+	}
+
+	StdCall(0x5C9800, script, 0);
+	return true;
 }
