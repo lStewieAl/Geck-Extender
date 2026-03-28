@@ -3861,24 +3861,18 @@ void __fastcall TESPreviewControl__SetTime(TESRenderControl* renderControl, void
 {
 	if (renderControl == *(TESRenderControl**)0xECECE4) // if this is the havok preview window
 	{
-		bool bHasAnims = false;
-		auto ref = *(TESObjectREFR**)0xECECE0;
-		if (ref)
+		if (auto pRef = *(TESObjectREFR**)0xECECE0)
 		{
-			if (auto node = ref->Get3D())
+			if (auto pNode = pRef->Get3D())
 			{
-				auto listView = *(HWND*)0xECECD4; // HavokPreview::pAnimListHwnd
-				if (auto animSequence = CdeclCall<NiControllerSequence*>(0x41A390, listView))
+				if (CdeclCall<bool>(0x40F8A0, 0xF2CD84, pNode)) // NiIsKindOf(BSMasterParticleSystem::ms_RTTI, pNode)
 				{
-					bHasAnims = true;
+					// For most object types, afTime represents the animation timeline offset (i.e. an absolute position).
+					// For BSMasterParticleSystem however, it is treated as a delta time (time elapsed since the last frame).
+					// Since the render window runs at a fixed 60fps, use a constant 16.67ms delta instead.
+					afTime = (1000.0F / 60) / havokAnimationRate;
 				}
 			}
-		}
-
-		if (!bHasAnims)
-		{
-			// always use 16.67ms as render window is 60fps
-			afTime = (1000.0F / 60) / havokAnimationRate;
 		}
 	}
 	ThisCall(TESPreviewControl__SetTimeAddr, renderControl, afTime, abIsPaused);
