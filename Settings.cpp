@@ -103,6 +103,9 @@ void ReadAllSettings()
 
 	config.uiHeapMaxSizeMB = GetOrCreateINIValue("Heap", "uiHeapMaxSizeMB", 800, IniPath);
 	config.uiHeapInitialSizeMB = GetOrCreateINIValue("Heap", "uiHeapInitialSizeMB", 600, IniPath);
+	
+	config.bRecompileAllScriptsSCPTFormsOnly = GetOrCreateINIValue("Recompile All Scripts", "bRecompileAllScriptsSCPTFormsOnly", 1, IniPath);
+	config.sRecompileAllScriptsModName = GetOrCreateINIValue("Recompile All Scripts", "sModName", "", IniPath);
 }
 
 #define INI_SETTING_NOT_FOUND -1
