@@ -135,6 +135,10 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="CustomReferenceBatchAction.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="CustomRenderWindowHotkeys.cpp">
       <SubType>
       </SubType>
@@ -250,6 +254,10 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
       </SubType>
     </ClInclude>
     <ClInclude Include="CreatureMarkerSwapper.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="CustomReferenceBatchAction.h">
       <SubType>
       </SubType>
     </ClInclude>

@@ -94,6 +94,7 @@
     <ClCompile Include="ObjectWindowTreeHooks.cpp" />
     <ClCompile Include="ToggleReferenceMovement.cpp" />
     <ClCompile Include="FormColoring.cpp" />
+    <ClCompile Include="CustomReferenceBatchAction.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Main.h" />
@@ -216,6 +217,7 @@
     <ClInclude Include="ObjectWindowTreeHooks.h" />
     <ClInclude Include="ToggleReferenceMovement.h" />
     <ClInclude Include="FormColoring.h" />
+    <ClInclude Include="CustomReferenceBatchAction.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

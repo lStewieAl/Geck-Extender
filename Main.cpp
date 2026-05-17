@@ -42,6 +42,7 @@
 #include "Settings.h"
 #include "NavMeshPickPreventer.h"
 #include "CustomRenderWindowHotkeys.h"
+#include "CustomReferenceBatchAction.h"
 #include "LaunchGame.h"
 #include "FaceGenExporter.h"
 #include "ONAMFix.h"
@@ -324,8 +325,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	// Remove call to SetFocus(0) when closing Reference Batch Action dialog
 	XUtil::PatchMemoryNop(0x411CFA, 8);
-
-	originalReferenceBatchActionFn = (WNDPROC)DetourVtable(0x456B3E, UInt32(ReferenceBatchActionCallback));
+	CustomReferenceBatchAction::Init();
 
 	//	Replace zlib with libinflate - credit to nukem/StewieA
 	if (config.bLibdeflate)

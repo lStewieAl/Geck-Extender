@@ -915,26 +915,6 @@ _declspec(naked) void FlycamRotationSpeedMultiplierHook() {
 	}
 }
 
-WNDPROC originalReferenceBatchActionFn;
-BOOL CALLBACK ReferenceBatchActionCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	if (msg == WM_INITDIALOG)
-	{
-		auto result = CallWindowProc(originalReferenceBatchActionFn, hDlg, msg, wParam, lParam);
-		// make the "Do" button not grayed out if an action is already selected when initialising the dialog
-		int* iButtonIdToControlId = (int*)0xE8C908;
-		auto currentAction = ReferenceBatchAction::GetAction();
-		if (currentAction && currentAction < ReferenceBatchAction::VANILLA_COUNT)
-		{
-			auto buttonId = iButtonIdToControlId[currentAction];
-			SendMessageA(hDlg, WM_COMMAND, buttonId, NULL);
-		}
-
-		return result;
-	}
-	return CallWindowProc(originalReferenceBatchActionFn, hDlg, msg, wParam, lParam);
-}
-
 /* ideally this would be replaced with a wrapper around the Script Edit callback function */
 _declspec(naked) void ScriptEditKeypressHook(HWND hWnd) {
 	static const UInt32 skipAddr = 0x5C40EC;
