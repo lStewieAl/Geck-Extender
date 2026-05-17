@@ -633,3 +633,25 @@ union Color
 };
 
 LRESULT __cdecl TESCSMain__WriteToStatusBar(unsigned int statusBarId, const char* msg);
+
+struct ReferenceBatchAction
+{
+	enum eACTION : UInt32
+	{
+		SET_REFLECTED_BY = 1,
+		SET_REFRACTED_BY,
+		SET_REFLECTED_BY_AUTOWATER,
+		SET_REFRACTED_BY_AUTOWATER,
+		SET_ENABLE_PARENT,
+		SET_LINKED_REF,
+		SET_ACTIVATE_REF,
+		SET_OWNER,
+		SET_MULTIBOUND,
+		SET_EXTENAL_EMITTANCE,
+		VANILLA_COUNT
+	};
+
+	static eACTION GetAction() { return *(eACTION*)0xECED38; };
+	static HWND GetWindow() { return *(HWND*)0xECED3C; };
+	static TESObjectREFR* GetRef() { return *(TESObjectREFR**)0xECED40; };
+};

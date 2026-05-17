@@ -322,11 +322,10 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		SafeWrite8(0x47CE86 + 5, 0x90);
 	}
 
-	// Make the "Do" button of "Reference Batch Action" not grayed out if an action is already selected when initialising the dialog
-	WriteRelJump(0x411CCF, UInt32(ReferenceBatchActionDoButtonHook));
-
 	// Remove call to SetFocus(0) when closing Reference Batch Action dialog
 	XUtil::PatchMemoryNop(0x411CFA, 8);
+
+	originalReferenceBatchActionFn = (WNDPROC)DetourVtable(0x456B3E, UInt32(ReferenceBatchActionCallback));
 
 	//	Replace zlib with libinflate - credit to nukem/StewieA
 	if (config.bLibdeflate)
