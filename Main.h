@@ -514,45 +514,17 @@ __HOOK hk_addr_4E26BA()
 	}
 }
 
-//	Fix Rock-It Launcher crash - credit to jazzisparis
-TESForm* (*GetFormByID)(UInt32 formID) = (TESForm * (*)(UInt32))0x004F9620;
-
-bool __fastcall GetIsRIL(TESForm* form)
+/*
+* the Rock-It-Launcher returns a TESObjectMISC which causes a crash when ApplyAmmoEffects is called - return null for non TESAmmos so it is skipped
+*/
+TESForm* __fastcall CalcWeaponDamagePerSecond_GetAmmoEnsureType(TESObjectWEAP* apWeapon, void* edx, Actor* apWeaponHolder)
 {
-	static UInt32 RIL_FormID = 0;
-	if (!RIL_FormID)
+	TESForm* pAmmo = ThisCall<TESForm*>(0x600050, apWeapon, apWeaponHolder);
+	if (pAmmo && pAmmo->typeID == kFormType_TESAmmo)
 	{
-		RIL_FormID = 0xFFFFFFFF;
-		DataHandler* dataHandler = *(DataHandler**)0x00ED3B0C;
-		if (dataHandler)
-		{
-			for (tList<ModInfo>::Iterator infoIter = dataHandler->modList.modInfoList.Begin(); !infoIter.End(); ++infoIter)
-			{
-				if (_stricmp(infoIter->name, "Fallout3.esm")) continue;
-				RIL_FormID = (infoIter->modIndex << 0x18) | 0x434B;
-				break;
-			}
-		}
-	}
-	return form->refID == RIL_FormID;
+		return pAmmo;
 }
-
-__HOOK CheckIsRILHook()
-{
-	static const UInt32 kRetnAddr = 0x005B8FFD;
-
-	__asm
-	{
-		mov		ecx, esi
-		call	GetIsRIL
-		test	al, al
-		jz		notRIL
-		retn
-	notRIL:
-		push	edi
-		mov		edi, [esp + 0xC]
-		jmp		kRetnAddr
-	}
+	return nullptr;
 }
 
 //	enable/disable spell checker - credit to roy

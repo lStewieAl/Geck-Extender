@@ -265,8 +265,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		SafeWrite8(0x004327BE, 0xEB);
 	}
 
-	//	fix Rock-It Launcher crash - credit to jazzisparis
-	WriteRelJump(0x005B8FF4, (UInt32)CheckIsRILHook);
+	// fix Rock-It Launcher crash
+	WriteRelCall(0x6865BA, UInt32(CalcWeaponDamagePerSecond_GetAmmoEnsureType));
 
 	WriteErrorMessageHooks();
 
