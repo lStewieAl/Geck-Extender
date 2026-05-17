@@ -83,6 +83,8 @@ struct Settings
 	char* sLaunchExeName;
 	char* sForceFinalizeNavMeshModName;
 
+	char* sCustomFormColors;
+
 	union
 	{
 		unsigned int uPrimitiveColors[8];

@@ -162,6 +162,7 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="FormColoring.cpp" />
     <ClCompile Include="FormSearch.cpp">
       <SubType>
       </SubType>
@@ -282,6 +283,7 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
       </SubType>
     </ClInclude>
     <ClInclude Include="FaceGenExporter.h" />
+    <ClInclude Include="FormColoring.h" />
     <ClInclude Include="FormSearch.h">
       <SubType>
       </SubType>

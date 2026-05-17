@@ -17,6 +17,7 @@
 #include "FormSearch.h"
 #include "Settings.h"
 #include "NavMeshPickPreventer.h"
+#include "FormColoring.h"
 
 #include "libs/stb_sprintf.h"
 
@@ -523,7 +524,7 @@ TESForm* __fastcall CalcWeaponDamagePerSecond_GetAmmoEnsureType(TESObjectWEAP* a
 	if (pAmmo && pAmmo->typeID == kFormType_TESAmmo)
 	{
 		return pAmmo;
-}
+	}
 	return nullptr;
 }
 
@@ -2914,9 +2915,22 @@ void __cdecl OnSetupObjectAndCellWindowRightClickMenu(HMENU menu, LPPOINT cursor
 
 	InsertMenuA(menu, 0xFFFFFFFF, MF_BYPOSITION | MF_POPUP, (UINT_PTR)hCopySubMenu, "Copy");
 
-	CdeclCall(0x47F3B0, menu, cursorPos, hWnd, listView);
+	HMENU hColorSubMenu = NULL;
+	bool bIsCellWindow = menu == *(HMENU*)0xECF508; // CellView::pSubMenu
+	if (!bIsCellWindow)
+	{
+		hColorSubMenu = FormColoring::CreateSubMenu(listView);
+		InsertMenuA(menu, 0xFFFFFFFF, MF_BYPOSITION | MF_POPUP, (UINT_PTR)hColorSubMenu, "Color");
+	}
+
+	CdeclCall(0x47F3B0, menu, cursorPos, hWnd, listView); // Window::SetupPopupMenu
 
 	RemoveSubMenuByHandle(menu, hCopySubMenu);
+
+	if (hColorSubMenu)
+	{
+		RemoveSubMenuByHandle(menu, hColorSubMenu);
+	}
 }
 
 void CopySelectedListViewItemData(HWND listView, std::function<void(std::string&, TESForm*)> aggregator)
@@ -2987,6 +3001,14 @@ bool HandlePopupMenuCommand(HWND listView, UInt32 commandID)
 		);
 		return true;
 	}
+
+	default:
+	{
+		if (FormColoring::HandlePopupMenuCommand(listView, commandID))
+		{
+			return true;
+		}
+	}
 	}
 	return false;
 }
@@ -3008,6 +3030,19 @@ LRESULT CALLBACK ObjectWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LP
 		if (HandlePopupMenuCommand(listView, wParam))
 		{
 			return true;
+		}
+	}
+	else if (Message == WM_NOTIFY)
+	{
+		LPNMHDR hdr = (LPNMHDR)lParam;
+
+		if (hdr->hwndFrom == GetDlgItem(Hwnd, 1041) &&
+			hdr->code == NM_CUSTOMDRAW)
+		{
+			LRESULT result = FormColoring::HandleCustomDraw(lParam);
+
+			SetWindowLongPtr(Hwnd, DWLP_MSGRESULT, result);
+			return TRUE;
 		}
 	}
 	return CallWindowProc(originalObjectWindowCallback, Hwnd, Message, wParam, lParam);

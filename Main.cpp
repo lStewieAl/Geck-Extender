@@ -109,6 +109,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	_DMESSAGE("Geck Extender Base Address: %08X", GetModuleHandle("ZeGaryHax.dll"));
 	ReadAllSettings();
+	FormColoring::Init();
 
 	// Increase heap size and add memory pools for a hefty performance boost
 	ReplaceCallEx(0x853BF1, &MemoryManager::Initialize);
@@ -835,8 +836,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	OutOfMemoryHelper::Init();
 
-	WriteRelCall(0x44B294, UInt32(OnSetupObjectAndCellWindowRightClickMenu));
-	WriteRelCall(0x42F2F5, UInt32(OnSetupObjectAndCellWindowRightClickMenu));
+	WriteRelCall(0x44B294, UInt32(OnSetupObjectAndCellWindowRightClickMenu)); // ObjectWindow
+	WriteRelCall(0x42F2F5, UInt32(OnSetupObjectAndCellWindowRightClickMenu)); // CellWindow
 
 	BetterFloatingFormList::Init();
 

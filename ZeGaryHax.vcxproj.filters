@@ -93,6 +93,7 @@
     <ClCompile Include="MultiBoundsAdder.cpp" />
     <ClCompile Include="ObjectWindowTreeHooks.cpp" />
     <ClCompile Include="ToggleReferenceMovement.cpp" />
+    <ClCompile Include="FormColoring.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Main.h" />
@@ -214,6 +215,7 @@
     </ClInclude>
     <ClInclude Include="ObjectWindowTreeHooks.h" />
     <ClInclude Include="ToggleReferenceMovement.h" />
+    <ClInclude Include="FormColoring.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
