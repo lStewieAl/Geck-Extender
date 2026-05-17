@@ -417,6 +417,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SafeWrite32(0x441CB0, UInt32(ScriptEditCallback));
 	SafeWrite32(0x509F6B, UInt32(ScriptEditCallback));
 	SafeWrite32(0x5C50C8, UInt32(ScriptEditCallback));
+	WriteRelCall(0x5C18D6, UInt32(OnScriptSetWindowText_SaveAndRestoreZoom));
+	SafeWrite8(0x5C18D6 + 5, 0x90);
 
 	/* allow ctrl S to save */
 	WriteRelJump(0x5C3ECD, UInt32(ScriptEditKeypressHook));

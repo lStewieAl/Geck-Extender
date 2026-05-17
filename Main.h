@@ -2708,15 +2708,56 @@ _declspec(naked) void SaveScriptChangedType()
 	}
 }
 
+struct RichEditZoom
+{
+	UINT num = 1;
+	UINT den = 1;
+} s_RichEditZoom;
+
+void SaveZoom(HWND hRichEdit, const RichEditZoom& zoom)
+{
+	char buffer[11];
+	SendMessage(hRichEdit, EM_GETZOOM, (WPARAM)&zoom.num, (LPARAM)&zoom.den);
+	WritePrivateProfileString("Script Editor", "iZoomNumerator", _itoa(zoom.num, buffer, 10), IniPath);
+	WritePrivateProfileString("Script Editor", "iZoomDenominator", _itoa(zoom.den, buffer, 10), IniPath);
+
+}
+
+void RestoreZoom(HWND hRichEdit, RichEditZoom& zoom)
+{
+	zoom.num = GetPrivateProfileIntA("Script Editor", "iZoomNumerator", 0, IniPath);
+	zoom.den = GetPrivateProfileIntA("Script Editor", "iZoomDenominator", 0, IniPath);
+	SendMessage(hRichEdit, EM_SETZOOM, zoom.num, zoom.den);
+}
+
 BOOL __stdcall ScriptEditCallback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	BOOL bResult = StdCall<LRESULT>(0x5C3D40, hWnd, msg, wParam, lParam);
-
+	BOOL bResult = CallWindowProc((WNDPROC)0x5C3D40, hWnd, msg, wParam, lParam);
 	static bool bFirstOpen = true;
-	if (msg == WM_INITDIALOG && config.bOpenScriptMenuAtStartup && bFirstOpen) {
-		bFirstOpen = false;
-		SendMessageA(hWnd, WM_COMMAND, 0x9CDB, NULL);
+	if (msg == WM_INITDIALOG)
+	{
+		if (config.bOpenScriptMenuAtStartup && bFirstOpen)
+		{
+			bFirstOpen = false;
+			SendMessageA(hWnd, WM_COMMAND, 0x9CDB, NULL);
+		}
+		RestoreZoom(GetDlgItem(hWnd, 1166), s_RichEditZoom);
 	}
+	else if (msg == WM_DESTROY)
+	{
+		SaveZoom(GetDlgItem(hWnd, 1166), s_RichEditZoom);
+	}
+
+	return bResult;
+}
+
+BOOL __stdcall OnScriptSetWindowText_SaveAndRestoreZoom(HWND hWnd, LPCSTR lpString)
+{
+	SaveZoom(hWnd, s_RichEditZoom);
+
+	bool bResult = SetWindowTextA(hWnd, lpString);
+
+	RestoreZoom(hWnd, s_RichEditZoom);
 
 	return bResult;
 }
