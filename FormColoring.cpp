@@ -221,6 +221,7 @@ namespace FormColoring
 		std::ofstream file(IniPath, std::ios::trunc);
 		if (!file.is_open())
 		{
+			Console_Print("Form Coloring: Failed to save file: %s", IniPath);
 			return;
 		}
 
