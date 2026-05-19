@@ -1040,6 +1040,10 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x643655, UInt32(IsMultiboundPointDifferent_IgnoreIfLoadingCell));
 	WriteRelCall(0x63A323, UInt32(TESObjectCELL__OnLoad3D));
 
+	// fix crash when trees are reloading in the render window after editing a Tree form
+	SafeWrite8(0x5EF5F0, 0x7C); // skips Set3D(nullptr); pParent->AttachChild(Load3D()) since pParent can be null if the form isn't actually loaded
+	WriteRelJump(0x5EF5F7, UInt32(OnReloadTreeFormRefHook));
+
 	NavMeshPickPreventer::Init();
 
 	// allow saving as ESM

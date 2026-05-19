@@ -9,6 +9,7 @@
 #include <unordered_set>
 #include <functional>
 #include <shlwapi.h>
+#include "intsafe.h"
 
 #include "NiNodes.h"
 #include "NiObjects.h"
@@ -2649,10 +2650,16 @@ void SaveWindowPositions() {
 
 	WINDOWPLACEMENT pos;
 	GetWindowPlacement(g_ConsoleHwnd, &pos);
-	WritePrivateProfileString("Log", "iWindowPosX", _itoa(pos.rcNormalPosition.left, buffer, 10), IniPath);
-	WritePrivateProfileString("Log", "iWindowPosY", _itoa(pos.rcNormalPosition.top, buffer, 10), IniPath);
-	WritePrivateProfileString("Log", "iWindowPosDX", _itoa(pos.rcNormalPosition.right - pos.rcNormalPosition.left, buffer, 10), IniPath);
-	WritePrivateProfileString("Log", "iWindowPosDY", _itoa(pos.rcNormalPosition.bottom - pos.rcNormalPosition.top, buffer, 10), IniPath);
+
+	LONG x = pos.rcNormalPosition.left;
+	LONG y = pos.rcNormalPosition.top;
+	LONG dx = pos.rcNormalPosition.right - x;
+	LONG dy = pos.rcNormalPosition.bottom - y;
+
+	WritePrivateProfileString("Log", "iWindowPosX", _itoa(x, buffer, 10), IniPath);
+	WritePrivateProfileString("Log", "iWindowPosY", _itoa(y, buffer, 10), IniPath);
+	WritePrivateProfileString("Log", "iWindowPosDX", _itoa(dx, buffer, 10), IniPath);
+	WritePrivateProfileString("Log", "iWindowPosDY", _itoa(dy, buffer, 10), IniPath);
 }
 
 void __fastcall FastExitHook(volatile LONG** thiss)
@@ -4087,6 +4094,23 @@ BOOL __fastcall IsMultiboundPointDifferent_IgnoreIfLoadingCell(NiPoint3* a1, voi
 	if (isLoadingCell) return false;
 	constexpr float THRESHOLD = 0.001F;
 	return abs(a1->x - a2->x) > THRESHOLD || abs(a1->y - a2->y) > THRESHOLD || abs(a1->z - a2->z) > THRESHOLD;
+}
+
+__HOOK OnReloadTreeFormRefHook()
+{
+	_asm
+	{
+		and bl, 1
+		test ebp, ebp
+		je nullParent
+
+		mov eax, 0x5EF5FE
+		jmp eax
+
+	nullParent:
+		mov eax, 0x5EF66D
+		jmp eax
+	}
 }
 
 enum BoundMode
