@@ -38,6 +38,7 @@
 #define UI_EXTMENU_AUTO_ADD_TO_MULTIBOUNDS 51022
 #define UI_EXTMENU_READD_TO_MULTIBOUNDS 51023
 #define UI_EXTMENU_TOGGLE_REF_MOVEMENT 51024
+#define UI_EXTMENU_TOGGLE_PREEMPTIVELY_UNLOAD_CELLS 51025
 #define MAIN_WINDOW_CALLBACK 0xFEED
 
 // unused button in vanilla menu
@@ -127,6 +128,7 @@ bool CreateExtensionMenu(HWND MainWindow, HMENU MainMenu)
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_AUTO_ADD_TO_MULTIBOUNDS, "Attach Objects to Multibounds");
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_READD_TO_MULTIBOUNDS, "Reattach All Objects to Multibounds");
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_TOGGLE_REF_MOVEMENT, "Render Window: Allow Reference Movement");
+	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_TOGGLE_PREEMPTIVELY_UNLOAD_CELLS, "Render Window: Preemptively Unload Cells");
 
 	MENUITEMINFO menuInfo;
 	memset(&menuInfo, 0, sizeof(MENUITEMINFO));
@@ -409,6 +411,13 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 				ToggleNavmeshPlaceAboveOthers(true);
 			}
 
+			if (!config.bPreemptivelyUnloadCells == 0)
+			{
+				menuInfo.fState = MFS_CHECKED;
+				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLE_PREEMPTIVELY_UNLOAD_CELLS, FALSE, &menuInfo);
+				PostMessageA(g_ConsoleHwnd, UI_EXTMENU_TOGGLE_PREEMPTIVELY_UNLOAD_CELLS, (WPARAM)true, 0);
+			}
+
 			if (config.bRenderWindowPreventRefMovementByDefault)
 			{
 				SendMessage(Hwnd, WM_COMMAND, UI_EXTMENU_TOGGLE_REF_MOVEMENT, NULL);
@@ -665,6 +674,33 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 			// save state to ini
 			char buffer[8];
 			WritePrivateProfileString("Render Window", "bNavmeshAllowPlaceAboveOthers", _itoa(config.bNavmeshAllowPlaceAboveOthers, buffer, 2), IniPath);
+		}
+		return 0;
+
+		case UI_EXTMENU_TOGGLE_PREEMPTIVELY_UNLOAD_CELLS:
+		{
+			MENUITEMINFO menuInfo;
+			menuInfo.cbSize = sizeof(MENUITEMINFO);
+			menuInfo.fMask = MIIM_STATE;
+			GetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLE_PREEMPTIVELY_UNLOAD_CELLS, FALSE, &menuInfo);
+
+			if (menuInfo.fState == MFS_CHECKED)
+			{
+				menuInfo.fState = MFS_UNCHECKED;
+				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLE_PREEMPTIVELY_UNLOAD_CELLS, FALSE, &menuInfo);
+				config.bPreemptivelyUnloadCells = false;
+			}
+			else
+			{
+				//	Show unedited only
+				menuInfo.fState = MFS_CHECKED;
+				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLE_PREEMPTIVELY_UNLOAD_CELLS, FALSE, &menuInfo);
+				config.bPreemptivelyUnloadCells = true;
+			}
+
+			// save state to ini
+			char buffer[8];
+			WritePrivateProfileString("General", "bPreemptivelyUnloadCells", _itoa(config.bPreemptivelyUnloadCells, buffer, 2), IniPath);
 		}
 		return 0;
 

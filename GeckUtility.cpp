@@ -297,7 +297,7 @@ void RunCallbackOnCell(TESObjectCELL* cell, void (*callback)(TESObjectREFR*))
 void RunCallbackOnAllCellRefs(void (*callback)(TESObjectREFR*))
 {
 	auto tes = TES::GetSingleton();
-	if (auto cell = tes->currentInterior)
+	if (auto cell = tes->pInteriorCell)
 	{
 		RunCallbackOnCell(cell, callback);
 	}

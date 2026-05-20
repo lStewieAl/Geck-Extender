@@ -95,6 +95,7 @@
     <ClCompile Include="ToggleReferenceMovement.cpp" />
     <ClCompile Include="FormColoring.cpp" />
     <ClCompile Include="CustomReferenceBatchAction.cpp" />
+    <ClCompile Include="PreemptivelyUnloadCells.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Main.h" />
@@ -218,6 +219,7 @@
     <ClInclude Include="ToggleReferenceMovement.h" />
     <ClInclude Include="FormColoring.h" />
     <ClInclude Include="CustomReferenceBatchAction.h" />
+    <ClInclude Include="PreemptivelyUnloadCells.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

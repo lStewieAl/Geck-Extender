@@ -655,3 +655,11 @@ struct ReferenceBatchAction
 	static HWND GetWindow() { return *(HWND*)0xECED3C; };
 	static TESObjectREFR* GetRef() { return *(TESObjectREFR**)0xECED40; };
 };
+
+struct BSShaderManager
+{
+	static void SetInterior(bool abInterior)
+	{
+		*(bool*)0xF23E77 = abInterior;
+	}
+};

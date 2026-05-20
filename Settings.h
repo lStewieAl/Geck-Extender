@@ -64,6 +64,7 @@ struct Settings
 	bool bAddFilterCtrlBackspace;
 	bool bRenderWindowPreventRefMovementByDefault;
 	bool bRenderWindowRefreshAfterLandscapeEdit;
+	bool bPreemptivelyUnloadCells;
 
 	int bUseAltShiftMultipliers;
 	float fMovementAltMultiplier;

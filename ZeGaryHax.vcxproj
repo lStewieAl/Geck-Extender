@@ -234,6 +234,10 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="PreemptivelyUnloadCells.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Settings.cpp">
       <SubType>
       </SubType>
@@ -336,6 +340,10 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
     </ClInclude>
     <ClInclude Include="ONAMFix.h" />
     <ClInclude Include="OutOfMemoryHelper.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="PreemptivelyUnloadCells.h">
       <SubType>
       </SubType>
     </ClInclude>
