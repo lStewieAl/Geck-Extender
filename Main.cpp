@@ -1045,6 +1045,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SafeWrite8(0x5EF5F0, 0x7C); // skips Set3D(nullptr); pParent->AttachChild(Load3D()) since pParent can be null if the form isn't actually loaded
 	WriteRelJump(0x5EF5F7, UInt32(OnReloadTreeFormRefHook));
 
+	// fix leak caused by BGSIdleMarker::UnClone3D using marker_creature instead of marker_idle
+	SafeWrite32(0x54AD99 + 1, 0xD4F86C);
+
 	// fix BSShaderManager::bInterior not getting cleared in TES::LeaveInterior
 	WriteRelCall(0x4CCF7E, UInt32(OnLeaveInterior));
 
