@@ -4362,3 +4362,10 @@ void __fastcall ObjectWindowNodeData__OnPopulateReputationList(ObjectWindowNodeD
 	auto challengesList = reinterpret_cast<tList<TESForm>*>((UInt32)apReputationList + 8); // &DataHandler->reputationList -> &DataHandler->challengesList
 	ThisCall(0x438C70, apNodeData, challengesList, abClear, formal);
 }
+
+class bhkWorld;
+void __fastcall OnLeaveInterior(bhkWorld* apWorld, void* edx, bool abEnable)
+{
+	ThisCall(0xA1AC10, apWorld, abEnable);
+	BSShaderManager::SetInterior(false);
+}
