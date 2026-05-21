@@ -194,12 +194,14 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		SafeWrite8(0x004100E5, 0x0A);
 	}
 
-	//	window handle leak fix - credit to nukem
+	//	window handle leak fix - original credit to nukem
 	//	now uses thread local storage to fix parent issues
 	SafeWrite32(0x00D234CC, (UInt32)hk_CreateDialogParamA);
 	SafeWrite32(0x00D23510, (UInt32)hk_DialogBoxParamA);
 	SafeWrite32(0x00D23530, (UInt32)hk_EndDialog);
 	SafeWrite32(0x00D23550, (UInt32)hk_SendMessageA);
+    g_DlgProcAtom = GlobalAddAtomA("GeckExt_DlgProc");
+	g_IsModalAtom = GlobalAddAtomA("GeckExt_IsModal");
 
 	//	fix WM_CLOSE in destruction data dialog - credit to roy
 	SafeWrite32(0x004E640F, (UInt32)hk_DialogProc);

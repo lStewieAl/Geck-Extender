@@ -46,17 +46,6 @@ struct z_stream_s
 	struct internal_state* state;
 };
 
-struct DialogOverrideData
-{
-	DLGPROC DialogFunc; // Original function pointer
-	LPARAM Param;       // Original parameter
-	bool IsDialog;      // True if it requires EndDialog()
-};
-
-std::recursive_mutex g_DialogMutex;
-std::unordered_map<HWND, DialogOverrideData> g_DialogOverrides;
-__declspec(thread) DialogOverrideData* DlgData;
-
 const char* nvseMSG[20] =
 {
 	"PostLoad",
@@ -222,45 +211,53 @@ BOOL WINAPI hk_DialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	return StdCall<LRESULT>(0x004E5E30, hWnd, uMsg, wParam, lParam);
 }
 
-//	fix handle memory leak - credit to nukem
+struct InitialDialogData {
+	DLGPROC OriginalProc;
+	bool IsModal;
+	bool IsValid;
+	void Set(DLGPROC aOriginalProc, bool aIsModal)
+	{
+		OriginalProc = aOriginalProc;
+		IsModal = aIsModal;
+		IsValid = true;
+	}
+	void Reset()
+	{
+		IsValid = false;
+	}
+};
+
+ATOM g_DlgProcAtom;
+ATOM g_IsModalAtom;
+
+__declspec(thread) InitialDialogData g_TlsDialogData;
+
 INT_PTR WINAPI DialogFuncOverride(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	DLGPROC proc = nullptr;
+	// Try to get the function pointer from the window properties
+	DLGPROC proc = (DLGPROC)GetPropA(hwndDlg, MAKEINTATOM(g_DlgProcAtom));
 
-	g_DialogMutex.lock();
+	// If it's null, this is the very first message this HWND has ever received.
+	// We grab the data from our Thread-Local variable and attach it to the window.
+	if (!proc && g_TlsDialogData.IsValid)
 	{
-		auto itr = g_DialogOverrides.find(hwndDlg);
-		if (itr != g_DialogOverrides.end())
-			proc = itr->second.DialogFunc;
+		proc = g_TlsDialogData.OriginalProc;
+		SetPropA(hwndDlg, MAKEINTATOM(g_DlgProcAtom), (HANDLE)proc);
+		SetPropA(hwndDlg, MAKEINTATOM(g_IsModalAtom), (HANDLE)(g_TlsDialogData.IsModal ? 1 : 0));
 
-		//	if (is new entry)
-		if (!proc)
-		{
-			g_DialogOverrides[hwndDlg] = *DlgData;
-			proc = DlgData->DialogFunc;
-
-			delete DlgData;
-			DlgData = nullptr;
-		}
-
-		//	Purge old entries every now and then
-		if (g_DialogOverrides.size() >= 50)
-		{
-			for (auto itr = g_DialogOverrides.begin(); itr != g_DialogOverrides.end();)
-			{
-				if (itr->first == hwndDlg || IsWindow(itr->first))
-				{
-					itr++;
-					continue;
-				}
-
-				itr = g_DialogOverrides.erase(itr);
-			}
-		}
+		g_TlsDialogData.Reset();
 	}
-	g_DialogMutex.unlock();
 
-	return proc(hwndDlg, uMsg, wParam, lParam);
+	LRESULT result = proc && proc(hwndDlg, uMsg, wParam, lParam);
+
+	// Clean up the properties when the window is destroyed
+	if (uMsg == WM_DESTROY)
+	{
+		RemovePropA(hwndDlg, MAKEINTATOM(g_DlgProcAtom));
+		RemovePropA(hwndDlg, MAKEINTATOM(g_IsModalAtom));
+	}
+
+	return result;
 }
 
 HWND WINAPI hk_CreateDialogParamA(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc, LPARAM dwInitParam)
@@ -274,15 +271,12 @@ HWND WINAPI hk_CreateDialogParamA(HINSTANCE hInstance, LPCSTR lpTemplateName, HW
 		break;
 	}
 
-	//	EndDialog MUST NOT be used
-	DialogOverrideData* data = new DialogOverrideData;
-	data->DialogFunc = lpDialogFunc;
-	data->Param = dwInitParam;
-	data->IsDialog = false;
+	// EndDialog MUST NOT be used
+	g_TlsDialogData.Set(lpDialogFunc, false);
+	HWND hwnd = CreateDialogParamA(hInstance, lpTemplateName, hWndParent, DialogFuncOverride, dwInitParam);
+	g_TlsDialogData.Reset();
 
-	DlgData = data;
-
-	return CreateDialogParamA(hInstance, lpTemplateName, hWndParent, DialogFuncOverride, dwInitParam);
+	return hwnd;
 }
 
 LRESULT CALLBACK SoundPickerListBoxCallback(HWND listBox, UINT Message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
@@ -370,25 +364,25 @@ INT_PTR WINAPI hk_DialogBoxParamA(HINSTANCE hInstance, LPCSTR lpTemplateName, HW
 	}
 
 	// EndDialog MUST be used
-	DialogOverrideData* data = new DialogOverrideData;
-	data->DialogFunc = lpDialogFunc;
-	data->Param = dwInitParam;
-	data->IsDialog = true;
+	// Pass data via TLS. IsModal = true
+	g_TlsDialogData.Set(lpDialogFunc, true);
+	INT_PTR result = DialogBoxParamA(hInstance, lpTemplateName, hWndParent, DialogFuncOverride, dwInitParam);
+	g_TlsDialogData.Reset();
 
-	DlgData = data;
-	return DialogBoxParamA(hInstance, lpTemplateName, hWndParent, DialogFuncOverride, dwInitParam);
+	return result;
 }
 
 BOOL WINAPI hk_EndDialog(HWND hDlg, INT_PTR nResult)
 {
-	std::lock_guard<std::recursive_mutex> lock(g_DialogMutex);
-
 	//	Fix for the CK calling EndDialog on a CreateDialogParamA window
-	auto itr = g_DialogOverrides.find(hDlg);
-	if (itr != g_DialogOverrides.end() && !itr->second.IsDialog)
+	if (GetPropA(hDlg, MAKEINTATOM(g_DlgProcAtom)) != NULL) // Make sure it's one of our windows
 	{
-		DestroyWindow(hDlg);
-		return TRUE;
+		bool isModal = (bool)GetPropA(hDlg, MAKEINTATOM(g_IsModalAtom));
+		if (!isModal)
+		{
+			DestroyWindow(hDlg);
+			return TRUE;
+		}
 	}
 
 	return EndDialog(hDlg, nResult);
@@ -410,15 +404,14 @@ LRESULT WINAPI hk_SendMessageA(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam
 {
 	if (hWnd && Msg == WM_DESTROY)
 	{
-		std::lock_guard<std::recursive_mutex> lock(g_DialogMutex);
-		// If this is a dialog, we can't call DestroyWindow on it
-		auto itr = g_DialogOverrides.find(hWnd);
-		if (itr != g_DialogOverrides.end())
+		if (GetPropA(hWnd, MAKEINTATOM(g_DlgProcAtom)) != NULL)
 		{
-			if (!itr->second.IsDialog)
+			bool isModal = (bool)GetPropA(hWnd, MAKEINTATOM(g_IsModalAtom));
+			if (!isModal)
+			{
 				DestroyWindow(hWnd);
+			}
 		}
-
 		return 0;
 	}
 
