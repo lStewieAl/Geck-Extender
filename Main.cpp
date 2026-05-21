@@ -392,8 +392,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SafeWrite8(0x45D3D9, 0x7C);
 	SafeWrite8(0x45D3EA, 0x7F);
 
-	// make holding shift slow down the flycam movement by 80%
-	WriteRelJump(0x455D12, UInt32(FlycamMovementSpeedMultiplierHook));
+	// add shift and alt scaling flycam movement speed, and fix speed being framerate dependent
+	WriteRelCall(0x455D12, UInt32(FlycamMovementSpeedMultiplier));
 
 	if (config.bSmoothFlycamRotation) {
 		WriteRelJump(0x45D3A3, UInt32(FlycamRotationSpeedMultiplierHook));

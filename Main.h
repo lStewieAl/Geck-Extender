@@ -265,7 +265,6 @@ INT_PTR WINAPI DialogFuncOverride(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 
 HWND WINAPI hk_CreateDialogParamA(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc, LPARAM dwInitParam)
 {
-
 	// Override certain default dialogs to use this DLL's resources and callbacks
 	switch ((uintptr_t)lpTemplateName)
 	{
@@ -861,37 +860,33 @@ _declspec(naked) void EndLoadingHook() {
 }
 
 // hooks before movement speed is determined for flycam mode
-static int lastFlycamTime = 0;
-_declspec(naked) void FlycamMovementSpeedMultiplierHook() {
-	_asm
+int FlycamMovementSpeedMultiplier()
+{
+	Setting* fFlyMoveSpeed = (Setting*)0xED12BC;
+	fFlyMoveSpeed->data.f = config.fFlycamNormalMovementSpeed;
+
+	if (GetAsyncKeyState(VK_SHIFT) < 0)
 	{
-		pushad
-	}
-	static const UInt32 retnAddr = 0x455D17;
-	*(float*)(0xED12C0) = config.fFlycamNormalMovementSpeed;
-
-	if (GetAsyncKeyState(VK_SHIFT) < 0) {
-		*(float*)(0xED12C0) *= config.fFlycamShiftMovementSpeed;
+		fFlyMoveSpeed->data.f *= config.fFlycamShiftMovementSpeed;
 	}
 
-	if (GetAsyncKeyState(VK_MENU) < 0) {
-		*(float*)(0xED12C0) *= config.fFlycamAltMovementSpeed;
+	if (GetAsyncKeyState(VK_MENU) < 0)
+	{
+		fFlyMoveSpeed->data.f *= config.fFlycamAltMovementSpeed;
 	}
 
 	/* fix flycam speed being dependent on framerate by slowing down movement if framerate is greater than 30fps (33ms/frame)*/
-	if (GetTickCount() - lastFlycamTime < 33) {
-		*(float*)(0xED12C0) *= (GetTickCount() - lastFlycamTime) / 33.0;
-	}
+	static DWORD uiLastFlycamTime = 0;
+	DWORD uiCurrentTick = GetTickCount();
+	int iDelta = uiCurrentTick - uiLastFlycamTime;
 
-	lastFlycamTime = GetTickCount();
-
-	_asm
+	if (iDelta < 33)
 	{
-		popad
-		//	originalCode
-		mov     eax, dword ptr ds : [0xF1FBF4]
-		jmp retnAddr
+		fFlyMoveSpeed->data.f *= (float)iDelta / 33.0f;
 	}
+	uiLastFlycamTime = uiCurrentTick;
+
+	return 0;
 }
 
 // edi       : difference in x pos, 
@@ -1998,11 +1993,17 @@ void PatchRememberLandscapeEditSettingsWindowPosition()
 
 void ClearLandscapeUndosIfNearlyOutOfMemory()
 {
+	static DWORD lastCheckTime = 0;
+	DWORD currentTime = GetTickCount();
+
+	// Only query memory at most once every 2 seconds
+	if (currentTime - lastCheckTime < 2000) return;
+	lastCheckTime = currentTime;
+
 	constexpr size_t MAX_MEMORY = 2560u * (1024u * 1024u); // 2.5gb
 	if (GetCurrentMemoryUsage() > MAX_MEMORY)
 	{
-		auto hist = HistoryManager::GetSingleton();
-		hist->ClearHistoryForCurrentElement();
+		HistoryManager::GetSingleton()->ClearHistoryForCurrentElement();
 		Console_Print("2.5gb memory usage exceeded, clearing land edit history.");
 	}
 }
