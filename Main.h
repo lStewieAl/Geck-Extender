@@ -79,10 +79,10 @@ const char* nvseMSG[20] =
 	"RenameNewGameName",
 };
 
-static const char* geckwikiurl = "https://geckwiki.com/index.php/";
-static const char* geckwikiscriptingurl = "https://geckwiki.com/index.php/Category:Scripting";
-static const char* geckwikicommandsurl = "https://geckwiki.com/index.php/Category:Commands";
-static const char* geckwikifunctionsurl = "https://geckwiki.com/index.php/Category:Functions";
+constexpr const char* geckwikiurl = "https://geckwiki.com/index.php/";
+constexpr const char* geckwikiscriptingurl = "https://geckwiki.com/index.php/Category:Scripting";
+constexpr const char* geckwikicommandsurl = "https://geckwiki.com/index.php/Category:Commands";
+constexpr const char* geckwikifunctionsurl = "https://geckwiki.com/index.php/Category:Functions";
 
 #define ID_CMB_IDLE_SPEAKER 2170
 #define ID_CMB_IDLE_LISTENER 2173
@@ -1681,7 +1681,7 @@ BOOL __stdcall HavokPreviewCallback(HWND hWnd, UINT Message, WPARAM wParam, LPAR
 		int red = GetDlgItemInt(hWnd, 1109, 0, 0);
 		int green = GetDlgItemInt(hWnd, 1033, 0, 0);
 		int blue = GetDlgItemInt(hWnd, 1111, 0, 0);
-		char arr[11];
+		char arr[0x10];
 		WritePrivateProfileString("Preview Window", "iBackgroundRed", _itoa(red, arr, 10), IniPath);
 		WritePrivateProfileString("Preview Window", "iBackgroundGreen", _itoa(green, arr, 10), IniPath);
 		WritePrivateProfileString("Preview Window", "iBackgroundBlue", _itoa(blue, arr, 10), IniPath);
@@ -1953,7 +1953,7 @@ BOOL __stdcall LandscapeEditCallback(HWND hWnd, UINT Message, WPARAM wParam, LPA
 {
 	if (Message == WM_DESTROY)
 	{
-		char buffer[8];
+		char buffer[0x10];
 		WINDOWPLACEMENT pos;
 		GetWindowPlacement(hWnd, &pos);
 
@@ -2646,7 +2646,7 @@ extern HWND g_ConsoleHwnd;
 void SaveWindowPositions() {
 	SaveWindowPositionToINI(RenderWindow::GetWindow(), "Render Window");
 
-	char buffer[8];
+	char buffer[0x10];
 
 	WINDOWPLACEMENT pos;
 	GetWindowPlacement(g_ConsoleHwnd, &pos);
@@ -2723,7 +2723,7 @@ struct RichEditZoom
 
 void SaveZoom(HWND hRichEdit, const RichEditZoom& zoom)
 {
-	char buffer[11];
+	char buffer[0x10];
 	SendMessage(hRichEdit, EM_GETZOOM, (WPARAM)&zoom.num, (LPARAM)&zoom.den);
 	WritePrivateProfileString("Script Editor", "iZoomNumerator", _itoa(zoom.num, buffer, 10), IniPath);
 	WritePrivateProfileString("Script Editor", "iZoomDenominator", _itoa(zoom.den, buffer, 10), IniPath);
