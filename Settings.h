@@ -65,6 +65,7 @@ struct Settings
 	bool bRenderWindowPreventRefMovementByDefault;
 	bool bRenderWindowRefreshAfterLandscapeEdit;
 	bool bPreemptivelyUnloadCells;
+	bool bCustomReferenceBatchActions;
 
 	int bUseAltShiftMultipliers;
 	float fMovementAltMultiplier;

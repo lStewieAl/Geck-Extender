@@ -634,6 +634,46 @@ union Color
 
 LRESULT __cdecl TESCSMain__WriteToStatusBar(unsigned int statusBarId, const char* msg);
 
+struct RefSelectControl
+{
+	HWND parent;
+	bool(__cdecl* refComparator)(TESObjectREFR*, void*);
+	void* userData;
+	int selectRefButtonID;
+	int cellComboBoxID;
+	int refComboBoxID;
+	UInt8 allowNone;
+	UInt8 bInCaptureMode;
+	UInt8 byte1A;
+	UInt8 pad1B;
+
+	static RefSelectControl* Get(HWND aHwnd, UInt32 auiID)
+	{
+		return CdeclCall<RefSelectControl*>(0x47AD40, aHwnd, auiID);
+	}
+
+	void SetEnabled(bool abEnable)
+	{
+		ThisCall(0x48C070, this, abEnable);
+	}
+
+	void SetComparator(bool(__cdecl* aComparator)(TESObjectREFR*, void*), void* apData = nullptr)
+	{
+		refComparator = aComparator;
+		userData = apData;
+	}
+
+	TESObjectREFR* GetSelectedRef()
+	{
+		return ThisCall<TESObjectREFR*>(0x48BD80, this);
+	}
+
+	bool AllowsPickRef(TESObjectREFR* apRef)
+	{
+		return ThisCall<bool>(0x48BF70, this, apRef);
+	}
+};
+
 struct ReferenceBatchAction
 {
 	enum eACTION : UInt32
@@ -654,6 +694,7 @@ struct ReferenceBatchAction
 	static eACTION GetAction() { return *(eACTION*)0xECED38; };
 	static HWND GetWindow() { return *(HWND*)0xECED3C; };
 	static TESObjectREFR* GetRef() { return *(TESObjectREFR**)0xECED40; };
+	static void SetRef(TESObjectREFR* apRef) { *(TESObjectREFR**)0xECED40 = apRef; };
 };
 
 struct BSShaderManager
@@ -661,5 +702,28 @@ struct BSShaderManager
 	static void SetInterior(bool abInterior)
 	{
 		*(bool*)0xF23E77 = abInterior;
+	}
+};
+
+struct MessageHandler
+{
+	static constexpr LONG* iDisableWarningCount = (LONG*)0xF2CB4C;
+
+	static void DisableWarnings()
+	{
+		InterlockedIncrement(iDisableWarningCount);
+		if (*iDisableWarningCount < 0)
+		{
+			*iDisableWarningCount = 0;
+		}
+	}
+
+	static void EnableWarnings()
+	{
+		InterlockedDecrement(iDisableWarningCount);
+		if (*iDisableWarningCount < 0)
+		{
+			*iDisableWarningCount = 0;
+		}
 	}
 };

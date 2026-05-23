@@ -48,6 +48,7 @@ void ReadAllSettings()
 	config.bAllowHardDeletionInESMs = GetOrCreateINIValue("General", "bAllowHardDeletionInESMs", 1, IniPath);
 	config.bAddFilterCtrlBackspace = GetOrCreateINIValue("General", "bAddFilterCtrlBackspace", 1, IniPath);
 	config.bPreemptivelyUnloadCells = GetOrCreateINIValue("General", "bPreemptivelyUnloadCells", 0, IniPath);
+	config.bCustomReferenceBatchActions = GetOrCreateINIValue("General", "bCustomReferenceBatchActions", 0, IniPath);
 
 	config.bNoDirtyCellWhenNonPersistentRefsDeleted = GetOrCreateINIValue("Experimental", "bNoDirtyCellWhenNonPersistentRefsDeleted", 0, IniPath);
 
