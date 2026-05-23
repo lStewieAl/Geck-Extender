@@ -648,7 +648,7 @@ struct ReferenceBatchAction
 		SET_OWNER,
 		SET_MULTIBOUND,
 		SET_EXTENAL_EMITTANCE,
-		VANILLA_COUNT
+		MAX_COUNT
 	};
 
 	static eACTION GetAction() { return *(eACTION*)0xECED38; };

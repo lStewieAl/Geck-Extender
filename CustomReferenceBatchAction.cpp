@@ -6,6 +6,12 @@ namespace CustomReferenceBatchAction
 	* TODO: Initially Disabled, Set Encounter Zone and Set Level Modifier
 	*/
 
+	enum eCustomACTION : UInt32
+	{
+		SET_INITIALLY_DISABLED = ReferenceBatchAction::eACTION::MAX_COUNT,
+
+	};
+
 	void AddCustomReferenceBatchActionCombobox(HWND hDlg)
 	{
 		RECT rcBtn = { 224, 162, 224 + 9, 162 + 9 };
@@ -81,22 +87,17 @@ namespace CustomReferenceBatchAction
 //			AddCustomReferenceBatchActionCombobox(hDlg);
 
 			// make the "Do" button not grayed out if an action is already selected when initialising the dialog
-			int* iButtonIdToControlId = (int*)0xE8C908;
 			auto currentAction = ReferenceBatchAction::GetAction();
-			if (currentAction && currentAction < ReferenceBatchAction::VANILLA_COUNT)
+			auto hDoButton = GetDlgItem(hDlg, 1);
+			EnableWindow(hDoButton, currentAction != 0);
+			if (currentAction && currentAction < ReferenceBatchAction::MAX_COUNT)
 			{
+				int* iButtonIdToControlId = (int*)0xE8C908;
 				auto buttonId = iButtonIdToControlId[currentAction];
 				SendMessageA(hDlg, WM_COMMAND, buttonId, NULL);
 			}
 
 			return result;
-		}
-		if (msg == WM_COMMAND)
-		{
-			if (LOWORD(wParam) >= 1033 && LOWORD(wParam) <= 1042)
-			{
-				return TRUE;
-			}
 		}
 		return CallWindowProc(originalReferenceBatchActionFn, hDlg, msg, wParam, lParam);
 	}
