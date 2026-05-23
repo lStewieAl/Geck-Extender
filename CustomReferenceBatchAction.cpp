@@ -1,17 +1,113 @@
+#include "CustomReferenceBatchAction.h"
+
 #include "GeckUtility.h"
 #include "GameObjects.h"
 #include "settings.h"
 
 namespace CustomReferenceBatchAction
 {
+	/*
+	 To add new actions: add to the enum and the actions list
+	*/
+
 	enum eCustomACTION : UInt32
 	{
 		MIN_COUNT = ReferenceBatchAction::eACTION::MAX_COUNT,
+
 		SET_INITIALLY_DISABLED = MIN_COUNT,
 		SET_ENCOUNTER_ZONE,
 		SET_LEVEL_MODIFIER,
+
 		MAX_COUNT
 	};
+
+	struct CustomActionDef
+	{
+		eCustomACTION id;
+		const char* name;
+		bool needsRef;
+
+		bool(__cdecl* refComboboxFilter)(TESObjectREFR*, void*); // return true for refs that should be shown in the combobox
+		bool (*execute)(TESObjectREFR*);
+		void (*setupForm)();
+
+		static const CustomActionDef* GetAction(eCustomACTION id);
+	};
+
+	static const CustomActionDef kActions[] =
+	{
+		{
+			SET_INITIALLY_DISABLED,
+			"Set Initially Disabled",
+			false,
+
+			[](TESObjectREFR* ref, void*) -> bool
+			{
+				return true;
+			},
+
+			[](TESObjectREFR* ref) -> bool
+			{
+				Console_Print("CustomReferenceBatchActions: TODO Implement Set Initially Disabled");
+				return false;
+			},
+
+			[]()
+			{
+				// TODO implement setup form
+			}
+		},
+
+		{
+			SET_ENCOUNTER_ZONE,
+			"Set Encounter Zone",
+			false,
+
+			nullptr,
+
+			[](TESObjectREFR* ref) -> bool
+			{
+				Console_Print("CustomReferenceBatchActions: TODO Implement Set Encounter Zone");
+				return false;
+			},
+
+			[]()
+			{
+				// TODO implement setup form
+			}
+		},
+
+		{
+			SET_LEVEL_MODIFIER,
+			"Set Level Modifier",
+			false,
+
+			nullptr,
+
+			[](TESObjectREFR* ref) -> bool
+			{
+				Console_Print("CustomReferenceBatchActions: TODO Implement Set Level Modifier");
+				return false;
+			},
+
+			[]()
+			{
+				// TODO implement setup form
+			}
+		}
+	};
+
+	const CustomActionDef* CustomActionDef::GetAction(eCustomACTION id)
+	{
+		for (auto& action : kActions)
+		{
+			if (action.id == id)
+				return &action;
+		}
+		return nullptr;
+	}
+
+	constexpr size_t kActionCount = sizeof(kActions) / sizeof(kActions[0]);
 
 	const bool CustomActionNeedsRef[MAX_COUNT - MIN_COUNT] = { false, false, false };
 
@@ -93,8 +189,7 @@ namespace CustomReferenceBatchAction
 		HFONT hFont = (HFONT)SendMessage(hDlg, WM_GETFONT, 0, 0);
 		SendMessage(hCombo, WM_SETFONT, (WPARAM)hFont, TRUE);
 
-		int idx;
-		idx = SendMessage(hCombo, CB_ADDSTRING, 0, (LPARAM)"Set Initially Disabled");
+		int idx = SendMessage(hCombo, CB_ADDSTRING, 0, (LPARAM)"Set Initially Disabled");
 		SendMessage(hCombo, CB_SETITEMDATA, idx, SET_INITIALLY_DISABLED);
 
 		idx = SendMessage(hCombo, CB_ADDSTRING, 0, (LPARAM)"Set Encounter Zone");
@@ -133,11 +228,19 @@ namespace CustomReferenceBatchAction
 		auto hWnd = ReferenceBatchAction::GetWindow();
 		auto uiAction = ReferenceBatchAction::GetAction();
 		auto pRefSelector = RefSelectControl::Get(hWnd, IDC_SELECT_REFERENCE_RENDER_WINDOW);
-		switch (uiAction)
+
+		auto def = CustomActionDef::GetAction((eCustomACTION)uiAction);
+		if (def)
 		{
-		case eCustomACTION::SET_INITIALLY_DISABLED:
-			pRefSelector->SetComparator(CanSetInitiallyDisabled);
-			break;
+			if (def->refComboboxFilter)
+			{
+				pRefSelector->SetComparator(def->refComboboxFilter);
+			}
+
+			if (def->setupForm)
+			{
+				def->setupForm();
+			}
 		}
 	}
 
@@ -156,7 +259,8 @@ namespace CustomReferenceBatchAction
 		}
 		ReferenceBatchAction::SetRef(pSelectedRef);
 
-		bool bEnableDoButton = pSelectedRef != nullptr || !CustomActionNeedsRef[auiAction - eCustomACTION::MIN_COUNT];
+		auto def = CustomActionDef::GetAction(auiAction);
+		bool bEnableDoButton = pSelectedRef != nullptr || (def && !def->needsRef);
 		auto hDoButton = GetDlgItem(hWnd, IDC_DO);
 		EnableWindow(hDoButton, bEnableDoButton);
 	}
@@ -173,18 +277,13 @@ namespace CustomReferenceBatchAction
 			{
 				if (ref && ref->Unk_43() && ref->Unk_4E())
 				{
-					ref->MarkAsModified();
-					switch (auiAction)
+					auto def = CustomActionDef::GetAction(auiAction);
+					if (def && def->execute)
 					{
-					case SET_INITIALLY_DISABLED:
-						Console_Print("CustomReferenceBatchActions: TODO Implement Set Initially Disabled");
-						break;
-					case SET_ENCOUNTER_ZONE:
-						Console_Print("CustomReferenceBatchActions: TODO Implement Set Encounter Zone");
-						break;
-					case SET_LEVEL_MODIFIER:
-						Console_Print("CustomReferenceBatchActions: TODO Implement Set Level Modifier");
-						break;
+						if (def->execute(ref))
+						{
+							ref->MarkAsModified(true);
+						}
 					}
 				}
 			}
@@ -242,9 +341,7 @@ namespace CustomReferenceBatchAction
 
 				if (sel != CB_ERR)
 				{
-					eCustomACTION action =
-						(eCustomACTION)(eCustomACTION::MIN_COUNT + sel);
-
+					eCustomACTION action = (eCustomACTION)SendMessage(hCombo, CB_GETITEMDATA, sel, 0);
 					OnSetCustomAction(action);
 				}
 
