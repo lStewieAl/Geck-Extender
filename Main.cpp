@@ -891,6 +891,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SafeWrite8(0x4CE7DA, 0xEB); // Skip calling InvalidateRect on the RenderWindow in TESDataHandler::CloseAllTES (ShadeMe)
 	SafeWrite8(0x46252B, 0); // RenderWindowCallback - pass bUpdateSelection = 0 when copying (ShadeMe)
 
+	// fix crash when right clicking an empty list in the cell view and clicking 'Edit'
+	WriteRelJump(0x430119, UInt32(OnEditSelectedCellListItemHook));
+
 	CustomRenderWindowHotkeys::Init();
 
 	if (config.bSkipSplashScreen)
