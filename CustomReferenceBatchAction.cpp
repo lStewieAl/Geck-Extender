@@ -386,7 +386,6 @@ namespace CustomReferenceBatchAction
 					OnSetCustomAction(action);
 				}
 			}
-
 			// Changing dropdown selection
 			else if (controlId == IDC_CUSTOM_DROPDOWN &&
 				notifyCode == CBN_SELCHANGE)
@@ -402,8 +401,12 @@ namespace CustomReferenceBatchAction
 					eCustomACTION action = (eCustomACTION)SendMessage(hCombo, CB_GETITEMDATA, sel, 0);
 					OnSetCustomAction(action);
 				}
-
 				return TRUE;
+			}
+			else if (controlId == IDC_SET_EXTERNAL_EMITTANCE)
+			{
+				// workaround the button group being broken because the OWNER button is in the wrong place
+				CheckDlgButton(hDlg, IDC_CUSTOM_BUTTON, BST_UNCHECKED);
 			}
 		}
 		return CallWindowProc(originalReferenceBatchActionFn, hDlg, msg, wParam, lParam);
