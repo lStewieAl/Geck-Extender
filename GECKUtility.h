@@ -1,5 +1,7 @@
 #pragma once
 #include "NiObjects.h"
+#include "Editor.h"
+
 extern void(__cdecl* SaveWindowPositionToINI)(HWND, const char*);
 extern HWND g_mainWindowToolbar;
 
@@ -747,5 +749,12 @@ struct TESComboBox
 		}
 		
 		return 0;
+	}
+
+	static void __cdecl PopulateWithForms(HWND ahWnd, UInt32 aeFormType, char abResetComboBox = true, char abIncludeNoneOption = false, unsigned __int8(__cdecl* aFilterFn)(LPARAM, int) = nullptr, void* apFilterFnData = nullptr)
+	{
+		BeginUIDefer();
+		CdeclCall(0x47F7A0, ahWnd, aeFormType, abResetComboBox, abIncludeNoneOption, aFilterFn, apFilterFnData);
+		EndUIDefer();
 	}
 };

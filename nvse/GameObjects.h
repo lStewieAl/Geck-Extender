@@ -182,6 +182,11 @@ public:
 		ThisCall(0x4AB650, &this->extraDataList, aiLevel);
 	}
 
+	void SetEncounterZone(BGSEncounterZone* apZone)
+	{
+		ThisCall(0x4AB850, &this->extraDataList, apZone);
+	}
+
 	MEMBER_FN_PREFIX(TESObjectREFR);
 };
 

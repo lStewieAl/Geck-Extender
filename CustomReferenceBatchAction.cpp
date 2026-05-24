@@ -79,6 +79,7 @@ namespace CustomReferenceBatchAction
 			[](TESObjectREFR* pRef) -> bool
 			{
 				pRef->SetDisabled(true);
+
 				Console_Print("SET_INITIALLY_DISABLED: %s | TRUE", pRef->GetEditorID());
 				return true;
 			},
@@ -95,8 +96,13 @@ namespace CustomReferenceBatchAction
 
 			[](TESObjectREFR* pRef) -> bool
 			{
-				Console_Print("CustomReferenceBatchActions: TODO Implement Set Encounter Zone");
-				return false;
+				auto hWnd = ReferenceBatchAction::GetWindow();
+				auto hTopCombo = GetDlgItem(hWnd, IDC_TOP_COMBO);
+				auto pEncounterZone = (BGSEncounterZone*)TESComboBox::GetSelectedItemData(hTopCombo);
+				pRef->SetEncounterZone(pEncounterZone);
+
+				Console_Print("SET_ENCOUNTER_ZONE: %s | %s", pRef->GetEditorID(), pEncounterZone ? pEncounterZone->GetEditorID() : " NONE ");
+				return true;
 			},
 
 			[]()
@@ -106,12 +112,7 @@ namespace CustomReferenceBatchAction
 				auto hTopCombo = GetDlgItem(hWnd, IDC_TOP_COMBO);
 
 				SetWindowTextA(hTopLabel, "Encounter Zone");
-				SendMessageA(hTopCombo, CB_RESETCONTENT, 0, 0);
-				auto ppActorLevelLabels = (char**)0xE92120;
-				for (int i = 0; i < 5; ++i)
-				{
-					TESComboBox::AddItem(hTopCombo, ppActorLevelLabels[i], i);
-				}
+				TESComboBox::PopulateWithForms(hTopCombo, kFormType_BGSEncounterZone);
 
 				ShowWindow(hTopLabel, SW_SHOW);
 				ShowWindow(hTopCombo, SW_SHOW);
@@ -268,11 +269,6 @@ namespace CustomReferenceBatchAction
 			rcAction.bottom - rcAction.top,
 			SWP_NOZORDER
 		);
-	}
-
-	bool __cdecl CanSetInitiallyDisabled(TESObjectREFR* apRef, void* formal)
-	{
-		return true;
 	}
 
 	void __cdecl OnSetFormButtonsForAction(UInt32 auiActionID)
