@@ -101,7 +101,20 @@ namespace CustomReferenceBatchAction
 
 			[]()
 			{
-				// TODO implement setup form
+				auto hWnd = ReferenceBatchAction::GetWindow();
+				auto hTopLabel = GetDlgItem(hWnd, IDC_TOP_COMBO_LABEL);
+				auto hTopCombo = GetDlgItem(hWnd, IDC_TOP_COMBO);
+
+				SetWindowTextA(hTopLabel, "Encounter Zone");
+				SendMessageA(hTopCombo, CB_RESETCONTENT, 0, 0);
+				auto ppActorLevelLabels = (char**)0xE92120;
+				for (int i = 0; i < 5; ++i)
+				{
+					TESComboBox::AddItem(hTopCombo, ppActorLevelLabels[i], i);
+				}
+
+				ShowWindow(hTopLabel, SW_SHOW);
+				ShowWindow(hTopCombo, SW_SHOW);
 			}
 		},
 
@@ -127,12 +140,26 @@ namespace CustomReferenceBatchAction
 
 				auto hWnd = ReferenceBatchAction::GetWindow();
 				auto hTopCombo = GetDlgItem(hWnd, IDC_TOP_COMBO);
-				int iSelectedLevel = TESComboBox::GetSelectedItemData(hTopCombo);
+				int iLevel = TESComboBox::GetSelectedItemData(hTopCombo);
 
-				pRef->SetLevCreaModifier(iSelectedLevel);
+				pRef->SetLevCreaModifier(iLevel);
+
+				// set the color of the node (ideally we would reload the entire 3D instead to handle any other data changes but this is easier for now)
+				if (auto pNode = pRef->Get3D())
+				{
+					if (iLevel != 4)
+					{
+						CdeclCall(0x900820, pNode);
+					}
+					if (iLevel < 4)
+					{
+						NiPoint3* pColor = (NiPoint3*)0xEA88FC;
+						CdeclCall(0x526310, pNode, &pColor[iLevel]);
+					}
+				}
 
 				auto ppActorLevelLabels = (char**)0xE92120;
-				Console_Print("SET_LEVEL_MODIFIER: %s | %s", pRef->GetEditorID(), ppActorLevelLabels[iSelectedLevel]);
+				Console_Print("SET_LEVEL_MODIFIER: %s | %s", pRef->GetEditorID(), ppActorLevelLabels[iLevel]);
 				return true;
 			},
 
@@ -305,6 +332,7 @@ namespace CustomReferenceBatchAction
 			if (def && def->execute)
 			{
 				MessageHandler::DisableWarnings();
+
 				auto selected = RenderWindow::SelectedData::GetSelected();
 				for (auto ref : *selected)
 				{
@@ -317,10 +345,12 @@ namespace CustomReferenceBatchAction
 							if (def->execute(ref))
 							{
 								ref->MarkAsModified(true);
+								ref->RedrawLinkedRefs();
 							}
 						}
 					}
 				}
+
 				MessageHandler::EnableWarnings();
 			}
 		}
