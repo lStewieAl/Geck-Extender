@@ -727,3 +727,25 @@ struct MessageHandler
 		}
 	}
 };
+
+struct TESComboBox
+{
+	static void __cdecl AddItem(HWND ahCombo, const CHAR* apText, LPARAM auiData, char abUpdateExtents = true)
+	{
+		CdeclCall(0x419BC0, ahCombo, apText, auiData, abUpdateExtents);
+	}
+
+	static LRESULT __cdecl GetSelectedItemData(HWND hWnd)
+	{
+		if (hWnd)
+		{
+			int iCurSel = SendMessageA(hWnd, CB_GETCURSEL, 0, 0);
+			if (iCurSel != -1)
+			{
+				return SendMessageA(hWnd, CB_GETITEMDATA, iCurSel, 0);
+			}
+		}
+		
+		return 0;
+	}
+};

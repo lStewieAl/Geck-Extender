@@ -360,6 +360,7 @@ public:
 	bool IsIngestible() { return typeID == kFormType_AlchemyItem; }
 	void SetTemporary() { ThisCall(0x4FBA50, this); }
 
+
 	MEMBER_FN_PREFIX(TESForm);
 };
 STATIC_ASSERT(sizeof(TESForm) == 0x2C);
@@ -1413,6 +1414,7 @@ public:
 };
 
 STATIC_ASSERT(offsetof(TESActorBase, avOwner) == 0x100);
+STATIC_ASSERT(offsetof(TESActorBase, baseData) == 0x54);
 STATIC_ASSERT(sizeof(TESActorBase) == 0x10C);
 
 // 14

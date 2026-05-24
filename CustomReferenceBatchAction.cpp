@@ -10,6 +10,39 @@ namespace CustomReferenceBatchAction
 	 To add new actions: add to the enum and the actions list
 	*/
 
+	enum CtrlIDs
+	{
+		IDC_SET_REFLECTED_BY = 1033,
+		IDC_SET_REFRACTED_BY = 1034,
+		IDC_SET_ENABLE_PARENT = 1035,
+		IDC_CUSTOM_BUTTON,
+		IDC_SET_LINKED_REF = 1037,
+		IDC_SET_ACTIVATE_REF = 1038,
+		IDC_SET_MULTIBOUND = 1039,
+		IDC_SELECTED_REFERENCES_LIST = 1018,
+		IDC_SET_EXTERNAL_EMITTANCE = 1040,
+		IDC_SET_OWNER = 1041,
+
+		IDC_SELECT_REFERENCE_RENDER_WINDOW = 1982,
+		IDC_CELL_COMBO = 2063,
+		IDC_REFERENCE_COMBO = 1983,
+		IDC_CUSTOM_DROPDOWN,
+
+		IDC_SET_REFLECTED_BY_AUTOWATER = 5062,
+		IDC_SET_REFRACTED_BY_AUTOWATER = 5063,
+
+		IDC_TARGET_REFERENCE_LABEL = 5103,
+		IDC_BOTTOM_COMBO = 5104,
+		IDC_BOTTOM_COMBO_LABEL = 5105,
+		IDC_TOP_COMBO_LABEL = 5106,
+		IDC_TOP_COMBO = 5107,
+
+		IDC_OPPOSITE_CHECK = 5137,
+
+		IDC_DO = 1,
+	};
+
+
 	enum eCustomACTION : UInt32
 	{
 		MIN_COUNT = ReferenceBatchAction::eACTION::MAX_COUNT,
@@ -41,21 +74,16 @@ namespace CustomReferenceBatchAction
 			"Set Initially Disabled",
 			false,
 
-			[](TESObjectREFR* ref, void*) -> bool
+			nullptr,
+
+			[](TESObjectREFR* pRef) -> bool
 			{
+				pRef->SetDisabled(true);
+				Console_Print("SET_INITIALLY_DISABLED: %s | TRUE", pRef->GetEditorID());
 				return true;
 			},
 
-			[](TESObjectREFR* ref) -> bool
-			{
-				Console_Print("CustomReferenceBatchActions: TODO Implement Set Initially Disabled");
-				return false;
-			},
-
-			[]()
-			{
-				// TODO implement setup form
-			}
+			nullptr
 		},
 
 		{
@@ -65,7 +93,7 @@ namespace CustomReferenceBatchAction
 
 			nullptr,
 
-			[](TESObjectREFR* ref) -> bool
+			[](TESObjectREFR* pRef) -> bool
 			{
 				Console_Print("CustomReferenceBatchActions: TODO Implement Set Encounter Zone");
 				return false;
@@ -84,15 +112,46 @@ namespace CustomReferenceBatchAction
 
 			nullptr,
 
-			[](TESObjectREFR* ref) -> bool
+			[](TESObjectREFR* pRef) -> bool
 			{
-				Console_Print("CustomReferenceBatchActions: TODO Implement Set Level Modifier");
-				return false;
+				if (!pRef->baseForm || !(pRef->baseForm->typeID == kFormType_TESNPC || pRef->baseForm->typeID == kFormType_Creature))
+				{
+					return false;
+				}
+
+				TESActorBase* actorBase = (TESActorBase*)pRef->baseForm;
+				if (!ThisCall<bool>(0x4EAF20, &actorBase->baseData))
+				{
+					return false;
+				}
+
+				auto hWnd = ReferenceBatchAction::GetWindow();
+				auto hTopCombo = GetDlgItem(hWnd, IDC_TOP_COMBO);
+				int iSelectedLevel = TESComboBox::GetSelectedItemData(hTopCombo);
+
+				pRef->SetLevCreaModifier(iSelectedLevel);
+
+				auto ppActorLevelLabels = (char**)0xE92120;
+				Console_Print("SET_LEVEL_MODIFIER: %s | %s", pRef->GetEditorID(), ppActorLevelLabels[iSelectedLevel]);
+				return true;
 			},
 
 			[]()
 			{
-				// TODO implement setup form
+				auto hWnd = ReferenceBatchAction::GetWindow();
+				auto hTopLabel = GetDlgItem(hWnd, IDC_TOP_COMBO_LABEL);
+				auto hTopCombo = GetDlgItem(hWnd, IDC_TOP_COMBO);
+
+				SetWindowTextA(hTopLabel, "Level Modifier");
+				SendMessageA(hTopCombo, CB_RESETCONTENT, 0, 0);
+				auto ppActorLevelLabels = (char**)0xE92120;
+				for (int i = 0; i < 5; ++i)
+				{
+					TESComboBox::AddItem(hTopCombo, ppActorLevelLabels[i], i);
+				}
+
+				ShowWindow(hTopLabel, SW_SHOW);
+				ShowWindow(hTopCombo, SW_SHOW);
 			}
 		}
 	};
@@ -110,38 +169,6 @@ namespace CustomReferenceBatchAction
 	constexpr size_t kActionCount = sizeof(kActions) / sizeof(kActions[0]);
 
 	const bool CustomActionNeedsRef[MAX_COUNT - MIN_COUNT] = { false, false, false };
-
-	enum CtrlIDs
-	{
-		IDC_SET_REFLECTED_BY = 1033,
-		IDC_SET_REFRACTED_BY = 1034,
-		IDC_SET_ENABLE_PARENT = 1035,
-		IDC_CUSTOM_BUTTON,
-		IDC_SET_LINKED_REF = 1037,
-		IDC_SET_ACTIVATE_REF = 1038,
-		IDC_SET_MULTIBOUND = 1039,
-		IDC_SELECTED_REFERENCES_LIST = 1018,
-		IDC_SET_EXTERNAL_EMITTANCE = 1040,
-		IDC_SET_OWNER = 1041,
-
-		IDC_SELECT_REFERENCE_RENDER_WINDOW = 1982,
-		IDC_CELL_COMBO = 2063,
-		IDC_REFERENCE_COMBO = 1983,
-		IDC_CUSTOM_DROPDOWN,
-
-		IDC_SET_REFLECTED_BY_AUTOWATER = 5062,
-		IDC_SET_REFRACTED_BY_AUTOWATER = 5063,
-
-		IDC_TARGET_REFERENCE_LABEL = 5103,
-		IDC_EXTERIOR_LIGHT_COMBO = 5104,
-		IDC_EXTERIOR_LIGHT_LABEL = 5105,
-		IDC_INTERIOR_LIGHT_LABEL = 5106,
-		IDC_INTERIOR_LIGHT_COMBO = 5107,
-
-		IDC_OPPOSITE_CHECK = 5137,
-
-		IDC_DO = 1,
-	};
 
 	void AddCustomReferenceBatchActionCombobox(HWND hDlg)
 	{
@@ -268,30 +295,35 @@ namespace CustomReferenceBatchAction
 	void OnDoAction()
 	{
 		eCustomACTION auiAction = (eCustomACTION)ReferenceBatchAction::GetAction();
-		if (auiAction >= eCustomACTION::MIN_COUNT)
+		if (auiAction < eCustomACTION::MIN_COUNT)
 		{
-			MessageHandler::DisableWarnings();
-
-			auto selected = RenderWindow::SelectedData::GetSelected();
-			for (auto ref : *selected)
+			CdeclCall(0x4110D0); // ReferenceBatchAction::DoAction
+		}
+		else
+		{
+			auto def = CustomActionDef::GetAction(auiAction);
+			if (def && def->execute)
 			{
-				if (ref && ref->Unk_43() && ref->Unk_4E())
+				MessageHandler::DisableWarnings();
+				auto selected = RenderWindow::SelectedData::GetSelected();
+				for (auto ref : *selected)
 				{
-					auto def = CustomActionDef::GetAction(auiAction);
-					if (def && def->execute)
+					if (ref)
 					{
-						if (def->execute(ref))
+						// vanilla calls Unk_4E, but that marks as modified - just check the temporary flag instead as it does.
+						// the behaviour is slightly different for VC, since vanilla also checks some method using the Fud and Fvd arrays
+						if (ref->Unk_43() && !ref->IsTemporary())
 						{
-							ref->MarkAsModified(true);
+							if (def->execute(ref))
+							{
+								ref->MarkAsModified(true);
+							}
 						}
 					}
 				}
+				MessageHandler::EnableWarnings();
 			}
-
-			MessageHandler::EnableWarnings();
 		}
-
-		CdeclCall(0x4110D0); // ReferenceBatchAction::DoAction
 	}
 
 	WNDPROC originalReferenceBatchActionFn;
