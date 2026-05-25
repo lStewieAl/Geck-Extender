@@ -855,6 +855,22 @@ _declspec(naked) void EndLoadingHook() {
 	}
 }
 
+class NiMatrix3;
+NiMatrix3* __fastcall OnFlycamCalculateMatrixFromEuler(NiMatrix3* apMatrix, void* edx, float afYaw, float afPitch, float afRoll)
+{
+	constexpr float maxPitch = 1.55334f; // ~89 degrees
+	if (afRoll > maxPitch)
+	{
+		afRoll = maxPitch;
+	}
+	else if (afRoll < -maxPitch)
+	{
+		afRoll = -maxPitch;
+	}
+
+	return ThisCall<NiMatrix3*>(0x80A8F0, apMatrix, afYaw, afPitch, afRoll);
+}
+
 // hooks before movement speed is determined for flycam mode
 int FlycamMovementSpeedMultiplier()
 {

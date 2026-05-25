@@ -394,6 +394,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SafeWrite8(0x45D3D9, 0x7C);
 	SafeWrite8(0x45D3EA, 0x7F);
 
+	// fix being able to look upside down by clamping the roll
+	WriteRelCall(0x45D487, UInt32(OnFlycamCalculateMatrixFromEuler));
+
 	// add shift and alt scaling flycam movement speed, and fix speed being framerate dependent
 	WriteRelCall(0x455D12, UInt32(FlycamMovementSpeedMultiplier));
 
