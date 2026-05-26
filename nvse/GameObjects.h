@@ -177,6 +177,28 @@ public:
 		return (flags & 0x20) == 0 && (flags & 0x4000) == 0 && (flags & 0x400) != 0;
 	}
 
+	void SetLevCreaModifier(int aiLevel)
+	{
+		ThisCall(0x4AB650, &this->extraDataList, aiLevel);
+	}
+
+	void SetEncounterZone(BGSEncounterZone* apZone)
+	{
+		ThisCall(0x4AB850, &this->extraDataList, apZone);
+	}
+
+	static TESObjectREFR* Create()
+	{
+		auto pRef = (TESObjectREFR*)FormHeap_Allocate(sizeof(TESObjectREFR));
+		ThisCall(0x641D50, pRef);
+		return pRef;
+	}
+
+	void SetObjectReference(TESForm* apReference)
+	{
+		ThisCall(0x6415D0, this, apReference);
+	}
+
 	MEMBER_FN_PREFIX(TESObjectREFR);
 };
 

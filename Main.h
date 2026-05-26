@@ -1,6 +1,7 @@
 #pragma once
 #pragma comment(lib, "libdeflate/libdeflatestatic.lib")
 #pragma comment(lib, "shlwapi.lib")
+#pragma comment(lib, "dbghelp.lib")
 
 #include "GECKUtility.h"
 #include "Editor.h"
@@ -9,6 +10,7 @@
 #include <unordered_set>
 #include <functional>
 #include <shlwapi.h>
+#include "intsafe.h"
 
 #include "NiNodes.h"
 #include "NiObjects.h"
@@ -17,6 +19,9 @@
 #include "FormSearch.h"
 #include "Settings.h"
 #include "NavMeshPickPreventer.h"
+#include "FormColoring.h"
+
+#include <dbghelp.h>
 
 #include "libs/stb_sprintf.h"
 
@@ -44,17 +49,6 @@ struct z_stream_s
 	struct internal_state* state;
 };
 
-struct DialogOverrideData
-{
-	DLGPROC DialogFunc; // Original function pointer
-	LPARAM Param;       // Original parameter
-	bool IsDialog;      // True if it requires EndDialog()
-};
-
-std::recursive_mutex g_DialogMutex;
-std::unordered_map<HWND, DialogOverrideData> g_DialogOverrides;
-__declspec(thread) DialogOverrideData* DlgData;
-
 const char* nvseMSG[20] =
 {
 	"PostLoad",
@@ -77,10 +71,10 @@ const char* nvseMSG[20] =
 	"RenameNewGameName",
 };
 
-static const char* geckwikiurl = "https://geckwiki.com/index.php/";
-static const char* geckwikiscriptingurl = "https://geckwiki.com/index.php/Category:Scripting";
-static const char* geckwikicommandsurl = "https://geckwiki.com/index.php/Category:Commands";
-static const char* geckwikifunctionsurl = "https://geckwiki.com/index.php/Category:Functions";
+constexpr const char* geckwikiurl = "https://geckwiki.com/index.php/";
+constexpr const char* geckwikiscriptingurl = "https://geckwiki.com/index.php/Category:Scripting";
+constexpr const char* geckwikicommandsurl = "https://geckwiki.com/index.php/Category:Commands";
+constexpr const char* geckwikifunctionsurl = "https://geckwiki.com/index.php/Category:Functions";
 
 #define ID_CMB_IDLE_SPEAKER 2170
 #define ID_CMB_IDLE_LISTENER 2173
@@ -220,50 +214,57 @@ BOOL WINAPI hk_DialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	return StdCall<LRESULT>(0x004E5E30, hWnd, uMsg, wParam, lParam);
 }
 
-//	fix handle memory leak - credit to nukem
+struct InitialDialogData {
+	DLGPROC OriginalProc;
+	bool IsModal;
+	bool IsValid;
+	void Set(DLGPROC aOriginalProc, bool aIsModal)
+	{
+		OriginalProc = aOriginalProc;
+		IsModal = aIsModal;
+		IsValid = true;
+	}
+	void Reset()
+	{
+		IsValid = false;
+	}
+};
+
+ATOM g_DlgProcAtom;
+ATOM g_IsModalAtom;
+
+__declspec(thread) InitialDialogData g_TlsDialogData;
+
 INT_PTR WINAPI DialogFuncOverride(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	DLGPROC proc = nullptr;
+	// Try to get the function pointer from the window properties
+	DLGPROC proc = (DLGPROC)GetPropA(hwndDlg, MAKEINTATOM(g_DlgProcAtom));
 
-	g_DialogMutex.lock();
+	// If it's null, this is the very first message this HWND has ever received.
+	// We grab the data from our Thread-Local variable and attach it to the window.
+	if (!proc && g_TlsDialogData.IsValid)
 	{
-		auto itr = g_DialogOverrides.find(hwndDlg);
-		if (itr != g_DialogOverrides.end())
-			proc = itr->second.DialogFunc;
+		proc = g_TlsDialogData.OriginalProc;
+		SetPropA(hwndDlg, MAKEINTATOM(g_DlgProcAtom), (HANDLE)proc);
+		SetPropA(hwndDlg, MAKEINTATOM(g_IsModalAtom), (HANDLE)(g_TlsDialogData.IsModal ? 1 : 0));
 
-		//	if (is new entry)
-		if (!proc)
-		{
-			g_DialogOverrides[hwndDlg] = *DlgData;
-			proc = DlgData->DialogFunc;
-
-			delete DlgData;
-			DlgData = nullptr;
-		}
-
-		//	Purge old entries every now and then
-		if (g_DialogOverrides.size() >= 50)
-		{
-			for (auto itr = g_DialogOverrides.begin(); itr != g_DialogOverrides.end();)
-			{
-				if (itr->first == hwndDlg || IsWindow(itr->first))
-				{
-					itr++;
-					continue;
-				}
-
-				itr = g_DialogOverrides.erase(itr);
-			}
-		}
+		g_TlsDialogData.Reset();
 	}
-	g_DialogMutex.unlock();
 
-	return proc(hwndDlg, uMsg, wParam, lParam);
+	LRESULT result = proc && proc(hwndDlg, uMsg, wParam, lParam);
+
+	// Clean up the properties when the window is destroyed
+	if (uMsg == WM_DESTROY)
+	{
+		RemovePropA(hwndDlg, MAKEINTATOM(g_DlgProcAtom));
+		RemovePropA(hwndDlg, MAKEINTATOM(g_IsModalAtom));
+	}
+
+	return result;
 }
 
 HWND WINAPI hk_CreateDialogParamA(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc, LPARAM dwInitParam)
 {
-
 	// Override certain default dialogs to use this DLL's resources and callbacks
 	switch ((uintptr_t)lpTemplateName)
 	{
@@ -273,15 +274,12 @@ HWND WINAPI hk_CreateDialogParamA(HINSTANCE hInstance, LPCSTR lpTemplateName, HW
 		break;
 	}
 
-	//	EndDialog MUST NOT be used
-	DialogOverrideData* data = new DialogOverrideData;
-	data->DialogFunc = lpDialogFunc;
-	data->Param = dwInitParam;
-	data->IsDialog = false;
+	// EndDialog MUST NOT be used
+	g_TlsDialogData.Set(lpDialogFunc, false);
+	HWND hwnd = CreateDialogParamA(hInstance, lpTemplateName, hWndParent, DialogFuncOverride, dwInitParam);
+	g_TlsDialogData.Reset();
 
-	DlgData = data;
-
-	return CreateDialogParamA(hInstance, lpTemplateName, hWndParent, DialogFuncOverride, dwInitParam);
+	return hwnd;
 }
 
 LRESULT CALLBACK SoundPickerListBoxCallback(HWND listBox, UINT Message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
@@ -369,25 +367,25 @@ INT_PTR WINAPI hk_DialogBoxParamA(HINSTANCE hInstance, LPCSTR lpTemplateName, HW
 	}
 
 	// EndDialog MUST be used
-	DialogOverrideData* data = new DialogOverrideData;
-	data->DialogFunc = lpDialogFunc;
-	data->Param = dwInitParam;
-	data->IsDialog = true;
+	// Pass data via TLS. IsModal = true
+	g_TlsDialogData.Set(lpDialogFunc, true);
+	INT_PTR result = DialogBoxParamA(hInstance, lpTemplateName, hWndParent, DialogFuncOverride, dwInitParam);
+	g_TlsDialogData.Reset();
 
-	DlgData = data;
-	return DialogBoxParamA(hInstance, lpTemplateName, hWndParent, DialogFuncOverride, dwInitParam);
+	return result;
 }
 
 BOOL WINAPI hk_EndDialog(HWND hDlg, INT_PTR nResult)
 {
-	std::lock_guard<std::recursive_mutex> lock(g_DialogMutex);
-
 	//	Fix for the CK calling EndDialog on a CreateDialogParamA window
-	auto itr = g_DialogOverrides.find(hDlg);
-	if (itr != g_DialogOverrides.end() && !itr->second.IsDialog)
+	if (GetPropA(hDlg, MAKEINTATOM(g_DlgProcAtom)) != NULL) // Make sure it's one of our windows
 	{
-		DestroyWindow(hDlg);
-		return TRUE;
+		bool isModal = (bool)GetPropA(hDlg, MAKEINTATOM(g_IsModalAtom));
+		if (!isModal)
+		{
+			DestroyWindow(hDlg);
+			return TRUE;
+		}
 	}
 
 	return EndDialog(hDlg, nResult);
@@ -409,15 +407,14 @@ LRESULT WINAPI hk_SendMessageA(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam
 {
 	if (hWnd && Msg == WM_DESTROY)
 	{
-		std::lock_guard<std::recursive_mutex> lock(g_DialogMutex);
-		// If this is a dialog, we can't call DestroyWindow on it
-		auto itr = g_DialogOverrides.find(hWnd);
-		if (itr != g_DialogOverrides.end())
+		if (GetPropA(hWnd, MAKEINTATOM(g_DlgProcAtom)) != NULL)
 		{
-			if (!itr->second.IsDialog)
+			bool isModal = (bool)GetPropA(hWnd, MAKEINTATOM(g_IsModalAtom));
+			if (!isModal)
+			{
 				DestroyWindow(hWnd);
+			}
 		}
-
 		return 0;
 	}
 
@@ -514,45 +511,17 @@ __HOOK hk_addr_4E26BA()
 	}
 }
 
-//	Fix Rock-It Launcher crash - credit to jazzisparis
-TESForm* (*GetFormByID)(UInt32 formID) = (TESForm * (*)(UInt32))0x004F9620;
-
-bool __fastcall GetIsRIL(TESForm* form)
+/*
+* the Rock-It-Launcher returns a TESObjectMISC which causes a crash when ApplyAmmoEffects is called - return null for non TESAmmos so it is skipped
+*/
+TESForm* __fastcall CalcWeaponDamagePerSecond_GetAmmoEnsureType(TESObjectWEAP* apWeapon, void* edx, Actor* apWeaponHolder)
 {
-	static UInt32 RIL_FormID = 0;
-	if (!RIL_FormID)
+	TESForm* pAmmo = ThisCall<TESForm*>(0x600050, apWeapon, apWeaponHolder);
+	if (pAmmo && pAmmo->typeID == kFormType_TESAmmo)
 	{
-		RIL_FormID = 0xFFFFFFFF;
-		DataHandler* dataHandler = *(DataHandler**)0x00ED3B0C;
-		if (dataHandler)
-		{
-			for (tList<ModInfo>::Iterator infoIter = dataHandler->modList.modInfoList.Begin(); !infoIter.End(); ++infoIter)
-			{
-				if (_stricmp(infoIter->name, "Fallout3.esm")) continue;
-				RIL_FormID = (infoIter->modIndex << 0x18) | 0x434B;
-				break;
-			}
-		}
+		return pAmmo;
 	}
-	return form->refID == RIL_FormID;
-}
-
-__HOOK CheckIsRILHook()
-{
-	static const UInt32 kRetnAddr = 0x005B8FFD;
-
-	__asm
-	{
-		mov		ecx, esi
-		call	GetIsRIL
-		test	al, al
-		jz		notRIL
-		retn
-	notRIL:
-		push	edi
-		mov		edi, [esp + 0xC]
-		jmp		kRetnAddr
-	}
+	return nullptr;
 }
 
 //	enable/disable spell checker - credit to roy
@@ -910,38 +879,50 @@ _declspec(naked) void EndLoadingHook() {
 	}
 }
 
-// hooks before movement speed is determined for flycam mode
-static int lastFlycamTime = 0;
-_declspec(naked) void FlycamMovementSpeedMultiplierHook() {
-	_asm
+class NiMatrix3;
+NiMatrix3* __fastcall OnFlycamCalculateMatrixFromEuler(NiMatrix3* apMatrix, void* edx, float afYaw, float afPitch, float afRoll)
+{
+	constexpr float maxPitch = 1.55334f; // ~89 degrees
+	if (afRoll > maxPitch)
 	{
-		pushad
+		afRoll = maxPitch;
 	}
-	static const UInt32 retnAddr = 0x455D17;
-	*(float*)(0xED12C0) = config.fFlycamNormalMovementSpeed;
-
-	if (GetAsyncKeyState(VK_SHIFT) < 0) {
-		*(float*)(0xED12C0) *= config.fFlycamShiftMovementSpeed;
+	else if (afRoll < -maxPitch)
+	{
+		afRoll = -maxPitch;
 	}
 
-	if (GetAsyncKeyState(VK_MENU) < 0) {
-		*(float*)(0xED12C0) *= config.fFlycamAltMovementSpeed;
+	return ThisCall<NiMatrix3*>(0x80A8F0, apMatrix, afYaw, afPitch, afRoll);
+}
+
+// hooks before movement speed is determined for flycam mode
+int FlycamMovementSpeedMultiplier()
+{
+	Setting* fFlyMoveSpeed = (Setting*)0xED12BC;
+	fFlyMoveSpeed->data.f = config.fFlycamNormalMovementSpeed;
+
+	if (GetAsyncKeyState(VK_SHIFT) < 0)
+	{
+		fFlyMoveSpeed->data.f *= config.fFlycamShiftMovementSpeed;
+	}
+
+	if (GetAsyncKeyState(VK_MENU) < 0)
+	{
+		fFlyMoveSpeed->data.f *= config.fFlycamAltMovementSpeed;
 	}
 
 	/* fix flycam speed being dependent on framerate by slowing down movement if framerate is greater than 30fps (33ms/frame)*/
-	if (GetTickCount() - lastFlycamTime < 33) {
-		*(float*)(0xED12C0) *= (GetTickCount() - lastFlycamTime) / 33.0;
-	}
+	static DWORD uiLastFlycamTime = 0;
+	DWORD uiCurrentTick = GetTickCount();
+	int iDelta = uiCurrentTick - uiLastFlycamTime;
 
-	lastFlycamTime = GetTickCount();
-
-	_asm
+	if (iDelta < 33)
 	{
-		popad
-		//	originalCode
-		mov     eax, dword ptr ds : [0xF1FBF4]
-		jmp retnAddr
+		fFlyMoveSpeed->data.f *= (float)iDelta / 33.0f;
 	}
+	uiLastFlycamTime = uiCurrentTick;
+
+	return 0;
 }
 
 // edi       : difference in x pos, 
@@ -962,16 +943,6 @@ _declspec(naked) void FlycamRotationSpeedMultiplierHook() {
 		fild dword ptr ss : [esp + 0x324]
 		fmul config.fFlycamRotationSpeed
 		fstp dword ptr ss : [esp + 0x18]
-		jmp retnAddr
-	}
-}
-
-_declspec(naked) void ReferenceBatchActionDoButtonHook() {
-	static const UInt32 retnAddr = 0x411CD4;
-	_asm {
-		push dword ptr ds : [0xECED38] // replaces a 'push 0' with the selected action
-		push 1
-		push esi
 		jmp retnAddr
 	}
 }
@@ -1594,6 +1565,88 @@ void CreateCrashSave()
 	SafeWrite32(0x4DB0AC, 0xD415C4);
 }
 
+#define CENTERED_TEXT(size, name) (size/2) + sizeof(name) / 2, name, (size/2) - sizeof(name) / 2, ""
+namespace PDB {
+
+	UInt32 __fastcall GetModuleBase(UInt32 eip, HANDLE process) {
+		IMAGEHLP_MODULE module = { 0 };
+		module.SizeOfStruct = sizeof(IMAGEHLP_MODULE);
+		if (!SymGetModuleInfo(process, eip, &module)) return 0;
+
+		return module.BaseOfImage;
+	}
+
+	bool __fastcall GetModule(UInt32 eip, HANDLE process, char* buffer, size_t bufferSize) {
+		IMAGEHLP_MODULE module = { 0 };
+		module.SizeOfStruct = sizeof(IMAGEHLP_MODULE);
+		if (!SymGetModuleInfo(process, eip, &module))
+			return false;
+
+		strcpy_s(buffer, bufferSize, module.ModuleName);
+		return true;
+	}
+
+	bool __fastcall GetSymbol(UInt32 eip, HANDLE process, char* buffer, size_t bufferSize) {
+		char symbolBuffer[sizeof(SYMBOL_INFO) + 255];
+		const auto symbol = (SYMBOL_INFO*)symbolBuffer;
+
+		symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+		symbol->MaxNameLen = 254;
+		DWORD64 offset = 0;
+
+		if (!SymFromAddr(process, eip, &offset, symbol))
+			return false;
+
+		sprintf_s(buffer, bufferSize, "%s+0x%I64X", symbol->Name, offset);
+		return true;
+	}
+
+	bool __fastcall GetLine(UInt32 eip, HANDLE process, char* buffer, size_t bufferSize) {
+		char lineBuffer[sizeof(IMAGEHLP_LINE) + 255];
+		const auto line = (IMAGEHLP_LINE*)lineBuffer;
+		line->SizeOfStruct = sizeof(IMAGEHLP_LINE);
+
+		DWORD offset = 0;
+
+		if (!SymGetLineFromAddr(process, eip, &offset, line))
+			return false;
+
+		sprintf_s(buffer, bufferSize, "%s:%d", line->FileName, line->LineNumber);
+		return true;
+	}
+}
+
+void __fastcall GetCalltraceFunction(UInt32 eip, UInt32 ebp, HANDLE process, char* buffer, SIZE_T bufferSize) {
+	/*if (GetModuleFileName((HMODULE)frame.AddrPC.Offset, path, MAX_PATH)) {  //Do this work on non base addresses even on  Windows? Cal directly the LDR function?
+	if (!SymLoadModule(process, NULL, path, NULL, 0, 0)) Log() << FormatString("Porcoddio %0X", GetLastError());
+	}*/
+
+	const auto moduleBase = PDB::GetModuleBase(eip, process);
+
+	char begin[16];
+	sprintf_s(begin, "0x%08X | ", ebp);
+
+	char middle[MAX_PATH] = {};
+
+	const auto moduleOffset = (moduleBase != 0x00400000) ? eip - moduleBase + 0x10000000 : eip;
+
+	{
+		char module[MAX_PATH] = {};
+		char symbol[MAX_PATH] = {};
+		if (!PDB::GetModule(eip, process, module, sizeof(module)) || !module[0])
+			sprintf_s(middle, "%28s (0x%08X) | %-40s |", "-\\(°_o)/-", moduleOffset, "(Corrupt stack or heap?)");
+		else if (!PDB::GetSymbol(eip, process, symbol, sizeof(symbol)) || !symbol[0])
+			sprintf_s(middle, "%28s (0x%08X) | %-40s |", module, moduleOffset, "");
+		else
+			sprintf_s(middle, "%28s (0x%08X) | %-40s |", module, moduleOffset, symbol);
+	}
+
+	char end[MAX_PATH] = {};
+	PDB::GetLine(eip, process, end, sizeof(end));
+
+	sprintf_s(buffer, bufferSize, "%s%s %s", begin, middle, end);
+}
+
 LONG WINAPI DoCrashSave(EXCEPTION_POINTERS* info)
 {
 	CreateCrashSave();
@@ -1611,6 +1664,54 @@ LONG WINAPI DoCrashSave(EXCEPTION_POINTERS* info)
 	stbsp_sprintf(buf, "%s\r\nesi: %08X", buf, contextRecord->Esi);
 	stbsp_sprintf(buf, "%s\r\nebp: %08X", buf, contextRecord->Ebp);
 	stbsp_sprintf(buf, "%s\r\nesp: %08X", buf, contextRecord->Esp);
+
+	HANDLE process = GetCurrentProcess();
+	HANDLE thread = GetCurrentThread();
+
+	DWORD machine = IMAGE_FILE_MACHINE_I386;
+	CONTEXT context = {};
+	memcpy(&context, info->ContextRecord, sizeof(CONTEXT));
+
+	SymSetOptions(SYMOPT_LOAD_LINES | SYMOPT_DEFERRED_LOADS | SYMOPT_UNDNAME | SYMOPT_ALLOW_ABSOLUTE_SYMBOLS);
+
+	char buffer[2048] = {};
+	{
+		char pathBuffer[MAX_PATH];
+		GetCurrentDirectory(sizeof(pathBuffer), pathBuffer);
+		sprintf_s(buffer, "%s;%s\\Data\\NVSE\\Plugins", pathBuffer, pathBuffer);
+		GetEnvironmentVariable("_NT_SYMBOL_PATH", pathBuffer, sizeof(pathBuffer));
+		sprintf_s(buffer, "%s;%s", buffer, pathBuffer);
+		GetEnvironmentVariable("_NT_ALTERNATE_SYMBOL_PATH ", pathBuffer, sizeof(pathBuffer));
+		sprintf_s(buffer, "%s;%s", buffer, pathBuffer);
+
+		if (!SymInitialize(process, buffer, true))
+			_MESSAGE("Error initializing symbol store");
+	}
+
+	STACKFRAME frame = {};
+	frame.AddrPC.Offset = info->ContextRecord->Eip;
+	if (!frame.AddrPC.Offset && info->ContextRecord->Esp)
+	{
+		// if EIP was null, we likely hit a `call 0` so use the return address from [esp] instead
+		frame.AddrPC.Offset = *(int*)info->ContextRecord->Esp;
+	}
+
+	frame.AddrPC.Mode = AddrModeFlat;
+	frame.AddrFrame.Offset = info->ContextRecord->Ebp;
+	frame.AddrFrame.Mode = AddrModeFlat;
+	frame.AddrStack.Offset = info->ContextRecord->Esp;
+	frame.AddrStack.Mode = AddrModeFlat;
+	DWORD eip = 0;
+
+	_MESSAGE("\nCalltrace:\n %*s%*s |  %*s%*s | %*s%*s |  Source", CENTERED_TEXT(10, "ebp"), CENTERED_TEXT(40, "Address"), CENTERED_TEXT(40, "Function"));
+
+	while (StackWalk(machine, process, thread, &frame, &context, NULL, SymFunctionTableAccess, SymGetModuleBase, NULL)) {
+		if (frame.AddrPC.Offset == eip)
+			break;
+		eip = frame.AddrPC.Offset;
+		GetCalltraceFunction(frame.AddrPC.Offset, frame.AddrFrame.Offset, process, buffer, sizeof(buffer));
+		_MESSAGE(buffer);
+	}
 
 	UInt32* esp = (UInt32*)contextRecord->Esp;
 	stbsp_sprintf(buf, "%s\r\n\r\nSTACK", buf);
@@ -1633,7 +1734,7 @@ LONG WINAPI DoCrashSave(EXCEPTION_POINTERS* info)
 	stbsp_sprintf(buf, "%s\r\n%s", buf, stack);
 	_MESSAGE("%s", buf);
 	MessageBoxA(nullptr, buf, "Error", MB_ICONERROR | MB_OK);
-	
+
 	return s_originalFilter && s_originalFilter(info);
 };
 
@@ -1741,7 +1842,7 @@ BOOL __stdcall HavokPreviewCallback(HWND hWnd, UINT Message, WPARAM wParam, LPAR
 		int red = GetDlgItemInt(hWnd, 1109, 0, 0);
 		int green = GetDlgItemInt(hWnd, 1033, 0, 0);
 		int blue = GetDlgItemInt(hWnd, 1111, 0, 0);
-		char arr[11];
+		char arr[0x10];
 		WritePrivateProfileString("Preview Window", "iBackgroundRed", _itoa(red, arr, 10), IniPath);
 		WritePrivateProfileString("Preview Window", "iBackgroundGreen", _itoa(green, arr, 10), IniPath);
 		WritePrivateProfileString("Preview Window", "iBackgroundBlue", _itoa(blue, arr, 10), IniPath);
@@ -2013,7 +2114,7 @@ BOOL __stdcall LandscapeEditCallback(HWND hWnd, UINT Message, WPARAM wParam, LPA
 {
 	if (Message == WM_DESTROY)
 	{
-		char buffer[8];
+		char buffer[0x10];
 		WINDOWPLACEMENT pos;
 		GetWindowPlacement(hWnd, &pos);
 
@@ -2058,11 +2159,17 @@ void PatchRememberLandscapeEditSettingsWindowPosition()
 
 void ClearLandscapeUndosIfNearlyOutOfMemory()
 {
+	static DWORD lastCheckTime = 0;
+	DWORD currentTime = GetTickCount();
+
+	// Only query memory at most once every 2 seconds
+	if (currentTime - lastCheckTime < 2000) return;
+	lastCheckTime = currentTime;
+
 	constexpr size_t MAX_MEMORY = 2560u * (1024u * 1024u); // 2.5gb
 	if (GetCurrentMemoryUsage() > MAX_MEMORY)
 	{
-		auto hist = HistoryManager::GetSingleton();
-		hist->ClearHistoryForCurrentElement();
+		HistoryManager::GetSingleton()->ClearHistoryForCurrentElement();
 		Console_Print("2.5gb memory usage exceeded, clearing land edit history.");
 	}
 }
@@ -2706,14 +2813,20 @@ extern HWND g_ConsoleHwnd;
 void SaveWindowPositions() {
 	SaveWindowPositionToINI(RenderWindow::GetWindow(), "Render Window");
 
-	char buffer[8];
+	char buffer[0x10];
 
 	WINDOWPLACEMENT pos;
 	GetWindowPlacement(g_ConsoleHwnd, &pos);
-	WritePrivateProfileString("Log", "iWindowPosX", _itoa(pos.rcNormalPosition.left, buffer, 10), IniPath);
-	WritePrivateProfileString("Log", "iWindowPosY", _itoa(pos.rcNormalPosition.top, buffer, 10), IniPath);
-	WritePrivateProfileString("Log", "iWindowPosDX", _itoa(pos.rcNormalPosition.right - pos.rcNormalPosition.left, buffer, 10), IniPath);
-	WritePrivateProfileString("Log", "iWindowPosDY", _itoa(pos.rcNormalPosition.bottom - pos.rcNormalPosition.top, buffer, 10), IniPath);
+
+	LONG x = pos.rcNormalPosition.left;
+	LONG y = pos.rcNormalPosition.top;
+	LONG dx = pos.rcNormalPosition.right - x;
+	LONG dy = pos.rcNormalPosition.bottom - y;
+
+	WritePrivateProfileString("Log", "iWindowPosX", _itoa(x, buffer, 10), IniPath);
+	WritePrivateProfileString("Log", "iWindowPosY", _itoa(y, buffer, 10), IniPath);
+	WritePrivateProfileString("Log", "iWindowPosDX", _itoa(dx, buffer, 10), IniPath);
+	WritePrivateProfileString("Log", "iWindowPosDY", _itoa(dy, buffer, 10), IniPath);
 }
 
 void __fastcall FastExitHook(volatile LONG** thiss)
@@ -2769,15 +2882,56 @@ _declspec(naked) void SaveScriptChangedType()
 	}
 }
 
+struct RichEditZoom
+{
+	UINT num = 1;
+	UINT den = 1;
+} s_RichEditZoom;
+
+void SaveZoom(HWND hRichEdit, const RichEditZoom& zoom)
+{
+	char buffer[0x10];
+	SendMessage(hRichEdit, EM_GETZOOM, (WPARAM)&zoom.num, (LPARAM)&zoom.den);
+	WritePrivateProfileString("Script Editor", "iZoomNumerator", _itoa(zoom.num, buffer, 10), IniPath);
+	WritePrivateProfileString("Script Editor", "iZoomDenominator", _itoa(zoom.den, buffer, 10), IniPath);
+
+}
+
+void RestoreZoom(HWND hRichEdit, RichEditZoom& zoom)
+{
+	zoom.num = GetPrivateProfileIntA("Script Editor", "iZoomNumerator", 0, IniPath);
+	zoom.den = GetPrivateProfileIntA("Script Editor", "iZoomDenominator", 0, IniPath);
+	SendMessage(hRichEdit, EM_SETZOOM, zoom.num, zoom.den);
+}
+
 BOOL __stdcall ScriptEditCallback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	BOOL bResult = StdCall<LRESULT>(0x5C3D40, hWnd, msg, wParam, lParam);
-
+	BOOL bResult = CallWindowProc((WNDPROC)0x5C3D40, hWnd, msg, wParam, lParam);
 	static bool bFirstOpen = true;
-	if (msg == WM_INITDIALOG && config.bOpenScriptMenuAtStartup && bFirstOpen) {
-		bFirstOpen = false;
-		SendMessageA(hWnd, WM_COMMAND, 0x9CDB, NULL);
+	if (msg == WM_INITDIALOG)
+	{
+		if (config.bOpenScriptMenuAtStartup && bFirstOpen)
+		{
+			bFirstOpen = false;
+			SendMessageA(hWnd, WM_COMMAND, 0x9CDB, NULL);
+		}
+		RestoreZoom(GetDlgItem(hWnd, 1166), s_RichEditZoom);
 	}
+	else if (msg == WM_DESTROY)
+	{
+		SaveZoom(GetDlgItem(hWnd, 1166), s_RichEditZoom);
+	}
+
+	return bResult;
+}
+
+BOOL __stdcall OnScriptSetWindowText_SaveAndRestoreZoom(HWND hWnd, LPCSTR lpString)
+{
+	SaveZoom(hWnd, s_RichEditZoom);
+
+	bool bResult = SetWindowTextA(hWnd, lpString);
+
+	RestoreZoom(hWnd, s_RichEditZoom);
 
 	return bResult;
 }
@@ -2952,10 +3106,16 @@ void RemoveSubMenuByHandle(HMENU parentMenu, HMENU submenuHandle) {
 	}
 }
 
-constexpr UInt32 COPY_MENU_ID = 0x10001;
-constexpr UInt32 COPY_EDITOR_ID_MENUID = 0x10002;
-constexpr UInt32 COPY_REF_ID_MENUID = 0x10003;
-constexpr UInt32 COPY_XEDIT_ID_MENUID = 0x10004;
+bool SelectedListViewItemContainsRecalcBoundsTargets(HWND ahListView);
+enum CustomObjectWindowContextActions
+{
+	COPY_MENU_ID = 0x10001,
+	COPY_EDITOR_ID_MENUID,
+	COPY_REF_ID_MENUID,
+	COPY_XEDIT_ID_MENUID,
+	RECALC_BOUNDS = FormColoring::COLOR_ITEM_MAX + 1,
+};
+
 void __cdecl OnSetupObjectAndCellWindowRightClickMenu(HMENU menu, LPPOINT cursorPos, HWND hWnd, HWND listView)
 {
 	HMENU hCopySubMenu = CreatePopupMenu();
@@ -2966,9 +3126,29 @@ void __cdecl OnSetupObjectAndCellWindowRightClickMenu(HMENU menu, LPPOINT cursor
 
 	InsertMenuA(menu, 0xFFFFFFFF, MF_BYPOSITION | MF_POPUP, (UINT_PTR)hCopySubMenu, "Copy");
 
-	CdeclCall(0x47F3B0, menu, cursorPos, hWnd, listView);
+	HMENU hColorSubMenu = NULL;
+	bool bIsCellWindow = menu == *(HMENU*)0xECF508; // CellView::pSubMenu
+	if (!bIsCellWindow)
+	{
+		hColorSubMenu = FormColoring::CreateSubMenu(listView);
+		InsertMenuA(menu, 0xFFFFFFFF, MF_BYPOSITION | MF_POPUP, (UINT_PTR)hColorSubMenu, "Color");
+	}
+
+	if (SelectedListViewItemContainsRecalcBoundsTargets(listView))
+	{
+		InsertMenuA(menu, 0xFFFFFFFF, MF_BYPOSITION, RECALC_BOUNDS, "Recalc Bounds");
+	}
+
+	CdeclCall(0x47F3B0, menu, cursorPos, hWnd, listView); // Window::SetupPopupMenu
+
+	DeleteMenu(menu, RECALC_BOUNDS, MF_BYCOMMAND);
 
 	RemoveSubMenuByHandle(menu, hCopySubMenu);
+
+	if (hColorSubMenu)
+	{
+		RemoveSubMenuByHandle(menu, hColorSubMenu);
+	}
 }
 
 void CopySelectedListViewItemData(HWND listView, std::function<void(std::string&, TESForm*)> aggregator)
@@ -2996,6 +3176,52 @@ void CopySelectedListViewItemData(HWND listView, std::function<void(std::string&
 	{
 		CopyTextToClipboard(aggregatedText.c_str());
 	}
+}
+
+bool IsFormValidForRecalcBounds(TESForm* apForm)
+{
+	return DYNAMIC_CAST(apForm, TESForm, TESModel) && apForm->IsBoundObject();
+}
+
+void RecalculateBoundsForSelectedListViewItems(HWND ahListView)
+{
+	Setting* bCheckOutOnBoundFix = (Setting*)0xEDC904;
+	bool bPrevCheckOutOnBoundFix = bCheckOutOnBoundFix->Int();
+	bCheckOutOnBoundFix->SetInt(true);
+
+	int index = -1;
+	while ((index = SendMessageA(ahListView, LVM_GETNEXTITEM, index, LVNI_SELECTED)) != -1)
+	{
+		if (auto pBoundObject = (TESBoundObject*)GetNthListForm(ahListView, index))
+		{
+			if (IsFormValidForRecalcBounds(pBoundObject))
+			{
+				TESObjectREFR* pTempRef = TESObjectREFR::Create();
+				pTempRef->SetObjectReference(pBoundObject);
+				auto pNode = pTempRef->Load3D(false);
+				pBoundObject->SetBoundMinMax(pNode);
+				pTempRef->Destroy(true);
+			}
+		}
+	}
+
+	bCheckOutOnBoundFix->SetInt(bPrevCheckOutOnBoundFix);
+}
+
+bool SelectedListViewItemContainsRecalcBoundsTargets(HWND ahListView)
+{
+	int index = -1;
+	while ((index = SendMessageA(ahListView, LVM_GETNEXTITEM, index, LVNI_SELECTED)) != -1)
+	{
+		if (auto pBoundObject = (TESBoundObject*)GetNthListForm(ahListView, index))
+		{
+			if (IsFormValidForRecalcBounds(pBoundObject))
+			{
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 bool HandlePopupMenuCommand(HWND listView, UInt32 commandID)
@@ -3039,8 +3265,67 @@ bool HandlePopupMenuCommand(HWND listView, UInt32 commandID)
 		);
 		return true;
 	}
+
+	case RECALC_BOUNDS:
+	{
+		RecalculateBoundsForSelectedListViewItems(listView);
+		return true;
+	}
+
+	default:
+	{
+		if (FormColoring::HandlePopupMenuCommand(listView, commandID))
+		{
+			return true;
+		}
+	}
 	}
 	return false;
+}
+
+WNDPROC originalModelDataCallback;
+LRESULT CALLBACK ModelDataCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+{
+	enum CtrlIDs
+	{
+		IDC_MODEL_DATA_EDIT = 2421
+	};
+
+	// make pressing ENTER in the edit set the mesh path
+	if (Message == WM_COMMAND && LOWORD(wParam) == IDOK)
+	{
+		HWND hEdit = GetDlgItem(Hwnd, IDC_MODEL_DATA_EDIT);
+		if (GetFocus() == hEdit)
+		{
+			char buf[MAX_PATH];
+			GetWindowText(hEdit, buf, sizeof(buf));
+
+			auto pModelTexSwap = Window_GetForm(Hwnd);
+			if (pModelTexSwap)
+			{
+				pModelTexSwap->SetMeshPath(buf);
+				ThisCall(0x505870, pModelTexSwap);
+				CdeclCall(0x5067F0, Hwnd);
+
+				return 0;
+			}
+		}
+	}
+
+	auto result = CallWindowProc(originalModelDataCallback, Hwnd, Message, wParam, lParam);
+
+	// prefill the mesh path on load
+	if (Message == WM_INITDIALOG)
+	{
+		HWND hEdit = GetDlgItem(Hwnd, IDC_MODEL_DATA_EDIT);
+		auto pModelTexSwap = (TESModelTextureSwap*)Window_GetForm(Hwnd);
+		if (pModelTexSwap)
+		{
+			SetWindowText(hEdit, pModelTexSwap->nifPath.CStr());
+		}
+	}
+
+	return result;
 }
 
 WNDPROC originalObjectWindowCallback;
@@ -3060,6 +3345,19 @@ LRESULT CALLBACK ObjectWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LP
 		if (HandlePopupMenuCommand(listView, wParam))
 		{
 			return true;
+		}
+	}
+	else if (Message == WM_NOTIFY)
+	{
+		LPNMHDR hdr = (LPNMHDR)lParam;
+
+		if (hdr->hwndFrom == GetDlgItem(Hwnd, 1041) &&
+			hdr->code == NM_CUSTOMDRAW)
+		{
+			LRESULT result = FormColoring::HandleCustomDraw(lParam);
+
+			SetWindowLongPtr(Hwnd, DWLP_MSGRESULT, result);
+			return TRUE;
 		}
 	}
 	return CallWindowProc(originalObjectWindowCallback, Hwnd, Message, wParam, lParam);
@@ -3614,7 +3912,7 @@ LRESULT CALLBACK TextureUseListViewCallback(HWND Hwnd, UINT Message, WPARAM wPar
 			// allow copy/replacing entries
 			if (wParam == 'C' || wParam == 'V')
 			{
-				auto form = CdeclCall<TESForm*>(0x47ABC0, GetParent(Hwnd));
+				auto form = Window_GetForm(GetParent(Hwnd));
 				auto land = CdeclCall<TESObjectLAND*>(0xC5D114, form, 0, 0xE8C57C, 0xE8E57C, 0); // DYNAMIC_CAST(form, TESForm, TESObjectLAND)
 
 				int slot = SendMessageA(Hwnd, LVM_GETNEXTITEM, 0xFFFFFFFF, LVIS_SELECTED);
@@ -3885,24 +4183,18 @@ void __fastcall TESPreviewControl__SetTime(TESRenderControl* renderControl, void
 {
 	if (renderControl == *(TESRenderControl**)0xECECE4) // if this is the havok preview window
 	{
-		bool bHasAnims = false;
-		auto ref = *(TESObjectREFR**)0xECECE0;
-		if (ref)
+		if (auto pRef = *(TESObjectREFR**)0xECECE0)
 		{
-			if (auto node = ref->Get3D())
+			if (auto pNode = pRef->Get3D())
 			{
-				auto listView = *(HWND*)0xECECD4; // HavokPreview::pAnimListHwnd
-				if (auto animSequence = CdeclCall<NiControllerSequence*>(0x41A390, listView))
+				if (CdeclCall<bool>(0x40F8A0, 0xF2CD84, pNode)) // NiIsKindOf(BSMasterParticleSystem::ms_RTTI, pNode)
 				{
-					bHasAnims = true;
+					// For most object types, afTime represents the animation timeline offset (i.e. an absolute position).
+					// For BSMasterParticleSystem however, it is treated as a delta time (time elapsed since the last frame).
+					// Since the render window runs at a fixed 60fps, use a constant 16.67ms delta instead.
+					afTime = (1000.0F / 60) / havokAnimationRate;
 				}
 			}
-		}
-
-		if (!bHasAnims)
-		{
-			// always use 16.67ms as render window is 60fps
-			afTime = (1000.0F / 60) / havokAnimationRate;
 		}
 	}
 	ThisCall(TESPreviewControl__SetTimeAddr, renderControl, afTime, abIsPaused);
@@ -4079,6 +4371,23 @@ BOOL __fastcall IsMultiboundPointDifferent_IgnoreIfLoadingCell(NiPoint3* a1, voi
 	if (isLoadingCell) return false;
 	constexpr float THRESHOLD = 0.001F;
 	return abs(a1->x - a2->x) > THRESHOLD || abs(a1->y - a2->y) > THRESHOLD || abs(a1->z - a2->z) > THRESHOLD;
+}
+
+__HOOK OnReloadTreeFormRefHook()
+{
+	_asm
+	{
+		and bl, 1
+		test ebp, ebp
+		je nullParent
+
+		mov eax, 0x5EF5FE
+		jmp eax
+
+	nullParent:
+		mov eax, 0x5EF66D
+		jmp eax
+	}
 }
 
 enum BoundMode
@@ -4340,4 +4649,28 @@ bool __stdcall OnRecompileAllShouldProcessScript(Script* script, int iValue)
 
 	StdCall(0x5C9800, script, 0);
 	return true;
+}
+
+class bhkWorld;
+void __fastcall OnLeaveInterior(bhkWorld* apWorld, void* edx, bool abEnable)
+{
+	ThisCall(0xA1AC10, apWorld, abEnable);
+	BSShaderManager::SetInterior(false);
+}
+
+__HOOK OnEditSelectedCellListItemHook()
+{
+	_asm
+	{
+		test eax, eax
+		je skip
+		mov al, byte ptr ds : [eax + 0x4]
+		pop edx
+		mov edx, 0x43011F
+		jmp edx
+
+	skip:
+		mov eax, 0x430A00
+		jmp eax
+	}
 }

@@ -224,7 +224,7 @@ public:
 	virtual void		Destroy(bool bDoFree);
 	virtual void		Unk_0D();
 	virtual void		Unk_0E();
-	virtual void		Unk_0F();
+	virtual void		SetMeshPath(const char*);
 	virtual void		Unk_10();
 	virtual void		Unk_11();
 	virtual void		Unk_12();
@@ -360,6 +360,7 @@ public:
 	bool IsIngestible() { return typeID == kFormType_AlchemyItem; }
 	void SetTemporary() { ThisCall(0x4FBA50, this); }
 
+
 	MEMBER_FN_PREFIX(TESForm);
 };
 STATIC_ASSERT(sizeof(TESForm) == 0x2C);
@@ -399,6 +400,7 @@ public:
 	void* unk30;
 };
 
+class NiAVObject;
 // 30
 class TESBoundObject : public TESObject
 {
@@ -423,6 +425,11 @@ public:
 	UInt32 unk40;				// 040
 	BOUND_DATA					bounds;	// 044
 	UInt32 unk50;				// 050
+
+	void SetBoundMinMax(NiAVObject* apRoot)
+	{
+		ThisCall(0x5F1490, this, apRoot);
+	}
 };
 
 // C
@@ -1413,6 +1420,7 @@ public:
 };
 
 STATIC_ASSERT(offsetof(TESActorBase, avOwner) == 0x100);
+STATIC_ASSERT(offsetof(TESActorBase, baseData) == 0x54);
 STATIC_ASSERT(sizeof(TESActorBase) == 0x10C);
 
 // 14

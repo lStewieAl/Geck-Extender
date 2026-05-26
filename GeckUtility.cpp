@@ -297,7 +297,7 @@ void RunCallbackOnCell(TESObjectCELL* cell, void (*callback)(TESObjectREFR*))
 void RunCallbackOnAllCellRefs(void (*callback)(TESObjectREFR*))
 {
 	auto tes = TES::GetSingleton();
-	if (auto cell = tes->currentInterior)
+	if (auto cell = tes->pInteriorCell)
 	{
 		RunCallbackOnCell(cell, callback);
 	}
@@ -331,6 +331,11 @@ BOOL __stdcall _CreateProcessA(LPSTR exePath, LPPROCESS_INFORMATION lpProcessInf
 void* Window_GetExtraData(HWND hWnd, int code)
 {
 	return CdeclCall<void*>(0x47AB70, hWnd, code);
+}
+
+TESForm* Window_GetForm(HWND hWnd)
+{
+	return CdeclCall<TESForm*>(0x47ABC0, hWnd);
 }
 
 LRESULT __cdecl TESCSMain__WriteToStatusBar(unsigned int statusBarId, const char* msg)

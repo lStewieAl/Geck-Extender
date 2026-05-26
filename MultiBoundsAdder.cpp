@@ -401,7 +401,7 @@ namespace MultiBoundsAdder {
 	}
 
 	void TestObjects(bool abReattach) {
-		TESObjectCELL* pCell = TES::GetSingleton()->currentInterior;
+		TESObjectCELL* pCell = TES::GetSingleton()->pInteriorCell;
 		if (pCell) {
 			if (abReattach)
 				RemoveMultiBounds(pCell);
@@ -409,7 +409,7 @@ namespace MultiBoundsAdder {
 
 			RunGarbageCollection();
 		}
-		else if (TES::GetSingleton()->currentWrldspc) {
+		else if (TES::GetSingleton()->pWorldSpace) {
 #if 0
 			Setting* uGridsToLoad = (Setting*)0xED6550;
 			for (UInt32 x = 0; x < uGridsToLoad->data.i; x++) {
@@ -422,7 +422,7 @@ namespace MultiBoundsAdder {
 				}
 			}
 #else
-			TESWorldSpace* pWorld = TES::GetSingleton()->currentWrldspc;
+			TESWorldSpace* pWorld = TES::GetSingleton()->pWorldSpace;
 			NiTMapIterator kIter = pWorld->cellMap->GetFirstPos();
 
 			UInt32 uiCellsProcessed = 0;

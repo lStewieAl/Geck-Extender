@@ -64,6 +64,8 @@ struct Settings
 	bool bAddFilterCtrlBackspace;
 	bool bRenderWindowPreventRefMovementByDefault;
 	bool bRenderWindowRefreshAfterLandscapeEdit;
+	bool bPreemptivelyUnloadCells;
+	bool bCustomReferenceBatchActions;
 
 	int bUseAltShiftMultipliers;
 	float fMovementAltMultiplier;
@@ -82,6 +84,8 @@ struct Settings
 
 	char* sLaunchExeName;
 	char* sForceFinalizeNavMeshModName;
+
+	char* sCustomFormColors;
 
 	union
 	{

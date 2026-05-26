@@ -42,6 +42,7 @@
 #include "Settings.h"
 #include "NavMeshPickPreventer.h"
 #include "CustomRenderWindowHotkeys.h"
+#include "CustomReferenceBatchAction.h"
 #include "LaunchGame.h"
 #include "FaceGenExporter.h"
 #include "ONAMFix.h"
@@ -49,6 +50,7 @@
 #include "MultiBoundsAdder.h"
 #include "UnserializedIO.h"
 #include "ToggleReferenceMovement.h"
+#include "PreemptivelyUnloadCells.h"
 #include "Allocator/MemoryManager.hpp"
 #include "Allocator/BSMemory.hpp"
 
@@ -109,6 +111,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	_DMESSAGE("Geck Extender Base Address: %08X", GetModuleHandle("ZeGaryHax.dll"));
 	ReadAllSettings();
+	FormColoring::Init();
 
 	// Increase heap size and add memory pools for a hefty performance boost
 	ReplaceCallEx(0x853BF1, &MemoryManager::Initialize);
@@ -191,12 +194,14 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		SafeWrite8(0x004100E5, 0x0A);
 	}
 
-	//	window handle leak fix - credit to nukem
+	//	window handle leak fix - original credit to nukem
 	//	now uses thread local storage to fix parent issues
 	SafeWrite32(0x00D234CC, (UInt32)hk_CreateDialogParamA);
 	SafeWrite32(0x00D23510, (UInt32)hk_DialogBoxParamA);
 	SafeWrite32(0x00D23530, (UInt32)hk_EndDialog);
 	SafeWrite32(0x00D23550, (UInt32)hk_SendMessageA);
+    g_DlgProcAtom = GlobalAddAtomA("GeckExt_DlgProc");
+	g_IsModalAtom = GlobalAddAtomA("GeckExt_IsModal");
 
 	//	fix WM_CLOSE in destruction data dialog - credit to roy
 	SafeWrite32(0x004E640F, (UInt32)hk_DialogProc);
@@ -265,8 +270,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		SafeWrite8(0x004327BE, 0xEB);
 	}
 
-	//	fix Rock-It Launcher crash - credit to jazzisparis
-	WriteRelJump(0x005B8FF4, (UInt32)CheckIsRILHook);
+	// fix Rock-It Launcher crash
+	WriteRelCall(0x6865BA, UInt32(CalcWeaponDamagePerSecond_GetAmmoEnsureType));
 
 	WriteErrorMessageHooks();
 
@@ -321,11 +326,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		SafeWrite8(0x47CE86 + 5, 0x90);
 	}
 
-	// Make the "Do" button of "Reference Batch Action" not grayed out if an action is already selected when initialising the dialog
-	WriteRelJump(0x411CCF, UInt32(ReferenceBatchActionDoButtonHook));
-
 	// Remove call to SetFocus(0) when closing Reference Batch Action dialog
 	XUtil::PatchMemoryNop(0x411CFA, 8);
+	CustomReferenceBatchAction::Init();
 
 	//	Replace zlib with libinflate - credit to nukem/StewieA
 	if (config.bLibdeflate)
@@ -391,8 +394,11 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SafeWrite8(0x45D3D9, 0x7C);
 	SafeWrite8(0x45D3EA, 0x7F);
 
-	// make holding shift slow down the flycam movement by 80%
-	WriteRelJump(0x455D12, UInt32(FlycamMovementSpeedMultiplierHook));
+	// fix being able to look upside down by clamping the roll
+	WriteRelCall(0x45D487, UInt32(OnFlycamCalculateMatrixFromEuler));
+
+	// add shift and alt scaling flycam movement speed, and fix speed being framerate dependent
+	WriteRelCall(0x455D12, UInt32(FlycamMovementSpeedMultiplier));
 
 	if (config.bSmoothFlycamRotation) {
 		WriteRelJump(0x45D3A3, UInt32(FlycamRotationSpeedMultiplierHook));
@@ -417,6 +423,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SafeWrite32(0x441CB0, UInt32(ScriptEditCallback));
 	SafeWrite32(0x509F6B, UInt32(ScriptEditCallback));
 	SafeWrite32(0x5C50C8, UInt32(ScriptEditCallback));
+	WriteRelCall(0x5C18D6, UInt32(OnScriptSetWindowText_SaveAndRestoreZoom));
+	SafeWrite8(0x5C18D6 + 5, 0x90);
 
 	/* allow ctrl S to save */
 	WriteRelJump(0x5C3ECD, UInt32(ScriptEditKeypressHook));
@@ -803,6 +811,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// to fallback on the old windows explorer
 	SafeWrite32(0x47F287, 0);
 
+	originalModelDataCallback = (WNDPROC)DetourVtable(0x50728E, UInt32(ModelDataCallback));
+	
 	EasterEggs::Init();
 
 	// fix the 'IsEdited' flag getting reset when canceling the ESP/ESM dialog
@@ -822,6 +832,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	originalCellWindowCallback = *(WNDPROC*)0x441648;
 	SafeWrite32(0x441648, UInt32(CellWindowCallback));
 
+	// make the Ctrl-F9 hotkey in the Object Window
+
 	// fix the undo menu button for NavMesh
 	WriteRelCall(0x44104A, UInt32(OnMainWindowUndo));
 
@@ -835,8 +847,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	OutOfMemoryHelper::Init();
 
-	WriteRelCall(0x44B294, UInt32(OnSetupObjectAndCellWindowRightClickMenu));
-	WriteRelCall(0x42F2F5, UInt32(OnSetupObjectAndCellWindowRightClickMenu));
+	WriteRelCall(0x44B294, UInt32(OnSetupObjectAndCellWindowRightClickMenu)); // ObjectWindow
+	WriteRelCall(0x42F2F5, UInt32(OnSetupObjectAndCellWindowRightClickMenu)); // CellWindow
 
 	BetterFloatingFormList::Init();
 
@@ -885,6 +897,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	SafeWrite8(0x4CE7DA, 0xEB); // Skip calling InvalidateRect on the RenderWindow in TESDataHandler::CloseAllTES (ShadeMe)
 	SafeWrite8(0x46252B, 0); // RenderWindowCallback - pass bUpdateSelection = 0 when copying (ShadeMe)
+
+	// fix crash when right clicking an empty list in the cell view and clicking 'Edit'
+	WriteRelJump(0x430119, UInt32(OnEditSelectedCellListItemHook));
 
 	CustomRenderWindowHotkeys::Init();
 
@@ -1037,6 +1052,18 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// fix refs getting marked as modified if their primitives are slightly different during a cell load
 	WriteRelCall(0x643655, UInt32(IsMultiboundPointDifferent_IgnoreIfLoadingCell));
 	WriteRelCall(0x63A323, UInt32(TESObjectCELL__OnLoad3D));
+
+	// fix crash when trees are reloading in the render window after editing a Tree form
+	SafeWrite8(0x5EF5F0, 0x7C); // skips Set3D(nullptr); pParent->AttachChild(Load3D()) since pParent can be null if the form isn't actually loaded
+	WriteRelJump(0x5EF5F7, UInt32(OnReloadTreeFormRefHook));
+
+	// fix leak caused by BGSIdleMarker::UnClone3D using marker_creature instead of marker_idle
+	SafeWrite32(0x54AD99 + 1, 0xD4F86C);
+
+	// fix BSShaderManager::bInterior not getting cleared in TES::LeaveInterior
+	WriteRelCall(0x4CCF7E, UInt32(OnLeaveInterior));
+
+	PreemptivelyUnloadCells::Init();
 
 	NavMeshPickPreventer::Init();
 

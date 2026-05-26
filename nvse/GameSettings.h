@@ -40,6 +40,9 @@ public:
 	const char* Get();
 	bool Set(double newVal);
 	bool SetStr(const char* str);
+
+	int Int() { return data.i; };
+	void SetInt(int aiValue) { data.i = aiValue; };
 };
 
 template<class T> class SettingCollection 

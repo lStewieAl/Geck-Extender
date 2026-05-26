@@ -47,6 +47,8 @@ void ReadAllSettings()
 	config.bNewPluginsDefaultToESM = GetOrCreateINIValue("General", "bUseEsmAsDefaultExtension", 1, IniPath);
 	config.bAllowHardDeletionInESMs = GetOrCreateINIValue("General", "bAllowHardDeletionInESMs", 1, IniPath);
 	config.bAddFilterCtrlBackspace = GetOrCreateINIValue("General", "bAddFilterCtrlBackspace", 1, IniPath);
+	config.bPreemptivelyUnloadCells = GetOrCreateINIValue("General", "bPreemptivelyUnloadCells", 0, IniPath);
+	config.bCustomReferenceBatchActions = GetOrCreateINIValue("General", "bCustomReferenceBatchActions", 1, IniPath);
 
 	config.bNoDirtyCellWhenNonPersistentRefsDeleted = GetOrCreateINIValue("Experimental", "bNoDirtyCellWhenNonPersistentRefsDeleted", 0, IniPath);
 
@@ -81,6 +83,8 @@ void ReadAllSettings()
 
 	config.bObjectPaletteAllowRandom = GetOrCreateINIValue("Object Palette", "bObjectPaletteAllowRandom", 1, IniPath);
 	config.bObjectPaletteRandomByDefault = GetOrCreateINIValue("Object Palette", "bObjectPaletteRandomByDefault", 0, IniPath) != 0;
+
+	config.sCustomFormColors = GetOrCreateINIValue("Object Window", "sCustomFormColors", "Red:D30000;Green:03AC13;Blue:0041C2", IniPath);
 
 	config.bRemoveDialogSoundFilter = GetOrCreateINIValue("Dialog", "bRemoveDialogSoundFilter", 0, IniPath) != 0;
 	config.bCacheComboboxes = GetOrCreateINIValue("Dialog", "bCacheComboboxes", 1, IniPath) != 0;

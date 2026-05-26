@@ -1,5 +1,7 @@
 #pragma once
 #include "NiObjects.h"
+#include "Editor.h"
+
 extern void(__cdecl* SaveWindowPositionToINI)(HWND, const char*);
 extern HWND g_mainWindowToolbar;
 
@@ -623,6 +625,8 @@ BOOL __stdcall _CreateProcessA(LPSTR exePath, LPPROCESS_INFORMATION lpProcessInf
 
 void* Window_GetExtraData(HWND hWnd, int code);
 
+TESForm* Window_GetForm(HWND hWnd);
+
 union Color
 {
 	UInt32 rgba;
@@ -633,3 +637,126 @@ union Color
 };
 
 LRESULT __cdecl TESCSMain__WriteToStatusBar(unsigned int statusBarId, const char* msg);
+
+struct RefSelectControl
+{
+	HWND parent;
+	bool(__cdecl* refComparator)(TESObjectREFR*, void*);
+	void* userData;
+	int selectRefButtonID;
+	int cellComboBoxID;
+	int refComboBoxID;
+	UInt8 allowNone;
+	UInt8 bInCaptureMode;
+	UInt8 byte1A;
+	UInt8 pad1B;
+
+	static RefSelectControl* Get(HWND aHwnd, UInt32 auiID)
+	{
+		return CdeclCall<RefSelectControl*>(0x47AD40, aHwnd, auiID);
+	}
+
+	void SetEnabled(bool abEnable)
+	{
+		ThisCall(0x48C070, this, abEnable);
+	}
+
+	void SetComparator(bool(__cdecl* aComparator)(TESObjectREFR*, void*), void* apData = nullptr)
+	{
+		refComparator = aComparator;
+		userData = apData;
+	}
+
+	TESObjectREFR* GetSelectedRef()
+	{
+		return ThisCall<TESObjectREFR*>(0x48BD80, this);
+	}
+
+	bool AllowsPickRef(TESObjectREFR* apRef)
+	{
+		return ThisCall<bool>(0x48BF70, this, apRef);
+	}
+};
+
+struct ReferenceBatchAction
+{
+	enum eACTION : UInt32
+	{
+		SET_REFLECTED_BY = 1,
+		SET_REFRACTED_BY,
+		SET_REFLECTED_BY_AUTOWATER,
+		SET_REFRACTED_BY_AUTOWATER,
+		SET_ENABLE_PARENT,
+		SET_LINKED_REF,
+		SET_ACTIVATE_REF,
+		SET_OWNER,
+		SET_MULTIBOUND,
+		SET_EXTENAL_EMITTANCE,
+		MAX_COUNT
+	};
+
+	static eACTION GetAction() { return *(eACTION*)0xECED38; };
+	static HWND GetWindow() { return *(HWND*)0xECED3C; };
+	static TESObjectREFR* GetRef() { return *(TESObjectREFR**)0xECED40; };
+	static void SetRef(TESObjectREFR* apRef) { *(TESObjectREFR**)0xECED40 = apRef; };
+};
+
+struct BSShaderManager
+{
+	static void SetInterior(bool abInterior)
+	{
+		*(bool*)0xF23E77 = abInterior;
+	}
+};
+
+struct MessageHandler
+{
+	static constexpr LONG* iDisableWarningCount = (LONG*)0xF2CB4C;
+
+	static void DisableWarnings()
+	{
+		InterlockedIncrement(iDisableWarningCount);
+		if (*iDisableWarningCount < 0)
+		{
+			*iDisableWarningCount = 0;
+		}
+	}
+
+	static void EnableWarnings()
+	{
+		InterlockedDecrement(iDisableWarningCount);
+		if (*iDisableWarningCount < 0)
+		{
+			*iDisableWarningCount = 0;
+		}
+	}
+};
+
+struct TESComboBox
+{
+	static void __cdecl AddItem(HWND ahCombo, const CHAR* apText, LPARAM auiData, char abUpdateExtents = true)
+	{
+		CdeclCall(0x419BC0, ahCombo, apText, auiData, abUpdateExtents);
+	}
+
+	static LRESULT __cdecl GetSelectedItemData(HWND hWnd)
+	{
+		if (hWnd)
+		{
+			int iCurSel = SendMessageA(hWnd, CB_GETCURSEL, 0, 0);
+			if (iCurSel != -1)
+			{
+				return SendMessageA(hWnd, CB_GETITEMDATA, iCurSel, 0);
+			}
+		}
+		
+		return 0;
+	}
+
+	static void __cdecl PopulateWithForms(HWND ahWnd, UInt32 aeFormType, char abResetComboBox = true, char abIncludeNoneOption = false, unsigned __int8(__cdecl* aFilterFn)(LPARAM, int) = nullptr, void* apFilterFnData = nullptr)
+	{
+		BeginUIDefer();
+		CdeclCall(0x47F7A0, ahWnd, aeFormType, abResetComboBox, abIncludeNoneOption, aFilterFn, apFilterFnData);
+		EndUIDefer();
+	}
+};

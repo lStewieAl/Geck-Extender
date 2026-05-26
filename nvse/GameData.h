@@ -502,7 +502,7 @@ public:
 	SInt32				extCoordX;			// 24
 	SInt32				extCoordY;			// 28
 	SInt32				unk2C[2];			// 2C
-	TESObjectCELL		*currentInterior;	// 34
+	TESObjectCELL		*pInteriorCell;	// 34
 	TESObjectCELL		**interiorsBuffer;	// 38
 	TESObjectCELL		**exteriorsBuffer;	// 3C
 	UInt32				unk40[10];			// 40
@@ -510,7 +510,7 @@ public:
 	void				*ptr6C;				// 6C
 	UInt32				unk70[4];			// 70
 	float				unk80[2];			// 80
-	TESWorldSpace		*currentWrldspc;	// 88
+	TESWorldSpace		*pWorldSpace;	// 88
 	UInt32				unk8C[4];			// 8C
 	tList<void>			unk9C;				// 9C
 	QueuedFile			*unkA4;				// A4
@@ -523,6 +523,9 @@ public:
 
 	static TES* GetSingleton() { return *(TES**)0xECF93C; }
 	void CleanUpUnusedTextures(bool bEmergencyTextureRelease = false) { ThisCall(0x4C7D70, this, bEmergencyTextureRelease); };
+	void DetachGridCells() { ThisCall(0x4C8FE0, this); };
+	int FreeExteriorBuffer(bool abBufferedonly, TESWorldSpace* apWorldSpace) { return ThisCall<int>(0x4C90B0, this, abBufferedonly, apWorldSpace); };
+	int FreeInteriorBuffer(bool abBufferedonly) { return ThisCall<int>(0x4C7ED0, this, abBufferedonly); };
 	bool GetLandHeight(NiPoint3* cameraPos, float* heightOut);
 	bool IsCellLoaded(TESObjectCELL* apCell, bool abIgnoreBuffered);
 	void LoadCell(TESObjectCELL* apCell);

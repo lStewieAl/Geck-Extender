@@ -135,6 +135,10 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="CustomReferenceBatchAction.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="CustomRenderWindowHotkeys.cpp">
       <SubType>
       </SubType>
@@ -162,6 +166,7 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="FormColoring.cpp" />
     <ClCompile Include="FormSearch.cpp">
       <SubType>
       </SubType>
@@ -229,6 +234,10 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="PreemptivelyUnloadCells.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="Settings.cpp">
       <SubType>
       </SubType>
@@ -249,6 +258,10 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
       </SubType>
     </ClInclude>
     <ClInclude Include="CreatureMarkerSwapper.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="CustomReferenceBatchAction.h">
       <SubType>
       </SubType>
     </ClInclude>
@@ -282,6 +295,7 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
       </SubType>
     </ClInclude>
     <ClInclude Include="FaceGenExporter.h" />
+    <ClInclude Include="FormColoring.h" />
     <ClInclude Include="FormSearch.h">
       <SubType>
       </SubType>
@@ -326,6 +340,10 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
     </ClInclude>
     <ClInclude Include="ONAMFix.h" />
     <ClInclude Include="OutOfMemoryHelper.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="PreemptivelyUnloadCells.h">
       <SubType>
       </SubType>
     </ClInclude>

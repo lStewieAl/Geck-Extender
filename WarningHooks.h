@@ -460,8 +460,19 @@ __HOOK hk_RemovingEmptyReflectorWaterMsgHook()
 	}
 }
 
+void __fastcall OnNoOcclusionPlaneExtra(TESForm* apForm)
+{
+	Console_Print("No occlusion plane for occlusion plane ref extra: %08X", apForm->refID);
+}
 
-
+__HOOK OnNoOcclusionPlaneExtraHook()
+{
+	_asm
+	{
+		mov ecx, ebp
+		jmp OnNoOcclusionPlaneExtra
+	}
+}
 
 void WriteErrorMessageHooks()
 {
@@ -584,4 +595,6 @@ void WriteErrorMessageHooks()
 	SafeWrite8(0x659DBC, 0x55);
 	SafeWrite8(0x659DBD, 0x50);
 	SafeWrite32(0x659DC4, UInt32(LODMessage3));
+
+	WriteRelCall(0x4AFF52, UInt32(OnNoOcclusionPlaneExtraHook));
 }
