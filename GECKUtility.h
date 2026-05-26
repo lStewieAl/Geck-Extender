@@ -625,6 +625,8 @@ BOOL __stdcall _CreateProcessA(LPSTR exePath, LPPROCESS_INFORMATION lpProcessInf
 
 void* Window_GetExtraData(HWND hWnd, int code);
 
+TESForm* Window_GetForm(HWND hWnd);
+
 union Color
 {
 	UInt32 rgba;

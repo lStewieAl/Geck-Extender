@@ -811,6 +811,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// to fallback on the old windows explorer
 	SafeWrite32(0x47F287, 0);
 
+	originalModelDataCallback = (WNDPROC)DetourVtable(0x50728E, UInt32(ModelDataCallback));
+	
 	EasterEggs::Init();
 
 	// fix the 'IsEdited' flag getting reset when canceling the ESP/ESM dialog

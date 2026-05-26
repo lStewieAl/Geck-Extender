@@ -224,7 +224,7 @@ public:
 	virtual void		Destroy(bool bDoFree);
 	virtual void		Unk_0D();
 	virtual void		Unk_0E();
-	virtual void		Unk_0F();
+	virtual void		SetMeshPath(const char*);
 	virtual void		Unk_10();
 	virtual void		Unk_11();
 	virtual void		Unk_12();

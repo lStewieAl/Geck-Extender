@@ -333,6 +333,11 @@ void* Window_GetExtraData(HWND hWnd, int code)
 	return CdeclCall<void*>(0x47AB70, hWnd, code);
 }
 
+TESForm* Window_GetForm(HWND hWnd)
+{
+	return CdeclCall<TESForm*>(0x47ABC0, hWnd);
+}
+
 LRESULT __cdecl TESCSMain__WriteToStatusBar(unsigned int statusBarId, const char* msg)
 {
 	return CdeclCall<LRESULT>(0x4657A0, statusBarId, msg);

@@ -3194,6 +3194,38 @@ bool HandlePopupMenuCommand(HWND listView, UInt32 commandID)
 	return false;
 }
 
+WNDPROC originalModelDataCallback;
+LRESULT CALLBACK ModelDataCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+{
+	enum CtrlIDs
+	{
+		IDC_MODEL_DATA_EDIT = 2421
+	};
+
+	if (Message == WM_COMMAND && LOWORD(wParam) == IDOK)
+	{
+		HWND hEdit = GetDlgItem(Hwnd, IDC_MODEL_DATA_EDIT);
+		if (GetFocus() == hEdit)
+		{
+			char buf[MAX_PATH];
+			GetWindowText(hEdit, buf, sizeof(buf));
+
+			auto form = Window_GetForm(Hwnd);
+			if (form)
+			{
+
+				form->SetMeshPath(buf);
+				ThisCall(0x505870, form);
+				CdeclCall(0x5067F0, Hwnd);
+
+				return 0; // swallow Enter
+			}
+		}
+	}
+
+	return CallWindowProc(originalModelDataCallback, Hwnd, Message, wParam, lParam);
+}
+
 WNDPROC originalObjectWindowCallback;
 LRESULT CALLBACK ObjectWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
@@ -3778,7 +3810,7 @@ LRESULT CALLBACK TextureUseListViewCallback(HWND Hwnd, UINT Message, WPARAM wPar
 			// allow copy/replacing entries
 			if (wParam == 'C' || wParam == 'V')
 			{
-				auto form = CdeclCall<TESForm*>(0x47ABC0, GetParent(Hwnd));
+				auto form = Window_GetForm(GetParent(Hwnd));
 				auto land = CdeclCall<TESObjectLAND*>(0xC5D114, form, 0, 0xE8C57C, 0xE8E57C, 0); // DYNAMIC_CAST(form, TESForm, TESObjectLAND)
 
 				int slot = SendMessageA(Hwnd, LVM_GETNEXTITEM, 0xFFFFFFFF, LVIS_SELECTED);
