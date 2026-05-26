@@ -3202,6 +3202,7 @@ bool IsFormValidForRecalcBounds(TESForm* apForm)
 
 void RecalculateBoundsForSelectedListViewItems(HWND ahListView)
 {
+	// force enable bCheckOutOnBoundFix as it's checked in SetBoundMinMax
 	Setting* bCheckOutOnBoundFix = (Setting*)0xEDC904;
 	bool bPrevCheckOutOnBoundFix = bCheckOutOnBoundFix->Int();
 	bCheckOutOnBoundFix->SetInt(true);
@@ -3215,8 +3216,10 @@ void RecalculateBoundsForSelectedListViewItems(HWND ahListView)
 			{
 				TESObjectREFR* pTempRef = TESObjectREFR::Create();
 				pTempRef->SetObjectReference(pBoundObject);
+
 				auto pNode = pTempRef->Load3D(false);
 				pBoundObject->SetBoundMinMax(pNode);
+
 				pTempRef->Destroy(true);
 			}
 		}
