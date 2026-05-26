@@ -3215,6 +3215,7 @@ void RecalculateBoundsForSelectedListViewItems(HWND ahListView)
 			if (IsFormValidForRecalcBounds(pBoundObject))
 			{
 				TESObjectREFR* pTempRef = TESObjectREFR::Create();
+				pTempRef->SetTemporary();
 				pTempRef->SetObjectReference(pBoundObject);
 
 				auto pNode = pTempRef->Load3D(false);
@@ -4083,10 +4084,10 @@ char __fastcall BGSBodyPartData__DialogCallback(BGSBodyPartData* bodyPart, void*
 
 void __fastcall OnWeapCreateTempPlayer_MarkAsTemporary(Actor* pPlayer, void* edx, TESNPC* baseForm)
 {
-	ThisCall(0x6415D0, pPlayer, baseForm); // InitBaseForm
-	
 	// mark the temporary player as temporary so it doesn't mark the plugin as modified...
 	pPlayer->SetTemporary();
+
+	pPlayer->SetObjectReference(baseForm);
 }
 
 // the animShotsPerSec field is computed lossily so instead of checking if the bytes are different
