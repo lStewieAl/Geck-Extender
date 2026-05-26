@@ -105,6 +105,9 @@ struct Settings
 
 	UInt32 uiHeapMaxSizeMB;
 	UInt32 uiHeapInitialSizeMB;
+
+	bool bRecompileAllScriptsSCPTFormsOnly;
+	char* sRecompileAllScriptsModName;
 };
 
 extern Settings config;
