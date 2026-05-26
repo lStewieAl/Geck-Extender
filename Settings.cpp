@@ -30,7 +30,6 @@ void ReadAllSettings()
 	config.bLibdeflate = GetOrCreateINIValue("General", "bLibDeflate", 0, IniPath);
 	config.bExpandFormIDColumn = GetOrCreateINIValue("General", "bExpandFormIDColumn", 0, IniPath);
 	config.bAllowEditLandEdges = GetOrCreateINIValue("General", "bAllowEditLandEdges", 0, IniPath);
-	config.bAllowRecompileAll = GetOrCreateINIValue("General", "bAllowRecompileAll", 0, IniPath);
 	config.bNavmeshFindCoverConfirmPrompt = GetOrCreateINIValue("General", "bNavmeshFindCoverConfirmPrompt", 0, IniPath);
 	config.bFaceGenOnlyEdited = GetOrCreateINIValue("General", "bFaceGenOnlyEdited", 1, IniPath);
 	config.bDisableTextureMirroring = GetOrCreateINIValue("General", "bDisableTextureMirroring", 0, IniPath);
@@ -55,6 +54,9 @@ void ReadAllSettings()
 	config.bPatchScriptEditorFont = GetOrCreateINIValue("Script", "bPatchEditorFont", 1, IniPath);
 	config.bScriptCompileWarningPopup = GetOrCreateINIValue("Script", "bScriptCompileWarningPopup", 1, IniPath);
 	config.bShowScriptChangeTypeWarning = GetOrCreateINIValue("Script", "bShowChangeScriptTypeWarning", 0, IniPath);
+	config.bAllowRecompileAll = GetOrCreateINIValue("Script", "bAllowRecompileAll", 0, IniPath);
+	config.bRecompileAllScriptsSCPTFormsOnly = GetOrCreateINIValue("Script", "bRecompileAllSCPTFormsOnly", 0, IniPath);
+	config.sRecompileAllScriptsModName = GetOrCreateINIValue("Script", "sRecompileAllModName", "", IniPath);
 
 	config.bAutoScroll = GetOrCreateINIValue("Log", "bAutoScroll", 1, IniPath);
 
@@ -107,9 +109,6 @@ void ReadAllSettings()
 
 	config.uiHeapMaxSizeMB = GetOrCreateINIValue("Heap", "uiHeapMaxSizeMB", 800, IniPath);
 	config.uiHeapInitialSizeMB = GetOrCreateINIValue("Heap", "uiHeapInitialSizeMB", 600, IniPath);
-	
-	config.bRecompileAllScriptsSCPTFormsOnly = GetOrCreateINIValue("Recompile All Scripts", "bRecompileAllScriptsSCPTFormsOnly", 1, IniPath);
-	config.sRecompileAllScriptsModName = GetOrCreateINIValue("Recompile All Scripts", "sModName", "", IniPath);
 }
 
 #define INI_SETTING_NOT_FOUND -1

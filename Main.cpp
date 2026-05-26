@@ -369,13 +369,16 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		SafeWriteBuf(0x4BFFA2, "\xF7\xC3\x7F\x00\x00\x00\x74\x3C\xEB\x68", 10); // replaces a test ebx, ebx with test ebx, 0x7F
 	}
 
-	if (config.bPlaySoundEndOfLoading) {
-		WriteRelJump(0x464D32, UInt32(EndLoadingHook));
-	}
-
 	// add a more detailed warning when recompiling all
 	WriteRelJump(0x5C497E, UInt32(RecompileAllWarningScriptHook));
 	WriteRelJump(0x4442C7, UInt32(RecompileAllWarningMainHook));
+
+	// recompiling all scripts will only recompile SCPT forms, optionally only from a specified mod
+	if (config.bRecompileAllScriptsSCPTFormsOnly)
+	{
+		WriteRelJump(0x5C3A56, 0x5C3BC8);
+		WriteRelCall(0x5C397C, UInt32(OnRecompileAllShouldProcessScript));
+	}
 
 	// fix arrow keys in dialogue menu making the window become unfocussed, allowing consecutive arrow presses without having to click again
 	SafeWrite16(0x5A1817, 0x0FEB); // jump over SetFocus(0)
@@ -1160,13 +1163,6 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SafeWriteBuf(0x560160, "\x83\xC4\x18\xE9\x3B\xFF\xFF\xFF", 8);
 
 	ToggleReferenceMovement::InitHooks();
-
-	// recompiling all scripts will only recompile SCPT forms, optionally only from a specified mod
-	if (config.bRecompileAllScriptsSCPTFormsOnly)
-	{
-		WriteRelJump(0x5C3A56, 0x5C3BC8);
-		WriteRelCall(0x5C397C, UInt32(OnRecompileAllShouldProcessScript));
-	}
 
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())

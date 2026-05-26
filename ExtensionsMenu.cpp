@@ -332,7 +332,7 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 			EnableMenuItem(g_MainMenu, MENUOPTION_RENDER_WINDOW, MF_ENABLED);
 			CheckMenuItem(g_MainMenu, MENUOPTION_RENDER_WINDOW, MF_CHECKED);
 
-			if (!config.bAllowRecompileAll)
+			if (!config.bAllowRecompileAll && !(config.bRecompileAllScriptsSCPTFormsOnly && *config.sRecompileAllScriptsModName))
 			{
 				EnableMenuItem(g_MainMenu, MENUOPTION_RECOMPILE_ALL, MF_DISABLED | MF_GRAYED);
 				// patch switch table offset for recompile all menu button
