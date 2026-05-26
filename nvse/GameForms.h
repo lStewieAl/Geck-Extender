@@ -400,6 +400,7 @@ public:
 	void* unk30;
 };
 
+class NiAVObject;
 // 30
 class TESBoundObject : public TESObject
 {
@@ -424,6 +425,11 @@ public:
 	UInt32 unk40;				// 040
 	BOUND_DATA					bounds;	// 044
 	UInt32 unk50;				// 050
+
+	void SetBoundMinMax(NiAVObject* apRoot)
+	{
+		ThisCall(0x5F1490, this, apRoot);
+	}
 };
 
 // C

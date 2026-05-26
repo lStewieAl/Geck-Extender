@@ -832,6 +832,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	originalCellWindowCallback = *(WNDPROC*)0x441648;
 	SafeWrite32(0x441648, UInt32(CellWindowCallback));
 
+	// make the Ctrl-F9 hotkey in the Object Window
+
 	// fix the undo menu button for NavMesh
 	WriteRelCall(0x44104A, UInt32(OnMainWindowUndo));
 

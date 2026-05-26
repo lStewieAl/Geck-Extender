@@ -3082,10 +3082,16 @@ void RemoveSubMenuByHandle(HMENU parentMenu, HMENU submenuHandle) {
 	}
 }
 
-constexpr UInt32 COPY_MENU_ID = 0x10001;
-constexpr UInt32 COPY_EDITOR_ID_MENUID = 0x10002;
-constexpr UInt32 COPY_REF_ID_MENUID = 0x10003;
-constexpr UInt32 COPY_XEDIT_ID_MENUID = 0x10004;
+bool SelectedListViewItemContainsRecalcBoundsTargets(HWND ahListView);
+enum CustomObjectWindowContextActions
+{
+	COPY_MENU_ID = 0x10001,
+	COPY_EDITOR_ID_MENUID,
+	COPY_REF_ID_MENUID,
+	COPY_XEDIT_ID_MENUID,
+	RECALC_BOUNDS = FormColoring::COLOR_ITEM_MAX + 1,
+};
+
 void __cdecl OnSetupObjectAndCellWindowRightClickMenu(HMENU menu, LPPOINT cursorPos, HWND hWnd, HWND listView)
 {
 	HMENU hCopySubMenu = CreatePopupMenu();
@@ -3104,7 +3110,14 @@ void __cdecl OnSetupObjectAndCellWindowRightClickMenu(HMENU menu, LPPOINT cursor
 		InsertMenuA(menu, 0xFFFFFFFF, MF_BYPOSITION | MF_POPUP, (UINT_PTR)hColorSubMenu, "Color");
 	}
 
+	if (SelectedListViewItemContainsRecalcBoundsTargets(listView))
+	{
+		InsertMenuA(menu, 0xFFFFFFFF, MF_BYPOSITION, RECALC_BOUNDS, "Recalc Bounds");
+	}
+
 	CdeclCall(0x47F3B0, menu, cursorPos, hWnd, listView); // Window::SetupPopupMenu
+
+	DeleteMenu(menu, RECALC_BOUNDS, MF_BYCOMMAND);
 
 	RemoveSubMenuByHandle(menu, hCopySubMenu);
 
@@ -3139,6 +3152,52 @@ void CopySelectedListViewItemData(HWND listView, std::function<void(std::string&
 	{
 		CopyTextToClipboard(aggregatedText.c_str());
 	}
+}
+
+bool IsFormValidForRecalcBounds(TESForm* apForm)
+{
+	return DYNAMIC_CAST(apForm, TESForm, TESModel) && apForm->IsBoundObject();
+}
+
+void RecalculateBoundsForSelectedListViewItems(HWND ahListView)
+{
+	Setting* bCheckOutOnBoundFix = (Setting*)0xEDC904;
+	bool bPrevCheckOutOnBoundFix = bCheckOutOnBoundFix->Int();
+	bCheckOutOnBoundFix->SetInt(true);
+
+	int index = -1;
+	while ((index = SendMessageA(ahListView, LVM_GETNEXTITEM, index, LVNI_SELECTED)) != -1)
+	{
+		if (auto pBoundObject = (TESBoundObject*)GetNthListForm(ahListView, index))
+		{
+			if (IsFormValidForRecalcBounds(pBoundObject))
+			{
+				TESObjectREFR* pTempRef = TESObjectREFR::Create();
+				pTempRef->SetObjectReference(pBoundObject);
+				auto pNode = pTempRef->Load3D(false);
+				pBoundObject->SetBoundMinMax(pNode);
+				pTempRef->Destroy(true);
+			}
+		}
+	}
+
+	bCheckOutOnBoundFix->SetInt(bPrevCheckOutOnBoundFix);
+}
+
+bool SelectedListViewItemContainsRecalcBoundsTargets(HWND ahListView)
+{
+	int index = -1;
+	while ((index = SendMessageA(ahListView, LVM_GETNEXTITEM, index, LVNI_SELECTED)) != -1)
+	{
+		if (auto pBoundObject = (TESBoundObject*)GetNthListForm(ahListView, index))
+		{
+			if (IsFormValidForRecalcBounds(pBoundObject))
+			{
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 bool HandlePopupMenuCommand(HWND listView, UInt32 commandID)
@@ -3180,6 +3239,12 @@ bool HandlePopupMenuCommand(HWND listView, UInt32 commandID)
 				currentText += std::format("{} \"{}\" [{}:{:08X}]\n", editorID, formName, formTypeName, refID);
 			}
 		);
+		return true;
+	}
+
+	case RECALC_BOUNDS:
+	{
+		RecalculateBoundsForSelectedListViewItems(listView);
 		return true;
 	}
 

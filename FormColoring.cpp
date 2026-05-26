@@ -20,7 +20,6 @@ namespace FormColoring
 	*/
 
 	char IniPath[MAX_PATH];
-	enum { COLOR_ITEM_CLEAR = 0x10005, COLOR_ITEM_CUSTOM, COLOR_ITEM_CONFIG_BASE };
 
 	struct CustomColorEntry
 	{
@@ -53,6 +52,7 @@ namespace FormColoring
 
 		std::string config(apConfig);
 
+		UInt32 iNumEntries = 0;
 		size_t start = 0;
 		while (start < config.size())
 		{
@@ -77,6 +77,11 @@ namespace FormColoring
 							label,
 							ParseHexColor(colorHex)
 						});
+					++iNumEntries;
+					if (iNumEntries >= NUM_MAX_COLORS)
+					{
+						break;
+					}
 				}
 				catch (...)
 				{
