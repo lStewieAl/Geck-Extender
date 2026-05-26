@@ -3202,6 +3202,7 @@ LRESULT CALLBACK ModelDataCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARA
 		IDC_MODEL_DATA_EDIT = 2421
 	};
 
+	// make pressing ENTER in the edit set the mesh path
 	if (Message == WM_COMMAND && LOWORD(wParam) == IDOK)
 	{
 		HWND hEdit = GetDlgItem(Hwnd, IDC_MODEL_DATA_EDIT);
@@ -3210,20 +3211,32 @@ LRESULT CALLBACK ModelDataCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARA
 			char buf[MAX_PATH];
 			GetWindowText(hEdit, buf, sizeof(buf));
 
-			auto form = Window_GetForm(Hwnd);
-			if (form)
+			auto pModelTexSwap = Window_GetForm(Hwnd);
+			if (pModelTexSwap)
 			{
-
-				form->SetMeshPath(buf);
-				ThisCall(0x505870, form);
+				pModelTexSwap->SetMeshPath(buf);
+				ThisCall(0x505870, pModelTexSwap);
 				CdeclCall(0x5067F0, Hwnd);
 
-				return 0; // swallow Enter
+				return 0;
 			}
 		}
 	}
 
-	return CallWindowProc(originalModelDataCallback, Hwnd, Message, wParam, lParam);
+	auto result = CallWindowProc(originalModelDataCallback, Hwnd, Message, wParam, lParam);
+
+	// prefill the mesh path on load
+	if (Message == WM_INITDIALOG)
+	{
+		HWND hEdit = GetDlgItem(Hwnd, IDC_MODEL_DATA_EDIT);
+		auto pModelTexSwap = (TESModelTextureSwap*)Window_GetForm(Hwnd);
+		if (pModelTexSwap)
+		{
+			SetWindowText(hEdit, pModelTexSwap->nifPath.CStr());
+		}
+	}
+
+	return result;
 }
 
 WNDPROC originalObjectWindowCallback;
