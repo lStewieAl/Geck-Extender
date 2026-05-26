@@ -218,6 +218,16 @@ void ResizeUseReportWindow(HWND hWnd, WORD newWidth, WORD newHeight)
 // Use Report window (220)
 BOOL CALLBACK UseReportCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+	if (msg == WM_INITDIALOG)
+	{
+		if (auto pForm = (TESForm*)lParam)
+		{
+			char buf[0x80];
+			snprintf(buf, sizeof(buf), "Use Report: %s", pForm->GetEditorID());
+			SetWindowTextA(hDlg, buf);
+		}
+	}
+
 	if (msg == WM_SIZE)
 	{
 		WORD width = LOWORD(lParam);
