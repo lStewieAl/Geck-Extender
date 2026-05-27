@@ -4684,3 +4684,68 @@ __HOOK OnEditSelectedCellListItemHook()
 		jmp eax
 	}
 }
+
+void ReplacePerkEntryLabel(HWND hDlg, HWND hOldEdit)
+{
+	RECT rc;
+	GetWindowRect(hOldEdit, &rc);
+	MapWindowPoints(NULL, hDlg, (LPPOINT)&rc, 2);
+
+	HFONT hFont = (HFONT)SendMessage(hOldEdit, WM_GETFONT, 0, 0);
+	LONG style = GetWindowLongA(hOldEdit, GWL_STYLE);
+	LONG exStyle = GetWindowLongA(hOldEdit, GWL_EXSTYLE);
+
+	// Read original text as Unicode
+	wchar_t wtext[512];
+	wtext[0] = 0;
+
+	GetWindowTextW(hOldEdit, wtext, 512);
+
+	// Convert Unicode -> ANSI
+	char text[512];
+	text[0] = 0;
+
+	WideCharToMultiByte(
+		CP_ACP,
+		0,
+		wtext,
+		-1,
+		text,
+		sizeof(text),
+		NULL,
+		NULL);
+
+	DestroyWindow(hOldEdit);
+
+	CreateWindowExA(
+		exStyle,
+		"EDIT",
+		text,
+		style,
+		rc.left,
+		rc.top,
+		rc.right - rc.left,
+		rc.bottom - rc.top,
+		hDlg,
+		(HMENU)2458,
+		GetModuleHandle(NULL),
+		NULL);
+}
+
+BOOL __stdcall PerkEntryCallback(HWND hDlg, UINT Message, WPARAM wParam, LPARAM lParam)
+{
+	auto result = CallWindowProc((WNDPROC)0x550EF0, hDlg, Message, wParam, lParam);
+
+	if (Message == WM_INITDIALOG)
+	{
+		// workaround the perk entry activate label being unicode for some reason... which caused widechars showing
+		// recreate the label
+		HWND hOldEdit = GetDlgItem(hDlg, 2458);
+		if (IsWindowUnicode(hOldEdit))
+		{
+			ReplacePerkEntryLabel(hDlg, hOldEdit);
+		}
+	}
+
+	return result;
+}

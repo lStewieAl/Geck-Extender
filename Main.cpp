@@ -1164,6 +1164,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	ToggleReferenceMovement::InitHooks();
 
+	SafeWrite32(0x55182D, UInt32(PerkEntryCallback));
+	SafeWrite32(0x5519D6, UInt32(PerkEntryCallback));
+
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
 	{
