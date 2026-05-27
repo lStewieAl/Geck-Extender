@@ -671,3 +671,15 @@ void TESForm::SetDisabled(bool abDisabled)
 		flags &= ~kFormFlags_InitiallyDisabled;
 	}
 }
+
+void TESForm::SetInitialized(bool abInitialized)
+{
+	if (abInitialized)
+	{
+		flags |= kFormFlags_Initialized;
+	}
+	else
+	{
+		flags &= ~kFormFlags_Initialized;
+	}
+}

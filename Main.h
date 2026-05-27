@@ -4749,3 +4749,44 @@ BOOL __stdcall PerkEntryCallback(HWND hDlg, UINT Message, WPARAM wParam, LPARAM 
 
 	return result;
 }
+
+void SetDoorSoundsInUsagesMap(TESObjectDOOR* apDoor, bool abAddToMap)
+{
+	TESSound* pSounds[3];
+	pSounds[0] = apDoor->GetOpenSound();
+	pSounds[1] = apDoor->GetCloseSound();
+	pSounds[2] = apDoor->GetLoopSound();
+	for (int i = 0; i < 3; ++i)
+	{
+		if (auto pSound = pSounds[i])
+		{
+			if (abAddToMap)
+			{
+				pSound->AddToUsageMap(apDoor);
+			}
+			else
+			{
+				pSound->RemoveFromUsageMap(apDoor);
+			}
+		}
+	}
+}
+
+void __fastcall OnTESObjectDOOR_InitItem(TESObjectDOOR* apDoor, void* edx, bool abInitialized)
+{
+	apDoor->SetInitialized(abInitialized);
+	SetDoorSoundsInUsagesMap(apDoor, true);
+}
+
+void __fastcall OnTESObjectDOOR_CloneStart(UInt32 apList)
+{
+	ThisCall(0x5056F0, (UInt32*)apList);
+	TESObjectDOOR* pDoor = (TESObjectDOOR*)(apList - 188);
+	SetDoorSoundsInUsagesMap(pDoor, false);
+}
+
+void __fastcall OnTESObjectDOOR_CloneEnd(TESObjectDOOR* apDoor, void* edx, TESObjectDOOR* apFrom)
+{
+	SetDoorSoundsInUsagesMap(apDoor, true);
+	ThisCall(0x4F7FF0, apDoor, apFrom);
+}

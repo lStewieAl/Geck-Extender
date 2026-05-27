@@ -1167,6 +1167,11 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SafeWrite32(0x55182D, UInt32(PerkEntryCallback));
 	SafeWrite32(0x5519D6, UInt32(PerkEntryCallback));
 
+	// fix TESObjectDOOR not adding sound usages to the usage map
+	WriteRelCall(0x5FAA77, UInt32(OnTESObjectDOOR_InitItem));
+	WriteRelCall(0x5FA492, UInt32(OnTESObjectDOOR_CloneStart));
+	WriteRelJump(0x5FA573, UInt32(OnTESObjectDOOR_CloneEnd));
+
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
 	{

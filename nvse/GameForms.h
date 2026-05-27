@@ -345,21 +345,23 @@ public:
 	UInt8 gap29[3];
 
 	TESForm* TryGetREFRParent(void);
-	UInt8			GetModIndex() const;
+	UInt8 GetModIndex() const;
 	TESFullName* GetFullName();
 	const char* GetTheName() { return CdeclCall <const char*>(0x437DB0, this); };
-	bool			IsCloned() const;
+	bool IsCloned() const;
 	bool IsDisabled() const { return flags & kFormFlags_InitiallyDisabled; };
 	void SetDisabled(bool abDisabled);
-
+	void SetInitialized(bool abInitialized);
 	bool IsAltered() const { return flags & kFormFlags_Modified; };
 
 	bool IsWeapon() { return typeID == kFormType_TESObjectWEAP; }
 	bool IsArmor() { return typeID == kFormType_TESObjectARMO; }
 	bool IsAmmo() { return typeID == kFormType_TESAmmo; }
 	bool IsIngestible() { return typeID == kFormType_AlchemyItem; }
-	void SetTemporary() { ThisCall(0x4FBA50, this); }
 
+	void SetTemporary() { ThisCall(0x4FBA50, this); }
+	void AddToUsageMap(TESForm* apForm) { ThisCall(0x4FB210, this, apForm); };
+	void RemoveFromUsageMap(TESForm* apForm) { ThisCall(0x4FB250, this, apForm); };
 
 	MEMBER_FN_PREFIX(TESForm);
 };
@@ -2598,6 +2600,10 @@ public:
 	BGSOpenCloseForm			openCloseForm;		// 70
 	TESSound* soundLooping;		//
 	// There is a tList in 088 (likely TESObjectCELL, but unused in Fallout)
+
+	TESSound* GetOpenSound() { return *(TESSound**)(((UInt32)this) + 0xAC); }
+	TESSound* GetCloseSound() { return *(TESSound**)(((UInt32)this) + 0xB0); }
+	TESSound* GetLoopSound() { return *(TESSound**)(((UInt32)this) + 0xB4); }
 };
 
 // IngredientItem (A4)
