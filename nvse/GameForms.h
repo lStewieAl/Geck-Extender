@@ -295,7 +295,7 @@ public:
 	virtual void		Unk_53(void);
 	virtual bool		DialogCallback(HWND hDlg, int a3, int a4, int a5, void* a6);
 	virtual void		Unk_55(void);
-	virtual void		Unk_56(void);
+	virtual void		Unk_56(HWND);
 	virtual void		Unk_57(void);
 	virtual void		Unk_58(void);
 	virtual void		OpenDialog(HWND hWndParent, char a3, char a4);

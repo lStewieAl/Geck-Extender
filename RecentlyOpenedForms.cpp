@@ -200,8 +200,14 @@ namespace RecentlyOpenedForms
 		return system_clock::to_time_t(system_clock::now());
 	}
 
-	void StoreForm(const char* sFormName)
+	void StoreForm(TESForm* apForm)
 	{
+		if (!apForm)
+		{
+			return;
+		}
+
+		const char* sFormName = apForm->GetEditorID();
 		if (!sFormName || !sFormName[0])
 			return;
 
@@ -239,17 +245,25 @@ namespace RecentlyOpenedForms
 	HWND __stdcall OnOpenObjectWindowForm(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc, LPARAM dwInitParam)
 	{
 		auto pForm = ((TESForm**)(dwInitParam))[1];
-		if (pForm)
-		{
-			StoreForm(pForm->GetEditorID());
-		}
+		StoreForm(pForm);
 		return CreateDialogParamA(hInstance, lpTemplateName, hWndParent, lpDialogFunc, dwInitParam);
+	}
+
+	void __fastcall OnLoadScriptForm(Script* apScript, void* edx, HWND hWnd)
+	{
+		apScript->Unk_56(hWnd);
+		StoreForm(apScript);
 	}
 
 	void InitHooks()
 	{
 		DataLoadEvent::RegisterCallback(PostLoadPlugins);
+
+		// add forms to list when opening them
 		WriteRelCall(0x4376A6, UInt32(OnOpenObjectWindowForm));
 		SafeWrite8(0x4376A6 + 5, 0x90);
+
+		SafeWrite16(0x5C48AB, 0xBA90);
+		SafeWrite32(0x5C48AB + 2, UInt32(OnLoadScriptForm));
 	}
 }
