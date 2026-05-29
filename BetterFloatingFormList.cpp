@@ -341,6 +341,7 @@ namespace BetterFloatingFormList
 		{
 			CreateToolbar(Hwnd);
 			UpdateToolbarAndListviewPositions(Hwnd);
+			SendMessageA(Hwnd, BFL_SET_INITIAL_SORT, 1, 0);
 			break;
 		}
 		case WM_COMMAND:
@@ -486,7 +487,9 @@ namespace BetterFloatingFormList
 			}
 		}
 
+		SetDeferListUpdate(listView, true);
 		TESListView::AddForms(listView, list, filterFn, (void*)filterData);
+		SetDeferListUpdate(listView, false);
 	}
 
 	LRESULT __stdcall OnInitialSort(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
