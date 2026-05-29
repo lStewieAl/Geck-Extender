@@ -2,6 +2,7 @@
 #include "GameTypes.h"
 #include "GameObjects.h"
 #include "GameAPI.h"
+#include "GameData.h"
 #include "GeckUtility.h"
 #include <unordered_set>
 
@@ -255,6 +256,12 @@ namespace RecentlyOpenedForms
 		StoreForm(apScript);
 	}
 
+	void __fastcall OnLoadInteriorCell(TES* apTES, void* edx, TESObjectCELL* apCell)
+	{
+		apTES->AddToInteriorBuffer(apCell);
+		StoreForm(apCell);
+	}
+
 	void InitHooks()
 	{
 		DataLoadEvent::RegisterCallback(PostLoadPlugins);
@@ -262,8 +269,8 @@ namespace RecentlyOpenedForms
 		// add forms to list when opening them
 		WriteRelCall(0x4376A6, UInt32(OnOpenObjectWindowForm));
 		SafeWrite8(0x4376A6 + 5, 0x90);
-
 		SafeWrite16(0x5C48AB, 0xBA90);
 		SafeWrite32(0x5C48AB + 2, UInt32(OnLoadScriptForm));
+		WriteRelCall(0x4CB25C, UInt32(OnLoadInteriorCell));
 	}
 }

@@ -529,6 +529,8 @@ public:
 	bool GetLandHeight(NiPoint3* cameraPos, float* heightOut);
 	bool IsCellLoaded(TESObjectCELL* apCell, bool abIgnoreBuffered);
 	void LoadCell(TESObjectCELL* apCell);
+	void AddToInteriorBuffer(TESObjectCELL* apCell) { ThisCall(0x4C7E20, this, apCell); };
+	void AddToExteriorBuffer(TESObjectCELL* apCell) { ThisCall(0x4C9030, this, apCell); };
 };
 
 class TLSData {
