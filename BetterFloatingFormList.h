@@ -5,6 +5,9 @@ namespace BetterFloatingFormList
 	{
 		BFL_ADDED_ITEMS = WM_USER + 1000, // WPARAM (tList<TESForm>* modifiedForms) LPARAM (HWND listView)
 		BFL_DELETED_ITEMS, // WPARAM (tList<TESForm>* modifiedForms) LPARAM (HWND listView)
+
+		BFL_SET_FILTER,
+		BFL_SET_INITIAL_SORT,
 	};
 
 	void Init();

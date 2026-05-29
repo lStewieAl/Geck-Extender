@@ -123,6 +123,16 @@ namespace BetterFloatingFormList
 			}
 			break;
 		}
+		case BFL_SET_FILTER:
+		{
+			SetPropA(Hwnd, "DoFilter", (HANDLE)wParam);
+			break;
+		}
+		case BFL_SET_INITIAL_SORT:
+		{
+			SetPropA(Hwnd, "DoInitialSort", (HANDLE)wParam);
+			break;
+		}
 		}
 
 		return CallWindowProc(originalWindowCallback, Hwnd, Message, wParam, lParam);
@@ -405,6 +415,7 @@ namespace BetterFloatingFormList
 		return _stricmp(FormToTypeStr(a1), FormToTypeStr(a2));
 	}
 
+	UInt32 originalCompareFormsFn;
 	int __stdcall CompareForms(TESForm* a1, TESForm* a2, int a3)
 	{
 		int column = abs(a3) - 1;
@@ -415,7 +426,7 @@ namespace BetterFloatingFormList
 		}
 		else
 		{
-			return StdCall<int>(0x47B1E0, a1, a2, a3);
+			return StdCall<int>(originalCompareFormsFn, a1, a2, a3);
 		}
 	}
 
@@ -463,7 +474,7 @@ namespace BetterFloatingFormList
 
 	void __cdecl OnInitListViewForms(HWND listView, tList<TESForm>* list, bool(__cdecl* filterFn)(TESForm*, const char*), const char* filterData)
 	{
-		if (!GetProp(GetParent(listView), "NoFilter"))
+		if (GetPropA(GetParent(listView), "DoFilter"))
 		{
 			if (auto fullPath = GetSelectedTreeViewItemFullPath())
 			{
@@ -476,6 +487,15 @@ namespace BetterFloatingFormList
 		}
 
 		CdeclCall(0x47E410, listView, list, filterFn, filterData);
+	}
+
+	LRESULT __stdcall OnInitialSort(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+	{
+		if (!GetPropA(GetParent(hWnd), "DoInitialSort"))
+		{
+			return 0;
+		}
+		SendMessageA(hWnd, Msg, wParam, lParam);
 	}
 
 	void Init()
@@ -491,7 +511,7 @@ namespace BetterFloatingFormList
 		WriteRelCall(0x48389C, UInt32(InitFormIdNameAndFormTypeColumns));
 
 		// add support for sorting the 'Type' column
-		SafeWrite32(0x48368A, UInt32(CompareForms));
+		originalCompareFormsFn = DetourVtable(0x48368A, UInt32(CompareForms));
 
 		// support displaying the type column
 		SafeWrite8(0x4836AD, 0xB8);
@@ -499,5 +519,8 @@ namespace BetterFloatingFormList
 		SafeWrite8(0x4836AD + 1 + 4, 0x90);
 
 		WriteRelCall(0x4838C1, UInt32(OnInitListViewForms));
+
+		WriteRelCall(0x4838F1, UInt32(OnInitialSort));
+		SafeWrite8(0x4838F1 + 5, 0x90);
 	}
 }

@@ -74,7 +74,7 @@ namespace RecentlyOpenedForms
 			g_RecentForms.end(),
 			[](const RecentFormEntry& a, const RecentFormEntry& b)
 			{
-				return a.lastOpened > b.lastOpened;
+				return a.lastOpened < b.lastOpened;
 			});
 	}
 
@@ -118,7 +118,8 @@ namespace RecentlyOpenedForms
 		}
 		else if (Message == WM_INITDIALOG)
 		{
-			SetPropA(Hwnd, "NoFilter", (HANDLE)1);
+			SendMessageA(Hwnd, BetterFloatingFormList::BFL_SET_FILTER, 0, 0);
+			SendMessageA(Hwnd, BetterFloatingFormList::BFL_SET_INITIAL_SORT, 0, 0);
 		}
 
 		auto result = BetterFloatingFormList::BaseWindowCallback(Hwnd, Message, wParam, lParam);
@@ -215,9 +216,7 @@ namespace RecentlyOpenedForms
 				}),
 			g_RecentForms.end());
 
-		// Push newest to front
-		g_RecentForms.insert(
-			g_RecentForms.begin(),
+		g_RecentForms.push_back(
 			{
 				sFormName,
 				GetCurrentTimestamp()

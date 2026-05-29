@@ -106,7 +106,7 @@ namespace NavMeshPickPreventer
 	{
 		if (Message == WM_INITDIALOG)
 		{
-			SetPropA(Hwnd, "NoFilter", (HANDLE)1);
+			SendMessageA(Hwnd, BetterFloatingFormList::BFL_SET_FILTER, 0, 0);
 		}
 		auto result = BetterFloatingFormList::BaseWindowCallback(Hwnd, Message, wParam, lParam);
 		if (Message == BetterFloatingFormList::BFL_ADDED_ITEMS)
