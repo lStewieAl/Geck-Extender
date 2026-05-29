@@ -32,6 +32,10 @@ namespace ModifiedFormViewer
 
 	LRESULT CALLBACK WindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 	{
+		if (Message == WM_INITDIALOG)
+		{
+			SetPropA(Hwnd, "NoFilter", (HANDLE)1);
+		}
 		auto result = BetterFloatingFormList::BaseWindowCallback(Hwnd, Message, wParam, lParam);
 		if (Message == WM_INITDIALOG)
 		{
@@ -64,7 +68,6 @@ namespace ModifiedFormViewer
 		HINSTANCE hInstance = (HINSTANCE)GetModuleHandle(nullptr);
 		auto hWnd = CreateDialogParamA(hInstance, (LPCSTR)189, g_MainHwnd, (DLGPROC)WindowCallback, (LPARAM)&data);
 		SendMessageA(hWnd, WM_SETTEXT, 0, (LPARAM)"Modified Forms");
-
 		data.forms.RemoveAll();
 	}
 }

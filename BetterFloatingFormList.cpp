@@ -463,12 +463,15 @@ namespace BetterFloatingFormList
 
 	void __cdecl OnInitListViewForms(HWND listView, tList<TESForm>* list, bool(__cdecl* filterFn)(TESForm*, const char*), const char* filterData)
 	{
-		if (auto fullPath = GetSelectedTreeViewItemFullPath())
+		if (!GetProp(GetParent(listView), "NoFilter"))
 		{
-			if (*fullPath)
+			if (auto fullPath = GetSelectedTreeViewItemFullPath())
 			{
-				filterFn = FormPathMatches;
-				filterData = fullPath;
+				if (*fullPath)
+				{
+					filterFn = FormPathMatches;
+					filterData = fullPath;
+				}
 			}
 		}
 

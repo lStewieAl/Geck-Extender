@@ -11,6 +11,7 @@
 #include "Events/MainWindowLoadEvent.h"
 #include "MultiBoundsAdder.h"
 #include "ToggleReferenceMovement.h"
+#include "RecentlyOpenedForms.h"
 
 #define UI_MENU_LANDSCAPE_KEY	40190
 #define UI_MENU_LANDSCAPE_BAR	40191
@@ -39,6 +40,7 @@
 #define UI_EXTMENU_READD_TO_MULTIBOUNDS 51023
 #define UI_EXTMENU_TOGGLE_REF_MOVEMENT 51024
 #define UI_EXTMENU_TOGGLE_PREEMPTIVELY_UNLOAD_CELLS 51025
+#define UI_EXTMENU_VIEW_RECENT_FORMS 51026
 #define MAIN_WINDOW_CALLBACK 0xFEED
 
 // unused button in vanilla menu
@@ -125,6 +127,8 @@ bool CreateExtensionMenu(HWND MainWindow, HMENU MainMenu)
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_LOOKUPFORM, "Lookup Form");
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_VIEW_MODIFIED_FORMS, "View Modified Forms");
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_VIEW_NAVMESH_IGNORED_FORMS, "View Navmesh Ignored Forms");
+	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_VIEW_RECENT_FORMS, "View Recent Forms");
+	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_SEPARATOR, (UINT_PTR)UI_EXTMENU_SPACER, "");
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_AUTO_ADD_TO_MULTIBOUNDS, "Attach Objects to Multibounds");
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_READD_TO_MULTIBOUNDS, "Reattach All Objects to Multibounds");
 	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_TOGGLE_REF_MOVEMENT, "Render Window: Allow Reference Movement");
@@ -466,6 +470,12 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 		case UI_EXTMENU_VIEW_MODIFIED_FORMS:
 		{
 			ModifiedFormViewer::Show();
+		}
+		return 0;
+		
+		case UI_EXTMENU_VIEW_RECENT_FORMS:
+		{
+			RecentlyOpenedForms::ShowList();
 		}
 		return 0;
 

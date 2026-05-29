@@ -104,6 +104,10 @@ namespace NavMeshPickPreventer
 
 	LRESULT CALLBACK WindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 	{
+		if (Message == WM_INITDIALOG)
+		{
+			SetPropA(Hwnd, "NoFilter", (HANDLE)1);
+		}
 		auto result = BetterFloatingFormList::BaseWindowCallback(Hwnd, Message, wParam, lParam);
 		if (Message == BetterFloatingFormList::BFL_ADDED_ITEMS)
 		{

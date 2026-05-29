@@ -96,6 +96,7 @@
     <ClCompile Include="FormColoring.cpp" />
     <ClCompile Include="CustomReferenceBatchAction.cpp" />
     <ClCompile Include="PreemptivelyUnloadCells.cpp" />
+    <ClCompile Include="RecentlyOpenedForms.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Main.h" />
@@ -220,6 +221,7 @@
     <ClInclude Include="FormColoring.h" />
     <ClInclude Include="CustomReferenceBatchAction.h" />
     <ClInclude Include="PreemptivelyUnloadCells.h" />
+    <ClInclude Include="RecentlyOpenedForms.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

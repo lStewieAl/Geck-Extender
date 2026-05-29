@@ -43,6 +43,7 @@
 #include "NavMeshPickPreventer.h"
 #include "CustomRenderWindowHotkeys.h"
 #include "CustomReferenceBatchAction.h"
+#include "RecentlyOpenedForms.h"
 #include "LaunchGame.h"
 #include "FaceGenExporter.h"
 #include "ONAMFix.h"
@@ -1163,6 +1164,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SafeWriteBuf(0x560160, "\x83\xC4\x18\xE9\x3B\xFF\xFF\xFF", 8);
 
 	ToggleReferenceMovement::InitHooks();
+	RecentlyOpenedForms::InitHooks();
 
 	SafeWrite32(0x55182D, UInt32(PerkEntryCallback));
 	SafeWrite32(0x5519D6, UInt32(PerkEntryCallback));
