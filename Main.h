@@ -3225,8 +3225,10 @@ void __cdecl OnSetupObjectAndCellWindowRightClickMenu(HMENU menu, LPPOINT cursor
 	InsertMenuA(menu, 0xFFFFFFFF, MF_BYPOSITION | MF_POPUP, (UINT_PTR)hCopySubMenu, "Copy");
 
 	HMENU hColorSubMenu = NULL;
+	HWND pChildWindowFromPoint = *(HWND*)0xECF504;
+	bool bIsCellObjects = pChildWindowFromPoint == *(HWND*)0xECF548;
 	bool bIsCellWindow = menu == *(HMENU*)0xECF508; // CellView::pSubMenu
-	if (!bIsCellWindow)
+	if (!(bIsCellWindow && bIsCellObjects))
 	{
 		hColorSubMenu = FormColoring::CreateSubMenu(listView);
 		InsertMenuA(menu, 0xFFFFFFFF, MF_BYPOSITION | MF_POPUP, (UINT_PTR)hColorSubMenu, "Color");
@@ -3499,6 +3501,19 @@ LRESULT CALLBACK CellWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 			{
 				return true;
 			}
+		}
+	}
+	else if (Message == WM_NOTIFY)
+	{
+		LPNMHDR hdr = (LPNMHDR)lParam;
+
+		if (hdr->hwndFrom == GetDlgItem(Hwnd, 1155) &&
+			hdr->code == NM_CUSTOMDRAW)
+		{
+			LRESULT result = FormColoring::HandleCustomDraw(lParam);
+
+			SetWindowLongPtr(Hwnd, DWLP_MSGRESULT, result);
+			return TRUE;
 		}
 	}
 	return CallWindowProc(originalCellWindowCallback, Hwnd, Message, wParam, lParam);
