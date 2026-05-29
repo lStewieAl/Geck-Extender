@@ -615,8 +615,6 @@ struct RenderWindowHotkey
 };
 STATIC_ASSERT(sizeof(RenderWindowHotkey) == 0x14);
 
-void AddFormsToListView(HWND listView, tList<TESForm>* forms, bool(__cdecl* filterFn)(TESForm*, void*) = nullptr, void* filterData = nullptr);
-
 void OpenForm(TESForm* form, HWND parentHwnd = nullptr);
 
 void RunCallbackOnAllCellRefs(void (*callback)(TESObjectREFR*));
@@ -758,5 +756,19 @@ struct TESComboBox
 		BeginUIDefer();
 		CdeclCall(0x47F7A0, ahWnd, aeFormType, abResetComboBox, abIncludeNoneOption, aFilterFn, apFilterFnData);
 		EndUIDefer();
+	}
+};
+
+struct TESListView
+{
+	static void AddColumnHeader(HWND listView, WPARAM index, const char* pszText, int width, int format)
+	{
+		CdeclCall(0x419F50, listView, index, pszText, width, format);
+	}
+
+	using FilterFn = unsigned char(__cdecl*)(TESForm*, void*);
+	static void __cdecl AddForms(HWND listView, tList<TESForm>* apForms, FilterFn filterFn = nullptr, void* filterData = nullptr)
+	{
+		CdeclCall(0x47E410, listView, apForms, filterFn, filterData);
 	}
 };

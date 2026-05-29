@@ -235,11 +235,6 @@ bool NavMeshManager::HasMultipleNavmeshesSelected()
 
 tList<HWND>* OpenWindows::GetWindowList() { return (tList<HWND>*)0xED033C; }
 
-void AddFormsToListView(HWND listView, tList<TESForm>* forms, bool(__cdecl* filterFn)(TESForm*, void*), void* filterData)
-{
-	CdeclCall(0x47E410, listView, forms, filterFn, filterData);
-}
-
 void GetCellCoords(NiPoint3& pos, TESObjectCELL* cell)
 {
 	if (cell->IsInterior())

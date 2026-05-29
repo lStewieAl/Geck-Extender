@@ -1389,9 +1389,9 @@ _declspec(naked) void ObjectWindowListViewColumnSizeHook()
 	}
 }
 
-void __cdecl InsertListViewHeaderSetSizeHook(HWND hWnd, WPARAM wParam, int a3, int a4, int a5)
+void __cdecl InsertListViewHeaderSetSizeHook(HWND hWnd, WPARAM wParam, const char* apText, int a4, int a5)
 {
-	CdeclCall(0x419F50, hWnd, wParam, a3, a4, a5);
+	TESListView::AddColumnHeader(hWnd, wParam, apText, a4, a5);
 	SendMessageA(hWnd, LVM_SETCOLUMNWIDTH, wParam, 65);
 }
 
@@ -1891,8 +1891,8 @@ void __cdecl HavokPreviewResize(HWND hWnd)
 /* Need to figure how to fill out the "length" column with the animation length
 void __cdecl HavokPreviewAddColumns(HWND hWnd, WPARAM index, char* name, int width, int a5)
 {
-	CdeclCall(0x419F50, hWnd, index, name, width, a5);
-	CdeclCall(0x419F50, hWnd, index+1, "Length", width, a5);
+	TESListView::AddColumnHeader(hWnd, index, name, width, a5);
+	TESListView::AddColumnHeader(hWnd, index+1, "Length", width, a5);
 }
 
 void AddAnimLengthColumnToHavokPreviewAnimsList()
@@ -4573,7 +4573,7 @@ __HOOK OnSetupRefFormControls_DisableEditBaseHook()
 
 void __cdecl OnInitSelectFormWindow(HWND hWnd, WPARAM index, char* pszText, int width, int format)
 {
-	CdeclCall(0x419F50, hWnd, index, pszText, width, format);
+	TESListView::AddColumnHeader(hWnd, index, pszText, width, format);
 	SetFocus(hWnd);
 }
 

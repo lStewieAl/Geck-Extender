@@ -113,7 +113,7 @@ namespace BetterFloatingFormList
 				{
 					SetDeferListUpdate(listView, true);
 
-					AddFormsToListView(listView, &addedForms);
+					TESListView::AddForms(listView, &addedForms);
 					SendMessageA(Hwnd, BFL_ADDED_ITEMS, (WPARAM)&addedForms, (LPARAM)listView);
 
 					SetDeferListUpdate(listView, false);
@@ -221,7 +221,7 @@ namespace BetterFloatingFormList
 			SetDeferListUpdate(listView, true);
 
 			SendMessageA(listView, LVM_DELETEALLITEMS, 0, 0);
-			AddFormsToListView(listView, &forms);
+			TESListView::AddForms(listView, &forms);
 
 			SetDeferListUpdate(listView, false);
 		}
@@ -388,7 +388,7 @@ namespace BetterFloatingFormList
 	void __cdecl InitFormNameColumn(HWND hWnd, WPARAM index, char* pszText, int width, int format)
 	{
 		width = 200;
-		CdeclCall(0x419F50, hWnd, index, pszText, width, format);
+		TESListView::AddColumnHeader(hWnd, index, pszText, width, format);
 	}
 
 	enum
@@ -399,9 +399,9 @@ namespace BetterFloatingFormList
 	void __cdecl InitFormIdNameAndFormTypeColumns(HWND hWnd, WPARAM index, char* pszText, int width, int format)
 	{
 		width = 80;
-		CdeclCall(0x419F50, hWnd, index, pszText, width, format);
-		CdeclCall(0x419F50, hWnd, 2, "Name", width, format);
-		CdeclCall(0x419F50, hWnd, COLUMN_TYPE, "Type", width, format);
+		TESListView::AddColumnHeader(hWnd, index, pszText, width, format);
+		TESListView::AddColumnHeader(hWnd, 2, "Name", width, format);
+		TESListView::AddColumnHeader(hWnd, COLUMN_TYPE, "Type", width, format);
 	}
 
 	const char* FormToTypeStr(TESForm* form)
@@ -472,7 +472,7 @@ namespace BetterFloatingFormList
 		return result;
 	}
 
-	void __cdecl OnInitListViewForms(HWND listView, tList<TESForm>* list, bool(__cdecl* filterFn)(TESForm*, const char*), const char* filterData)
+	void __cdecl OnInitListViewForms(HWND listView, tList<TESForm>* list, TESListView::FilterFn filterFn, const char* filterData)
 	{
 		if (GetPropA(GetParent(listView), "DoFilter"))
 		{
@@ -480,13 +480,13 @@ namespace BetterFloatingFormList
 			{
 				if (*fullPath)
 				{
-					filterFn = FormPathMatches;
+					filterFn = (TESListView::FilterFn)FormPathMatches;
 					filterData = fullPath;
 				}
 			}
 		}
 
-		CdeclCall(0x47E410, listView, list, filterFn, filterData);
+		TESListView::AddForms(listView, list, filterFn, (void*)filterData);
 	}
 
 	LRESULT __stdcall OnInitialSort(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)

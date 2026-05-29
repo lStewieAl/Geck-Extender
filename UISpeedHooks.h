@@ -21,10 +21,10 @@ LRESULT __fastcall hk_ObjectListViewListView(DWORD* thisptr, void* ignorethisthi
 	return 0;
 }
 
-void __cdecl OnPopulateFloatingObjectsList(HWND listWindow, tList<TESForm>* list, unsigned __int8(__cdecl* filterFn)(TESForm*, int), int filterData)
+void __cdecl OnPopulateFloatingObjectsList(HWND listWindow, tList<TESForm>* list, TESListView::FilterFn filterFn, int* filterData)
 {
 	SendMessage(listWindow, WM_SETREDRAW, FALSE, 0);
-	CdeclCall(0x47E410, listWindow, list, filterFn, filterData);
+	TESListView::AddForms(listWindow, list, filterFn, filterData);
 	SendMessage(listWindow, WM_SETREDRAW, TRUE, 0);
 	RedrawWindow(listWindow, nullptr, nullptr, RDW_ERASE | RDW_INVALIDATE | RDW_NOCHILDREN);
 }
