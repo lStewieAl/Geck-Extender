@@ -602,6 +602,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelJump(0x4585B3, UInt32(RefreshCellHook));
 	WriteRelJz(0x4585BF, UInt32(RefreshCellHook));
 
+	WriteRelCall(0x580407, UInt32(DialogueWindowTopicsCallback));
+	WriteRelCall(0x580970, UInt32(DialogueWindowTopicsCallback));
+
 	// allow resizing the FormList and BGSListForm dialog (3274)
 	SafeWrite32(0x43768B, UInt32(FormListCallback));
 	originalBGSListFormDialogFn = DetourVtable(0xD5BABC, UInt32(BGSListForm__DialogCallback));

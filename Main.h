@@ -20,6 +20,7 @@
 #include "Settings.h"
 #include "NavMeshPickPreventer.h"
 #include "FormColoring.h"
+#include "DialogResizing.h"
 
 #include <dbghelp.h>
 
@@ -1974,6 +1975,99 @@ _declspec(naked) void RefreshCellHook()
 	}
 }
 
+void RemoveSubMenuByHandle(HMENU parentMenu, HMENU submenuHandle) {
+	UINT itemCount = GetMenuItemCount(parentMenu);
+	for (UINT i = 0; i < itemCount; i++) {
+		HMENU hSubMenu = GetSubMenu(parentMenu, i);
+		if (hSubMenu == submenuHandle) {
+			// Found the submenu by its HMENU, now remove it
+			RemoveMenu(parentMenu, i, MF_BYPOSITION);
+			DestroyMenu(submenuHandle);
+			break;
+		}
+	}
+}
+
+void __cdecl SetupDialogueTopicRightClickMenu(HWND hWnd, HWND listView)
+{
+	HMENU menu = CreatePopupMenu();
+	HMENU hColorSubMenu = FormColoring::CreateSubMenu(listView);
+	InsertMenuA(menu, 0xFFFFFFFF, MF_BYPOSITION | MF_POPUP, (UINT_PTR)hColorSubMenu, "Color");
+
+	POINT cursorPos;
+	GetCursorPos(&cursorPos);
+	TrackPopupMenu(menu, TPM_RIGHTBUTTON, cursorPos.x, cursorPos.y, 0, hWnd, NULL);
+
+	if (hColorSubMenu)
+	{
+		RemoveSubMenuByHandle(menu, hColorSubMenu);
+	}
+}
+
+bool HandleDialoguePopupMenuCommand(HWND listView, UInt32 commandID)
+{
+	return FormColoring::HandlePopupMenuCommand(listView, commandID);
+}
+
+BOOL CALLBACK DialogueWindowTopicsCallback(HWND Hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	enum { kDialogMenu_ListView = 1448, kDialogMenu_QuestListView = 2064 };
+	if (msg == WM_COMMAND)
+	{
+		if (HandleDialoguePopupMenuCommand(GetDlgItem(Hwnd, kDialogMenu_ListView), wParam) ||
+			HandleDialoguePopupMenuCommand(GetDlgItem(Hwnd, kDialogMenu_QuestListView), wParam))
+		{
+			return true;
+		}
+	}
+	if (msg == WM_NOTIFY)
+	{
+		LPNMHDR hdr = (LPNMHDR)lParam;
+		if (hdr->idFrom == kDialogMenu_ListView || hdr->idFrom == kDialogMenu_QuestListView)
+		{
+			if (hdr->code == NM_RCLICK)
+			{
+				SetupDialogueTopicRightClickMenu(Hwnd, hdr->hwndFrom);
+			}
+			else if (hdr->code == NM_CUSTOMDRAW)
+			{
+				LRESULT result = FormColoring::HandleCustomDraw(lParam);
+
+				SetWindowLongPtr(Hwnd, DWLP_MSGRESULT, result);
+				return TRUE;
+			}
+		}
+	}
+	return CallWindowProc((WNDPROC)0x598440, Hwnd, msg, wParam, lParam);
+}
+
+BOOL CALLBACK DialogueWindowCallback(HWND Hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	if (msg == WM_SIZE)
+	{
+		WORD width = LOWORD(lParam);
+		WORD height = HIWORD(lParam);
+		ResizeDialogueWindow(Hwnd, width, height);
+		// TODO - the menu needs to resize when switching tabs too...
+	}
+	auto result = CallWindowProc((WNDPROC)0x57FA00, Hwnd, msg, wParam, lParam);
+	if (msg == WM_INITDIALOG)
+	{
+		LONG style = GetWindowLong(Hwnd, GWL_STYLE);
+		style |= WS_THICKFRAME;
+		SetWindowLong(Hwnd, GWL_STYLE, style);
+
+		SetWindowPos(
+			Hwnd,
+			nullptr,
+			0, 0, 0, 0,
+			SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
+			SWP_FRAMECHANGED
+		);
+	}
+	return result;
+}
+
 UInt32 __fastcall PlaceOPALObjectHook(ObjectPalette::Object* current, void* edx, float* point1, float* point2)
 {
 	ObjectPalette::Object* toPlace = current;
@@ -3108,19 +3202,6 @@ LRESULT CALLBACK ObjectWindowFilterFieldCallback(HWND Hwnd, UINT Message, WPARAM
 		}
 	}
 	return DefSubclassProc(Hwnd, Message, wParam, lParam);
-}
-
-void RemoveSubMenuByHandle(HMENU parentMenu, HMENU submenuHandle) {
-	UINT itemCount = GetMenuItemCount(parentMenu);
-	for (UINT i = 0; i < itemCount; i++) {
-		HMENU hSubMenu = GetSubMenu(parentMenu, i);
-		if (hSubMenu == submenuHandle) {
-			// Found the submenu by its HMENU, now remove it
-			RemoveMenu(parentMenu, i, MF_BYPOSITION);
-			DestroyMenu(submenuHandle);
-			break;
-		}
-	}
 }
 
 bool SelectedListViewItemContainsRecalcBoundsTargets(HWND ahListView);

@@ -282,19 +282,6 @@ void ResizeDialogueWindow(HWND hWnd, WORD newWidth, WORD newHeight)
 	}
 }
 
-BOOL CALLBACK DialogueWindowCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	if (msg == WM_SIZE)
-	{
-		WORD width = LOWORD(lParam);
-		WORD height = HIWORD(lParam);
-		ResizeDialogueWindow(hDlg, width, height);
-		// TODO - the menu needs to resize when switching tabs too...
-	}
-	return CallWindowProc((WNDPROC)0x57FA00, hDlg, msg, wParam, lParam);
-}
-
-
 
 /* Load ESP/ESM Dialogs
 
