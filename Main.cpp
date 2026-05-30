@@ -50,6 +50,7 @@
 #include "SCOLConsistencyFix.h"
 #include "MultiBoundsAdder.h"
 #include "UnserializedIO.h"
+#include "SearchAndReplaceWindow.h"
 #include "ToggleReferenceMovement.h"
 #include "PreemptivelyUnloadCells.h"
 #include "Allocator/MemoryManager.hpp"
@@ -326,6 +327,11 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		WriteRelCall(0x47CE86, UInt32(OnDestroySearchAndReplaceWindow));
 		SafeWrite8(0x47CE86 + 5, 0x90);
 	}
+
+	// Don't change search and replace dropdowns when clicking OK
+	WriteRelJump(0x47CE29, 0x47CE5E);
+
+	SearchAndReplaceWindow::InitHooks();
 
 	// Remove call to SetFocus(0) when closing Reference Batch Action dialog
 	XUtil::PatchMemoryNop(0x411CFA, 8);
@@ -838,8 +844,6 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	originalCellWindowCallback = *(WNDPROC*)0x441648;
 	SafeWrite32(0x441648, UInt32(CellWindowCallback));
-
-	// make the Ctrl-F9 hotkey in the Object Window
 
 	// fix the undo menu button for NavMesh
 	WriteRelCall(0x44104A, UInt32(OnMainWindowUndo));

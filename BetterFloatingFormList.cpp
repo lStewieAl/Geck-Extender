@@ -498,7 +498,7 @@ namespace BetterFloatingFormList
 		{
 			return 0;
 		}
-		SendMessageA(hWnd, Msg, wParam, lParam);
+		return SendMessageA(hWnd, Msg, wParam, lParam);
 	}
 
 	void Init()
