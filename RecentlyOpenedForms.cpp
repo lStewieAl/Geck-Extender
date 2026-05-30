@@ -13,6 +13,8 @@
 #include <string>
 using json = nlohmann::json;
 
+HWND WINAPI hk_CreateDialogParamA(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc, LPARAM dwInitParam);
+
 extern HWND g_MainHwnd;
 namespace RecentlyOpenedForms
 {
@@ -184,7 +186,7 @@ namespace RecentlyOpenedForms
 			}
 		}
 
-		auto hWnd = CreateDialogParamA(
+		auto hWnd = hk_CreateDialogParamA(
 			hInstance,
 			(LPCSTR)189,
 			g_MainHwnd,
@@ -247,7 +249,7 @@ namespace RecentlyOpenedForms
 	{
 		auto pForm = ((TESForm**)(dwInitParam))[1];
 		StoreForm(pForm);
-		return CreateDialogParamA(hInstance, lpTemplateName, hWndParent, lpDialogFunc, dwInitParam);
+		return hk_CreateDialogParamA(hInstance, lpTemplateName, hWndParent, lpDialogFunc, dwInitParam);
 	}
 
 	void __fastcall OnLoadScriptForm(Script* apScript, void* edx, HWND hWnd)

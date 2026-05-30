@@ -11,6 +11,7 @@
 #include <Events/DataLoadEvent.h>
 
 extern HWND g_MainHwnd;
+HWND WINAPI hk_CreateDialogParamA(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc, LPARAM dwInitParam);
 
 namespace NavMeshPickPreventer
 {
@@ -164,7 +165,7 @@ namespace NavMeshPickPreventer
 			}
 		} while (iter = iter->next);
 
-		auto hWnd = CreateDialogParamA(hInstance, (LPCSTR)189, g_MainHwnd, (DLGPROC)WindowCallback, (LPARAM)((char*)(&ignoredForms)) - 0xC);
+		auto hWnd = hk_CreateDialogParamA(hInstance, (LPCSTR)189, g_MainHwnd, (DLGPROC)WindowCallback, (LPARAM)((char*)(&ignoredForms)) - 0xC);
 		SendMessageA(hWnd, WM_SETTEXT, 0, (LPARAM)"Ignored Forms");
 	}
 

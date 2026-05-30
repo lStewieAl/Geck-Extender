@@ -602,12 +602,12 @@ void __stdcall OnCreateSearchAndReplaceWindow(HINSTANCE hInstance, LPCSTR lpTemp
 		else
 		{
 			// create a new dialog (case where there's multiple search dialogs opened, and set the last opened as the cached window)
-			cachedSearchAndReplaceWindow = CreateDialogParamA(hInstance, lpTemplateName, hWndParent, lpDialogFunc, dwInitParam);
+			cachedSearchAndReplaceWindow = hk_CreateDialogParamA(hInstance, lpTemplateName, hWndParent, lpDialogFunc, dwInitParam);
 		}
 	}
 	else
 	{
-		cachedSearchAndReplaceWindow = CreateDialogParamA(hInstance, lpTemplateName, hWndParent, lpDialogFunc, dwInitParam);
+		cachedSearchAndReplaceWindow = hk_CreateDialogParamA(hInstance, lpTemplateName, hWndParent, lpDialogFunc, dwInitParam);
 	}
 }
 
@@ -2259,7 +2259,7 @@ HWND __stdcall CreateLandscapeEditHook(HINSTANCE hInstance, LPCSTR lpTemplateNam
 	savedLandscapeEditPos.y = posY;
 
 	originalLandscapeEditCallback = lpDialogFunc;
-	return CreateDialogParamA(hInstance, lpTemplateName, hWndParent, (DLGPROC)LandscapeEditCallback, dwInitParam);
+	return hk_CreateDialogParamA(hInstance, lpTemplateName, hWndParent, (DLGPROC)LandscapeEditCallback, dwInitParam);
 }
 
 void PatchRememberLandscapeEditSettingsWindowPosition()

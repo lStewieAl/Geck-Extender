@@ -4,8 +4,7 @@
 #include "BetterFloatingFormList.h"
 
 extern HWND g_MainHwnd;
-
-INT_PTR WINAPI hk_DialogBoxParamA(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc, LPARAM dwInitParam);
+HWND WINAPI hk_CreateDialogParamA(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc, LPARAM dwInitParam);
 namespace ModifiedFormViewer
 {
 	LRESULT CALLBACK SubclassedListViewProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
@@ -66,7 +65,7 @@ namespace ModifiedFormViewer
 		}
 
 		HINSTANCE hInstance = (HINSTANCE)GetModuleHandle(nullptr);
-		auto hWnd = CreateDialogParamA(hInstance, (LPCSTR)189, g_MainHwnd, (DLGPROC)WindowCallback, (LPARAM)&data);
+		auto hWnd = hk_CreateDialogParamA(hInstance, (LPCSTR)189, g_MainHwnd, (DLGPROC)WindowCallback, (LPARAM)&data);
 		SendMessageA(hWnd, WM_SETTEXT, 0, (LPARAM)"Modified Forms");
 		data.forms.RemoveAll();
 	}
