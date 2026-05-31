@@ -273,21 +273,6 @@ void AddExtraButtonsAndSliders(HWND hWnd, HINSTANCE hInstance)
 	}
 }
 
-void MoveChildWindow(HWND hwndChild, LPPOINT offset)
-{
-	// Get the current position of the child window
-	RECT rcChild;
-	GetWindowRect(hwndChild, &rcChild);
-	MapWindowPoints(HWND_DESKTOP, GetParent(hwndChild), (LPPOINT)&rcChild, 2); // Convert to parent-relative coordinates
-
-	// Calculate the new position
-	int newX = rcChild.left + offset->x;
-	int newY = rcChild.top + offset->y;
-
-	// Move the child window to the new position
-	SetWindowPos(hwndChild, NULL, newX, newY, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
-}
-
 void OpenExtenderPreferences()
 {
 	ShellExecuteA(0, "open", IniPath, 0, 0, SW_NORMAL);
@@ -829,24 +814,37 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 	}
 	else if (Message == WM_MOVE)
 	{
-		static int prevX, prevY = 0;
+		static int prevX = 0, prevY = 0;
 
-		// Extract the new position from lParam
-		int newX = LOWORD(lParam); // New x-coordinate
-		int newY = HIWORD(lParam); // New y-coordinate
+		// Extract signed coordinates from lParam
+		int newX = (short)LOWORD(lParam);
+		int newY = (short)HIWORD(lParam);
 
 		if ((GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0)
 		{
-			// Calculate the offset based on the new and old positions
-			POINT offset = { newX - prevX, newY - prevY };
-
-			for (auto pWindow : { RenderWindow::GetWindow(), CellView::GetWindow(), ObjectsView::GetWindow() })
+			POINT offset =
 			{
-				MoveChildWindow(pWindow, &offset);
+				newX - prevX,
+				newY - prevY
+			};
+
+			for (HWND pWindow : { RenderWindow::GetWindow(), CellView::GetWindow(), ObjectsView::GetWindow() })
+			{
+				RECT rc;
+				GetWindowRect(pWindow, &rc);
+
+				SetWindowPos(
+					pWindow,
+					nullptr,
+					rc.left + offset.x,
+					rc.top + offset.y,
+					0,
+					0,
+					SWP_NOZORDER | SWP_NOSIZE
+				);
 			}
 		}
 
-		// Update the previous position for the next move
 		prevX = newX;
 		prevY = newY;
 	}
