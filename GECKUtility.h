@@ -3,7 +3,6 @@
 #include "Editor.h"
 
 extern void(__cdecl* SaveWindowPositionToINI)(HWND, const char*);
-extern HWND g_mainWindowToolbar;
 
 struct ObjectPalette
 {
@@ -772,3 +771,18 @@ struct TESListView
 		CdeclCall(0x47E410, listView, apForms, filterFn, filterData);
 	}
 };
+
+struct MainWindow
+{
+	static HMENU GetMenu()
+	{
+		return *(HMENU*)0xED05C0;
+	}
+
+	static HWND GetWindow()
+	{
+		return *(HWND*)0xECFB38;
+	}
+};
+
+void AddMinimizeAndCloseButtons(HWND hWnd);

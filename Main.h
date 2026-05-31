@@ -1257,28 +1257,48 @@ void __fastcall PreferencesWindowApplyButtonHook(int* thiss, void* dummyEDX, int
 	SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_SETCHECK, GetIsRenderWindowAllowCellLoads(), NULL);
 }
 
-BOOL __stdcall RenderWindowCallbackHook(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-	if (msg == WM_KEYDOWN) {
-		switch (wParam) {
-		case VK_ESCAPE:
-		case VK_LWIN:
+WNDPROC originalRenderWindowCallback;
+BOOL CALLBACK RenderWindowCallbackHook(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+	switch (msg)
+	{
+	case WM_KEYDOWN:
+		if (wParam == VK_ESCAPE || wParam == VK_LWIN) {
 			SetFlycamMode(0);
-			break;
 		}
-	}
-	else if (msg == WM_RBUTTONDOWN) {
+		break;
+	case WM_RBUTTONDOWN:
 		SetFlycamMode(0);
+		break;
+	case 0x416:
+		// Disabling landscape editing
+		if (wParam == 0) {
+			RenderWindow::ResetLandscapePainting();
+		}
+		break;
+	case WM_INITDIALOG:
+	{
+		AddMinimizeAndCloseButtons(hWnd);
+		break;
 	}
-	else if (msg == 0x416u && wParam == 0) {
-		// Disabling landscape editing.
-		RenderWindow::ResetLandscapePainting();
+	case WM_CLOSE:
+		ShowWindow(hWnd, SW_HIDE);
+		CheckMenuItem(MainWindow::GetMenu(), 0x9D06, MF_UNCHECKED);
+		return TRUE;
+	case WM_SYSCOMMAND:
+		if ((wParam & 0xFFF0) == SC_MINIMIZE)
+		{
+			ShowWindow(hWnd, SW_HIDE);
+			CheckMenuItem(MainWindow::GetMenu(), 0x9D06, MF_UNCHECKED);
+			return TRUE;
+		}
+		break;
 	}
 
-	LRESULT res = StdCall<LRESULT>(0x455AA0, hWnd, msg, wParam, lParam);
+	LRESULT res = CallWindowProc(originalRenderWindowCallback, hWnd, msg, wParam, lParam);
 
 	if (msg == 0x416u && wParam == 0 && config.bRenderWindowRefreshAfterLandscapeEdit) {
 		// Refresh render window after landscape editing disabled.
-		StdCall<LRESULT>(0x455AA0, hWnd, WM_KEYDOWN, VK_F5, lParam);
+		CallWindowProc(originalRenderWindowCallback, hWnd, WM_KEYDOWN, VK_F5, lParam);
 	}
 
 	return res;
@@ -3433,38 +3453,57 @@ LRESULT CALLBACK ModelDataCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARA
 }
 
 WNDPROC originalObjectWindowCallback;
-LRESULT CALLBACK ObjectWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK ObjectWindowCallback(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
-	if (Message == WM_INITDIALOG)
+	switch (Message)
 	{
-		HWND listView = GetDlgItem(Hwnd, 1041);
+	case WM_INITDIALOG:
+	{
+		HWND listView = GetDlgItem(hWnd, 1041);
 		SetWindowSubclass(listView, ObjectWindowListViewCallback, 0, 0);
 
-		HWND filterField = GetDlgItem(Hwnd, 2557);
+		HWND filterField = GetDlgItem(hWnd, 2557);
 		SetWindowSubclass(filterField, ObjectWindowFilterFieldCallback, 0, 0);
+
+		AddMinimizeAndCloseButtons(hWnd);
+		break;
 	}
-	else if (Message == WM_COMMAND)
+	case WM_CLOSE:
+		ShowWindow(hWnd, SW_HIDE);
+		CheckMenuItem(MainWindow::GetMenu(), 0x9D07, MF_UNCHECKED);
+		return TRUE;
+	case WM_SYSCOMMAND:
+		if ((wParam & 0xFFF0) == SC_MINIMIZE)
+		{
+			ShowWindow(hWnd, SW_HIDE);
+			CheckMenuItem(MainWindow::GetMenu(), 0x9D07, MF_UNCHECKED);
+			return TRUE;
+		}
+		break;
+	case WM_COMMAND:
 	{
-		HWND listView = GetDlgItem(Hwnd, 1041);
+		HWND listView = GetDlgItem(hWnd, 1041);
 		if (HandlePopupMenuCommand(listView, wParam))
 		{
 			return true;
 		}
+		break;
 	}
-	else if (Message == WM_NOTIFY)
+	case WM_NOTIFY:
 	{
 		LPNMHDR hdr = (LPNMHDR)lParam;
 
-		if (hdr->hwndFrom == GetDlgItem(Hwnd, 1041) &&
+		if (hdr->hwndFrom == GetDlgItem(hWnd, 1041) &&
 			hdr->code == NM_CUSTOMDRAW)
 		{
 			LRESULT result = FormColoring::HandleCustomDraw(lParam);
 
-			SetWindowLongPtr(Hwnd, DWLP_MSGRESULT, result);
+			SetWindowLongPtr(hWnd, DWLP_MSGRESULT, result);
 			return TRUE;
 		}
 	}
-	return CallWindowProc(originalObjectWindowCallback, Hwnd, Message, wParam, lParam);
+	}
+	return CallWindowProc(originalObjectWindowCallback, hWnd, Message, wParam, lParam);
 }
 
 LRESULT CALLBACK CellWindowListViewCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
@@ -3482,14 +3521,30 @@ LRESULT CALLBACK CellWindowListViewCallback(HWND Hwnd, UINT Message, WPARAM wPar
 WNDPROC originalCellWindowCallback;
 LRESULT CALLBACK CellWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
-	if (Message == WM_INITDIALOG)
+	switch (Message)
+	{
+	case WM_INITDIALOG:
 	{
 		auto pCellList = GetDlgItem(Hwnd, 1155);
 		auto pObjectList = GetDlgItem(Hwnd, 1156);
 		SetWindowSubclass(pCellList, CellWindowListViewCallback, 0, 0);
 		SetWindowSubclass(pObjectList, CellWindowListViewCallback, 0, 0);
+		AddMinimizeAndCloseButtons(Hwnd);
+		break;
 	}
-	else if (Message == WM_COMMAND)
+	case WM_CLOSE:
+		ShowWindow(Hwnd, SW_HIDE);
+		CheckMenuItem(MainWindow::GetMenu(), 0x9D08, MF_UNCHECKED);
+		return TRUE;
+	case WM_SYSCOMMAND:
+		if ((wParam & 0xFFF0) == SC_MINIMIZE)
+		{
+			ShowWindow(Hwnd, SW_HIDE);
+			CheckMenuItem(MainWindow::GetMenu(), 0x9D08, MF_UNCHECKED);
+			return TRUE;
+		}
+		break;
+	case WM_COMMAND:
 	{
 		HWND pChildWindowFromPoint = *(HWND*)0xECF504;
 		bool isObjects = pChildWindowFromPoint == *(HWND*)0xECF548;
@@ -3502,8 +3557,9 @@ LRESULT CALLBACK CellWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 				return true;
 			}
 		}
+		break;
 	}
-	else if (Message == WM_NOTIFY)
+	case WM_NOTIFY:
 	{
 		LPNMHDR hdr = (LPNMHDR)lParam;
 
@@ -3515,6 +3571,8 @@ LRESULT CALLBACK CellWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 			SetWindowLongPtr(Hwnd, DWLP_MSGRESULT, result);
 			return TRUE;
 		}
+		break;
+	}
 	}
 	return CallWindowProc(originalCellWindowCallback, Hwnd, Message, wParam, lParam);
 }

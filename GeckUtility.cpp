@@ -5,7 +5,6 @@
 #include "GameData.h"
 
 void(__cdecl* SaveWindowPositionToINI)(HWND, const char*) = ((void(__cdecl*)(HWND hWnd, const char* Src))(0x43E170));
-HWND g_mainWindowToolbar = (HWND)0xECFC14;
 
 void GetCameraViewMatrix(NiMatrix33* out) {
 	auto current = &RenderData::GetSingleton()->pNode->m_localRotate;
@@ -336,4 +335,20 @@ TESForm* Window_GetForm(HWND hWnd)
 LRESULT __cdecl TESCSMain__WriteToStatusBar(unsigned int statusBarId, const char* msg)
 {
 	return CdeclCall<LRESULT>(0x4657A0, statusBarId, msg);
+}
+
+void AddMinimizeAndCloseButtons(HWND hWnd)
+{
+	LONG_PTR style = GetWindowLongPtr(hWnd, GWL_STYLE);
+	style |= WS_SYSMENU;
+	style &= ~WS_MINIMIZEBOX;
+	SetWindowLongPtr(hWnd, GWL_STYLE, style);
+
+	SetWindowPos(
+		hWnd,
+		nullptr,
+		0, 0, 0, 0,
+		SWP_NOMOVE | SWP_NOSIZE |
+		SWP_NOZORDER | SWP_FRAMECHANGED
+	);
 }

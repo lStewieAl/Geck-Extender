@@ -533,7 +533,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SafeWrite8(0x463282 + kFormType_TESLevCreature, 1);
 	SafeWrite8(0x463282 + kFormType_TESLevCharacter, 1);
 	WriteRelCall(0x46193B, UInt32(OnRenderWindowDragDrop__CreateReferenceAtLocation));
-	SafeWrite32(0x4411A1, UInt32(RenderWindowCallbackHook));
+	originalRenderWindowCallback = (WNDPROC)DetourVtable(0x4411A1, UInt32(RenderWindowCallbackHook));
 
 	// fix lights not updating when dragged unless a multibound is in the cell (thanks Pr0bability)
 	SafeWrite16(0x90C136, 0x9066); // remove check that the node is the root in ShadowSceneNode::UpdateQueuedLight 
