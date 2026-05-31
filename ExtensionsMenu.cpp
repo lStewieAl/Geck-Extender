@@ -306,6 +306,7 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 
 			editorUIInit = true;
 			g_MainHwnd = Hwnd;
+			SetWindowLongPtr(LogWindow::GetWindow(), GWLP_HWNDPARENT, (LONG_PTR)Hwnd);
 
 			InjectOpenSettingsMenuItem(createInfo->hMenu);
 
@@ -828,7 +829,7 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 				newY - prevY
 			};
 
-			for (HWND pWindow : { RenderWindow::GetWindow(), CellView::GetWindow(), ObjectsView::GetWindow() })
+			for (HWND pWindow : { RenderWindow::GetWindow(), CellView::GetWindow(), ObjectsView::GetWindow(), LogWindow::GetWindow() })
 			{
 				RECT rc;
 				GetWindowRect(pWindow, &rc);

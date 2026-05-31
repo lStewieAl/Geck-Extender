@@ -13,3 +13,8 @@ void AddLogText(LPARAM lParam, HWND richEditHwnd, bool doFree);
 
 LRESULT CALLBACK EditorUI_LogWndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam);
 bool EditorUI_CreateLogWindow();
+
+namespace LogWindow
+{
+	HWND GetWindow();
+}

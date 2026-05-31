@@ -12,6 +12,14 @@ HWND g_ConsoleHwnd;
 extern HWND g_MainHwnd;
 extern bool g_bPauseLogging = false;
 
+namespace LogWindow
+{
+	HWND GetWindow()
+	{
+		return g_ConsoleHwnd;
+	}
+}
+
 void Console_PrintVa(const char* Format, va_list Va)
 {
 	char buffer[2048];
@@ -267,7 +275,17 @@ bool EditorUI_CreateLogWindow()
 	int width = GetPrivateProfileIntA("Log", "iWindowPosDX", 1024, IniPath);
 	int height = GetPrivateProfileIntA("Log", "iWindowPosDY", 768, IniPath);
 
-	g_ConsoleHwnd = CreateWindowExA(0, "RTEDITLOG", "Message Log", WS_OVERLAPPEDWINDOW, posX, posY, width, height, nullptr, nullptr, instance, nullptr);
+	g_ConsoleHwnd = g_ConsoleHwnd = CreateWindowExA(
+		WS_EX_TOOLWINDOW,
+		"RTEDITLOG",
+		"Message Log",
+		WS_OVERLAPPEDWINDOW,
+		posX, posY, width, height,
+		g_MainHwnd,
+		nullptr,
+		instance,
+		nullptr
+	);
 
 	if (!g_ConsoleHwnd)
 		return false;
