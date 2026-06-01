@@ -66,7 +66,6 @@ struct Settings
 	bool bRenderWindowRefreshAfterLandscapeEdit;
 	bool bPreemptivelyUnloadCells;
 	bool bCustomReferenceBatchActions;
-	bool bWindowDragSyncRequiresShiftHeld;
 
 	int bUseAltShiftMultipliers;
 	float fMovementAltMultiplier;

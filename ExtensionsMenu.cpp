@@ -821,7 +821,7 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 		int newX = (short)LOWORD(lParam);
 		int newY = (short)HIWORD(lParam);
 
-		if (((GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0) ^ config.bWindowDragSyncRequiresShiftHeld)
+		if (((GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0))
 		{
 			POINT offset =
 			{
