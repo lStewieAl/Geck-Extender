@@ -3026,7 +3026,6 @@ void SaveZoom(HWND hRichEdit, const RichEditZoom& zoom)
 	SendMessage(hRichEdit, EM_GETZOOM, (WPARAM)&zoom.num, (LPARAM)&zoom.den);
 	WritePrivateProfileString("Script Editor", "iZoomNumerator", _itoa(zoom.num, buffer, 10), IniPath);
 	WritePrivateProfileString("Script Editor", "iZoomDenominator", _itoa(zoom.den, buffer, 10), IniPath);
-
 }
 
 void RestoreZoom(HWND hRichEdit, RichEditZoom& zoom)
@@ -3057,13 +3056,17 @@ BOOL __stdcall ScriptEditCallback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
 	return bResult;
 }
 
-BOOL __stdcall OnScriptSetWindowText_SaveAndRestoreZoom(HWND hWnd, LPCSTR lpString)
+BOOL __stdcall OnScriptSetWindowText_SaveAndRestoreZoom(HWND hRichEdit, LPCSTR lpString)
 {
-	SaveZoom(hWnd, s_RichEditZoom);
+	RichEditZoom kZoom;
+	SendMessage(hRichEdit, EM_GETZOOM, (WPARAM)&kZoom.num, (LPARAM)&kZoom.den);
 
-	bool bResult = SetWindowTextA(hWnd, lpString);
+	bool bResult = SetWindowTextA(hRichEdit, lpString);
 
-	RestoreZoom(hWnd, s_RichEditZoom);
+	if (kZoom.num && kZoom.den)
+	{
+		SendMessage(hRichEdit, EM_SETZOOM, kZoom.num, kZoom.den);
+	}
 
 	return bResult;
 }

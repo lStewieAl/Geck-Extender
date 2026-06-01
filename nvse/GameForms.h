@@ -757,6 +757,8 @@ public:
 	void* unk10;		// 10
 	UInt8	facegenFlags;	// 14
 	UInt8	pad15[3];		// 15
+	UInt32 controlId1;
+	UInt32 controlId2;
 
 	void SetPath(const char* newPath) { nifPath.Set(newPath); }
 };
