@@ -148,7 +148,7 @@ namespace LaunchGame
 			auto cell = RenderWindow::GetCurrentCell();
 			if (cell && GetAsyncKeyState(VK_SHIFT) < 0)
 			{
-				Console_Print("Launched game - process id: %d");
+				Console_Print("Launched game - process id: %d", processInfo.dwProcessId);
 				WriteLaunchAtCellFile(GetTickCount(), cell);
 			}
 		}

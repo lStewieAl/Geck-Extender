@@ -591,7 +591,7 @@ void RestoreCachedSearchAndReplaceWindow(HWND hDlg)
 }
 
 HWND cachedSearchAndReplaceWindow;
-void __stdcall OnCreateSearchAndReplaceWindow(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc, LPARAM dwInitParam)
+HWND __stdcall OnCreateSearchAndReplaceWindow(HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc, LPARAM dwInitParam)
 {
 	if (cachedSearchAndReplaceWindow && IsWindow(cachedSearchAndReplaceWindow))
 	{
@@ -609,6 +609,7 @@ void __stdcall OnCreateSearchAndReplaceWindow(HINSTANCE hInstance, LPCSTR lpTemp
 	{
 		cachedSearchAndReplaceWindow = hk_CreateDialogParamA(hInstance, lpTemplateName, hWndParent, lpDialogFunc, dwInitParam);
 	}
+	return cachedSearchAndReplaceWindow;
 }
 
 void __stdcall OnDestroySearchAndReplaceWindow(HWND hWnd)
