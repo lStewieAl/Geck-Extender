@@ -154,6 +154,7 @@ LRESULT CALLBACK EditorUI_LogWndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPA
 
 	case WM_CLOSE:
 		ShowWindow(Hwnd, SW_HIDE);
+		WritePrivateProfileString("Windows", "bHideLogWindow", " 1", IniPath);
 		return 0;
 
 	case WM_NOTIFY:
@@ -290,7 +291,11 @@ bool EditorUI_CreateLogWindow()
 	if (!g_ConsoleHwnd)
 		return false;
 
-	ShowWindow(g_ConsoleHwnd, SW_SHOW);
+	if (!config.bHideLogWindow)
+	{
+		ShowWindow(g_ConsoleHwnd, SW_SHOW);
+	}
+
 	UpdateWindow(g_ConsoleHwnd);
 	return true;
 }

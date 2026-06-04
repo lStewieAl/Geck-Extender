@@ -97,6 +97,7 @@ void ReadAllSettings()
 	config.bHideRenderWindow = GetOrCreateINIValue("Windows", "bHideRenderWindow", 0, IniPath);
 	config.bHideObjectWindow = GetOrCreateINIValue("Windows", "bHideObjectWindow", 0, IniPath);
 	config.bHideCellViewWindow = GetOrCreateINIValue("Windows", "bHideCellViewWindow", 0, IniPath);
+	config.bHideLogWindow = GetOrCreateINIValue("Windows", "bHideLogWindow", 0, IniPath);
 
 	config.uPrimitiveColor_CubicActivator = GetOrCreateINIValueHex("Primitive Colors", "uCubicActivator", 0xCC4C3326, IniPath);
 	config.uPrimitiveColor_CubicMultibound = GetOrCreateINIValueHex("Primitive Colors", "uCubicMultibound", 0x4CCC1926, IniPath);

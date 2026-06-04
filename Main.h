@@ -1258,6 +1258,13 @@ void __fastcall PreferencesWindowApplyButtonHook(int* thiss, void* dummyEDX, int
 	SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_SETCHECK, GetIsRenderWindowAllowCellLoads(), NULL);
 }
 
+void HideRenderWindow(HWND hWnd)
+{
+	ShowWindow(hWnd, SW_HIDE);
+	CheckMenuItem(MainWindow::GetMenu(), 0x9D06, MF_UNCHECKED);
+	WritePrivateProfileString("Windows", "bHideRenderWindow", " 1", IniPath);
+}
+
 WNDPROC originalRenderWindowCallback;
 BOOL CALLBACK RenderWindowCallbackHook(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	switch (msg)
@@ -1282,14 +1289,12 @@ BOOL CALLBACK RenderWindowCallbackHook(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 		break;
 	}
 	case WM_CLOSE:
-		ShowWindow(hWnd, SW_HIDE);
-		CheckMenuItem(MainWindow::GetMenu(), 0x9D06, MF_UNCHECKED);
+		HideRenderWindow(hWnd);
 		return TRUE;
 	case WM_SYSCOMMAND:
 		if ((wParam & 0xFFF0) == SC_MINIMIZE)
 		{
-			ShowWindow(hWnd, SW_HIDE);
-			CheckMenuItem(MainWindow::GetMenu(), 0x9D06, MF_UNCHECKED);
+			HideRenderWindow(hWnd);
 			return TRUE;
 		}
 		break;
@@ -3456,6 +3461,13 @@ LRESULT CALLBACK ModelDataCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARA
 	return result;
 }
 
+void HideObjectWindow(HWND hWnd)
+{
+	ShowWindow(hWnd, SW_HIDE);
+	CheckMenuItem(MainWindow::GetMenu(), 0x9D07, MF_UNCHECKED);
+	WritePrivateProfileString("Windows", "bHideObjectWindow", " 1", IniPath);
+}
+
 WNDPROC originalObjectWindowCallback;
 LRESULT CALLBACK ObjectWindowCallback(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
@@ -3473,14 +3485,12 @@ LRESULT CALLBACK ObjectWindowCallback(HWND hWnd, UINT Message, WPARAM wParam, LP
 		break;
 	}
 	case WM_CLOSE:
-		ShowWindow(hWnd, SW_HIDE);
-		CheckMenuItem(MainWindow::GetMenu(), 0x9D07, MF_UNCHECKED);
+		HideObjectWindow(hWnd);
 		return TRUE;
 	case WM_SYSCOMMAND:
 		if ((wParam & 0xFFF0) == SC_MINIMIZE)
 		{
-			ShowWindow(hWnd, SW_HIDE);
-			CheckMenuItem(MainWindow::GetMenu(), 0x9D07, MF_UNCHECKED);
+			HideObjectWindow(hWnd);
 			return TRUE;
 		}
 		break;
@@ -3522,6 +3532,13 @@ LRESULT CALLBACK CellWindowListViewCallback(HWND Hwnd, UINT Message, WPARAM wPar
 	return DefSubclassProc(Hwnd, Message, wParam, lParam);
 }
 
+void HideCellWindow(HWND hWnd)
+{
+	ShowWindow(hWnd, SW_HIDE);
+	CheckMenuItem(MainWindow::GetMenu(), 0x9D08, MF_UNCHECKED);
+	WritePrivateProfileString("Windows", "bHideCellViewWindow", " 1", IniPath);
+}
+
 WNDPROC originalCellWindowCallback;
 LRESULT CALLBACK CellWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
@@ -3537,14 +3554,12 @@ LRESULT CALLBACK CellWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 		break;
 	}
 	case WM_CLOSE:
-		ShowWindow(Hwnd, SW_HIDE);
-		CheckMenuItem(MainWindow::GetMenu(), 0x9D08, MF_UNCHECKED);
+		HideCellWindow(Hwnd);
 		return TRUE;
 	case WM_SYSCOMMAND:
 		if ((wParam & 0xFFF0) == SC_MINIMIZE)
 		{
-			ShowWindow(Hwnd, SW_HIDE);
-			CheckMenuItem(MainWindow::GetMenu(), 0x9D08, MF_UNCHECKED);
+			HideCellWindow(Hwnd);
 			return TRUE;
 		}
 		break;

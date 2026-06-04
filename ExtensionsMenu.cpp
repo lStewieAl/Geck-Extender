@@ -45,6 +45,8 @@
 
 // unused button in vanilla menu
 #define MENUOPTION_RENDER_WINDOW 0x9D06
+#define MENUOPTION_OBJECT_WINDOW 0x9D07
+#define MENUOPTION_CELL_WINDOW 0x9D08
 #define MENUOPTION_RECOMPILE_ALL 0x9ECE
 
 HWND g_MainHwnd;
@@ -438,6 +440,7 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 		{
 			ShowWindow(g_ConsoleHwnd, SW_SHOW);
 			SetForegroundWindow(g_ConsoleHwnd);
+			WritePrivateProfileString("Windows", "bHideLogWindow", " 0", IniPath);
 		}
 		return 0;
 
@@ -761,15 +764,66 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 				//	Hide window
 				menuInfo.fState = MFS_UNCHECKED;
 				SetMenuItemInfo(g_MainMenu, MENUOPTION_RENDER_WINDOW, FALSE, &menuInfo);
-				ShowWindow(RenderWindow::GetWindow(), false);
+				ShowWindow(RenderWindow::GetWindow(), SW_HIDE);
 			}
 			else
 			{
 				//	Show window
 				menuInfo.fState = MFS_CHECKED;
 				SetMenuItemInfo(g_MainMenu, MENUOPTION_RENDER_WINDOW, FALSE, &menuInfo);
-				ShowWindow(RenderWindow::GetWindow(), true);
+				ShowWindow(RenderWindow::GetWindow(), SW_NORMAL);
 			}
+			WritePrivateProfileString("Windows", "bHideRenderWindow", menuInfo.fState == MFS_CHECKED ? " 0" : " 1", IniPath);
+		}
+		return 0;
+
+		case MENUOPTION_OBJECT_WINDOW:
+		{
+			MENUITEMINFO menuInfo;
+			menuInfo.cbSize = sizeof(MENUITEMINFO);
+			menuInfo.fMask = MIIM_STATE;
+			GetMenuItemInfo(g_MainMenu, MENUOPTION_OBJECT_WINDOW, FALSE, &menuInfo);
+
+			if (menuInfo.fState == MFS_CHECKED)
+			{
+				//	Hide window
+				menuInfo.fState = MFS_UNCHECKED;
+				SetMenuItemInfo(g_MainMenu, MENUOPTION_OBJECT_WINDOW, FALSE, &menuInfo);
+				ShowWindow(ObjectsView::GetWindow(), SW_HIDE);
+			}
+			else
+			{
+				//	Show window
+				menuInfo.fState = MFS_CHECKED;
+				SetMenuItemInfo(g_MainMenu, MENUOPTION_OBJECT_WINDOW, FALSE, &menuInfo);
+				ShowWindow(ObjectsView::GetWindow(), SW_NORMAL);
+			}
+			WritePrivateProfileString("Windows", "bHideObjectWindow", menuInfo.fState == MFS_CHECKED ? " 0" : " 1", IniPath);
+		}
+		return 0;
+
+		case MENUOPTION_CELL_WINDOW:
+		{
+			MENUITEMINFO menuInfo;
+			menuInfo.cbSize = sizeof(MENUITEMINFO);
+			menuInfo.fMask = MIIM_STATE;
+			GetMenuItemInfo(g_MainMenu, MENUOPTION_CELL_WINDOW, FALSE, &menuInfo);
+
+			if (menuInfo.fState == MFS_CHECKED)
+			{
+				//	Hide window
+				menuInfo.fState = MFS_UNCHECKED;
+				SetMenuItemInfo(g_MainMenu, MENUOPTION_CELL_WINDOW, FALSE, &menuInfo);
+				ShowWindow(CellView::GetWindow(), SW_HIDE);
+			}
+			else
+			{
+				//	Show window
+				menuInfo.fState = MFS_CHECKED;
+				SetMenuItemInfo(g_MainMenu, MENUOPTION_CELL_WINDOW, FALSE, &menuInfo);
+				ShowWindow(CellView::GetWindow(), SW_NORMAL);
+			}
+			WritePrivateProfileString("Windows", "bHideCellViewWindow", menuInfo.fState == MFS_CHECKED ? " 0" : " 1", IniPath);
 		}
 		return 0;
 
@@ -855,6 +909,5 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 
 void ExtensionsMenu_InitHooks()
 {
-	originalMainWindowCallback = *(WNDPROC*)0x0044612D;
-	SafeWrite32(0x0044612D, (UInt32)MainWindowCallback);
+	originalMainWindowCallback = (WNDPROC)DetourVtable(0x44612D, UInt32(MainWindowCallback));
 }
