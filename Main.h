@@ -124,9 +124,9 @@ void MoveDlgItem(HWND hWnd, int ID, int deltaX, int deltaY)
 	SetWindowPos(element, NULL, point.x + deltaX, point.y + deltaY, NULL, NULL, SWP_NOSIZE);
 }
 
-static void DoModScriptWindow(HWND wnd)
+static void DoModScriptWindow(HWND hWnd)
 {
-	SendMessage(wnd, EM_EXLIMITTEXT, 0, 0x00FFFFFF);
+	SendMessage(hWnd, EM_EXLIMITTEXT, 0, 0x00FFFFFF);
 
 	GetPrivateProfileStringA("Script", "Font", "Consolas", editorFont.lfFaceName, 31, IniPath);
 	editorFont.lfHeight = GetOrCreateINIValue("Script", "FontSize", 13, IniPath);
@@ -143,13 +143,13 @@ static void DoModScriptWindow(HWND wnd)
 		fontHandle = GetStockObject(SYSTEM_FIXED_FONT);
 		GetObject(fontHandle, sizeof(fontInfo), &fontInfo);
 	}
-	SendMessage(wnd, EM_SETTEXTMODE, TM_PLAINTEXT, 0);
-	SendMessage(wnd, WM_SETFONT, (WPARAM)fontHandle, 1);
-	SendMessage(wnd, EM_SETMODIFY, 1, 0);
+	SendMessage(hWnd, EM_SETTEXTMODE, TM_PLAINTEXT, 0);
+	SendMessage(hWnd, WM_SETFONT, (WPARAM)fontHandle, 1);
+	SendMessage(hWnd, EM_SETMODIFY, 1, 0);
 
 	// one tab stop every 16 dialog units
 	UInt32	tabStopSize = 16;
-	SendMessage(wnd, EM_SETTABSTOPS, 1, (LPARAM)& tabStopSize);
+	SendMessage(hWnd, EM_SETTABSTOPS, 1, (LPARAM)& tabStopSize);
 	DeleteObject(fontHandle);
 }
 
@@ -1820,13 +1820,13 @@ bool HandleDialoguePopupMenuCommand(HWND listView, UInt32 commandID)
 	return FormColoring::HandlePopupMenuCommand(listView, commandID);
 }
 
-BOOL CALLBACK DialogueWindowTopicsCallback(HWND Hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+BOOL CALLBACK DialogueWindowTopicsCallback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	enum { kDialogMenu_ListView = 1448, kDialogMenu_QuestListView = 2064 };
 	if (msg == WM_COMMAND)
 	{
-		if (HandleDialoguePopupMenuCommand(GetDlgItem(Hwnd, kDialogMenu_ListView), wParam) ||
-			HandleDialoguePopupMenuCommand(GetDlgItem(Hwnd, kDialogMenu_QuestListView), wParam))
+		if (HandleDialoguePopupMenuCommand(GetDlgItem(hWnd, kDialogMenu_ListView), wParam) ||
+			HandleDialoguePopupMenuCommand(GetDlgItem(hWnd, kDialogMenu_QuestListView), wParam))
 		{
 			return true;
 		}
@@ -1838,38 +1838,38 @@ BOOL CALLBACK DialogueWindowTopicsCallback(HWND Hwnd, UINT msg, WPARAM wParam, L
 		{
 			if (hdr->code == NM_RCLICK)
 			{
-				SetupDialogueTopicRightClickMenu(Hwnd, hdr->hwndFrom);
+				SetupDialogueTopicRightClickMenu(hWnd, hdr->hwndFrom);
 			}
 			else if (hdr->code == NM_CUSTOMDRAW)
 			{
 				LRESULT result = FormColoring::HandleCustomDraw(lParam);
 
-				SetWindowLongPtr(Hwnd, DWLP_MSGRESULT, result);
+				SetWindowLongPtr(hWnd, DWLP_MSGRESULT, result);
 				return TRUE;
 			}
 		}
 	}
-	return CallWindowProc((WNDPROC)0x598440, Hwnd, msg, wParam, lParam);
+	return CallWindowProc((WNDPROC)0x598440, hWnd, msg, wParam, lParam);
 }
 
-BOOL CALLBACK DialogueWindowCallback(HWND Hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+BOOL CALLBACK DialogueWindowCallback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	if (msg == WM_SIZE)
 	{
 		WORD width = LOWORD(lParam);
 		WORD height = HIWORD(lParam);
-		ResizeDialogueWindow(Hwnd, width, height);
+		ResizeDialogueWindow(hWnd, width, height);
 		// TODO - the menu needs to resize when switching tabs too...
 	}
-	auto result = CallWindowProc((WNDPROC)0x57FA00, Hwnd, msg, wParam, lParam);
+	auto result = CallWindowProc((WNDPROC)0x57FA00, hWnd, msg, wParam, lParam);
 	if (msg == WM_INITDIALOG)
 	{
-		LONG style = GetWindowLong(Hwnd, GWL_STYLE);
+		LONG style = GetWindowLong(hWnd, GWL_STYLE);
 		style |= WS_THICKFRAME;
-		SetWindowLong(Hwnd, GWL_STYLE, style);
+		SetWindowLong(hWnd, GWL_STYLE, style);
 
 		SetWindowPos(
-			Hwnd,
+			hWnd,
 			nullptr,
 			0, 0, 0, 0,
 			SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
@@ -2962,7 +2962,7 @@ __HOOK OnObjectWindowNewHook()
 	}
 }
 
-LRESULT CALLBACK ObjectWindowListViewCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
+LRESULT CALLBACK ObjectWindowListViewCallback(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
 {
 	if (Message == WM_KEYDOWN)
 	{
@@ -2975,13 +2975,13 @@ LRESULT CALLBACK ObjectWindowListViewCallback(HWND Hwnd, UINT Message, WPARAM wP
 			}
 			else if (wParam == 'F')
 			{
-				SetFocus(GetDlgItem(GetParent(Hwnd), 2557));
+				SetFocus(GetDlgItem(GetParent(hWnd), 2557));
 				return FALSE;
 			}
 		}
 		else if (wParam == VK_RETURN)
 		{
-			SInt32 index = SendMessageA(Hwnd, LVM_GETNEXTITEM, -1, LVNI_SELECTED);
+			SInt32 index = SendMessageA(hWnd, LVM_GETNEXTITEM, -1, LVNI_SELECTED);
 			struct
 			{
 				UInt32 pad[3];
@@ -2997,25 +2997,25 @@ LRESULT CALLBACK ObjectWindowListViewCallback(HWND Hwnd, UINT Message, WPARAM wP
 			return FALSE;
 		}
 	}
-	return DefSubclassProc(Hwnd, Message, wParam, lParam);
+	return DefSubclassProc(hWnd, Message, wParam, lParam);
 }
 
-LRESULT CALLBACK ObjectWindowFilterFieldCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
+LRESULT CALLBACK ObjectWindowFilterFieldCallback(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
 {
 	if (Message == WM_KEYDOWN && GetAsyncKeyState(VK_CONTROL) < 0)
 	{
 		if (wParam == 'A')
 		{
-			SendMessage(Hwnd, EM_SETSEL, 0, -1);
+			SendMessage(hWnd, EM_SETSEL, 0, -1);
 			return FALSE;
 		}
 		else if (wParam == 'F')
 		{
-			SetFocus(GetDlgItem(GetParent(Hwnd), 1041));
+			SetFocus(GetDlgItem(GetParent(hWnd), 1041));
 			return FALSE;
 		}
 	}
-	return DefSubclassProc(Hwnd, Message, wParam, lParam);
+	return DefSubclassProc(hWnd, Message, wParam, lParam);
 }
 
 bool SelectedListViewItemContainsRecalcBoundsTargets(HWND ahListView);
@@ -3202,7 +3202,7 @@ bool HandlePopupMenuCommand(HWND listView, UInt32 commandID)
 }
 
 WNDPROC originalModelDataCallback;
-LRESULT CALLBACK ModelDataCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK ModelDataCallback(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	enum CtrlIDs
 	{
@@ -3212,31 +3212,31 @@ LRESULT CALLBACK ModelDataCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARA
 	// make pressing ENTER in the edit set the mesh path
 	if (Message == WM_COMMAND && LOWORD(wParam) == IDOK)
 	{
-		HWND hEdit = GetDlgItem(Hwnd, IDC_MODEL_DATA_EDIT);
+		HWND hEdit = GetDlgItem(hWnd, IDC_MODEL_DATA_EDIT);
 		if (GetFocus() == hEdit)
 		{
 			char buf[MAX_PATH];
 			GetWindowText(hEdit, buf, sizeof(buf));
 
-			auto pModelTexSwap = Window_GetForm(Hwnd);
+			auto pModelTexSwap = Window_GetForm(hWnd);
 			if (pModelTexSwap)
 			{
 				pModelTexSwap->SetMeshPath(buf);
 				ThisCall(0x505870, pModelTexSwap);
-				CdeclCall(0x5067F0, Hwnd);
+				CdeclCall(0x5067F0, hWnd);
 
 				return 0;
 			}
 		}
 	}
 
-	auto result = CallWindowProc(originalModelDataCallback, Hwnd, Message, wParam, lParam);
+	auto result = CallWindowProc(originalModelDataCallback, hWnd, Message, wParam, lParam);
 
 	// prefill the mesh path on load
 	if (Message == WM_INITDIALOG)
 	{
-		HWND hEdit = GetDlgItem(Hwnd, IDC_MODEL_DATA_EDIT);
-		auto pModelTexSwap = (TESModelTextureSwap*)Window_GetForm(Hwnd);
+		HWND hEdit = GetDlgItem(hWnd, IDC_MODEL_DATA_EDIT);
+		auto pModelTexSwap = (TESModelTextureSwap*)Window_GetForm(hWnd);
 		if (pModelTexSwap)
 		{
 			SetWindowText(hEdit, pModelTexSwap->nifPath.CStr());
@@ -3305,16 +3305,16 @@ LRESULT CALLBACK ObjectWindowCallback(HWND hWnd, UINT Message, WPARAM wParam, LP
 	return CallWindowProc(originalObjectWindowCallback, hWnd, Message, wParam, lParam);
 }
 
-LRESULT CALLBACK CellWindowListViewCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
+LRESULT CALLBACK CellWindowListViewCallback(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
 {
 	if (Message == WM_COMMAND)
 	{
-		if (HandlePopupMenuCommand(Hwnd, wParam))
+		if (HandlePopupMenuCommand(hWnd, wParam))
 		{
 			return true;
 		}
 	}
-	return DefSubclassProc(Hwnd, Message, wParam, lParam);
+	return DefSubclassProc(hWnd, Message, wParam, lParam);
 }
 
 void HideCellWindow(HWND hWnd)
@@ -3325,26 +3325,26 @@ void HideCellWindow(HWND hWnd)
 }
 
 WNDPROC originalCellWindowCallback;
-LRESULT CALLBACK CellWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK CellWindowCallback(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	switch (Message)
 	{
 	case WM_INITDIALOG:
 	{
-		auto pCellList = GetDlgItem(Hwnd, 1155);
-		auto pObjectList = GetDlgItem(Hwnd, 1156);
+		auto pCellList = GetDlgItem(hWnd, 1155);
+		auto pObjectList = GetDlgItem(hWnd, 1156);
 		SetWindowSubclass(pCellList, CellWindowListViewCallback, 0, 0);
 		SetWindowSubclass(pObjectList, CellWindowListViewCallback, 0, 0);
-		AddMinimizeAndCloseButtons(Hwnd);
+		AddMinimizeAndCloseButtons(hWnd);
 		break;
 	}
 	case WM_CLOSE:
-		HideCellWindow(Hwnd);
+		HideCellWindow(hWnd);
 		return TRUE;
 	case WM_SYSCOMMAND:
 		if ((wParam & 0xFFF0) == SC_MINIMIZE)
 		{
-			HideCellWindow(Hwnd);
+			HideCellWindow(hWnd);
 			return TRUE;
 		}
 		break;
@@ -3356,7 +3356,7 @@ LRESULT CALLBACK CellWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 		if (isObjects || isCells)
 		{
 			int listId = isObjects ? 1156 : 1155;
-			if (HandlePopupMenuCommand(GetDlgItem(Hwnd, listId), wParam))
+			if (HandlePopupMenuCommand(GetDlgItem(hWnd, listId), wParam))
 			{
 				return true;
 			}
@@ -3367,18 +3367,18 @@ LRESULT CALLBACK CellWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 	{
 		LPNMHDR hdr = (LPNMHDR)lParam;
 
-		if (hdr->hwndFrom == GetDlgItem(Hwnd, 1155) &&
+		if (hdr->hwndFrom == GetDlgItem(hWnd, 1155) &&
 			hdr->code == NM_CUSTOMDRAW)
 		{
 			LRESULT result = FormColoring::HandleCustomDraw(lParam);
 
-			SetWindowLongPtr(Hwnd, DWLP_MSGRESULT, result);
+			SetWindowLongPtr(hWnd, DWLP_MSGRESULT, result);
 			return TRUE;
 		}
 		break;
 	}
 	}
-	return CallWindowProc(originalCellWindowCallback, Hwnd, Message, wParam, lParam);
+	return CallWindowProc(originalCellWindowCallback, hWnd, Message, wParam, lParam);
 }
 
 void __fastcall OnMainWindowUndo(HistoryManager* historyMgr, void* edx, int formal)
@@ -3840,12 +3840,12 @@ void ShowHideHwnd__CheckDlgButtons()
 }
 
 WNDPROC originalShowHideWindowCallback;
-LRESULT CALLBACK ShowHideWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK ShowHideWindowCallback(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
-	auto result = CallWindowProc(originalShowHideWindowCallback, Hwnd, Message, wParam, lParam);
+	auto result = CallWindowProc(originalShowHideWindowCallback, hWnd, Message, wParam, lParam);
 	if (Message == WM_INITDIALOG)
 	{
-		EnableWindow(GetDlgItem(Hwnd, SHOW_ACTIVATORS_BUTTON), TRUE);
+		EnableWindow(GetDlgItem(hWnd, SHOW_ACTIVATORS_BUTTON), TRUE);
 		ShowHideHwnd__CheckDlgButtons();
 	}
 	else if (Message == WM_COMMAND)
@@ -3881,7 +3881,7 @@ void __cdecl OnSetNonLandVisible(bool bVisible)
 	ShowHideHwnd__CheckDlgButtons();
 }
 
-LRESULT CALLBACK TextureUseListViewCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR quadIdx)
+LRESULT CALLBACK TextureUseListViewCallback(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR quadIdx)
 {
 	static UInt32 copiedTextureFormId = 0;
 	if (Message == WM_KEYDOWN)
@@ -3891,10 +3891,10 @@ LRESULT CALLBACK TextureUseListViewCallback(HWND Hwnd, UINT Message, WPARAM wPar
 			// allow copy/replacing entries
 			if (wParam == 'C' || wParam == 'V')
 			{
-				auto form = Window_GetForm(GetParent(Hwnd));
+				auto form = Window_GetForm(GetParent(hWnd));
 				auto land = CdeclCall<TESObjectLAND*>(0xC5D114, form, 0, 0xE8C57C, 0xE8E57C, 0); // DYNAMIC_CAST(form, TESForm, TESObjectLAND)
 
-				int slot = SendMessageA(Hwnd, LVM_GETNEXTITEM, 0xFFFFFFFF, LVIS_SELECTED);
+				int slot = SendMessageA(hWnd, LVM_GETNEXTITEM, 0xFFFFFFFF, LVIS_SELECTED);
 				if (slot != -1)
 				{
 					TESLandTexture* texture;
@@ -3916,7 +3916,7 @@ LRESULT CALLBACK TextureUseListViewCallback(HWND Hwnd, UINT Message, WPARAM wPar
 						}
 						else if (auto clipBoardLandTexture = LookupFormByID(copiedTextureFormId))
 						{
-							CdeclCall(0x436B20, GetParent(Hwnd), quadIdx, texture, clipBoardLandTexture);
+							CdeclCall(0x436B20, GetParent(hWnd), quadIdx, texture, clipBoardLandTexture);
 							return FALSE;
 						}
 					}
@@ -3927,21 +3927,21 @@ LRESULT CALLBACK TextureUseListViewCallback(HWND Hwnd, UINT Message, WPARAM wPar
 			
 		}
 	}
-	return DefSubclassProc(Hwnd, Message, wParam, lParam);
+	return DefSubclassProc(hWnd, Message, wParam, lParam);
 }
 
 WNDPROC originalTextureUseCallback;
-LRESULT CALLBACK TextureUseCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK TextureUseCallback(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	if (Message == WM_INITDIALOG)
 	{
 		for (int quad = 0; quad < 4; ++quad)
 		{
-			HWND listView = GetDlgItem(Hwnd, 2386 + quad);
+			HWND listView = GetDlgItem(hWnd, 2386 + quad);
 			SetWindowSubclass(listView, TextureUseListViewCallback, 0, (DWORD_PTR)quad);
 		}
 	}
-	return CallWindowProc(originalTextureUseCallback, Hwnd, Message, wParam, lParam);
+	return CallWindowProc(originalTextureUseCallback, hWnd, Message, wParam, lParam);
 }
 
 __HOOK OnSelectedBodyPartListViewButtonPressedHook()

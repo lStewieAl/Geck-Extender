@@ -112,24 +112,24 @@ namespace RecentlyOpenedForms
 		}
 	}
 
-	LRESULT CALLBACK WindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+	LRESULT CALLBACK WindowCallback(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 	{
 		if (Message == BSMsg_AcceptsDropType)
 		{
-			SetWindowLong(Hwnd, DWL_MSGRESULT, false);
+			SetWindowLong(hWnd, DWL_MSGRESULT, false);
 			return TRUE;
 		}
 		else if (Message == WM_INITDIALOG)
 		{
-			SendMessageA(Hwnd, BetterFloatingFormList::BFL_SET_FILTER, 0, 0);
-			SendMessageA(Hwnd, BetterFloatingFormList::BFL_SET_INITIAL_SORT, 0, 0);
+			SendMessageA(hWnd, BetterFloatingFormList::BFL_SET_FILTER, 0, 0);
+			SendMessageA(hWnd, BetterFloatingFormList::BFL_SET_INITIAL_SORT, 0, 0);
 		}
 
-		auto result = BetterFloatingFormList::BaseWindowCallback(Hwnd, Message, wParam, lParam);
+		auto result = BetterFloatingFormList::BaseWindowCallback(hWnd, Message, wParam, lParam);
 
 		if (Message == WM_INITDIALOG)
 		{
-			DragAcceptFiles(Hwnd, FALSE);
+			DragAcceptFiles(hWnd, FALSE);
 		}
 		else if (Message == BetterFloatingFormList::BFL_DELETED_ITEMS)
 		{

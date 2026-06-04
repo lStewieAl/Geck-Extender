@@ -62,36 +62,36 @@ namespace BetterFloatingFormList
 	}
 
 	WNDPROC originalWindowCallback;
-	LRESULT CALLBACK BaseWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+	LRESULT CALLBACK BaseWindowCallback(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 	{
 		switch (Message)
 		{
 		case WM_INITDIALOG:
 		{
-			auto listView = GetDlgItem(Hwnd, 1018);
+			auto listView = GetDlgItem(hWnd, 1018);
 			SubclassListView(listView);
 			ListView_SetExtendedListViewStyleEx(listView, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
 			LONG_PTR style = GetWindowLongPtr(listView, GWL_STYLE);
 			SetWindowLongPtr(listView, GWL_STYLE, style & ~LVS_EDITLABELS);
 
-			DragAcceptFiles(Hwnd, TRUE);
+			DragAcceptFiles(hWnd, TRUE);
 
 			// allow the window to be closed from the 'Open Windows' menu
 			auto openWindowsList = OpenWindows::GetWindowList();
-			openWindowsList->Append((HWND*)Hwnd);
+			openWindowsList->Append((HWND*)hWnd);
 			break;
 		}
 
 		case BSMsg_AcceptsDropType:
 		{
-			SetWindowLong(Hwnd, DWL_MSGRESULT, wParam != kFormType_TESObjectREFR);
+			SetWindowLong(hWnd, DWL_MSGRESULT, wParam != kFormType_TESObjectREFR);
 			return TRUE;
 		}
 
 		case BSMsg_HandleDrop:
 		{
 			auto selected = RenderWindow::SelectedData::GetSelected();
-			auto listView = GetDlgItem(Hwnd, 1018);
+			auto listView = GetDlgItem(hWnd, 1018);
 			if (auto selectedFormIter = selected->selectedForms)
 			{
 				tList<TESForm> addedForms;
@@ -114,7 +114,7 @@ namespace BetterFloatingFormList
 					SetDeferListUpdate(listView, true);
 
 					TESListView::AddForms(listView, &addedForms);
-					SendMessageA(Hwnd, BFL_ADDED_ITEMS, (WPARAM)&addedForms, (LPARAM)listView);
+					SendMessageA(hWnd, BFL_ADDED_ITEMS, (WPARAM)&addedForms, (LPARAM)listView);
 
 					SetDeferListUpdate(listView, false);
 
@@ -125,17 +125,17 @@ namespace BetterFloatingFormList
 		}
 		case BFL_SET_FILTER:
 		{
-			SetPropA(Hwnd, "DoFilter", (HANDLE)wParam);
+			SetPropA(hWnd, "DoFilter", (HANDLE)wParam);
 			break;
 		}
 		case BFL_SET_INITIAL_SORT:
 		{
-			SetPropA(Hwnd, "DoInitialSort", (HANDLE)wParam);
+			SetPropA(hWnd, "DoInitialSort", (HANDLE)wParam);
 			break;
 		}
 		}
 
-		return CallWindowProc(originalWindowCallback, Hwnd, Message, wParam, lParam);
+		return CallWindowProc(originalWindowCallback, hWnd, Message, wParam, lParam);
 	}
 
 	bool ShowOpenFileDialog(HWND hWnd, char* dst, size_t dstLen, bool bSave = false) {
@@ -314,13 +314,13 @@ namespace BetterFloatingFormList
 		return hWndToolbar;
 	}
 
-	void UpdateToolbarAndListviewPositions(HWND Hwnd)
+	void UpdateToolbarAndListviewPositions(HWND hWnd)
 	{
 		RECT rcClient;
-		GetClientRect(Hwnd, &rcClient);
+		GetClientRect(hWnd, &rcClient);
 
 		// Resize the toolbar and let it auto-adjust its height
-		auto hWndToolbar = GetDlgItem(Hwnd, IDC_TOOLBAR);
+		auto hWndToolbar = GetDlgItem(hWnd, IDC_TOOLBAR);
 		SendMessage(hWndToolbar, TB_AUTOSIZE, 0, 0);
 
 		RECT rcToolbar;
@@ -329,19 +329,19 @@ namespace BetterFloatingFormList
 
 		// Calculate the new height and position for the list view
 		int listViewHeight = rcClient.bottom - toolbarHeight;
-		auto listView = GetDlgItem(Hwnd, 1018);
+		auto listView = GetDlgItem(hWnd, 1018);
 		SetWindowPos(listView, NULL, 0, toolbarHeight, rcClient.right, listViewHeight, SWP_NOZORDER);
 	}
 
-	LRESULT CALLBACK WindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+	LRESULT CALLBACK WindowCallback(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 	{
 		switch (Message)
 		{
 		case WM_INITDIALOG:
 		{
-			CreateToolbar(Hwnd);
-			UpdateToolbarAndListviewPositions(Hwnd);
-			SendMessageA(Hwnd, BFL_SET_INITIAL_SORT, 1, 0);
+			CreateToolbar(hWnd);
+			UpdateToolbarAndListviewPositions(hWnd);
+			SendMessageA(hWnd, BFL_SET_INITIAL_SORT, 1, 0);
 			break;
 		}
 		case WM_COMMAND:
@@ -349,21 +349,21 @@ namespace BetterFloatingFormList
 			switch (LOWORD(wParam))
 			{
 			case IDM_LOAD:
-				LoadFormList(GetDlgItem(Hwnd, 1018));
+				LoadFormList(GetDlgItem(hWnd, 1018));
 				break;
 			case IDM_SAVE:
-				SaveFormList(GetDlgItem(Hwnd, 1018));
+				SaveFormList(GetDlgItem(hWnd, 1018));
 				break;
 			}
 			break;
 		}
 		case WM_SIZE:
 		{
-			UpdateToolbarAndListviewPositions(Hwnd);
+			UpdateToolbarAndListviewPositions(hWnd);
 			break;
 		}
 		}
-		return BaseWindowCallback(Hwnd, Message, wParam, lParam);
+		return BaseWindowCallback(hWnd, Message, wParam, lParam);
 	}
 
 	void __fastcall OnSelectForm(TESForm* form, HWND parent)

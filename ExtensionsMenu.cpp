@@ -291,7 +291,7 @@ void InjectOpenSettingsMenuItem(HMENU hMenu)
 	}
 }
 
-LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK MainWindowCallback(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	if (Message == WM_CREATE)
 	{
@@ -307,13 +307,13 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 			}
 
 			editorUIInit = true;
-			g_MainHwnd = Hwnd;
-			SetWindowLongPtr(LogWindow::GetWindow(), GWLP_HWNDPARENT, (LONG_PTR)Hwnd);
+			g_MainHwnd = hWnd;
+			SetWindowLongPtr(LogWindow::GetWindow(), GWLP_HWNDPARENT, (LONG_PTR)hWnd);
 
 			InjectOpenSettingsMenuItem(createInfo->hMenu);
 
-			CreateExtensionMenu(Hwnd, createInfo->hMenu);
-			AddExtraButtonsAndSliders(Hwnd, createInfo->hInstance);
+			CreateExtensionMenu(hWnd, createInfo->hMenu);
+			AddExtraButtonsAndSliders(hWnd, createInfo->hInstance);
 
 			if (*config.sLaunchExeName)
 			{
@@ -412,7 +412,7 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 
 			if (config.bRenderWindowPreventRefMovementByDefault)
 			{
-				SendMessage(Hwnd, WM_COMMAND, UI_EXTMENU_TOGGLE_REF_MOVEMENT, NULL);
+				SendMessage(hWnd, WM_COMMAND, UI_EXTMENU_TOGGLE_REF_MOVEMENT, NULL);
 			}
 			else
 			{
@@ -434,7 +434,7 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 			if (RenderWindow::IsLandscapePainting())
 				return 0;
 		}
-		return CallWindowProc(originalMainWindowCallback, Hwnd, Message, wParam, lParam);
+		return CallWindowProc(originalMainWindowCallback, hWnd, Message, wParam, lParam);
 
 		case UI_EXTMENU_SHOWLOG:
 		{
@@ -835,13 +835,13 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 		return 0;
 		}
 	}
-	else if (Message == WM_SETTEXT && Hwnd == g_MainHwnd)
+	else if (Message == WM_SETTEXT && hWnd == g_MainHwnd)
 	{
 		//	Continue normal execution but with a custom string
 		char customTitle[256];
 		stbsp_snprintf(customTitle, sizeof(customTitle), "%s -= Extender Rev. 0.51 =-", (const char*)lParam);
 
-		return CallWindowProc(originalMainWindowCallback, Hwnd, Message, wParam, (LPARAM)customTitle);
+		return CallWindowProc(originalMainWindowCallback, hWnd, Message, wParam, (LPARAM)customTitle);
 	}
 	else if (Message == WM_HSCROLL && config.bShowTimeOfDaySlider)
 	{
@@ -904,7 +904,7 @@ LRESULT CALLBACK MainWindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPAR
 		prevY = newY;
 	}
 
-	return CallWindowProc(originalMainWindowCallback, Hwnd, Message, wParam, lParam);
+	return CallWindowProc(originalMainWindowCallback, hWnd, Message, wParam, lParam);
 }
 
 void ExtensionsMenu_InitHooks()

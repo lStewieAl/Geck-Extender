@@ -92,7 +92,7 @@ void AddLogText(LPARAM lParam, HWND richEditHwnd, bool doFree)
 		free(textData);
 }
 
-LRESULT CALLBACK EditorUI_LogWndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK EditorUI_LogWndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	static HWND richEditHwnd;
 
@@ -104,7 +104,7 @@ LRESULT CALLBACK EditorUI_LogWndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPA
 
 		//	Create the rich edit control (https://docs.microsoft.com/en-us/windows/desktop/Controls/rich-edit-controls)
 		uint32_t style = WS_VISIBLE | WS_CHILD | WS_VSCROLL | ES_MULTILINE | ES_LEFT | ES_NOHIDESEL | ES_AUTOVSCROLL | ES_READONLY;
-		richEditHwnd = CreateWindowW(MSFTEDIT_CLASS, L"", style, 0, 0, info->cx, info->cy, Hwnd, nullptr, info->hInstance, nullptr);
+		richEditHwnd = CreateWindowW(MSFTEDIT_CLASS, L"", style, 0, 0, info->cx, info->cy, hWnd, nullptr, info->hInstance, nullptr);
 
 		if (!richEditHwnd)
 			return -1;
@@ -153,7 +153,7 @@ LRESULT CALLBACK EditorUI_LogWndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPA
 	return 0;
 
 	case WM_CLOSE:
-		ShowWindow(Hwnd, SW_HIDE);
+		ShowWindow(hWnd, SW_HIDE);
 		WritePrivateProfileString("Windows", "bHideLogWindow", " 1", IniPath);
 		return 0;
 
@@ -247,7 +247,7 @@ LRESULT CALLBACK EditorUI_LogWndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPA
 	return 0;
 
 	}
-	return DefWindowProc(Hwnd, Message, wParam, lParam);
+	return DefWindowProc(hWnd, Message, wParam, lParam);
 }
 
 bool EditorUI_CreateLogWindow()

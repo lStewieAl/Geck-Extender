@@ -11,7 +11,7 @@ void Console_Print(const char* Format, ...);
 int __cdecl Console_Print2(const char* Format, ...);
 void AddLogText(LPARAM lParam, HWND richEditHwnd, bool doFree);
 
-LRESULT CALLBACK EditorUI_LogWndProc(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK EditorUI_LogWndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
 bool EditorUI_CreateLogWindow();
 
 namespace LogWindow

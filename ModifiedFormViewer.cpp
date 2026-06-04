@@ -29,19 +29,19 @@ namespace ModifiedFormViewer
 		SetWindowSubclass(hListView, SubclassedListViewProc, 0, 0);
 	}
 
-	LRESULT CALLBACK WindowCallback(HWND Hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+	LRESULT CALLBACK WindowCallback(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 	{
 		if (Message == WM_INITDIALOG)
 		{
-			SendMessageA(Hwnd, BetterFloatingFormList::BFL_SET_FILTER, 0, 0);
+			SendMessageA(hWnd, BetterFloatingFormList::BFL_SET_FILTER, 0, 0);
 		}
-		auto result = BetterFloatingFormList::BaseWindowCallback(Hwnd, Message, wParam, lParam);
+		auto result = BetterFloatingFormList::BaseWindowCallback(hWnd, Message, wParam, lParam);
 		if (Message == WM_INITDIALOG)
 		{
 			// prevent the delete button deleting items from the list as it's misleading if users expect it to actually remove modified forms
-			auto listView = GetDlgItem(Hwnd, 1018);
+			auto listView = GetDlgItem(hWnd, 1018);
 			SubclassListView(listView);
-			DragAcceptFiles(Hwnd, FALSE);
+			DragAcceptFiles(hWnd, FALSE);
 		}
 		return result;
 	}
