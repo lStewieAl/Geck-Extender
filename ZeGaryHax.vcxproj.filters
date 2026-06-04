@@ -98,6 +98,7 @@
     <ClCompile Include="PreemptivelyUnloadCells.cpp" />
     <ClCompile Include="RecentlyOpenedForms.cpp" />
     <ClCompile Include="SearchAndReplaceWindow.cpp" />
+    <ClCompile Include="CrashHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Main.h" />
@@ -224,6 +225,7 @@
     <ClInclude Include="PreemptivelyUnloadCells.h" />
     <ClInclude Include="RecentlyOpenedForms.h" />
     <ClInclude Include="SearchAndReplaceWindow.h" />
+    <ClInclude Include="CrashHandler.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

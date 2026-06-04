@@ -131,6 +131,10 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="CrashHandler.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="CreatureMarkerSwapper.cpp">
       <SubType>
       </SubType>
@@ -262,6 +266,10 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
     <ClInclude Include="Allocator\BSMemory.hpp" />
     <ClInclude Include="Allocator\MemoryManager.hpp" />
     <ClInclude Include="BetterFloatingFormList.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="CrashHandler.h">
       <SubType>
       </SubType>
     </ClInclude>

@@ -1,6 +1,6 @@
 #include "Utilities.h"
+#include "CrashHandler.h"
 
-void CreateCrashSave();
 namespace OutOfMemoryHelper
 {
 	namespace EmergencyBuffer
@@ -42,7 +42,7 @@ namespace OutOfMemoryHelper
 		// PurgeCellBuffers - the problem is without knowing where the crash was, we can't really safely free the cells...
 		CdeclCall(0x44F180);
 
-		CreateCrashSave();
+		CrashHandler::CreateCrashSave();
 
 		EmergencyBuffer::Allocate();
 		return malloc(size);

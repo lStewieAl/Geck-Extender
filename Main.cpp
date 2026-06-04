@@ -53,6 +53,7 @@
 #include "SearchAndReplaceWindow.h"
 #include "ToggleReferenceMovement.h"
 #include "PreemptivelyUnloadCells.h"
+#include "CrashHandler.h"
 #include "Allocator/MemoryManager.hpp"
 #include "Allocator/BSMemory.hpp"
 
@@ -601,7 +602,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SetupHavokPreviewWindow();
 
 	// attempt to save the active plugin to "CrashSave - PLUGINNAME.esp" when crashing (not compatible with NVAC)
-	SetCrashSaveHandler();
+	CrashHandler::InitHooks();
 
 	// hide markers where appropriate when refreshing a cell
 	WriteRelJump(0x458593, UInt32(RefreshCellHook));
