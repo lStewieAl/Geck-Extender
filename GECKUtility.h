@@ -624,6 +624,11 @@ void* Window_GetExtraData(HWND hWnd, int code);
 
 TESForm* Window_GetForm(HWND hWnd);
 
+class TESQuest;
+class TESTopic;
+class TESTopicInfo;
+char* GetAudioFileName(char* apDst, size_t auiLen, TESQuest* apQuest, TESTopic* apTopic, TESTopicInfo* apInfo, UInt32 aucResponseID);
+
 union Color
 {
 	UInt32 rgba;

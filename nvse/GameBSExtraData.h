@@ -78,6 +78,32 @@ public:
 	UInt32 menuID;
 };
 
+class TESTopic;
+class TESTopicInfo;
+class TESQuest;
+class DialogExtraDialogData : BSExtraData
+{
+public:
+	struct Data
+	{
+		UInt32 unk00;
+		UInt32 unk04;
+		UInt32 unk08;
+		TESTopic* pTopic;
+		TESTopicInfo* pTopicInfo10;
+		TESTopicInfo* pTopicInfo;
+		UInt32 iTabIdx;
+		UInt32 unk1C;
+		UInt32 unk20;
+		UInt32 unk24;
+		DialogExtraSubWindow* pSubWindow;
+		UInt8 byte2C;
+		UInt8 bNotQuestWindow;
+	};
+
+	Data* pData;
+};
+
 enum MenuExtraData
 {
 	kMenuExtra_DialogExtraParam = 0x0,

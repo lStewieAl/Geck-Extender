@@ -1716,9 +1716,32 @@ public:
 	String			editorIDstr;	// 40
 
 	TESTopicInfo* GetTopicInfo(Actor* actor, Actor* target);
+	TESQuest* GetOwnerQuest(TESTopicInfo* apTopic) { return ThisCall<TESQuest*>(0x593710, this, apTopic); };
 };
 
 STATIC_ASSERT(offsetof(TESTopic, fullName) == 0x018);
+
+struct TESResponse
+{
+	struct Data
+	{
+		uint32_t uiEmotionType;
+		uint32_t uiEmotionValue;
+		TESTopic* pTopic;
+		uint8_t ucResponseID;
+		TESSound* pSound;
+		uint8_t ucFlags;
+	};
+
+	Data kData;
+	String strText;
+	TESIdleForm* pSpeakerIdle;
+	TESIdleForm* pListenerIdle;
+	String sScriptNotes;
+	String sEdits;
+	uint32_t unk38;
+	TESResponse* pNext;
+};
 
 // A0
 class BGSTextureSet : public TESBoundObject

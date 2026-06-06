@@ -1799,6 +1799,68 @@ void RemoveSubMenuByHandle(HMENU parentMenu, HMENU submenuHandle) {
 	}
 }
 
+bool CopySelectedListViewItemData(HWND listView, std::function<void(std::string&, TESForm*)> aggregator)
+{
+	int index = -1;
+	std::string aggregatedText;
+
+	// Iterate over all selected items
+	while ((index = SendMessageA(listView, LVM_GETNEXTITEM, index, LVNI_SELECTED)) != -1)
+	{
+		if (auto form = GetNthListForm(listView, index))
+		{
+			aggregator(aggregatedText, form);
+		}
+	}
+
+	// Remove the last newline if there is one
+	if (!aggregatedText.empty() && aggregatedText.back() == '\n')
+	{
+		aggregatedText.pop_back();
+	}
+
+	// Copy the aggregated text to the clipboard
+	if (!aggregatedText.empty())
+	{
+		CopyTextToClipboard(aggregatedText.c_str());
+		return true;
+	}
+	return false;
+}
+
+enum CustomDialogContextActions
+{
+	COPY_RESPONSE_FILENAME = 0x10001,
+};
+
+enum { kQuestResponsesListView = 1454 };
+
+void __stdcall OnSetupResponseRightClickMenu(UInt32 menuID, HMENU menu, LPPOINT cursorPos, HWND hWnd, HWND listView)
+{
+	auto uiSelectedItems = 0;
+	if (menuID != kQuestResponsesListView || !(uiSelectedItems = ListView_GetSelectedCount(GetDlgItem(hWnd, kQuestResponsesListView))))
+	{
+		CdeclCall(0x47F3B0, menu, cursorPos, hWnd, listView); // Window::SetupPopupMenu
+		return;
+	}
+
+	InsertMenuA(menu, 0xFFFFFFFF, MF_BYPOSITION | MF_SEPARATOR, 0, nullptr);
+	InsertMenuA(menu, 0xFFFFFFFF, MF_BYPOSITION, COPY_RESPONSE_FILENAME, uiSelectedItems == 1 ? "Copy Filename" : "Copy Filenames");
+	CdeclCall(0x47F3B0, menu, cursorPos, hWnd, listView); // Window::SetupPopupMenu
+	DeleteMenu(menu, COPY_RESPONSE_FILENAME, MF_BYCOMMAND);
+}
+
+__HOOK OnSetupResponseRightClickMenuHook()
+{
+	_asm
+	{
+		pop eax
+		push ebx
+		push 0x59967A
+		jmp OnSetupResponseRightClickMenu
+	}
+}
+
 void __cdecl SetupDialogueTopicRightClickMenu(HWND hWnd, HWND listView)
 {
 	HMENU menu = CreatePopupMenu();
@@ -1820,21 +1882,71 @@ bool HandleDialoguePopupMenuCommand(HWND listView, UInt32 commandID)
 	return FormColoring::HandlePopupMenuCommand(listView, commandID);
 }
 
+bool CopySelectedDialogFileNames(HWND hWnd)
+{
+	DialogExtraDialogData* pExtra = (DialogExtraDialogData*)Window_GetExtraData(hWnd, kMenuExtra_DialogExtraDialogData);
+	if (!pExtra)
+	{
+		return false;
+	}
+	auto pData = pExtra->pData;
+	if (!pData || !pData->pTopic || !pData->pTopicInfo || !pData->pTopicInfo10)
+	{
+		return false;
+	}
+	auto pTopic = pData->pTopic;
+	auto pInfo = pData->pTopicInfo;
+	auto pQuest = pTopic->GetOwnerQuest(pInfo);
+
+	auto hListView = GetDlgItem(hWnd, kQuestResponsesListView);
+
+	char name[MAX_PATH];
+	bool bCopiedData = CopySelectedListViewItemData(hListView, [&name, pQuest, pTopic, pInfo](std::string& currentText, TESForm* form)
+		{
+			auto response = (TESResponse*)form;
+			UInt8 cResponseID = response->kData.ucResponseID;
+			GetAudioFileName(name, sizeof(name), pQuest, pTopic, pInfo, cResponseID);
+			currentText += name;
+			currentText += "\n";
+		}
+	);
+	return bCopiedData;
+}
+
 BOOL CALLBACK DialogueWindowTopicsCallback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	enum { kDialogMenu_ListView = 1448, kDialogMenu_QuestListView = 2064 };
+	enum { kListView = 1448, kQuestListView = 2064};
+	if (msg == WM_NOTIFY)
+	{
+		// allow selecting multiple responses for copying filenames (ideally this would be WM_INITDIALOG, but that doesn't get called here)
+		HWND hResponseList = GetDlgItem(hWnd, kQuestResponsesListView);
+		LONG_PTR style = GetWindowLongPtr(hResponseList, GWL_STYLE);
+		style &= ~LVS_SINGLESEL;
+		SetWindowLongPtr(hResponseList, GWL_STYLE, style);
+	}
 	if (msg == WM_COMMAND)
 	{
-		if (HandleDialoguePopupMenuCommand(GetDlgItem(hWnd, kDialogMenu_ListView), wParam) ||
-			HandleDialoguePopupMenuCommand(GetDlgItem(hWnd, kDialogMenu_QuestListView), wParam))
+		if (HandleDialoguePopupMenuCommand(GetDlgItem(hWnd, kListView), wParam) ||
+			HandleDialoguePopupMenuCommand(GetDlgItem(hWnd, kQuestListView), wParam))
 		{
 			return true;
+		}
+		if (wParam == COPY_RESPONSE_FILENAME)
+		{
+			if (CopySelectedDialogFileNames(hWnd))
+			{
+				return true;
+			}
+			else
+			{
+				PlaySound("MouseClick", NULL, SND_ASYNC);
+			}
 		}
 	}
 	if (msg == WM_NOTIFY)
 	{
 		LPNMHDR hdr = (LPNMHDR)lParam;
-		if (hdr->idFrom == kDialogMenu_ListView || hdr->idFrom == kDialogMenu_QuestListView)
+		if (hdr->idFrom == kListView || hdr->idFrom == kQuestListView)
 		{
 			if (hdr->code == NM_RCLICK)
 			{
@@ -3062,33 +3174,6 @@ void __cdecl OnSetupObjectAndCellWindowRightClickMenu(HMENU menu, LPPOINT cursor
 	if (hColorSubMenu)
 	{
 		RemoveSubMenuByHandle(menu, hColorSubMenu);
-	}
-}
-
-void CopySelectedListViewItemData(HWND listView, std::function<void(std::string&, TESForm*)> aggregator)
-{
-	int index = -1;
-	std::string aggregatedText;
-
-	// Iterate over all selected items
-	while ((index = SendMessageA(listView, LVM_GETNEXTITEM, index, LVNI_SELECTED)) != -1)
-	{
-		if (auto form = GetNthListForm(listView, index))
-		{
-			aggregator(aggregatedText, form);
-		}
-	}
-
-	// Remove the last newline if there is one
-	if (!aggregatedText.empty() && aggregatedText.back() == '\n')
-	{
-		aggregatedText.pop_back();
-	}
-
-	// Copy the aggregated text to the clipboard
-	if (!aggregatedText.empty())
-	{
-		CopyTextToClipboard(aggregatedText.c_str());
 	}
 }
 

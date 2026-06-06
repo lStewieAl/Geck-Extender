@@ -327,6 +327,14 @@ void* Window_GetExtraData(HWND hWnd, int code)
 	return CdeclCall<void*>(0x47AB70, hWnd, code);
 }
 
+char* GetAudioFileName(char* apDst, size_t auiLen, TESQuest* apQuest, TESTopic* apTopic, TESTopicInfo* apInfo, UInt32 aucResponseID)
+{
+	char buf[MAX_PATH];
+	CdeclCall(0x58C2B0, apQuest, apTopic, buf, sizeof(buf));
+	snprintf(apDst, auiLen, "%s_%08X_%u", buf, apInfo->refID & 0xFFFFFF, aucResponseID);
+	return apDst;
+}
+
 TESForm* Window_GetForm(HWND hWnd)
 {
 	return CdeclCall<TESForm*>(0x47ABC0, hWnd);

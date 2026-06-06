@@ -611,6 +611,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	WriteRelCall(0x580407, UInt32(DialogueWindowTopicsCallback));
 	WriteRelCall(0x580970, UInt32(DialogueWindowTopicsCallback));
+	WriteRelCall(0x599672, UInt32(OnSetupResponseRightClickMenuHook));
 
 	// allow resizing the FormList and BGSListForm dialog (3274)
 	SafeWrite32(0x43768B, UInt32(FormListCallback));
