@@ -13,42 +13,6 @@
 #include "ToggleReferenceMovement.h"
 #include "RecentlyOpenedForms.h"
 
-#define UI_MENU_LANDSCAPE_KEY	40190
-#define UI_MENU_LANDSCAPE_BAR	40191
-#define UI_EXTMENU_ID			51001
-#define UI_EXTMENU_SHOWLOG		51002
-#define UI_EXTMENU_CLEARLOG		51003
-#define UI_EXTMENU_AUTOSCROLL	51004
-#define UI_EXTMENU_SPACER		51005
-#define UI_EXTMENU_SPELLCHECK	51006
-#define UI_EXTMENU_RENDER		51007
-#define UI_EXTMENU_PREVIEW		51008
-#define UI_EXTMENU_LAUNCHGAME   51009
-#define UI_EXTMENU_SAVEPOSITION 51010
-#define UI_EXTMENU_LOADPOSITION 51011
-#define ID_TRACKBAR				51012
-#define ID_TIMEOFDAYTEXT		51013
-#define ID_RENDERWINDOWCELLLOADS_CHECKBOX 51014
-#define ID_RENDERWINDOW_SHOWWATER_CHECKBOX	51015
-#define ID_RENDERWINDOW_SHOWPORTALS_CHECKBOX	51016
-#define UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED	51017
-#define UI_EXTMENU_TOGGLENAVEMESHBISECT 51018
-#define UI_EXTMENU_LOOKUPFORM 51019
-#define UI_EXTMENU_VIEW_MODIFIED_FORMS 51020
-#define UI_EXTMENU_VIEW_NAVMESH_IGNORED_FORMS 51021
-#define UI_EXTMENU_AUTO_ADD_TO_MULTIBOUNDS 51022
-#define UI_EXTMENU_READD_TO_MULTIBOUNDS 51023
-#define UI_EXTMENU_TOGGLE_REF_MOVEMENT 51024
-#define UI_EXTMENU_TOGGLE_PREEMPTIVELY_UNLOAD_CELLS 51025
-#define UI_EXTMENU_VIEW_RECENT_FORMS 51026
-#define MAIN_WINDOW_CALLBACK 0xFEED
-
-// unused button in vanilla menu
-#define MENUOPTION_RENDER_WINDOW 0x9D06
-#define MENUOPTION_OBJECT_WINDOW 0x9D07
-#define MENUOPTION_CELL_WINDOW 0x9D08
-#define MENUOPTION_RECOMPILE_ALL 0x9ECE
-
 HWND g_MainHwnd;
 extern HWND g_ConsoleHwnd;
 HMENU g_ExtensionMenu;
@@ -69,845 +33,850 @@ static LOGFONT	fontInfo;
 extern LOGFONT  editorFont;
 
 extern HMODULE ZeGaryHaxHandle;
-
 LPLOGFONT GetEditorFont();
-void ToggleNavmeshPlaceAboveOthers(bool isAllowed)
+
+namespace ExtensionsMenu
 {
-	//	Patch Navmesh editing to allow placing vertices over existing navmesh (disables line bisection)
-	SafeWrite16(0x0045C590, isAllowed ? 0x9090 : 0x4675);
-	config.bNavmeshAllowPlaceAboveOthers = isAllowed;
-}
-
-_declspec(naked) void ObjectWindowListFilterUneditedHook()
-{
-	static const UInt32 skipAddr = 0x439793;
-	static const UInt32 retnAddr = 0x43973F;
-	_asm {
-		// esi contains TESForm
-		test byte ptr ss : [esi + 8] , 2 /// form->flags & kModified
-		jne editedForm
-		jmp skipAddr
-
-	editedForm :
-		mov eax, dword ptr ss : [esp + 0x1C]
-		test eax, eax
-		jmp retnAddr
-	}
-}
-
-void ToggleObjectWindowFilterUnedited(bool show)
-{
-	if (show)
+	void ToggleNavmeshPlaceAboveOthers(bool isAllowed)
 	{
-		SafeWriteBuf(0x439739, "\x8B\x44\x24\x1C\x85\xC0", 6);
+		//	Patch Navmesh editing to allow placing vertices over existing navmesh (disables line bisection)
+		SafeWrite16(0x0045C590, isAllowed ? 0x9090 : 0x4675);
+		config.bNavmeshAllowPlaceAboveOthers = isAllowed;
 	}
-	else
+
+	_declspec(naked) void ObjectWindowListFilterUneditedHook()
 	{
-		WriteRelJump(0x439739, UInt32(ObjectWindowListFilterUneditedHook));
+		static const UInt32 skipAddr = 0x439793;
+		static const UInt32 retnAddr = 0x43973F;
+		_asm {
+			// esi contains TESForm
+			test byte ptr ss : [esi + 8] , 2 /// form->flags & kModified
+			jne editedForm
+			jmp skipAddr
+
+		editedForm :
+			mov eax, dword ptr ss : [esp + 0x1C]
+			test eax, eax
+			jmp retnAddr
+		}
 	}
-}
 
-bool CreateExtensionMenu(HWND MainWindow, HMENU MainMenu)
-{
-	//	Create extended menu options
-	g_ExtensionMenu = CreateMenu();
-
-	BOOL result = TRUE;
-	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_SAVEPOSITION, "Render Window: Save Camera Pos");
-	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_LOADPOSITION, "Render Window: Load Camera Pos");
-	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_SEPARATOR, (UINT_PTR)UI_EXTMENU_SPACER, "");
-	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_SHOWLOG, "Show Log");
-	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_CLEARLOG, "Clear Log");
-	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_AUTOSCROLL, "Autoscroll Log");
-	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_SEPARATOR, (UINT_PTR)UI_EXTMENU_SPACER, "");
-	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_SPELLCHECK, "Enable Spell Check");
-	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_RENDER, "Render Window Uncap (requires restart)");
-	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_PREVIEW, "Preview Window Uncap (requires restart)");
-	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED, "Object Window - Only Show Edited");
-	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_TOGGLENAVEMESHBISECT, "Allow Placement Of Navmesh Node Above Others");
-	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_SEPARATOR, (UINT_PTR)UI_EXTMENU_SPACER, "");
-	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_LOOKUPFORM, "Lookup Form");
-	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_VIEW_MODIFIED_FORMS, "View Modified Forms");
-	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_VIEW_NAVMESH_IGNORED_FORMS, "View Navmesh Ignored Forms");
-	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_VIEW_RECENT_FORMS, "View Recent Forms");
-	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_SEPARATOR, (UINT_PTR)UI_EXTMENU_SPACER, "");
-	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_AUTO_ADD_TO_MULTIBOUNDS, "Attach Objects to Multibounds");
-	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_READD_TO_MULTIBOUNDS, "Reattach All Objects to Multibounds");
-	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_TOGGLE_REF_MOVEMENT, "Render Window: Allow Reference Movement");
-	result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_TOGGLE_PREEMPTIVELY_UNLOAD_CELLS, "Render Window: Preemptively Unload Cells");
-
-	MENUITEMINFO menuInfo;
-	memset(&menuInfo, 0, sizeof(MENUITEMINFO));
-	menuInfo.cbSize = sizeof(MENUITEMINFO);
-	menuInfo.fMask = MIIM_SUBMENU | MIIM_ID | MIIM_STRING;
-	menuInfo.hSubMenu = g_ExtensionMenu;
-	menuInfo.wID = UI_EXTMENU_ID;
-	menuInfo.dwTypeData = (char*)"Extensions";
-	menuInfo.cch = (uint32_t)strlen(menuInfo.dwTypeData);
-	result = result && InsertMenuItem(MainMenu, -1, TRUE, &menuInfo);
-
-	return result ? true : false;
-}
-
-void EditorUI_AddSliderToToolbar(HWND MainWindow, HINSTANCE hInstance) {
-	g_trackBarHwnd = CreateWindowEx(
-		NULL,
-		TRACKBAR_CLASSA,
-		"Trackbar Control",
-		(WS_CHILD | WS_VISIBLE | TBS_NOTICKS),
-		898, 2, // x, y
-		200, 24, // width, height
-		MainWindow,
-		(HMENU)ID_TRACKBAR,
-		hInstance,
-		NULL
-	);
-	SendMessageA(g_trackBarHwnd, TBM_SETRANGE, TRUE, MAKELONG(0, 24 * 4));
-	SendMessageA(g_trackBarHwnd, TBM_SETTICFREQ, 10, 0);
-	SendMessageA(g_trackBarHwnd, TBM_SETPOS, TRUE, 10 * 4);
-
-}
-
-void EditorUI_AddTimeOfDayTextToToolbar(HWND MainWindow, HINSTANCE hInstance) {
-	g_timeOfDayTextHwnd = CreateWindowEx(
-		WS_EX_CLIENTEDGE,
-		"Edit",
-		"10.00",
-		(WS_CHILD | WS_VISIBLE | ES_LEFT),
-		1105, 5, // x, y
-		45, 20, // width, height
-		MainWindow,
-		(HMENU)ID_TIMEOFDAYTEXT,
-		hInstance,
-		NULL
-	);
-
-	// try something nice, otherwise fall back on SYSTEM_FIXED_FONT
-	fontHandle = CreateFontIndirect(GetEditorFont());
-	if (fontHandle)
+	void ToggleObjectWindowFilterUnedited(bool abShow)
 	{
-		fontInfo = *GetEditorFont();
-	}
-	else
-	{
-		fontHandle = GetStockObject(SYSTEM_FIXED_FONT);
-		GetObject(fontHandle, sizeof(fontInfo), &fontInfo);
-	}
-	SendMessageA(g_timeOfDayTextHwnd, WM_SETFONT, (WPARAM)fontHandle, 1);
-	SendMessageA(g_timeOfDayTextHwnd, EM_LIMITTEXT, 8, 0);
-}
-
-void EditorUI_AddAllowRenderWindowCellLoadsCheckbox(HWND MainWindow, HINSTANCE hInstance) {
-	g_allowCellWindowLoadsButtonHwnd = CreateWindowEx(
-		NULL,
-		"BUTTON",
-		"Allow Render Window Cell Loads",
-		BS_PUSHLIKE | BS_CHECKBOX | WS_CHILD | WS_VISIBLE | BS_NOTIFY | BS_BITMAP,
-		1160, 4, // x, y
-		24, 21, // width, height
-		MainWindow,
-		(HMENU)ID_RENDERWINDOWCELLLOADS_CHECKBOX,
-		hInstance,
-		NULL
-	);
-	SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_SETCHECK, GetIsRenderWindowAllowCellLoads(), NULL);
-
-	HBITMAP hBitmap = (HBITMAP)LoadImage(ZeGaryHaxHandle, MAKEINTRESOURCE(IDB_ALLOW_CELL_LOADS_ICON), IMAGE_BITMAP, NULL, NULL, LR_LOADTRANSPARENT);
-	if (hBitmap)
-	{
-		SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
-	}
-	else
-	{
-		MessageBox(MainWindow, "Could not load icon resource.", "Error", MB_OK | MB_ICONERROR);
-	}
-}
-
-void EditorUI_AddRenderWindowShowPortalsCheckbox(HWND MainWindow, HINSTANCE hInstance) {
-	g_renderWindowShowPortalsButtonHwnd = CreateWindowEx(
-		NULL,
-		"BUTTON",
-		"Render Window Show Portals",
-		BS_PUSHLIKE | BS_CHECKBOX | WS_CHILD | WS_VISIBLE | BS_NOTIFY | BS_BITMAP,
-		1185, 4, // x, y
-		24, 21, // width, height
-		MainWindow,
-		(HMENU)ID_RENDERWINDOW_SHOWPORTALS_CHECKBOX,
-		hInstance,
-		NULL
-	);
-	SendMessageA(g_renderWindowShowPortalsButtonHwnd, BM_SETCHECK, GetIsShowPortalsAndRooms(), NULL);
-
-	HBITMAP hBitmap = (HBITMAP)LoadImage(ZeGaryHaxHandle, MAKEINTRESOURCE(IDB_SHOW_PORTALS_ICON), IMAGE_BITMAP, NULL, NULL, NULL);
-	SendMessageA(g_renderWindowShowPortalsButtonHwnd, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
-}
-
-void EditorUI_AddRenderWindowShowWaterCheckbox(HWND MainWindow, HINSTANCE hInstance) {
-	g_renderWindowShowWaterButtonHwnd = CreateWindowEx(
-		NULL,
-		"BUTTON",
-		"Render Window Show Water",
-		BS_PUSHLIKE | BS_CHECKBOX | WS_CHILD | WS_VISIBLE | BS_NOTIFY | BS_BITMAP,
-		1210, 4, // x, y
-		24, 21, // width, height
-		MainWindow,
-		(HMENU)ID_RENDERWINDOW_SHOWWATER_CHECKBOX,
-		hInstance,
-		NULL
-	);
-	SendMessageA(g_renderWindowShowWaterButtonHwnd, BM_SETCHECK, GetIsShowWater(), NULL);
-
-	HBITMAP hBitmap = (HBITMAP)LoadImage(ZeGaryHaxHandle, MAKEINTRESOURCE(IDB_SHOW_WATER_ICON), IMAGE_BITMAP, NULL, NULL, NULL);
-	SendMessageA(g_renderWindowShowWaterButtonHwnd, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
-}
-
-void AddExtraButtonsAndSliders(HWND hWnd, HINSTANCE hInstance)
-{
-	if (config.bShowTimeOfDaySlider) {
-		EditorUI_AddSliderToToolbar(hWnd, hInstance);
-		EditorUI_AddTimeOfDayTextToToolbar(hWnd, hInstance);
-	}
-
-	if (config.bShowAdditionalToolbarButtons) {
-		EditorUI_AddAllowRenderWindowCellLoadsCheckbox(hWnd, hInstance);
-		EditorUI_AddRenderWindowShowWaterCheckbox(hWnd, hInstance);
-		EditorUI_AddRenderWindowShowPortalsCheckbox(hWnd, hInstance);
-	}
-}
-
-void OpenExtenderPreferences()
-{
-	ShellExecuteA(0, "open", IniPath, 0, 0, SW_NORMAL);
-}
-
-void InjectOpenSettingsMenuItem(HMENU hMenu)
-{
-	HMENU hSubMenu = GetSubMenu(hMenu, 0);
-
-	if (hSubMenu != nullptr)
-	{
-		ModifyMenu(hSubMenu, 40620, MF_BYCOMMAND | MF_STRING, 40620, "Extender Preferences...");
-		WriteRelCall(0x44408E, UInt32(OpenExtenderPreferences));
-	}
-}
-
-LRESULT CALLBACK MainWindowCallback(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
-{
-	if (Message == WM_CREATE)
-	{
-		static bool editorUIInit = false;
-
-		if (!editorUIInit)
+		if (abShow)
 		{
-			const CREATESTRUCT* createInfo = (CREATESTRUCT*)lParam;
+			SafeWriteBuf(0x439739, "\x8B\x44\x24\x1C\x85\xC0", 6);
+		}
+		else
+		{
+			WriteRelJump(0x439739, UInt32(ObjectWindowListFilterUneditedHook));
+		}
 
-			if (_stricmp(createInfo->lpszName, "Garden of Eden Creation Kit") != 0 || _stricmp(createInfo->lpszName, "Garden of Eden Creation Kit") != 0)
+		SendMessageA(ObjectsView::GetWindow(), WM_COMMAND, ObjectsViewEx::SET_FILTER_STAR, !abShow);
+	}
+
+	bool CreateExtensionMenu(HWND MainWindow, HMENU MainMenu)
+	{
+		//	Create extended menu options
+		g_ExtensionMenu = CreateMenu();
+
+		BOOL result = TRUE;
+		result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_SAVEPOSITION, "Render Window: Save Camera Pos");
+		result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_LOADPOSITION, "Render Window: Load Camera Pos");
+		result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_SEPARATOR, (UINT_PTR)UI_EXTMENU_SPACER, "");
+		result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_SHOWLOG, "Show Log");
+		result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_CLEARLOG, "Clear Log");
+		result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_AUTOSCROLL, "Autoscroll Log");
+		result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_SEPARATOR, (UINT_PTR)UI_EXTMENU_SPACER, "");
+		result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_SPELLCHECK, "Enable Spell Check");
+		result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_RENDER, "Render Window Uncap (requires restart)");
+		result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_PREVIEW, "Preview Window Uncap (requires restart)");
+		result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED, "Object Window - Only Show Edited");
+		result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_TOGGLENAVEMESHBISECT, "Allow Placement Of Navmesh Node Above Others");
+		result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_SEPARATOR, (UINT_PTR)UI_EXTMENU_SPACER, "");
+		result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_LOOKUPFORM, "Lookup Form");
+		result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_VIEW_MODIFIED_FORMS, "View Modified Forms");
+		result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_VIEW_NAVMESH_IGNORED_FORMS, "View Navmesh Ignored Forms");
+		result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_VIEW_RECENT_FORMS, "View Recent Forms");
+		result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_SEPARATOR, (UINT_PTR)UI_EXTMENU_SPACER, "");
+		result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_AUTO_ADD_TO_MULTIBOUNDS, "Attach Objects to Multibounds");
+		result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_READD_TO_MULTIBOUNDS, "Reattach All Objects to Multibounds");
+		result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_TOGGLE_REF_MOVEMENT, "Render Window: Allow Reference Movement");
+		result = result && InsertMenu(g_ExtensionMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_TOGGLE_PREEMPTIVELY_UNLOAD_CELLS, "Render Window: Preemptively Unload Cells");
+
+		MENUITEMINFO menuInfo;
+		memset(&menuInfo, 0, sizeof(MENUITEMINFO));
+		menuInfo.cbSize = sizeof(MENUITEMINFO);
+		menuInfo.fMask = MIIM_SUBMENU | MIIM_ID | MIIM_STRING;
+		menuInfo.hSubMenu = g_ExtensionMenu;
+		menuInfo.wID = UI_EXTMENU_ID;
+		menuInfo.dwTypeData = (char*)"Extensions";
+		menuInfo.cch = (uint32_t)strlen(menuInfo.dwTypeData);
+		result = result && InsertMenuItem(MainMenu, -1, TRUE, &menuInfo);
+
+		return result ? true : false;
+	}
+
+	void EditorUI_AddSliderToToolbar(HWND MainWindow, HINSTANCE hInstance) {
+		g_trackBarHwnd = CreateWindowEx(
+			NULL,
+			TRACKBAR_CLASSA,
+			"Trackbar Control",
+			(WS_CHILD | WS_VISIBLE | TBS_NOTICKS),
+			898, 2, // x, y
+			200, 24, // width, height
+			MainWindow,
+			(HMENU)ID_TRACKBAR,
+			hInstance,
+			NULL
+		);
+		SendMessageA(g_trackBarHwnd, TBM_SETRANGE, TRUE, MAKELONG(0, 24 * 4));
+		SendMessageA(g_trackBarHwnd, TBM_SETTICFREQ, 10, 0);
+		SendMessageA(g_trackBarHwnd, TBM_SETPOS, TRUE, 10 * 4);
+
+	}
+
+	void EditorUI_AddTimeOfDayTextToToolbar(HWND MainWindow, HINSTANCE hInstance) {
+		g_timeOfDayTextHwnd = CreateWindowEx(
+			WS_EX_CLIENTEDGE,
+			"Edit",
+			"10.00",
+			(WS_CHILD | WS_VISIBLE | ES_LEFT),
+			1105, 5, // x, y
+			45, 20, // width, height
+			MainWindow,
+			(HMENU)ID_TIMEOFDAYTEXT,
+			hInstance,
+			NULL
+		);
+
+		// try something nice, otherwise fall back on SYSTEM_FIXED_FONT
+		fontHandle = CreateFontIndirect(GetEditorFont());
+		if (fontHandle)
+		{
+			fontInfo = *GetEditorFont();
+		}
+		else
+		{
+			fontHandle = GetStockObject(SYSTEM_FIXED_FONT);
+			GetObject(fontHandle, sizeof(fontInfo), &fontInfo);
+		}
+		SendMessageA(g_timeOfDayTextHwnd, WM_SETFONT, (WPARAM)fontHandle, 1);
+		SendMessageA(g_timeOfDayTextHwnd, EM_LIMITTEXT, 8, 0);
+	}
+
+	void EditorUI_AddAllowRenderWindowCellLoadsCheckbox(HWND MainWindow, HINSTANCE hInstance) {
+		g_allowCellWindowLoadsButtonHwnd = CreateWindowEx(
+			NULL,
+			"BUTTON",
+			"Allow Render Window Cell Loads",
+			BS_PUSHLIKE | BS_CHECKBOX | WS_CHILD | WS_VISIBLE | BS_NOTIFY | BS_BITMAP,
+			1160, 4, // x, y
+			24, 21, // width, height
+			MainWindow,
+			(HMENU)ID_RENDERWINDOWCELLLOADS_CHECKBOX,
+			hInstance,
+			NULL
+		);
+		SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_SETCHECK, GetIsRenderWindowAllowCellLoads(), NULL);
+
+		HBITMAP hBitmap = (HBITMAP)LoadImage(ZeGaryHaxHandle, MAKEINTRESOURCE(IDB_ALLOW_CELL_LOADS_ICON), IMAGE_BITMAP, NULL, NULL, LR_LOADTRANSPARENT);
+		if (hBitmap)
+		{
+			SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
+		}
+		else
+		{
+			MessageBox(MainWindow, "Could not load icon resource.", "Error", MB_OK | MB_ICONERROR);
+		}
+	}
+
+	void EditorUI_AddRenderWindowShowPortalsCheckbox(HWND MainWindow, HINSTANCE hInstance) {
+		g_renderWindowShowPortalsButtonHwnd = CreateWindowEx(
+			NULL,
+			"BUTTON",
+			"Render Window Show Portals",
+			BS_PUSHLIKE | BS_CHECKBOX | WS_CHILD | WS_VISIBLE | BS_NOTIFY | BS_BITMAP,
+			1185, 4, // x, y
+			24, 21, // width, height
+			MainWindow,
+			(HMENU)ID_RENDERWINDOW_SHOWPORTALS_CHECKBOX,
+			hInstance,
+			NULL
+		);
+		SendMessageA(g_renderWindowShowPortalsButtonHwnd, BM_SETCHECK, GetIsShowPortalsAndRooms(), NULL);
+
+		HBITMAP hBitmap = (HBITMAP)LoadImage(ZeGaryHaxHandle, MAKEINTRESOURCE(IDB_SHOW_PORTALS_ICON), IMAGE_BITMAP, NULL, NULL, NULL);
+		SendMessageA(g_renderWindowShowPortalsButtonHwnd, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
+	}
+
+	void EditorUI_AddRenderWindowShowWaterCheckbox(HWND MainWindow, HINSTANCE hInstance) {
+		g_renderWindowShowWaterButtonHwnd = CreateWindowEx(
+			NULL,
+			"BUTTON",
+			"Render Window Show Water",
+			BS_PUSHLIKE | BS_CHECKBOX | WS_CHILD | WS_VISIBLE | BS_NOTIFY | BS_BITMAP,
+			1210, 4, // x, y
+			24, 21, // width, height
+			MainWindow,
+			(HMENU)ID_RENDERWINDOW_SHOWWATER_CHECKBOX,
+			hInstance,
+			NULL
+		);
+		SendMessageA(g_renderWindowShowWaterButtonHwnd, BM_SETCHECK, GetIsShowWater(), NULL);
+
+		HBITMAP hBitmap = (HBITMAP)LoadImage(ZeGaryHaxHandle, MAKEINTRESOURCE(IDB_SHOW_WATER_ICON), IMAGE_BITMAP, NULL, NULL, NULL);
+		SendMessageA(g_renderWindowShowWaterButtonHwnd, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
+	}
+
+	void AddExtraButtonsAndSliders(HWND hWnd, HINSTANCE hInstance)
+	{
+		if (config.bShowTimeOfDaySlider) {
+			EditorUI_AddSliderToToolbar(hWnd, hInstance);
+			EditorUI_AddTimeOfDayTextToToolbar(hWnd, hInstance);
+		}
+
+		if (config.bShowAdditionalToolbarButtons) {
+			EditorUI_AddAllowRenderWindowCellLoadsCheckbox(hWnd, hInstance);
+			EditorUI_AddRenderWindowShowWaterCheckbox(hWnd, hInstance);
+			EditorUI_AddRenderWindowShowPortalsCheckbox(hWnd, hInstance);
+		}
+	}
+
+	void OpenExtenderPreferences()
+	{
+		ShellExecuteA(0, "open", IniPath, 0, 0, SW_NORMAL);
+	}
+
+	void InjectOpenSettingsMenuItem(HMENU hMenu)
+	{
+		HMENU hSubMenu = GetSubMenu(hMenu, 0);
+
+		if (hSubMenu != nullptr)
+		{
+			ModifyMenu(hSubMenu, 40620, MF_BYCOMMAND | MF_STRING, 40620, "Extender Preferences...");
+			WriteRelCall(0x44408E, UInt32(OpenExtenderPreferences));
+		}
+	}
+
+	LRESULT CALLBACK MainWindowCallback(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
+	{
+		if (Message == WM_CREATE)
+		{
+			static bool editorUIInit = false;
+
+			if (!editorUIInit)
 			{
-				ExitProcess(0);
-			}
+				const CREATESTRUCT* createInfo = (CREATESTRUCT*)lParam;
 
-			editorUIInit = true;
-			g_MainHwnd = hWnd;
-			SetWindowLongPtr(LogWindow::GetWindow(), GWLP_HWNDPARENT, (LONG_PTR)hWnd);
+				if (_stricmp(createInfo->lpszName, "Garden of Eden Creation Kit") != 0 || _stricmp(createInfo->lpszName, "Garden of Eden Creation Kit") != 0)
+				{
+					ExitProcess(0);
+				}
 
-			InjectOpenSettingsMenuItem(createInfo->hMenu);
+				editorUIInit = true;
+				g_MainHwnd = hWnd;
+				SetWindowLongPtr(LogWindow::GetWindow(), GWLP_HWNDPARENT, (LONG_PTR)hWnd);
 
-			CreateExtensionMenu(hWnd, createInfo->hMenu);
-			AddExtraButtonsAndSliders(hWnd, createInfo->hInstance);
+				InjectOpenSettingsMenuItem(createInfo->hMenu);
 
-			if (*config.sLaunchExeName)
-			{
-				InsertMenu(createInfo->hMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_LAUNCHGAME, "Launch Game");
-			}
+				CreateExtensionMenu(hWnd, createInfo->hMenu);
+				AddExtraButtonsAndSliders(hWnd, createInfo->hInstance);
 
-			g_MainMenu = createInfo->hMenu;
-			EnableMenuItem(g_MainMenu, MENUOPTION_RENDER_WINDOW, MF_ENABLED);
-			CheckMenuItem(g_MainMenu, MENUOPTION_RENDER_WINDOW, MF_CHECKED);
+				if (*config.sLaunchExeName)
+				{
+					InsertMenu(createInfo->hMenu, -1, MF_BYPOSITION | MF_STRING, (UINT_PTR)UI_EXTMENU_LAUNCHGAME, "Launch Game");
+				}
 
-			if (!config.bAllowRecompileAll && !(config.bRecompileAllScriptsSCPTFormsOnly && *config.sRecompileAllScriptsModName))
-			{
-				EnableMenuItem(g_MainMenu, MENUOPTION_RECOMPILE_ALL, MF_DISABLED | MF_GRAYED);
-				// patch switch table offset for recompile all menu button
-				SafeWrite8(0x4455E0, 0xE8);
+				g_MainMenu = createInfo->hMenu;
+				EnableMenuItem(g_MainMenu, MENUOPTION_RENDER_WINDOW, MF_ENABLED);
+				CheckMenuItem(g_MainMenu, MENUOPTION_RENDER_WINDOW, MF_CHECKED);
 
-				// patch switch table for script edit recompile all button
-				SafeWrite16(0x5C4E3C, 0x4D6B);
-			}
+				if (!config.bAllowRecompileAll && !(config.bRecompileAllScriptsSCPTFormsOnly && *config.sRecompileAllScriptsModName))
+				{
+					EnableMenuItem(g_MainMenu, MENUOPTION_RECOMPILE_ALL, MF_DISABLED | MF_GRAYED);
+					// patch switch table offset for recompile all menu button
+					SafeWrite8(0x4455E0, 0xE8);
 
-			if (config.bObjectWindowOnlyShowEditedByDefault)
-			{
-				ToggleObjectWindowFilterUnedited(false);
+					// patch switch table for script edit recompile all button
+					SafeWrite16(0x5C4E3C, 0x4D6B);
+				}
+
+				if (config.bObjectWindowOnlyShowEditedByDefault)
+				{
+					ToggleObjectWindowFilterUnedited(false);
+
+					MENUITEMINFO menuInfo;
+					menuInfo.cbSize = sizeof(MENUITEMINFO);
+					menuInfo.fMask = MIIM_STATE;
+					menuInfo.fState = MFS_CHECKED;
+					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED, FALSE, &menuInfo);
+				}
 
 				MENUITEMINFO menuInfo;
 				menuInfo.cbSize = sizeof(MENUITEMINFO);
 				menuInfo.fMask = MIIM_STATE;
-				menuInfo.fState = MFS_CHECKED;
-				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED, FALSE, &menuInfo);
-			}
 
-			MENUITEMINFO menuInfo;
-			menuInfo.cbSize = sizeof(MENUITEMINFO);
-			menuInfo.fMask = MIIM_STATE;
+				if (!config.bAutoScroll == 0)
+				{
+					//	Enable scroll
+					menuInfo.fState = MFS_CHECKED;
+					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_AUTOSCROLL, FALSE, &menuInfo);
+					PostMessageA(g_ConsoleHwnd, UI_CMD_AUTOSCROLL, (WPARAM)true, 0);
+				}
 
-			if (!config.bAutoScroll == 0)
-			{
-				//	Enable scroll
-				menuInfo.fState = MFS_CHECKED;
-				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_AUTOSCROLL, FALSE, &menuInfo);
-				PostMessageA(g_ConsoleHwnd, UI_CMD_AUTOSCROLL, (WPARAM)true, 0);
-			}
+				if (!config.bEnableSpellChecker == 0)
+				{
+					//	Enable spellchecker
+					menuInfo.fState = MFS_CHECKED;
+					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_SPELLCHECK, FALSE, &menuInfo);
+					PostMessageA(g_ConsoleHwnd, UI_EXTMENU_SPELLCHECK, (WPARAM)true, 0);
+				}
 
-			if (!config.bEnableSpellChecker == 0)
-			{
-				//	Enable spellchecker
-				menuInfo.fState = MFS_CHECKED;
-				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_SPELLCHECK, FALSE, &menuInfo);
-				PostMessageA(g_ConsoleHwnd, UI_EXTMENU_SPELLCHECK, (WPARAM)true, 0);
-			}
+				if (!config.bRenderWindowUncap == 0)
+				{
+					//	Enable Render Uncap
+					menuInfo.fState = MFS_CHECKED;
+					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_RENDER, FALSE, &menuInfo);
+					PostMessageA(g_ConsoleHwnd, UI_EXTMENU_RENDER, (WPARAM)true, 0);
+				}
 
-			if (!config.bRenderWindowUncap == 0)
-			{
-				//	Enable Render Uncap
-				menuInfo.fState = MFS_CHECKED;
-				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_RENDER, FALSE, &menuInfo);
-				PostMessageA(g_ConsoleHwnd, UI_EXTMENU_RENDER, (WPARAM)true, 0);
-			}
+				if (!config.bPreviewWindowUncap == 0)
+				{
+					//	Enable Preview Uncap
+					menuInfo.fState = MFS_CHECKED;
+					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_PREVIEW, FALSE, &menuInfo);
+					PostMessageA(g_ConsoleHwnd, UI_EXTMENU_PREVIEW, (WPARAM)true, 0);
+				}
 
-			if (!config.bPreviewWindowUncap == 0)
-			{
-				//	Enable Preview Uncap
-				menuInfo.fState = MFS_CHECKED;
-				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_PREVIEW, FALSE, &menuInfo);
-				PostMessageA(g_ConsoleHwnd, UI_EXTMENU_PREVIEW, (WPARAM)true, 0);
-			}
+				if (!config.bShowLoadFilesAtStartup == 0) {
+					// open esm/esp selection window at startup
+					if (*(BYTE*)(0xECFE16) != 1) { // is not NIF mode
+						PostMessageA(g_MainHwnd, WM_COMMAND, 0x9CD1, 0);
+					}
+				}
 
-			if (!config.bShowLoadFilesAtStartup == 0) {
-				// open esm/esp selection window at startup
-				if (*(BYTE*)(0xECFE16) != 1) { // is not NIF mode
-					PostMessageA(g_MainHwnd, WM_COMMAND, 0x9CD1, 0);
+				if (!config.bOpenScriptMenuAtStartup == 0) {
+					// open new script window at startup
+					if (*(BYTE*)(0xECFE16) != 1) { // is not NIF mode
+						PostMessageA(g_MainHwnd, WM_COMMAND, 0x9CE3, 0);
+					}
+				}
+
+				if (!config.bNavmeshAllowPlaceAboveOthers == 0)
+				{
+					menuInfo.fState = MFS_CHECKED;
+					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLENAVEMESHBISECT, FALSE, &menuInfo);
+					PostMessageA(g_ConsoleHwnd, UI_EXTMENU_TOGGLENAVEMESHBISECT, (WPARAM)true, 0);
+					ToggleNavmeshPlaceAboveOthers(true);
+				}
+
+				if (!config.bPreemptivelyUnloadCells == 0)
+				{
+					menuInfo.fState = MFS_CHECKED;
+					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLE_PREEMPTIVELY_UNLOAD_CELLS, FALSE, &menuInfo);
+					PostMessageA(g_ConsoleHwnd, UI_EXTMENU_TOGGLE_PREEMPTIVELY_UNLOAD_CELLS, (WPARAM)true, 0);
+				}
+
+				if (config.bRenderWindowPreventRefMovementByDefault)
+				{
+					SendMessage(hWnd, WM_COMMAND, UI_EXTMENU_TOGGLE_REF_MOVEMENT, NULL);
+				}
+				else
+				{
+					menuInfo.fState = MFS_CHECKED;
+					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLE_REF_MOVEMENT, FALSE, &menuInfo);
 				}
 			}
+		}
+		else if (Message == WM_COMMAND)
+		{
+			const uint32_t param = LOWORD(wParam);
 
-			if (!config.bOpenScriptMenuAtStartup == 0) {
-				// open new script window at startup
-				if (*(BYTE*)(0xECFE16) != 1) { // is not NIF mode
-					PostMessageA(g_MainHwnd, WM_COMMAND, 0x9CE3, 0);
-				}
-			}
-
-			if (!config.bNavmeshAllowPlaceAboveOthers == 0)
+			switch (param)
 			{
-				menuInfo.fState = MFS_CHECKED;
-				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLENAVEMESHBISECT, FALSE, &menuInfo);
-				PostMessageA(g_ConsoleHwnd, UI_EXTMENU_TOGGLENAVEMESHBISECT, (WPARAM)true, 0);
-				ToggleNavmeshPlaceAboveOthers(true);
-			}
-
-			if (!config.bPreemptivelyUnloadCells == 0)
+			case UI_MENU_LANDSCAPE_KEY:
+			case UI_MENU_LANDSCAPE_BAR:
 			{
-				menuInfo.fState = MFS_CHECKED;
-				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLE_PREEMPTIVELY_UNLOAD_CELLS, FALSE, &menuInfo);
-				PostMessageA(g_ConsoleHwnd, UI_EXTMENU_TOGGLE_PREEMPTIVELY_UNLOAD_CELLS, (WPARAM)true, 0);
+				// Disallow closing the landscape dialog when painting is in progress.
+				if (RenderWindow::IsLandscapePainting())
+					return 0;
 			}
+			return CallWindowProc(originalMainWindowCallback, hWnd, Message, wParam, lParam);
 
-			if (config.bRenderWindowPreventRefMovementByDefault)
+			case UI_EXTMENU_SHOWLOG:
 			{
-				SendMessage(hWnd, WM_COMMAND, UI_EXTMENU_TOGGLE_REF_MOVEMENT, NULL);
-			}
-			else
-			{
-				menuInfo.fState = MFS_CHECKED;
-				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLE_REF_MOVEMENT, FALSE, &menuInfo);
-			}
-		}
-	}
-	else if (Message == WM_COMMAND)
-	{
-		const uint32_t param = LOWORD(wParam);
-
-		switch (param)
-		{
-		case UI_MENU_LANDSCAPE_KEY:
-		case UI_MENU_LANDSCAPE_BAR:
-		{
-			// Disallow closing the landscape dialog when painting is in progress.
-			if (RenderWindow::IsLandscapePainting())
-				return 0;
-		}
-		return CallWindowProc(originalMainWindowCallback, hWnd, Message, wParam, lParam);
-
-		case UI_EXTMENU_SHOWLOG:
-		{
-			ShowWindow(g_ConsoleHwnd, SW_SHOW);
-			SetForegroundWindow(g_ConsoleHwnd);
-			WritePrivateProfileString("Windows", "bHideLogWindow", " 0", IniPath);
-		}
-		return 0;
-
-		case UI_EXTMENU_CLEARLOG:
-		{
-			PostMessageA(g_ConsoleHwnd, UI_CMD_CLEARLOGTEXT, 0, 0);
-		}
-		return 0;
-
-		case UI_EXTMENU_LOOKUPFORM:
-		{
-			FormSearch::Show();
-		}
-		return 0;
-
-		case UI_EXTMENU_VIEW_MODIFIED_FORMS:
-		{
-			ModifiedFormViewer::Show();
-		}
-		return 0;
-		
-		case UI_EXTMENU_VIEW_RECENT_FORMS:
-		{
-			RecentlyOpenedForms::ShowList();
-		}
-		return 0;
-
-		case UI_EXTMENU_VIEW_NAVMESH_IGNORED_FORMS:
-		{
-			NavMeshPickPreventer::ShowList();
-		}
-		return 0;
-
-		case UI_EXTMENU_AUTO_ADD_TO_MULTIBOUNDS:
-		{
-			MultiBoundsAdder::TestObjects(false);
-		}
-		return 0;
-
-		case UI_EXTMENU_READD_TO_MULTIBOUNDS:
-		{
-			MultiBoundsAdder::TestObjects(true);
-		}
-		return 0;
-
-		case UI_EXTMENU_TOGGLE_REF_MOVEMENT:
-		{
-			auto isMovementAllowed = ToggleReferenceMovement::Toggle();
-			MENUITEMINFO menuInfo;
-			menuInfo.cbSize = sizeof(MENUITEMINFO);
-			menuInfo.fMask = MIIM_STATE;
-			menuInfo.fState = isMovementAllowed ? MFS_CHECKED : MFS_UNCHECKED;
-			SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLE_REF_MOVEMENT, FALSE, &menuInfo);
-		}
-		return 0;
-
-		case UI_EXTMENU_AUTOSCROLL:
-		{
-			MENUITEMINFO menuInfo;
-			menuInfo.cbSize = sizeof(MENUITEMINFO);
-			menuInfo.fMask = MIIM_STATE;
-			GetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_AUTOSCROLL, FALSE, &menuInfo);
-
-			if (menuInfo.fState == MFS_CHECKED)
-			{
-				//	Disable scroll
-				menuInfo.fState = MFS_UNCHECKED;
-				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_AUTOSCROLL, FALSE, &menuInfo);
-				PostMessageA(g_ConsoleHwnd, UI_CMD_AUTOSCROLL, (WPARAM)false, 0);
-			}
-			else
-			{
-				//	Enable scroll
-				menuInfo.fState = MFS_CHECKED;
-				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_AUTOSCROLL, FALSE, &menuInfo);
-				PostMessageA(g_ConsoleHwnd, UI_CMD_AUTOSCROLL, (WPARAM)true, 0);
-			}
-		}
-		return 0;
-
-		case UI_EXTMENU_SPELLCHECK:
-		{
-			MENUITEMINFO menuInfo;
-			menuInfo.cbSize = sizeof(MENUITEMINFO);
-			menuInfo.fMask = MIIM_STATE;
-			GetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_SPELLCHECK, FALSE, &menuInfo);
-
-			if (menuInfo.fState == MFS_CHECKED)
-			{
-				//	Disable Spell Check
-				menuInfo.fState = MFS_UNCHECKED;
-				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_SPELLCHECK, FALSE, &menuInfo);
-				config.bEnableSpellChecker = 0;
-				char buffer[8];
-				WritePrivateProfileString("General", "bEnableSpellChecker", _itoa(config.bEnableSpellChecker, buffer, 2), IniPath);
-			}
-			else
-			{
-				//	Enable Spell Check
-				menuInfo.fState = MFS_CHECKED;
-				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_SPELLCHECK, FALSE, &menuInfo);
-				config.bEnableSpellChecker = 1;
-				char buffer[8];
-				WritePrivateProfileString("General", "bEnableSpellChecker", _itoa(config.bEnableSpellChecker, buffer, 2), IniPath);
-			}
-		}
-		return 0;
-
-		case UI_EXTMENU_RENDER:
-		{
-			MENUITEMINFO menuInfo;
-			menuInfo.cbSize = sizeof(MENUITEMINFO);
-			menuInfo.fMask = MIIM_STATE;
-			GetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_RENDER, FALSE, &menuInfo);
-
-			if (menuInfo.fState == MFS_CHECKED)
-			{
-				//	Disable Render Uncap
-				menuInfo.fState = MFS_UNCHECKED;
-				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_RENDER, FALSE, &menuInfo);
-				config.bRenderWindowUncap = 0;
-				char buffer[8];
-				WritePrivateProfileString("General", "bRenderWindowUncap", _itoa(config.bRenderWindowUncap, buffer, 2), IniPath);
-			}
-			else
-			{
-				//	Enable Render Uncap
-				menuInfo.fState = MFS_CHECKED;
-				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_RENDER, FALSE, &menuInfo);
-				config.bRenderWindowUncap = 1;
-				char buffer[8];
-				WritePrivateProfileString("General", "bRenderWindowUncap", _itoa(config.bRenderWindowUncap, buffer, 2), IniPath);
-			}
-		}
-		return 0;
-
-		case UI_EXTMENU_PREVIEW:
-		{
-			MENUITEMINFO menuInfo;
-			menuInfo.cbSize = sizeof(MENUITEMINFO);
-			menuInfo.fMask = MIIM_STATE;
-			GetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_PREVIEW, FALSE, &menuInfo);
-
-			if (menuInfo.fState == MFS_CHECKED)
-			{
-				//	Disable Preview Uncap
-				menuInfo.fState = MFS_UNCHECKED;
-				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_PREVIEW, FALSE, &menuInfo);
-				config.bPreviewWindowUncap = 0;
-				char buffer[8];
-				WritePrivateProfileString("General", "bPreviewWindowUncap", _itoa(config.bPreviewWindowUncap, buffer, 2), IniPath);
-			}
-			else
-			{
-				//	Enable Preview Uncap
-				menuInfo.fState = MFS_CHECKED;
-				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_PREVIEW, FALSE, &menuInfo);
-				config.bPreviewWindowUncap = 1;
-				char buffer[8];
-				WritePrivateProfileString("General", "bPreviewWindowUncap", _itoa(config.bPreviewWindowUncap, buffer, 2), IniPath);
-			}
-		}
-		return 0;
-
-		case UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED:
-		{
-			MENUITEMINFO menuInfo;
-			menuInfo.cbSize = sizeof(MENUITEMINFO);
-			menuInfo.fMask = MIIM_STATE;
-			GetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED, FALSE, &menuInfo);
-
-			if (menuInfo.fState == MFS_CHECKED)
-			{
-				//	Disable showing unedited
-				menuInfo.fState = MFS_UNCHECKED;
-				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED, FALSE, &menuInfo);
-				ToggleObjectWindowFilterUnedited(true);
-			}
-			else
-			{
-				//	Show unedited only
-				menuInfo.fState = MFS_CHECKED;
-				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED, FALSE, &menuInfo);
-				ToggleObjectWindowFilterUnedited(false);
-			}
-
-			ObjectsView::Refresh();
-		}
-		return 0;
-
-		case UI_EXTMENU_LAUNCHGAME:
-		{
-			LaunchGame::Launch();
-		}
-		return 0;
-
-		case UI_EXTMENU_SAVEPOSITION:
-		{
-			GetCamera(&savedRenderPos, &savedRenderDirection);
-		}
-		return 0;
-
-		case UI_EXTMENU_LOADPOSITION:
-		{
-			SetCamera(&savedRenderPos, &savedRenderDirection);
-		}
-		return 0;
-
-		case UI_EXTMENU_TOGGLENAVEMESHBISECT:
-		{
-			MENUITEMINFO menuInfo;
-			menuInfo.cbSize = sizeof(MENUITEMINFO);
-			menuInfo.fMask = MIIM_STATE;
-			GetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLENAVEMESHBISECT, FALSE, &menuInfo);
-
-			if (menuInfo.fState == MFS_CHECKED)
-			{
-				menuInfo.fState = MFS_UNCHECKED;
-				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLENAVEMESHBISECT, FALSE, &menuInfo);
-				ToggleNavmeshPlaceAboveOthers(false);
-			}
-			else
-			{
-				//	Show unedited only
-				menuInfo.fState = MFS_CHECKED;
-				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLENAVEMESHBISECT, FALSE, &menuInfo);
-				ToggleNavmeshPlaceAboveOthers(true);
-			}
-
-			// save state to ini
-			char buffer[8];
-			WritePrivateProfileString("Render Window", "bNavmeshAllowPlaceAboveOthers", _itoa(config.bNavmeshAllowPlaceAboveOthers, buffer, 2), IniPath);
-		}
-		return 0;
-
-		case UI_EXTMENU_TOGGLE_PREEMPTIVELY_UNLOAD_CELLS:
-		{
-			MENUITEMINFO menuInfo;
-			menuInfo.cbSize = sizeof(MENUITEMINFO);
-			menuInfo.fMask = MIIM_STATE;
-			GetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLE_PREEMPTIVELY_UNLOAD_CELLS, FALSE, &menuInfo);
-
-			if (menuInfo.fState == MFS_CHECKED)
-			{
-				menuInfo.fState = MFS_UNCHECKED;
-				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLE_PREEMPTIVELY_UNLOAD_CELLS, FALSE, &menuInfo);
-				config.bPreemptivelyUnloadCells = false;
-			}
-			else
-			{
-				//	Show unedited only
-				menuInfo.fState = MFS_CHECKED;
-				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLE_PREEMPTIVELY_UNLOAD_CELLS, FALSE, &menuInfo);
-				config.bPreemptivelyUnloadCells = true;
-			}
-
-			// save state to ini
-			char buffer[8];
-			WritePrivateProfileString("General", "bPreemptivelyUnloadCells", _itoa(config.bPreemptivelyUnloadCells, buffer, 2), IniPath);
-		}
-		return 0;
-
-		case ID_TIMEOFDAYTEXT:
-		{
-			if (GetFocus() != (HWND)lParam) break;
-
-			if (HIWORD(wParam) == EN_MAXTEXT) break;
-
-			char text[16];
-			int len = SendMessageA((HWND)lParam, EM_GETLINE, 0, (LPARAM)text);
-			text[len] = '\0'; // null terminate the line since EM_GETLINE does not
-
-			float time = atof(text);
-			SetTimeOfDay(time);
-			SendMessageA(g_trackBarHwnd, TBM_SETPOS, TRUE, time * 4); // update scrollbar
-		}
-		return 0;
-
-		case ID_RENDERWINDOWCELLLOADS_CHECKBOX:
-		{
-			if (HIWORD(wParam) == BN_CLICKED && config.bShowAdditionalToolbarButtons)
-			{
-				bool newButtonState = !SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_GETCHECK, 0, 0);
-				SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_SETCHECK, newButtonState, 0);
-				ToggleRenderWindowAllowCellLoads(newButtonState);
-			}
-		}
-		return 0;
-
-		case ID_RENDERWINDOW_SHOWWATER_CHECKBOX:
-		{
-			if (HIWORD(wParam) == BN_CLICKED && config.bShowAdditionalToolbarButtons)
-			{
-				bool newButtonState = !SendMessageA(g_renderWindowShowWaterButtonHwnd, BM_GETCHECK, 0, 0);
-				SendMessageA(g_renderWindowShowWaterButtonHwnd, BM_SETCHECK, newButtonState, 0);
-				SetIsShowWater(newButtonState);
-			}
-		}
-		return 0;
-
-		case ID_RENDERWINDOW_SHOWPORTALS_CHECKBOX:
-		{
-			if (HIWORD(wParam) == BN_CLICKED && config.bShowAdditionalToolbarButtons)
-			{
-				bool newButtonState = !SendMessageA(g_renderWindowShowPortalsButtonHwnd, BM_GETCHECK, 0, 0);
-				SendMessageA(g_renderWindowShowPortalsButtonHwnd, BM_SETCHECK, newButtonState, 0);
-				SetIsShowPortalsAndRooms(newButtonState);
-			}
-		}
-		return 0;
-
-		case MENUOPTION_RENDER_WINDOW:
-		{
-			MENUITEMINFO menuInfo;
-			menuInfo.cbSize = sizeof(MENUITEMINFO);
-			menuInfo.fMask = MIIM_STATE;
-			GetMenuItemInfo(g_MainMenu, MENUOPTION_RENDER_WINDOW, FALSE, &menuInfo);
-
-			if (menuInfo.fState == MFS_CHECKED)
-			{
-				//	Hide window
-				menuInfo.fState = MFS_UNCHECKED;
-				SetMenuItemInfo(g_MainMenu, MENUOPTION_RENDER_WINDOW, FALSE, &menuInfo);
-				ShowWindow(RenderWindow::GetWindow(), SW_HIDE);
-			}
-			else
-			{
-				//	Show window
-				menuInfo.fState = MFS_CHECKED;
-				SetMenuItemInfo(g_MainMenu, MENUOPTION_RENDER_WINDOW, FALSE, &menuInfo);
-				ShowWindow(RenderWindow::GetWindow(), SW_NORMAL);
-			}
-			WritePrivateProfileString("Windows", "bHideRenderWindow", menuInfo.fState == MFS_CHECKED ? " 0" : " 1", IniPath);
-		}
-		return 0;
-
-		case MENUOPTION_OBJECT_WINDOW:
-		{
-			MENUITEMINFO menuInfo;
-			menuInfo.cbSize = sizeof(MENUITEMINFO);
-			menuInfo.fMask = MIIM_STATE;
-			GetMenuItemInfo(g_MainMenu, MENUOPTION_OBJECT_WINDOW, FALSE, &menuInfo);
-
-			if (menuInfo.fState == MFS_CHECKED)
-			{
-				//	Hide window
-				menuInfo.fState = MFS_UNCHECKED;
-				SetMenuItemInfo(g_MainMenu, MENUOPTION_OBJECT_WINDOW, FALSE, &menuInfo);
-				ShowWindow(ObjectsView::GetWindow(), SW_HIDE);
-			}
-			else
-			{
-				//	Show window
-				menuInfo.fState = MFS_CHECKED;
-				SetMenuItemInfo(g_MainMenu, MENUOPTION_OBJECT_WINDOW, FALSE, &menuInfo);
-				ShowWindow(ObjectsView::GetWindow(), SW_NORMAL);
-			}
-			WritePrivateProfileString("Windows", "bHideObjectWindow", menuInfo.fState == MFS_CHECKED ? " 0" : " 1", IniPath);
-		}
-		return 0;
-
-		case MENUOPTION_CELL_WINDOW:
-		{
-			MENUITEMINFO menuInfo;
-			menuInfo.cbSize = sizeof(MENUITEMINFO);
-			menuInfo.fMask = MIIM_STATE;
-			GetMenuItemInfo(g_MainMenu, MENUOPTION_CELL_WINDOW, FALSE, &menuInfo);
-
-			if (menuInfo.fState == MFS_CHECKED)
-			{
-				//	Hide window
-				menuInfo.fState = MFS_UNCHECKED;
-				SetMenuItemInfo(g_MainMenu, MENUOPTION_CELL_WINDOW, FALSE, &menuInfo);
-				ShowWindow(CellView::GetWindow(), SW_HIDE);
-			}
-			else
-			{
-				//	Show window
-				menuInfo.fState = MFS_CHECKED;
-				SetMenuItemInfo(g_MainMenu, MENUOPTION_CELL_WINDOW, FALSE, &menuInfo);
-				ShowWindow(CellView::GetWindow(), SW_NORMAL);
-			}
-			WritePrivateProfileString("Windows", "bHideCellViewWindow", menuInfo.fState == MFS_CHECKED ? " 0" : " 1", IniPath);
-		}
-		return 0;
-
-		case MAIN_WINDOW_CALLBACK:
-		{
-			auto callback = reinterpret_cast<void(*)()>(lParam);
-			callback();
-		}
-		return 0;
-		}
-	}
-	else if (Message == WM_SETTEXT && hWnd == g_MainHwnd)
-	{
-		//	Continue normal execution but with a custom string
-		char customTitle[256];
-		stbsp_snprintf(customTitle, sizeof(customTitle), "%s -= Extender Rev. 0.51 =-", (const char*)lParam);
-
-		return CallWindowProc(originalMainWindowCallback, hWnd, Message, wParam, (LPARAM)customTitle);
-	}
-	else if (Message == WM_HSCROLL && config.bShowTimeOfDaySlider)
-	{
-		if ((HWND)lParam == g_trackBarHwnd)
-		{
-			char timeBuf[100];
-			if ((LOWORD(wParam) == SB_THUMBPOSITION || LOWORD(wParam) == SB_THUMBTRACK))
-			{
-				float time = HIWORD(wParam) * 0.25;
-				SetTimeOfDay(time);
-
-				stbsp_sprintf(timeBuf, "%.2f", time);
-				SetWindowTextA(g_timeOfDayTextHwnd, timeBuf);
-			}
-			else if (LOWORD(wParam) == SB_ENDSCROLL)
-			{
-				float time = SendMessageA(g_trackBarHwnd, TBM_GETPOS, 0, 0) * 0.25;
-				SetTimeOfDay(time);
-
-				stbsp_sprintf(timeBuf, "%.2f", time);
-				SetWindowTextA(g_timeOfDayTextHwnd, timeBuf);
+				ShowWindow(g_ConsoleHwnd, SW_SHOW);
+				SetForegroundWindow(g_ConsoleHwnd);
+				WritePrivateProfileString("Windows", "bHideLogWindow", " 0", IniPath);
 			}
 			return 0;
-		}
-	}
-	else if (Message == WM_MOVE)
-	{
-		static int prevX = 0, prevY = 0;
 
-		// Extract signed coordinates from lParam
-		int newX = (short)LOWORD(lParam);
-		int newY = (short)HIWORD(lParam);
-
-		if (((GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0))
-		{
-			POINT offset =
+			case UI_EXTMENU_CLEARLOG:
 			{
-				newX - prevX,
-				newY - prevY
-			};
+				PostMessageA(g_ConsoleHwnd, UI_CMD_CLEARLOGTEXT, 0, 0);
+			}
+			return 0;
 
-			for (HWND pWindow : { RenderWindow::GetWindow(), CellView::GetWindow(), ObjectsView::GetWindow(), LogWindow::GetWindow() })
+			case UI_EXTMENU_LOOKUPFORM:
 			{
-				RECT rc;
-				GetWindowRect(pWindow, &rc);
+				FormSearch::Show();
+			}
+			return 0;
 
-				SetWindowPos(
-					pWindow,
-					nullptr,
-					rc.left + offset.x,
-					rc.top + offset.y,
-					0,
-					0,
-					SWP_NOZORDER | SWP_NOSIZE
-				);
+			case UI_EXTMENU_VIEW_MODIFIED_FORMS:
+			{
+				ModifiedFormViewer::Show();
+			}
+			return 0;
+		
+			case UI_EXTMENU_VIEW_RECENT_FORMS:
+			{
+				RecentlyOpenedForms::ShowList();
+			}
+			return 0;
+
+			case UI_EXTMENU_VIEW_NAVMESH_IGNORED_FORMS:
+			{
+				NavMeshPickPreventer::ShowList();
+			}
+			return 0;
+
+			case UI_EXTMENU_AUTO_ADD_TO_MULTIBOUNDS:
+			{
+				MultiBoundsAdder::TestObjects(false);
+			}
+			return 0;
+
+			case UI_EXTMENU_READD_TO_MULTIBOUNDS:
+			{
+				MultiBoundsAdder::TestObjects(true);
+			}
+			return 0;
+
+			case UI_EXTMENU_TOGGLE_REF_MOVEMENT:
+			{
+				auto isMovementAllowed = ToggleReferenceMovement::Toggle();
+				MENUITEMINFO menuInfo;
+				menuInfo.cbSize = sizeof(MENUITEMINFO);
+				menuInfo.fMask = MIIM_STATE;
+				menuInfo.fState = isMovementAllowed ? MFS_CHECKED : MFS_UNCHECKED;
+				SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLE_REF_MOVEMENT, FALSE, &menuInfo);
+			}
+			return 0;
+
+			case UI_EXTMENU_AUTOSCROLL:
+			{
+				MENUITEMINFO menuInfo;
+				menuInfo.cbSize = sizeof(MENUITEMINFO);
+				menuInfo.fMask = MIIM_STATE;
+				GetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_AUTOSCROLL, FALSE, &menuInfo);
+
+				if (menuInfo.fState == MFS_CHECKED)
+				{
+					//	Disable scroll
+					menuInfo.fState = MFS_UNCHECKED;
+					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_AUTOSCROLL, FALSE, &menuInfo);
+					PostMessageA(g_ConsoleHwnd, UI_CMD_AUTOSCROLL, (WPARAM)false, 0);
+				}
+				else
+				{
+					//	Enable scroll
+					menuInfo.fState = MFS_CHECKED;
+					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_AUTOSCROLL, FALSE, &menuInfo);
+					PostMessageA(g_ConsoleHwnd, UI_CMD_AUTOSCROLL, (WPARAM)true, 0);
+				}
+			}
+			return 0;
+
+			case UI_EXTMENU_SPELLCHECK:
+			{
+				MENUITEMINFO menuInfo;
+				menuInfo.cbSize = sizeof(MENUITEMINFO);
+				menuInfo.fMask = MIIM_STATE;
+				GetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_SPELLCHECK, FALSE, &menuInfo);
+
+				if (menuInfo.fState == MFS_CHECKED)
+				{
+					//	Disable Spell Check
+					menuInfo.fState = MFS_UNCHECKED;
+					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_SPELLCHECK, FALSE, &menuInfo);
+					config.bEnableSpellChecker = 0;
+					char buffer[8];
+					WritePrivateProfileString("General", "bEnableSpellChecker", _itoa(config.bEnableSpellChecker, buffer, 2), IniPath);
+				}
+				else
+				{
+					//	Enable Spell Check
+					menuInfo.fState = MFS_CHECKED;
+					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_SPELLCHECK, FALSE, &menuInfo);
+					config.bEnableSpellChecker = 1;
+					char buffer[8];
+					WritePrivateProfileString("General", "bEnableSpellChecker", _itoa(config.bEnableSpellChecker, buffer, 2), IniPath);
+				}
+			}
+			return 0;
+
+			case UI_EXTMENU_RENDER:
+			{
+				MENUITEMINFO menuInfo;
+				menuInfo.cbSize = sizeof(MENUITEMINFO);
+				menuInfo.fMask = MIIM_STATE;
+				GetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_RENDER, FALSE, &menuInfo);
+
+				if (menuInfo.fState == MFS_CHECKED)
+				{
+					//	Disable Render Uncap
+					menuInfo.fState = MFS_UNCHECKED;
+					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_RENDER, FALSE, &menuInfo);
+					config.bRenderWindowUncap = 0;
+					char buffer[8];
+					WritePrivateProfileString("General", "bRenderWindowUncap", _itoa(config.bRenderWindowUncap, buffer, 2), IniPath);
+				}
+				else
+				{
+					//	Enable Render Uncap
+					menuInfo.fState = MFS_CHECKED;
+					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_RENDER, FALSE, &menuInfo);
+					config.bRenderWindowUncap = 1;
+					char buffer[8];
+					WritePrivateProfileString("General", "bRenderWindowUncap", _itoa(config.bRenderWindowUncap, buffer, 2), IniPath);
+				}
+			}
+			return 0;
+
+			case UI_EXTMENU_PREVIEW:
+			{
+				MENUITEMINFO menuInfo;
+				menuInfo.cbSize = sizeof(MENUITEMINFO);
+				menuInfo.fMask = MIIM_STATE;
+				GetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_PREVIEW, FALSE, &menuInfo);
+
+				if (menuInfo.fState == MFS_CHECKED)
+				{
+					//	Disable Preview Uncap
+					menuInfo.fState = MFS_UNCHECKED;
+					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_PREVIEW, FALSE, &menuInfo);
+					config.bPreviewWindowUncap = 0;
+					char buffer[8];
+					WritePrivateProfileString("General", "bPreviewWindowUncap", _itoa(config.bPreviewWindowUncap, buffer, 2), IniPath);
+				}
+				else
+				{
+					//	Enable Preview Uncap
+					menuInfo.fState = MFS_CHECKED;
+					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_PREVIEW, FALSE, &menuInfo);
+					config.bPreviewWindowUncap = 1;
+					char buffer[8];
+					WritePrivateProfileString("General", "bPreviewWindowUncap", _itoa(config.bPreviewWindowUncap, buffer, 2), IniPath);
+				}
+			}
+			return 0;
+
+			case UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED:
+			{
+				MENUITEMINFO menuInfo;
+				menuInfo.cbSize = sizeof(MENUITEMINFO);
+				menuInfo.fMask = MIIM_STATE;
+				GetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED, FALSE, &menuInfo);
+
+				if (menuInfo.fState == MFS_CHECKED)
+				{
+					//	Disable showing unedited
+					menuInfo.fState = MFS_UNCHECKED;
+					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED, FALSE, &menuInfo);
+					ToggleObjectWindowFilterUnedited(true);
+				}
+				else
+				{
+					//	Show unedited only
+					menuInfo.fState = MFS_CHECKED;
+					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED, FALSE, &menuInfo);
+					ToggleObjectWindowFilterUnedited(false);
+				}
+
+				ObjectsView::Refresh();
+			}
+			return 0;
+
+			case UI_EXTMENU_LAUNCHGAME:
+			{
+				LaunchGame::Launch();
+			}
+			return 0;
+
+			case UI_EXTMENU_SAVEPOSITION:
+			{
+				GetCamera(&savedRenderPos, &savedRenderDirection);
+			}
+			return 0;
+
+			case UI_EXTMENU_LOADPOSITION:
+			{
+				SetCamera(&savedRenderPos, &savedRenderDirection);
+			}
+			return 0;
+
+			case UI_EXTMENU_TOGGLENAVEMESHBISECT:
+			{
+				MENUITEMINFO menuInfo;
+				menuInfo.cbSize = sizeof(MENUITEMINFO);
+				menuInfo.fMask = MIIM_STATE;
+				GetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLENAVEMESHBISECT, FALSE, &menuInfo);
+
+				if (menuInfo.fState == MFS_CHECKED)
+				{
+					menuInfo.fState = MFS_UNCHECKED;
+					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLENAVEMESHBISECT, FALSE, &menuInfo);
+					ToggleNavmeshPlaceAboveOthers(false);
+				}
+				else
+				{
+					//	Show unedited only
+					menuInfo.fState = MFS_CHECKED;
+					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLENAVEMESHBISECT, FALSE, &menuInfo);
+					ToggleNavmeshPlaceAboveOthers(true);
+				}
+
+				// save state to ini
+				char buffer[8];
+				WritePrivateProfileString("Render Window", "bNavmeshAllowPlaceAboveOthers", _itoa(config.bNavmeshAllowPlaceAboveOthers, buffer, 2), IniPath);
+			}
+			return 0;
+
+			case UI_EXTMENU_TOGGLE_PREEMPTIVELY_UNLOAD_CELLS:
+			{
+				MENUITEMINFO menuInfo;
+				menuInfo.cbSize = sizeof(MENUITEMINFO);
+				menuInfo.fMask = MIIM_STATE;
+				GetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLE_PREEMPTIVELY_UNLOAD_CELLS, FALSE, &menuInfo);
+
+				if (menuInfo.fState == MFS_CHECKED)
+				{
+					menuInfo.fState = MFS_UNCHECKED;
+					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLE_PREEMPTIVELY_UNLOAD_CELLS, FALSE, &menuInfo);
+					config.bPreemptivelyUnloadCells = false;
+				}
+				else
+				{
+					//	Show unedited only
+					menuInfo.fState = MFS_CHECKED;
+					SetMenuItemInfo(g_ExtensionMenu, UI_EXTMENU_TOGGLE_PREEMPTIVELY_UNLOAD_CELLS, FALSE, &menuInfo);
+					config.bPreemptivelyUnloadCells = true;
+				}
+
+				// save state to ini
+				char buffer[8];
+				WritePrivateProfileString("General", "bPreemptivelyUnloadCells", _itoa(config.bPreemptivelyUnloadCells, buffer, 2), IniPath);
+			}
+			return 0;
+
+			case ID_TIMEOFDAYTEXT:
+			{
+				if (GetFocus() != (HWND)lParam) break;
+
+				if (HIWORD(wParam) == EN_MAXTEXT) break;
+
+				char text[16];
+				int len = SendMessageA((HWND)lParam, EM_GETLINE, 0, (LPARAM)text);
+				text[len] = '\0'; // null terminate the line since EM_GETLINE does not
+
+				float time = atof(text);
+				SetTimeOfDay(time);
+				SendMessageA(g_trackBarHwnd, TBM_SETPOS, TRUE, time * 4); // update scrollbar
+			}
+			return 0;
+
+			case ID_RENDERWINDOWCELLLOADS_CHECKBOX:
+			{
+				if (HIWORD(wParam) == BN_CLICKED && config.bShowAdditionalToolbarButtons)
+				{
+					bool newButtonState = !SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_GETCHECK, 0, 0);
+					SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_SETCHECK, newButtonState, 0);
+					ToggleRenderWindowAllowCellLoads(newButtonState);
+				}
+			}
+			return 0;
+
+			case ID_RENDERWINDOW_SHOWWATER_CHECKBOX:
+			{
+				if (HIWORD(wParam) == BN_CLICKED && config.bShowAdditionalToolbarButtons)
+				{
+					bool newButtonState = !SendMessageA(g_renderWindowShowWaterButtonHwnd, BM_GETCHECK, 0, 0);
+					SendMessageA(g_renderWindowShowWaterButtonHwnd, BM_SETCHECK, newButtonState, 0);
+					SetIsShowWater(newButtonState);
+				}
+			}
+			return 0;
+
+			case ID_RENDERWINDOW_SHOWPORTALS_CHECKBOX:
+			{
+				if (HIWORD(wParam) == BN_CLICKED && config.bShowAdditionalToolbarButtons)
+				{
+					bool newButtonState = !SendMessageA(g_renderWindowShowPortalsButtonHwnd, BM_GETCHECK, 0, 0);
+					SendMessageA(g_renderWindowShowPortalsButtonHwnd, BM_SETCHECK, newButtonState, 0);
+					SetIsShowPortalsAndRooms(newButtonState);
+				}
+			}
+			return 0;
+
+			case MENUOPTION_RENDER_WINDOW:
+			{
+				MENUITEMINFO menuInfo;
+				menuInfo.cbSize = sizeof(MENUITEMINFO);
+				menuInfo.fMask = MIIM_STATE;
+				GetMenuItemInfo(g_MainMenu, MENUOPTION_RENDER_WINDOW, FALSE, &menuInfo);
+
+				if (menuInfo.fState == MFS_CHECKED)
+				{
+					//	Hide window
+					menuInfo.fState = MFS_UNCHECKED;
+					SetMenuItemInfo(g_MainMenu, MENUOPTION_RENDER_WINDOW, FALSE, &menuInfo);
+					ShowWindow(RenderWindow::GetWindow(), SW_HIDE);
+				}
+				else
+				{
+					//	Show window
+					menuInfo.fState = MFS_CHECKED;
+					SetMenuItemInfo(g_MainMenu, MENUOPTION_RENDER_WINDOW, FALSE, &menuInfo);
+					ShowWindow(RenderWindow::GetWindow(), SW_NORMAL);
+				}
+				WritePrivateProfileString("Windows", "bHideRenderWindow", menuInfo.fState == MFS_CHECKED ? " 0" : " 1", IniPath);
+			}
+			return 0;
+
+			case MENUOPTION_OBJECT_WINDOW:
+			{
+				MENUITEMINFO menuInfo;
+				menuInfo.cbSize = sizeof(MENUITEMINFO);
+				menuInfo.fMask = MIIM_STATE;
+				GetMenuItemInfo(g_MainMenu, MENUOPTION_OBJECT_WINDOW, FALSE, &menuInfo);
+
+				if (menuInfo.fState == MFS_CHECKED)
+				{
+					//	Hide window
+					menuInfo.fState = MFS_UNCHECKED;
+					SetMenuItemInfo(g_MainMenu, MENUOPTION_OBJECT_WINDOW, FALSE, &menuInfo);
+					ShowWindow(ObjectsView::GetWindow(), SW_HIDE);
+				}
+				else
+				{
+					//	Show window
+					menuInfo.fState = MFS_CHECKED;
+					SetMenuItemInfo(g_MainMenu, MENUOPTION_OBJECT_WINDOW, FALSE, &menuInfo);
+					ShowWindow(ObjectsView::GetWindow(), SW_NORMAL);
+				}
+				WritePrivateProfileString("Windows", "bHideObjectWindow", menuInfo.fState == MFS_CHECKED ? " 0" : " 1", IniPath);
+			}
+			return 0;
+
+			case MENUOPTION_CELL_WINDOW:
+			{
+				MENUITEMINFO menuInfo;
+				menuInfo.cbSize = sizeof(MENUITEMINFO);
+				menuInfo.fMask = MIIM_STATE;
+				GetMenuItemInfo(g_MainMenu, MENUOPTION_CELL_WINDOW, FALSE, &menuInfo);
+
+				if (menuInfo.fState == MFS_CHECKED)
+				{
+					//	Hide window
+					menuInfo.fState = MFS_UNCHECKED;
+					SetMenuItemInfo(g_MainMenu, MENUOPTION_CELL_WINDOW, FALSE, &menuInfo);
+					ShowWindow(CellView::GetWindow(), SW_HIDE);
+				}
+				else
+				{
+					//	Show window
+					menuInfo.fState = MFS_CHECKED;
+					SetMenuItemInfo(g_MainMenu, MENUOPTION_CELL_WINDOW, FALSE, &menuInfo);
+					ShowWindow(CellView::GetWindow(), SW_NORMAL);
+				}
+				WritePrivateProfileString("Windows", "bHideCellViewWindow", menuInfo.fState == MFS_CHECKED ? " 0" : " 1", IniPath);
+			}
+			return 0;
+
+			case MAIN_WINDOW_CALLBACK:
+			{
+				auto callback = reinterpret_cast<void(*)()>(lParam);
+				callback();
+			}
+			return 0;
 			}
 		}
+		else if (Message == WM_SETTEXT && hWnd == g_MainHwnd)
+		{
+			//	Continue normal execution but with a custom string
+			char customTitle[256];
+			stbsp_snprintf(customTitle, sizeof(customTitle), "%s -= Extender Rev. 0.51 =-", (const char*)lParam);
 
-		prevX = newX;
-		prevY = newY;
+			return CallWindowProc(originalMainWindowCallback, hWnd, Message, wParam, (LPARAM)customTitle);
+		}
+		else if (Message == WM_HSCROLL && config.bShowTimeOfDaySlider)
+		{
+			if ((HWND)lParam == g_trackBarHwnd)
+			{
+				char timeBuf[100];
+				if ((LOWORD(wParam) == SB_THUMBPOSITION || LOWORD(wParam) == SB_THUMBTRACK))
+				{
+					float time = HIWORD(wParam) * 0.25;
+					SetTimeOfDay(time);
+
+					stbsp_sprintf(timeBuf, "%.2f", time);
+					SetWindowTextA(g_timeOfDayTextHwnd, timeBuf);
+				}
+				else if (LOWORD(wParam) == SB_ENDSCROLL)
+				{
+					float time = SendMessageA(g_trackBarHwnd, TBM_GETPOS, 0, 0) * 0.25;
+					SetTimeOfDay(time);
+
+					stbsp_sprintf(timeBuf, "%.2f", time);
+					SetWindowTextA(g_timeOfDayTextHwnd, timeBuf);
+				}
+				return 0;
+			}
+		}
+		else if (Message == WM_MOVE)
+		{
+			static int prevX = 0, prevY = 0;
+
+			// Extract signed coordinates from lParam
+			int newX = (short)LOWORD(lParam);
+			int newY = (short)HIWORD(lParam);
+
+			if (((GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0))
+			{
+				POINT offset =
+				{
+					newX - prevX,
+					newY - prevY
+				};
+
+				for (HWND pWindow : { RenderWindow::GetWindow(), CellView::GetWindow(), ObjectsView::GetWindow(), LogWindow::GetWindow() })
+				{
+					RECT rc;
+					GetWindowRect(pWindow, &rc);
+
+					SetWindowPos(
+						pWindow,
+						nullptr,
+						rc.left + offset.x,
+						rc.top + offset.y,
+						0,
+						0,
+						SWP_NOZORDER | SWP_NOSIZE
+					);
+				}
+			}
+
+			prevX = newX;
+			prevY = newY;
+		}
+
+		return CallWindowProc(originalMainWindowCallback, hWnd, Message, wParam, lParam);
 	}
 
-	return CallWindowProc(originalMainWindowCallback, hWnd, Message, wParam, lParam);
-}
-
-void ExtensionsMenu_InitHooks()
-{
-	originalMainWindowCallback = (WNDPROC)DetourVtable(0x44612D, UInt32(MainWindowCallback));
+	void InitHooks()
+	{
+		originalMainWindowCallback = (WNDPROC)DetourVtable(0x44612D, UInt32(MainWindowCallback));
+	}
 }

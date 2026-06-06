@@ -21,6 +21,7 @@
 #include "NavMeshPickPreventer.h"
 #include "FormColoring.h"
 #include "DialogResizing.h"
+#include "ExtensionsMenu.h"
 
 #include "libs/stb_sprintf.h"
 
@@ -3345,13 +3346,14 @@ LRESULT CALLBACK ObjectWindowCallback(HWND hWnd, UINT Message, WPARAM wParam, LP
 	{
 	case WM_INITDIALOG:
 	{
-		HWND listView = GetDlgItem(hWnd, 1041);
+		HWND listView = GetDlgItem(hWnd, ObjectsView::IDC_LIST_VIEW);
 		SetWindowSubclass(listView, ObjectWindowListViewCallback, 0, 0);
 
-		HWND filterField = GetDlgItem(hWnd, 2557);
-		SetWindowSubclass(filterField, ObjectWindowFilterFieldCallback, 0, 0);
+		HWND hFilterEdit = GetDlgItem(hWnd, ObjectsView::IDC_FILTER_EDIT);
+		SetWindowSubclass(hFilterEdit, ObjectWindowFilterFieldCallback, 0, 0);
 
 		AddMinimizeAndCloseButtons(hWnd);
+		ObjectsViewEx::AddFilterStar(hWnd);
 		break;
 	}
 	case WM_CLOSE:
@@ -3366,18 +3368,31 @@ LRESULT CALLBACK ObjectWindowCallback(HWND hWnd, UINT Message, WPARAM wParam, LP
 		break;
 	case WM_COMMAND:
 	{
-		HWND listView = GetDlgItem(hWnd, 1041);
+		if (LOWORD(wParam) == ObjectsViewEx::IDC_FILTER_STAR)
+		{
+			SendMessageA(g_MainHwnd, WM_COMMAND, ExtensionsMenu::UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED, 0);
+			return true;
+		}
+
+		if (LOWORD(wParam) == ObjectsViewEx::SET_FILTER_STAR)
+		{
+			auto hCheck = GetDlgItem(hWnd, ObjectsViewEx::IDC_FILTER_STAR);
+			SendMessageA(hCheck, BM_SETCHECK, lParam ? BST_CHECKED : BST_UNCHECKED, 0);
+		}
+
+		HWND listView = GetDlgItem(hWnd, ObjectsView::IDC_LIST_VIEW);
 		if (HandlePopupMenuCommand(listView, wParam))
 		{
 			return true;
 		}
+
 		break;
 	}
 	case WM_NOTIFY:
 	{
 		LPNMHDR hdr = (LPNMHDR)lParam;
 
-		if (hdr->hwndFrom == GetDlgItem(hWnd, 1041) &&
+		if (hdr->hwndFrom == GetDlgItem(hWnd, ObjectsView::IDC_LIST_VIEW) &&
 			hdr->code == NM_CUSTOMDRAW)
 		{
 			LRESULT result = FormColoring::HandleCustomDraw(lParam);

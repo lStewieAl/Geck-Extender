@@ -682,7 +682,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		MessageBoxA(nullptr, "Failed to create console log window", "Error", MB_ICONERROR);
 	}
 
-	ExtensionsMenu_InitHooks();
+	ExtensionsMenu::InitHooks();
 
 	PatchRememberLandscapeEditSettingsWindowPosition();
 

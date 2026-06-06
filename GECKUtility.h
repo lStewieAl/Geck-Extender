@@ -245,6 +245,12 @@ struct ObjectsView
 		kColEx_DT
 	};
 
+	enum
+	{
+		IDC_LIST_VIEW = 1041,
+		IDC_FILTER_EDIT = 2557,
+	};
+
 	static void SetColumnWidth(Columns column, short width);
 	static short GetColumnWidth(Columns column);
 	static void SetColumnHeading(Columns column, const char* heading);
@@ -261,6 +267,50 @@ struct ObjectsView
 		char fullPath[MAX_PATH];
 		char nodeName[MAX_PATH];
 	};
+};
+
+struct ObjectsViewEx : ObjectsView
+{
+	enum Commands
+	{
+		SET_FILTER_STAR = 3001
+	};
+
+	enum IDs
+	{
+		IDC_FILTER_STAR = 3000,
+	};
+
+	static void AddFilterStar(HWND hWnd)
+	{
+		HWND hFilterEdit = GetDlgItem(hWnd, IDC_FILTER_EDIT);
+		RECT rc;
+		GetWindowRect(hFilterEdit, &rc);
+
+		POINT pt = { rc.right, rc.top };
+		ScreenToClient(hWnd, &pt);
+
+		CreateWindowEx(
+			0, TEXT("BUTTON"), TEXT(""),
+			WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
+			pt.x + 3,
+			pt.y - 1,
+			14,
+			rc.bottom - rc.top,
+			hWnd,
+			(HMENU)IDC_FILTER_STAR,
+			GetModuleHandle(NULL),
+			NULL);
+
+		HWND hLabel = CreateWindowEx(
+			0, TEXT("STATIC"), TEXT("*"),
+			WS_CHILD | WS_VISIBLE,
+			pt.x + 18, pt.y, 8, 10,
+			hWnd, NULL, GetModuleHandle(NULL), NULL);
+
+		HFONT hFont = (HFONT)SendMessage(hWnd, WM_GETFONT, 0, 0);
+		SendMessage(hLabel, WM_SETFONT, (WPARAM)hFont, TRUE);
+	}
 };
 
 struct ObjectWindowNodeData
