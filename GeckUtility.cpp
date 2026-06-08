@@ -335,9 +335,14 @@ char* GetAudioFileName(char* apDst, size_t auiLen, TESQuest* apQuest, TESTopic* 
 	return apDst;
 }
 
-TESForm* Window_GetForm(HWND hWnd)
+TESForm* __cdecl Window_GetForm(HWND hWnd)
 {
 	return CdeclCall<TESForm*>(0x47ABC0, hWnd);
+}
+
+void __cdecl Window_SetupPopupMenu(HMENU hMenu, LPPOINT cursorPos, HWND hWnd, HWND listView)
+{
+	CdeclCall(0x47F3B0, hMenu, cursorPos, hWnd, listView);
 }
 
 LRESULT __cdecl TESCSMain__WriteToStatusBar(unsigned int statusBarId, const char* msg)

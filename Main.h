@@ -1834,20 +1834,33 @@ enum CustomDialogContextActions
 	COPY_RESPONSE_FILENAME = 0x10001,
 };
 
-enum { kQuestResponsesListView = 1454 };
-
+enum { kQuestResponsesListView = 1454, kListView = 1448, kQuestListView = 2064 };
 void __stdcall OnSetupResponseRightClickMenu(UInt32 menuID, HMENU menu, LPPOINT cursorPos, HWND hWnd, HWND listView)
 {
 	auto uiSelectedItems = 0;
 	if (menuID != kQuestResponsesListView || !(uiSelectedItems = ListView_GetSelectedCount(GetDlgItem(hWnd, kQuestResponsesListView))))
 	{
-		CdeclCall(0x47F3B0, menu, cursorPos, hWnd, listView); // Window::SetupPopupMenu
+		if (menuID == kListView)
+		{
+			HMENU hColorSubMenu = FormColoring::CreateSubMenu(listView);
+			InsertMenuA(menu, 0xFFFFFFFF, MF_BYPOSITION | MF_POPUP, (UINT_PTR)hColorSubMenu, "Color");
+
+			Window_SetupPopupMenu(menu, cursorPos, hWnd, listView);
+
+			if (hColorSubMenu)
+			{
+				RemoveSubMenuByHandle(menu, hColorSubMenu);
+			}
+			return;
+		}
+
+		Window_SetupPopupMenu(menu, cursorPos, hWnd, listView);
 		return;
 	}
 
 	InsertMenuA(menu, 0xFFFFFFFF, MF_BYPOSITION | MF_SEPARATOR, 0, nullptr);
 	InsertMenuA(menu, 0xFFFFFFFF, MF_BYPOSITION, COPY_RESPONSE_FILENAME, uiSelectedItems == 1 ? "Copy Filename" : "Copy Filenames");
-	CdeclCall(0x47F3B0, menu, cursorPos, hWnd, listView); // Window::SetupPopupMenu
+	Window_SetupPopupMenu(menu, cursorPos, hWnd, listView);
 	DeleteMenu(menu, COPY_RESPONSE_FILENAME, MF_BYCOMMAND);
 }
 
@@ -1916,7 +1929,6 @@ bool CopySelectedDialogFileNames(HWND hWnd)
 
 BOOL CALLBACK DialogueWindowTopicsCallback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	enum { kListView = 1448, kQuestListView = 2064};
 	if (msg == WM_NOTIFY)
 	{
 		// allow selecting multiple responses for copying filenames (ideally this would be WM_INITDIALOG, but that doesn't get called here)
@@ -1949,7 +1961,7 @@ BOOL CALLBACK DialogueWindowTopicsCallback(HWND hWnd, UINT msg, WPARAM wParam, L
 		LPNMHDR hdr = (LPNMHDR)lParam;
 		if (hdr->idFrom == kListView || hdr->idFrom == kQuestListView)
 		{
-			if (hdr->code == NM_RCLICK)
+			if (hdr->idFrom == kQuestListView && hdr->code == NM_RCLICK)
 			{
 				SetupDialogueTopicRightClickMenu(hWnd, hdr->hwndFrom);
 			}
@@ -3166,7 +3178,7 @@ void __cdecl OnSetupObjectAndCellWindowRightClickMenu(HMENU menu, LPPOINT cursor
 		InsertMenuA(menu, 0xFFFFFFFF, MF_BYPOSITION, RECALC_BOUNDS, "Recalc Bounds");
 	}
 
-	CdeclCall(0x47F3B0, menu, cursorPos, hWnd, listView); // Window::SetupPopupMenu
+	Window_SetupPopupMenu(menu, cursorPos, hWnd, listView);
 
 	DeleteMenu(menu, RECALC_BOUNDS, MF_BYCOMMAND);
 

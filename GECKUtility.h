@@ -674,6 +674,8 @@ void* Window_GetExtraData(HWND hWnd, int code);
 
 TESForm* Window_GetForm(HWND hWnd);
 
+void __cdecl Window_SetupPopupMenu(HMENU hMenu, LPPOINT cursorPos, HWND hWnd, HWND listView);
+
 class TESQuest;
 class TESTopic;
 class TESTopicInfo;
