@@ -205,6 +205,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SafeWrite32(0x00D23550, (UInt32)hk_SendMessageA);
     g_DlgProcAtom = GlobalAddAtomA("GeckExt_DlgProc");
 	g_IsModalAtom = GlobalAddAtomA("GeckExt_IsModal");
+	SafeWrite32(0x7488C6, 0x0010C25B); // fix the region editor being a Cdecl dialog callback..?
 
 	//	fix WM_CLOSE in destruction data dialog - credit to roy
 	SafeWrite32(0x004E640F, (UInt32)hk_DialogProc);
