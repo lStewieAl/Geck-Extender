@@ -246,6 +246,10 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="RegionEditorEx.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="SearchAndReplaceWindow.cpp">
       <SubType>
       </SubType>
@@ -365,6 +369,10 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
     </ClInclude>
     <ClInclude Include="PrintReplacer.hpp" />
     <ClInclude Include="RecentlyOpenedForms.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="RegionEditorEx.h">
       <SubType>
       </SubType>
     </ClInclude>

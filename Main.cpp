@@ -53,6 +53,7 @@
 #include "SearchAndReplaceWindow.h"
 #include "ToggleReferenceMovement.h"
 #include "PreemptivelyUnloadCells.h"
+#include "RegionEditorEx.h"
 #include "CrashHandler.h"
 #include "Allocator/MemoryManager.hpp"
 #include "Allocator/BSMemory.hpp"
@@ -1183,6 +1184,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x5FAA77, UInt32(OnTESObjectDOOR_InitItem));
 	WriteRelCall(0x5FA492, UInt32(OnTESObjectDOOR_CloneStart));
 	WriteRelJump(0x5FA573, UInt32(OnTESObjectDOOR_CloneEnd));
+
+	RegionEditorEx::InitHooks();
 
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())

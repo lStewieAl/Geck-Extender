@@ -99,6 +99,7 @@
     <ClCompile Include="RecentlyOpenedForms.cpp" />
     <ClCompile Include="SearchAndReplaceWindow.cpp" />
     <ClCompile Include="CrashHandler.cpp" />
+    <ClCompile Include="RegionEditorEx.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Main.h" />
@@ -226,6 +227,7 @@
     <ClInclude Include="RecentlyOpenedForms.h" />
     <ClInclude Include="SearchAndReplaceWindow.h" />
     <ClInclude Include="CrashHandler.h" />
+    <ClInclude Include="RegionEditorEx.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
