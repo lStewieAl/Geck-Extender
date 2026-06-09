@@ -876,7 +876,7 @@ struct RegionEditor
 		UInt32 unk05C;
 		IDirect3D9* pDirect3D9;
 		UInt32 unk064;
-		UInt32 unk068;
+		int iNumLODTextures;
 		UInt32 unk06C;
 		UInt32 unk070;
 	};

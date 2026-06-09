@@ -92,6 +92,23 @@ namespace RegionEditorEx
 		}
 	}
 
+	__HOOK OnRenderLODHook()
+	{
+		_asm
+		{
+			cmp dword ptr ds : [ecx + 0x58], 0
+			je skip
+			mov eax, 0x748D80
+			jmp eax
+
+
+		skip:
+			pop ecx
+			mov eax, 0x749168
+			jmp eax
+		}
+	}
+
 	void InitHooks()
 	{
 		originalRegionEditorFn = DetourRelCall(0x7488B2, UInt32(RegionEditorCallback));
@@ -103,5 +120,8 @@ namespace RegionEditorEx
 		strcpy((char*)(strrchr(IniPath, '\\') + 1), "Data\\nvse\\plugins\\GeckExtender\\RegionEditor\\IgnoredRegions.ini");
 
 		DataLoadEvent::RegisterCallback(InitIgnoredRegions);
+
+		// only show the LOD renderer when holding CTRL if there is LOD textures to render... to avoid showing a black screen
+		WriteRelCall(0x7497EB, UInt32(OnRenderLODHook));
 	}
 }
