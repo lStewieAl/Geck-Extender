@@ -1850,7 +1850,7 @@ void __stdcall OnSetupResponseRightClickMenu(UInt32 menuID, HMENU menu, LPPOINT 
 			if (hColorSubMenu)
 			{
 				RemoveSubMenuByHandle(menu, hColorSubMenu);
-			}
+			} 
 			return;
 		}
 
