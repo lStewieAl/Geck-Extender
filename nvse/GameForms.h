@@ -3691,18 +3691,19 @@ struct RegionAreaEntry
 };
 typedef tList<RegionAreaEntry> RegionAreaEntryList;
 
-// 38
+// 50
 class TESRegion : public TESForm
 {
 public:
 	TESRegion();
 	~TESRegion();
 
-	RegionDataEntryList* dataEntries;	// 18
-	RegionAreaEntryList* areaEntries;	// 1C
-	TESWorldSpace* worldSpace;	// 20
-	TESWeather* weather;		// 24
-	UInt32				unk28[4];		// 28
+	void* unk2C;
+	RegionDataEntryList* dataEntries;	// 30
+	RegionAreaEntryList* areaEntries;	// 34
+	TESWorldSpace* worldSpace;	// 38
+	TESWeather* weather;		// 3C
+	UInt32				unk28[4];		// 40
 };
 
 STATIC_ASSERT(sizeof(TESRegion) == 0x38);

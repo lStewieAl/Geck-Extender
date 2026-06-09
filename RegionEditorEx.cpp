@@ -1,4 +1,5 @@
 #include "Utilities.h"
+#include "GeckUtility.h"
 #include "GameData.h"
 #include "Settings.h"
 
@@ -13,7 +14,7 @@ namespace RegionEditorEx
 	std::unordered_set<std::string> ignoredRegionEditorIDs;
 
 	UInt32 originalRegionEditorFn;
-	bool __fastcall RegionEditorCallback(struct RegionEditor* pRegionEditor, void* edx, HWND hWnd, unsigned int Msg, unsigned int wParam, UINT lParam)
+	bool __fastcall RegionEditorCallback(RegionEditor* pRegionEditor, void* edx, HWND hWnd, unsigned int Msg, unsigned int wParam, UINT lParam)
 	{
 		enum { CLEAR_LAST_POINT = 152 };
 		if (Msg == WM_KEYDOWN && wParam == 'Z' && (GetKeyState(VK_CONTROL) & 0x8000))
@@ -26,14 +27,18 @@ namespace RegionEditorEx
 		return ThisCall<bool>(originalRegionEditorFn, pRegionEditor, hWnd, Msg, wParam, lParam);
 	}
 
-	bool __fastcall ShouldHideRegionFromList(TESRegion* apRegion)
+	bool __fastcall ShouldHideRegionFromList(TESRegion* apRegion, RegionEditor* pEditor)
 	{
+		if (apRegion->worldSpace == pEditor->pData->pWrldSpc)
+		{
+			return false;
+		}
+
 		const char* pEditorID = apRegion->GetEditorID();
 		if (!pEditorID || !*pEditorID)
 		{
 			return false;
 		}
-
 		return ignoredRegionEditorIDs.find(pEditorID) != ignoredRegionEditorIDs.end();
 	}
 
@@ -43,26 +48,12 @@ namespace RegionEditorEx
 		{
 			mov ebx, eax
 
-			mov eax, [eax + 0x38]
-			test eax, eax
-			je nullWorldSpace
-
-			mov ecx, [esp + 0x14]
-			mov ecx, [ecx]
-			test ecx, ecx
-			je nullWorldSpace
-
-			mov ecx, [ecx + 0x10]
-			cmp ecx, eax
-			je noSkip // matching worldSpace
-
-		nullWorldSpace:
 			mov ecx, ebx
+			mov edx, [esp + 0x14]
 			call ShouldHideRegionFromList
 			test al, al
 			jne skip
 
-		noSkip:
 			mov ebx, [ebx + 0x38]
 			test ebx, ebx
 			mov eax, 0x742D85

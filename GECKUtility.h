@@ -843,3 +843,57 @@ struct MainWindow
 };
 
 void AddMinimizeAndCloseButtons(HWND hWnd);
+
+class TESWorldSpace;
+class TESRegion;
+struct RegionEditor
+{
+	struct Data
+	{
+		float unk000;
+		float unk004;
+		float unk008;
+		float unk00C;
+		TESWorldSpace* pWrldSpc;
+		TESRegion* region;
+		UInt32 unk018;
+		UInt32 unk01C;
+		UInt32 unk020;
+		UInt32 unk024;
+		UInt32 unk028;
+		UInt32 unk02C;
+		UInt32 unk030;
+		UInt32 unk034;
+		UInt32 unk038;
+		UInt32 unk03C;
+		HDC hdc040;
+		UInt32 unk044;
+		HWND hScrollbarHorizontal;
+		UInt8 byte04C;
+		HWND hScrollbarVertical;
+		UInt32 unk054;
+		UInt32 unk058;
+		UInt32 unk05C;
+		IDirect3D9* pDirect3D9;
+		UInt32 unk064;
+		UInt32 unk068;
+		UInt32 unk06C;
+		UInt32 unk070;
+	};
+
+	Data* pData;
+	UInt32 hWindow;
+	UInt32 hStatusWindow;
+	UInt32 hProgressBar;
+	HWND hRegionListView;
+	UInt32 hTabControl;
+	HWND hwnd018;
+	UInt32 unk01C;
+	UInt32 unk020;
+	UInt32 unk024;
+	float unk028;
+	UInt32 unk02C;
+	float unk030;
+	UInt32 unk034;
+	UInt32 unk038;
+};
