@@ -26,7 +26,7 @@ namespace RegionEditorEx
 		return ThisCall<bool>(originalRegionEditorFn, pRegionEditor, hWnd, Msg, wParam, lParam);
 	}
 
-	bool __fastcall ShouldHideRegionFromList(TESForm* apRegion)
+	bool __fastcall ShouldHideRegionFromList(TESRegion* apRegion)
 	{
 		const char* pEditorID = apRegion->GetEditorID();
 		if (!pEditorID || !*pEditorID)
@@ -42,11 +42,27 @@ namespace RegionEditorEx
 		_asm
 		{
 			mov ebx, eax
-			mov ecx, eax
+
+			mov eax, [eax + 0x38]
+			test eax, eax
+			je nullWorldSpace
+
+			mov ecx, [esp + 0x14]
+			mov ecx, [ecx]
+			test ecx, ecx
+			je nullWorldSpace
+
+			mov ecx, [ecx + 0x10]
+			cmp ecx, eax
+			je noSkip // matching worldSpace
+
+		nullWorldSpace:
+			mov ecx, ebx
 			call ShouldHideRegionFromList
 			test al, al
 			jne skip
 
+		noSkip:
 			mov ebx, [ebx + 0x38]
 			test ebx, ebx
 			mov eax, 0x742D85
