@@ -4263,10 +4263,15 @@ public:
 			kPackLocation_Max,
 		};
 
-		UInt8		locationType;	// 000
-		UInt8		pad[3];
-		UInt32		radius;			// 004
-		ObjectType  object;			// 008
+		enum UIFlags
+		{
+			ALLOW_LINKED_REFERENCE = 0x2,
+		};
+
+		UInt8		eLocationType;	// 000
+		UInt32		uiRadius;		// 004
+		UInt32		ucEnabledPicks;	// 008
+		ObjectType  object;			// 00C
 
 		static LocationData* Create();
 		static const char* StringForLocationCode(UInt8 locCode);

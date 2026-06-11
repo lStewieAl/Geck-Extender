@@ -14,6 +14,7 @@
 
 #include "NiNodes.h"
 #include "NiObjects.h"
+#include "GameForms.h"
 #include "GameScript.h"
 #include "GameSettings.h"
 #include "FormSearch.h"
@@ -2484,26 +2485,21 @@ errno_t __cdecl OnGetMeshPathModifyIfDragDrop(char* Dst, rsize_t SizeInBytes, co
 
 __HOOK OnLoadRegionsHook()
 {
+	// ebp (TESWorldSpace*) should be null if it's invalid not -1
 	_asm
 	{
 		cmp dword ptr ds : [esi + 0x10], ebx
 		je nullRegion
 		cmp ebp, -1
-		je noRegions
-
+		jne done
+		xor ebp, ebp
+	done:
 		pop eax
 		mov eax, 0x743F9D
 		jmp eax
 
 	nullRegion:
 		ret
-
-	noRegions:
-		pop eax
-		pop ebp
-		pop esi
-		pop ebx
-		ret 4
 	}
 }
 
@@ -4859,4 +4855,11 @@ void __fastcall OnTESObjectDOOR_CloneEnd(TESObjectDOOR* apDoor, void* edx, TESOb
 {
 	SetDoorSoundsInUsagesMap(apDoor, true);
 	ThisCall(0x4F7FF0, apDoor, apFrom);
+}
+
+TESPackage::LocationData* __fastcall OnOpenAmbushPackageLocation(TESPackage* apPackage)
+{
+	auto location = ThisCall<TESPackage::LocationData*>(0x493BA0, apPackage);
+	location->ucEnabledPicks |= TESPackage::LocationData::ALLOW_LINKED_REFERENCE;
+	return location;
 }

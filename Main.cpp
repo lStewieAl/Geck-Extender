@@ -1187,6 +1187,11 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	RegionEditorEx::InitHooks();
 
+	// workaround the 'Linked Reference' of Locations not being selectable for ambush locations
+	// ideally we would fix the package flags not getting set properly when loading
+	// but instead just set them when the dialog is opened
+	WriteRelCall(0x49A3B1, UInt32(OnOpenAmbushPackageLocation));
+
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
 	{

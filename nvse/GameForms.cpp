@@ -358,9 +358,9 @@ TESPackage::LocationData* TESPackage::LocationData::Create()
 {
 	LocationData* data = (LocationData*)FormHeap_Allocate(sizeof(LocationData));
 
-	data->locationType = kPackLocation_CurrentLocation;
+	data->eLocationType = kPackLocation_CurrentLocation;
 	data->object.form = NULL;
-	data->radius = 0;
+	data->uiRadius = 0;
 
 	return data;
 }
@@ -564,23 +564,23 @@ const char* TESPackage::LocationData::StringForLocationCodeAndData(void)
 {
 #define resultSize 256
 	static char result[resultSize];
-	if (locationType < kPackLocation_Max) {
-		switch (locationType) {
+	if (eLocationType < kPackLocation_Max) {
+		switch (eLocationType) {
 		case kPackLocation_NearReference:
 		case kPackLocation_InCell:
 		case kPackLocation_ObjectID:
 			if (object.form)
-				stbsp_snprintf(result, resultSize, "%s \"%s\" [%08X] with a radius of %u", TESPackage_LocationStrings[locationType], object.form->GetTheName(),
-					object.form->refID, radius);
+				stbsp_snprintf(result, resultSize, "%s \"%s\" [%08X] with a radius of %u", TESPackage_LocationStrings[eLocationType], object.form->GetTheName(),
+					object.form->refID, uiRadius);
 			else
-				stbsp_snprintf(result, resultSize, "%s \"\" [%08X] with a radius of %u", TESPackage_LocationStrings[locationType], 0, radius);
+				stbsp_snprintf(result, resultSize, "%s \"\" [%08X] with a radius of %u", TESPackage_LocationStrings[eLocationType], 0, uiRadius);
 			break;
 		case kPackLocation_ObjectType:
-			stbsp_snprintf(result, resultSize, "%s \"%s\" [%04X] with a radius of %u", TESPackage_LocationStrings[locationType], StringForObjectCode(object.objectCode),
-				object.objectCode, radius);
+			stbsp_snprintf(result, resultSize, "%s \"%s\" [%04X] with a radius of %u", TESPackage_LocationStrings[eLocationType], StringForObjectCode(object.objectCode),
+				object.objectCode, uiRadius);
 			break;
 		default:
-			stbsp_snprintf(result, resultSize, "%s with a radius of %u", TESPackage_LocationStrings[locationType], radius);
+			stbsp_snprintf(result, resultSize, "%s with a radius of %u", TESPackage_LocationStrings[eLocationType], uiRadius);
 			break;
 		}
 		return result;
