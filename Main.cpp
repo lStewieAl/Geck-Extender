@@ -194,6 +194,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	//	enable big guns for weapon skill
 	SafeWrite32(0x492D0C, 0x410);
 
+	// remove the need to reopen the Art and Sound tab to edit the weapon Attack Multiplier after toggling the automatic flag
+	SafeWrite8(0x606318, true);
+
 	//	uncap framerate on render window - credit to shademe
 	if (config.bRenderWindowUncap)
 	{
