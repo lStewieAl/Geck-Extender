@@ -109,6 +109,9 @@ struct Settings
 
 	bool bRecompileAllScriptsSCPTFormsOnly;
 	char* sRecompileAllScriptsModName;
+
+	bool bDisableProcessWindowsGhosting;
+	bool bSetProcessDPIAware;
 };
 
 extern Settings config;

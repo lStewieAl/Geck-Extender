@@ -122,7 +122,15 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	EventManager::InitHooks();
 
-	DisableProcessWindowsGhosting();
+	if (config.bDisableProcessWindowsGhosting)
+	{
+		DisableProcessWindowsGhosting();
+	}
+
+	if (config.bSetProcessDPIAware)
+	{
+		SetProcessDPIAware();
+	}
 
 	//	stop geck crash with bUseMultibounds = 0 in exterior cells with multibounds - credit to roy
 	WriteRelCall(0x004CA48F, (UInt32)FixMultiBounds);

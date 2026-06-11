@@ -110,6 +110,9 @@ void ReadAllSettings()
 
 	config.uiHeapMaxSizeMB = GetOrCreateINIValue("Heap", "uiHeapMaxSizeMB", 800, IniPath);
 	config.uiHeapInitialSizeMB = GetOrCreateINIValue("Heap", "uiHeapInitialSizeMB", 600, IniPath);
+
+	config.bDisableProcessWindowsGhosting = GetOrCreateINIValue("Process", "bDisableProcessWindowsGhosting", 1, IniPath);
+	config.bSetProcessDPIAware = GetOrCreateINIValue("Process", "bSetProcessDPIAware", 1, IniPath);
 }
 
 #define INI_SETTING_NOT_FOUND -1
