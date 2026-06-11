@@ -850,10 +850,10 @@ struct RegionEditor
 {
 	struct Data
 	{
-		float unk000;
-		float unk004;
-		float unk008;
-		float unk00C;
+		float fOffsetX;
+		float fOffsetY;
+		float fViewWidth;
+		float fViewHeight;
 		TESWorldSpace* pWrldSpc;
 		TESRegion* region;
 		UInt32 unk018;
@@ -875,10 +875,20 @@ struct RegionEditor
 		UInt32 unk058;
 		UInt32 unk05C;
 		IDirect3D9* pDirect3D9;
-		UInt32 unk064;
+		struct IDirect3DDevice9* pDeviceInterface;
 		int iNumLODTextures;
 		UInt32 unk06C;
-		UInt32 unk070;
+		struct IDirect3DTexture9* pTexture;
+
+		void Render()
+		{
+			ThisCall(0x7490E0, this);
+		}
+
+		void ScreenToWorld(NiPoint2* apPoint, int iOffsetX, int iOffsetY)
+		{
+			ThisCall(0x748BB0, this, apPoint, iOffsetX, iOffsetY);
+		}
 	};
 
 	Data* pData;
@@ -896,4 +906,9 @@ struct RegionEditor
 	float unk030;
 	UInt32 unk034;
 	UInt32 unk038;
+
+	static HWND GetBlackRect()
+	{
+		return *(HWND*)0xF0FF90;
+	}
 };

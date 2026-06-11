@@ -36,6 +36,12 @@ struct NiVector4
 	float	x, y, z, w;
 };
 
+// 8
+struct NiPoint2
+{
+	float	x, y;
+};
+
 struct NiPoint3
 {
 	float x, y, z;

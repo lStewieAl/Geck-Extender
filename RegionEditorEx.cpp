@@ -1,6 +1,7 @@
 #include "Utilities.h"
 #include "GeckUtility.h"
 #include "GameData.h"
+#include "NiTypes.h"
 #include "Settings.h"
 
 #include <string>
@@ -109,6 +110,100 @@ namespace RegionEditorEx
 		}
 	}
 
+	char __fastcall RegionEditorData_ZoomIn(RegionEditor::Data* pData, void* edx, float afZoom, char abRender)
+	{
+		float oldWidth = pData->fViewWidth;
+		float oldHeight = pData->fViewHeight;
+
+		if (afZoom < 0.0f || afZoom > 1.0f)
+			return 0;
+
+		float scale = 1.0f - afZoom * 0.5f;
+
+		float newWidth = oldWidth * scale;
+		float newHeight = oldHeight * scale;
+
+		if (newWidth < 1365.0f || newHeight < 819.0f)
+			return 0;
+
+		POINT pt;
+		GetCursorPos(&pt);
+		ScreenToClient(RegionEditor::GetBlackRect(), &pt);
+
+		NiPoint2 kBefore;
+		pData->ScreenToWorld(&kBefore, pt.x, pt.y);
+
+		// Change zoom
+		pData->fViewWidth = newWidth;
+		pData->fViewHeight = newHeight;
+
+		NiPoint2 kAfter;
+		pData->ScreenToWorld(&kAfter, pt.x, pt.y);
+
+		// Adjust offsets to compensate
+		pData->fOffsetX += kBefore.x - kAfter.x;
+		pData->fOffsetY += kBefore.y - kAfter.y;
+
+		if (abRender)
+		{
+			pData->Render();
+		}
+		else
+		{
+			EnableWindow(pData->hScrollbarHorizontal, 0);
+			EnableWindow(pData->hScrollbarVertical, 0);
+		}
+
+		return 1;
+	}
+
+	bool __fastcall RegionEditorData_ZoomOut(RegionEditor::Data* pData, void* edx, float afZoom, char abRender)
+	{
+		float oldWidth = pData->fViewWidth;
+		float oldHeight = pData->fViewHeight;
+
+		if (afZoom < 0.0f || afZoom > 1.0f)
+			return 0;
+
+		float scale = 1.0f + afZoom;
+		float newWidth = oldWidth * scale;
+		float newHeight = oldHeight * scale;
+
+		// increase min zoom by 3x
+		if (newWidth > 327680.0f * 3.f || newHeight > 196608.0f * 3.f)
+			return 0;
+
+		// make the zoom happen relative to the mouse position
+		// instead of the center
+		POINT pt;
+		GetCursorPos(&pt);
+		ScreenToClient(RegionEditor::GetBlackRect(), &pt);
+
+		NiPoint2 kBefore;
+		pData->ScreenToWorld(&kBefore, pt.x, pt.y);
+
+		pData->fViewWidth = newWidth;
+		pData->fViewHeight = newHeight;
+
+		NiPoint2 kAfter;
+		pData->ScreenToWorld(&kAfter, pt.x, pt.y);
+
+		pData->fOffsetX += kBefore.x - kAfter.x;
+		pData->fOffsetY += kBefore.y - kAfter.y;
+
+		if (abRender)
+		{
+			pData->Render();
+		}
+		else
+		{
+			EnableWindow(pData->hScrollbarHorizontal, 0);
+			EnableWindow(pData->hScrollbarVertical, 0);
+		}
+
+		return 1;
+	}
+
 	void InitHooks()
 	{
 		originalRegionEditorFn = DetourRelCall(0x7488B2, UInt32(RegionEditorCallback));
@@ -123,5 +218,9 @@ namespace RegionEditorEx
 
 		// only show the LOD renderer when holding CTRL if there is LOD textures to render... to avoid showing a black screen
 		WriteRelCall(0x7497EB, UInt32(OnRenderLODHook));
+
+		// zoom into where the cursor is instead of centered
+		WriteRelCall(0x74719E, UInt32(RegionEditorData_ZoomIn));
+		WriteRelCall(0x7471CA, UInt32(RegionEditorData_ZoomOut));
 	}
 }
