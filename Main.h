@@ -916,7 +916,7 @@ void __fastcall OnSetupScriptWindowStatusBarHook(int* ecx, HWND hStatusWindow, i
 struct ScriptEditUserData
 {
 	RECT kRect;
-	struct Script* pScript;
+	Script* pScript;
 	UInt8 bSavedScript;
 	HMENU hMenu;
 	HWND hStatusWindow;
@@ -932,6 +932,7 @@ bool __fastcall ScriptEdit__Save(byte* thiss, void* dummyEDX, HWND hWnd, char a3
 {
 	ScriptEditUserData* pUserData = (ScriptEditUserData*)GetWindowLongA(hWnd, GWL_USERDATA);
 	hScriptEditStatusWindow = pUserData ? pUserData->hStatusWindow : 0;
+	SendMessageA(hScriptEditStatusWindow, SB_SETTEXTA, 1, (LPARAM)"");
 
 	bool saveSuccess = ThisCall<bool>(0x5C2F40, thiss, hWnd, a3, a4);
 	if (saveSuccess)
@@ -947,8 +948,6 @@ bool __fastcall ScriptEdit__Save(byte* thiss, void* dummyEDX, HWND hWnd, char a3
 			windowName[len - 1] = '\0'; // strip the '* '
 			SetWindowTextA(hWnd, windowName);
 		}
-
-		SendMessageA(hScriptEditStatusWindow, SB_SETTEXTA, 1, (LPARAM)"");
 	}
 	return saveSuccess;
 }
@@ -957,8 +956,17 @@ void __cdecl OnScriptEditError(String* apStr, const char* apFormat, const char* 
 {
 	CdeclCall(0x407120, apStr, apFormat, apScriptName, auiLineNumber, apErrorString);
 
-	char kBuf[MAX_PATH];
-	snprintf(kBuf, sizeof(kBuf), "Line %d: %s", auiLineNumber, apErrorString);
+	char kBuf[MAX_PATH]; kBuf[0] = '\0';
+	char kPrevError[MAX_PATH]; kPrevError[0] = '\0';
+	SendMessageA(hScriptEditStatusWindow, SB_GETTEXTA, 1, (LPARAM)kPrevError);
+	if (*kPrevError)
+	{
+		snprintf(kBuf, sizeof(kBuf), "%s | %s", kPrevError, apErrorString);
+	}
+	else
+	{
+		snprintf(kBuf, sizeof(kBuf), "Line %d: %s", auiLineNumber, apErrorString);
+	}
 
 	SendMessageA(hScriptEditStatusWindow, SB_SETTEXTA, 1, (LPARAM)kBuf);
 }
