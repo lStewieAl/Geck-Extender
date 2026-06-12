@@ -827,6 +827,11 @@ struct TESListView
 	{
 		CdeclCall(0x47E410, listView, apForms, filterFn, filterData);
 	}
+
+	static LRESULT __cdecl InsertItem(HWND hListView, void* apItem, bool abIncludeImage, int aiIndex)
+	{
+		return CdeclCall<LRESULT>(0x41A020, hListView, apItem, abIncludeImage, aiIndex);
+	}
 };
 
 struct MainWindow

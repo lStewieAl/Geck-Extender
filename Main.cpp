@@ -728,8 +728,39 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	originalObjectWindowCallback = (WNDPROC)DetourVtable(0x4416A3, UInt32(ObjectWindowCallback));
 
+	// support regex in the Object window filter
+	WriteRelCall(0x439641, UInt32(OnObjectWindowFilter));
+	WriteRelCall(0x439754, UInt32(ObjectWindowRegexContains));
+	WriteRelCall(0x43977D, UInt32(ObjectWindowRegexContains));
+
+	// trim whitespace in object window filter
+	WriteRelCall(0x44B2FE, UInt32(OnGetObjectWindowText));
+	SafeWrite8(0x44B2FE + 5, 0x90);
+
 	originalCellWindowCallback = *(WNDPROC*)0x441648;
 	SafeWrite32(0x441648, UInt32(CellWindowCallback));
+
+	// support regex in the cell window
+	WriteRelCall(0x42DE03, UInt32(OnCellObjectsFilter));
+	WriteRelCall(0x42DE5A, UInt32(CellObjectsRegexContains));
+	WriteRelCall(0x42DE85, UInt32(CellObjectsRegexContains));
+	WriteRelCall(0x42DEAE, UInt32(CellObjectsRegexContains));
+	WriteRelCall(0x42DF67, UInt32(CellObjectsRegexContains));
+
+	// add filtering to the cells list
+	WriteRelCall(0x42D407, UInt32(OnPopulateCellsList));
+	WriteRelCall(0x47A6B6, UInt32(TESListView_InsertCellIfNotFiltered)); // Interiors
+	WriteRelCall(0x666CC0, UInt32(TESListView_InsertCellIfNotFiltered)); // Worldspaces
+	SafeWrite8(0x42D3CE, 0x45);
+	WriteRelJump(0x42D414, UInt32(ShouldUpdateCellsListHook));
+	WriteRelJump(0x42E441, UInt32(OnLoadCell_SortCellListHook)); // fix a call to sort the cell list that didn't pass a comparator...
+	WriteRelCall(0x42E431, UInt32(CellViewSetCurrentCellUpdateCellListHook)); // the selected item changes when clicking on a cell if you have a filter... bethcoded
+
+	// remove superfluous call to invalidate the cell view window's cell list (ShadeMe)
+	SafeWrite16(0x4309D4, 0x2AEB);
+
+	// fix the cell view bunching up when resizing it the first time after loading a cell (ShadeMe)
+	WriteRelJump(0x42EA05, UInt32(CellViewWindowResizeFixHook));
 
 	// fix the Text Search not updating Z position after loading a cell
 	WriteRelCall(0x48706C, UInt32(OnTextViewLoadCell));
@@ -766,12 +797,6 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	// add support for more keys to render window preferences
 	WriteRelCall(0x4137D5, UInt32(OnInitRenderWindowComboBox));
-
-	// remove superfluous call to invalidate the cell view window's cell list (ShadeMe)
-	SafeWrite16(0x4309D4, 0x2AEB);
-
-	// fix the cell view bunching up when resizing it the first time after loading a cell (ShadeMe)
-	WriteRelJump(0x42EA05, UInt32(CellViewWindowResizeFixHook));
 
 	// options to hide the cell/object/render windows at startup (ShadeMe)
 	WriteRelCall(0x446594, UInt32(HideCSMainDialogsStartup));
@@ -817,22 +842,6 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x5785EF, UInt32(InsertHeadPartsColumnsHookAdd));
 	WriteRelCall(0x5784F0, UInt32(PreInsertHeadPartsColumnsHookRemove)); // save the window (ESI) in a global because it's lost otherwise...
 	WriteRelCall(0x578595, UInt32(InsertHeadPartsColumnsHookRemove));
-
-	// support regex in the Object window filter
-	WriteRelCall(0x439641, UInt32(OnObjectWindowFilter));
-	WriteRelCall(0x439754, UInt32(ObjectWindowRegexContains));
-	WriteRelCall(0x43977D, UInt32(ObjectWindowRegexContains));
-
-	// support regex in the cell window
-	WriteRelCall(0x42DE03, UInt32(OnCellWindowFilter));
-	WriteRelCall(0x42DE5A, UInt32(CellWindowRegexContains));
-	WriteRelCall(0x42DE85, UInt32(CellWindowRegexContains));
-	WriteRelCall(0x42DEAE, UInt32(CellWindowRegexContains));
-	WriteRelCall(0x42DF67, UInt32(CellWindowRegexContains));
-
-	// trim whitespace in object window filter
-	WriteRelCall(0x44B2FE, UInt32(OnGetObjectWindowText));
-	SafeWrite8(0x44B2FE + 5, 0x90);
 
 	// fix the dialog window columns being zero width by default
 	WriteRelCall(0x59073B, UInt32(OnStoreDialogWindowColumnSizeHook));

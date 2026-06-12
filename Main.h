@@ -1997,22 +1997,6 @@ errno_t __cdecl OnGetMeshPathModifyIfDragDrop(char* Dst, rsize_t SizeInBytes, co
 
 namespace CustomFOV
 {
-	class NiCamera : public NiAVObject
-	{
-	public:
-		NiCamera();
-		~NiCamera();
-
-		float			m_kWorldToCam[4][4];// 09C
-		NiFrustum		m_kViewFrustum;		// 0DC
-		float			m_fMinNearPlaneDist;// 0F8
-		float			m_fMaxFarNearRatio;	// 0FC
-		NiViewport		m_kPort;			// 100
-		float			m_fLODAdjust;		// 110
-	};
-	STATIC_ASSERT(sizeof(NiCamera) == 0x114);
-	STATIC_ASSERT(offsetof(NiCamera, m_kViewFrustum) == 0xDC);
-
 	static float fFOVTan = 1.0F;
 	bool __fastcall NiWindow__UpdateCamera(void* window, void* edx, NiCamera* apCamera, UInt32 auiWidth, UInt32 auiHeight, float afEndClipDist)
 	{
@@ -2106,7 +2090,7 @@ TESForm* __cdecl OnMediaLocationControllerSelectForm(HWND hWndParent, TESForm* f
 		{
 			if (CdeclCall<int>(0x41A0F0, listView, form) < 0)
 			{
-				CdeclCall(0x41A020, listView, form, 0, -1);
+				TESListView::InsertItem(listView, form, 0, -1);
 				int index = CdeclCall<int>(0x41A0F0, listView, form);
 				CdeclCall(0x41A260, listView, index);
 			}
@@ -2977,6 +2961,93 @@ LRESULT CALLBACK ObjectWindowCallback(HWND hWnd, UINT Message, WPARAM wParam, LP
 	return CallWindowProc(originalObjectWindowCallback, hWnd, Message, wParam, lParam);
 }
 
+
+void __stdcall OnGetObjectWindowText(HWND hWnd, LPSTR lpString, int nMaxCount)
+{
+	GetWindowTextA(hWnd, lpString, nMaxCount);
+	trim(lpString);
+}
+
+struct WindowFilter
+{
+	HWND* hwnd;
+	std::unique_ptr<std::regex> regex;
+	bool bRegexSearch;
+	std::string lastPattern;
+	bool bAddedBackspaceSupport;
+
+	void AddBackspaceSupport()
+	{
+		if (!bAddedBackspaceSupport && config.bAddFilterCtrlBackspace)
+		{
+			bAddedBackspaceSupport = true;
+			SHAutoComplete(*hwnd, SHACF_AUTOSUGGEST_FORCE_OFF);
+		}
+	}
+
+	void UpdateFilter()
+	{
+		char filterString[0x100];
+		GetWindowTextA(*hwnd, filterString, 255);
+		trim(filterString);
+		try
+		{
+			if (strcmp(lastPattern.c_str(), filterString))
+			{
+				if (IsOnlyAlphaNumeric(filterString))
+				{
+					bRegexSearch = false;
+				}
+				else
+				{
+					regex = std::make_unique<std::regex>(filterString, std::regex_constants::icase);
+					bRegexSearch = true;
+				}
+				lastPattern = filterString;
+			}
+		}
+		catch (const std::regex_error& e)
+		{
+#ifdef _DEBUG
+			Console_Print("%s  -  %s", filterString, e.what());
+#endif
+			bRegexSearch = false;
+		}
+	}
+
+	bool Contains(const char* apText, const char* apPattern)
+	{
+		return bRegexSearch ? std::regex_search(apText, *regex) : CdeclCall<bool>(0x8A15B0, apText, apPattern);
+	}
+};
+
+WindowFilter objectWindowFilter = { (HWND*)0xED1108 };
+WindowFilter cellObjectsFilter = { (HWND*)0xECF520 };
+
+UInt32 __fastcall OnObjectWindowFilter()
+{
+	objectWindowFilter.AddBackspaceSupport();
+	objectWindowFilter.UpdateFilter();
+	return *(UInt32*)0xECC3C8;
+}
+
+bool __cdecl ObjectWindowRegexContains(const char* text, const char* pattern)
+{
+	return objectWindowFilter.Contains(text, pattern);
+}
+
+UInt32 OnCellObjectsFilter()
+{
+	cellObjectsFilter.AddBackspaceSupport();
+	cellObjectsFilter.UpdateFilter();
+	return *(UInt32*)0xECC3C8;
+}
+
+bool __cdecl CellObjectsRegexContains(const char* text, const char* pattern)
+{
+	return cellObjectsFilter.Contains(text, pattern);
+}
+
 LRESULT CALLBACK CellWindowListViewCallback(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
 {
 	if (Message == WM_COMMAND)
@@ -2996,6 +3067,125 @@ void HideCellWindow(HWND hWnd)
 	WritePrivateProfileString("Windows", "bHideCellViewWindow", " 1", IniPath);
 }
 
+enum CellViewControlID : UInt32
+{
+	IDC_WORLDSPACE_COMBO = 2083,
+
+	IDC_CELL_X_EDIT = 5283,
+	IDC_CELL_Y_EDIT = 5099,
+
+	IDC_GO_BUTTON = 3681,
+	IDC_FILTER_CHECKBOX = 1006,
+
+	IDC_FILTER_REFS_EDIT = 2557,
+	IDC_FILTER_CELLS_EDIT = 2558, // Extender added
+
+	IDC_CELL_LIST = 1155,
+	IDC_OBJECT_LIST = 1156,
+
+	IDC_CELL_NAME = 1163,
+	IDC_WORLDSPACE_LABEL = 1164,
+	IDC_X_LABEL = 5281,
+	IDC_Y_LABEL = 5282,
+};
+
+HWND CreateCellViewFilterControl(HWND hWnd)
+{
+	HWND hFilterEdit = CreateWindowExA(
+		WS_EX_CLIENTEDGE,
+		"EDIT",
+		"",
+		WS_CHILD | WS_VISIBLE | WS_BORDER | WS_TABSTOP |
+		ES_LEFT | ES_AUTOHSCROLL,
+		139,        // x
+		8,          // y
+		76,         // width
+		12,         // height
+		hWnd,
+		(HMENU)IDC_FILTER_CELLS_EDIT,
+		GetModuleHandle(NULL),
+		nullptr);
+
+	HFONT hFont = (HFONT)SendMessage(hWnd, WM_GETFONT, 0, 0);
+	SendMessage(hFilterEdit, WM_SETFONT, (WPARAM)hFont, TRUE);
+	return hFilterEdit;
+}
+
+bool bFilterCells;
+char kCellViewFilter[MAX_PATH];
+HWND hCellFilter;
+WindowFilter cellListFilter = { &hCellFilter };
+
+LRESULT __cdecl TESListView_InsertCellIfNotFiltered(HWND hListView, TESObjectCELL* apCell, char abIncludeImage, int aiIndex)
+{
+	if (!bFilterCells || !apCell || cellListFilter.Contains(apCell->GetEditorID(), kCellViewFilter))
+	{
+		return TESListView::InsertItem(hListView, apCell, abIncludeImage, aiIndex);
+	}
+	return -1;
+}
+
+bool HasCellFilter()
+{
+	return kCellViewFilter[0] != '\0' && (kCellViewFilter[0] != '*' || kCellViewFilter[1] != '*' || kCellViewFilter[2] != '\0');
+}
+
+void __cdecl OnPopulateCellsList(TESWorldSpace* wrldSpc, HWND hWnd, int abClearExisting)
+{
+	bFilterCells = HasCellFilter();
+	cellListFilter.AddBackspaceSupport();
+	cellListFilter.UpdateFilter();
+
+	CdeclCall(0x47A640, wrldSpc, hWnd, abClearExisting);
+
+	bFilterCells = false;
+}
+
+bool bForceCellListViewRefresh;
+__HOOK ShouldUpdateCellsListHook()
+{
+	_asm
+	{
+		cmp bForceCellListViewRefresh, 0
+		je skip
+		mov eax, 0x42D3CF
+		jmp eax
+
+	skip:
+		mov eax, 0x42D40F
+		jmp eax
+	}
+}
+
+__HOOK OnLoadCell_SortCellListHook()
+{
+	_asm
+	{
+		pop edx
+		push 0x628BA0
+		mov edx, 0x42E446
+		jmp edx
+	}
+}
+
+__HOOK CellViewSetCurrentCellUpdateCellListHook()
+{
+	_asm
+	{
+		call HasCellFilter
+		test al, al
+		jne skip
+		mov eax, 0x42D370
+		jmp eax
+
+	skip:
+		pop eax
+		pop eax
+		mov eax, 0x42E46A
+		jmp eax
+	}
+}
+
 WNDPROC originalCellWindowCallback;
 LRESULT CALLBACK CellWindowCallback(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
@@ -3003,11 +3193,21 @@ LRESULT CALLBACK CellWindowCallback(HWND hWnd, UINT Message, WPARAM wParam, LPAR
 	{
 	case WM_INITDIALOG:
 	{
-		auto pCellList = GetDlgItem(hWnd, 1155);
-		auto pObjectList = GetDlgItem(hWnd, 1156);
-		SetWindowSubclass(pCellList, CellWindowListViewCallback, 0, 0);
-		SetWindowSubclass(pObjectList, CellWindowListViewCallback, 0, 0);
-		AddMinimizeAndCloseButtons(hWnd);
+		static bool bDoOnce;
+		if (!bDoOnce)
+		{
+			bDoOnce = true;
+			auto hCellList = GetDlgItem(hWnd, 1155);
+			auto hObjectList = GetDlgItem(hWnd, 1156);
+			SetWindowSubclass(hCellList, CellWindowListViewCallback, 0, 0);
+			SetWindowSubclass(hObjectList, CellWindowListViewCallback, 0, 0);
+			AddMinimizeAndCloseButtons(hWnd);
+			hCellFilter = CreateCellViewFilterControl(hWnd);
+
+			// fix flicker when changing cells
+			ListView_SetExtendedListViewStyleEx(hCellList, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
+			ListView_SetExtendedListViewStyleEx(hObjectList, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
+		}
 		break;
 	}
 	case WM_CLOSE:
@@ -3033,6 +3233,20 @@ LRESULT CALLBACK CellWindowCallback(HWND hWnd, UINT Message, WPARAM wParam, LPAR
 				return true;
 			}
 		}
+
+		if (LOWORD(wParam) == IDC_FILTER_CELLS_EDIT &&
+			HIWORD(wParam) == EN_CHANGE)
+		{
+			kCellViewFilter[0] = '\0';
+			char kBuf[MAX_PATH]; kBuf[0] = '\0';
+			GetWindowTextA(hCellFilter, kBuf, sizeof(kBuf));
+			trim(kBuf);
+			snprintf(kCellViewFilter, sizeof(kCellViewFilter), "*%s*", kBuf);
+			bForceCellListViewRefresh = true;
+			SendMessageA(hWnd, 0x40E, 0, 0);
+			bForceCellListViewRefresh = false;
+			return TRUE;
+		}
 		break;
 	}
 	case WM_NOTIFY:
@@ -3049,8 +3263,59 @@ LRESULT CALLBACK CellWindowCallback(HWND hWnd, UINT Message, WPARAM wParam, LPAR
 		}
 		break;
 	}
+	case WM_SIZE:
+	{
+		LRESULT result = CallWindowProc(
+			originalCellWindowCallback, hWnd, Message, wParam, lParam);
+
+		if (hCellFilter)
+		{
+			RECT rcGo, rcObj;
+
+			GetWindowRect(GetDlgItem(hWnd, IDC_GO_BUTTON), &rcGo);
+			GetWindowRect(GetDlgItem(hWnd, IDC_CELL_LIST), &rcObj);
+
+			POINT tl = { rcGo.right + 4, rcGo.top };
+			POINT br = { rcObj.right, rcGo.bottom };
+
+			ScreenToClient(hWnd, &tl);
+			ScreenToClient(hWnd, &br);
+
+			SetWindowPos(
+				hCellFilter,
+				nullptr,
+				tl.x,
+				tl.y,
+				br.x - tl.x - 10,
+				20,
+				SWP_NOZORDER | SWP_NOACTIVATE);
+		}
+
+		return result;
+	}
 	}
 	return CallWindowProc(originalCellWindowCallback, hWnd, Message, wParam, lParam);
+}
+
+__HOOK CellViewWindowResizeFixHook()
+{
+	static bool bDoOnce;
+	_asm
+	{
+		cmp bDoOnce, 0
+		jne skip
+
+		mov bDoOnce, 1
+		mov ebx, dword ptr ds : [0x00D23554]
+		mov eax, 0x42EA0B
+		jmp eax
+
+	skip:
+		push GWL_STYLE
+		push dword ptr ds : [0xECF548] // CellView::pObjectListHdlg
+		mov eax, 0x42EEFB
+		jmp eax
+	}
 }
 
 void __cdecl OnTextViewLoadCell(NiPoint3* pos, TESObjectCELL* cell)
@@ -3193,27 +3458,6 @@ void __cdecl OnInitRenderWindowComboBox(HWND hWnd, const CHAR* text, LPARAM item
 	CdeclCall(0x419BC0, hWnd, "<TILDE>", '`', bUpdateExtents);
 }
 
-__HOOK CellViewWindowResizeFixHook()
-{
-	static bool bDoOnce;
-	_asm
-	{
-		cmp bDoOnce, 0
-		jne skip
-
-		mov bDoOnce, 1
-		mov ebx, dword ptr ds : [0x00D23554]
-		mov eax, 0x42EA0B
-		jmp eax
-
-	skip:
-		push GWL_STYLE
-		push dword ptr ds : [0xECF548] // CellView::pObjectListHdlg
-		mov eax, 0x42EEFB
-		jmp eax
-	}
-}
-
 void __cdecl HideCSMainDialogsStartup(unsigned int statusBarId, const char* msg)
 {
 	if (config.bHideRenderWindow)
@@ -3350,92 +3594,6 @@ __HOOK InsertHeadPartsColumnsHookAdd()
 		add esp, 8
 		ret
 	}
-}
-
-void __stdcall OnGetObjectWindowText(HWND hWnd, LPSTR lpString, int nMaxCount)
-{
-	GetWindowTextA(hWnd, lpString, nMaxCount);
-	trim(lpString);
-}
-
-struct WindowFilter
-{
-	HWND* hwnd;
-	std::unique_ptr<std::regex> regex;
-	bool bRegexSearch;
-	std::string lastPattern;
-	bool bAddedBackspaceSupport;
-
-	void AddBackspaceSupport()
-	{
-		if (!bAddedBackspaceSupport && config.bAddFilterCtrlBackspace)
-		{
-			bAddedBackspaceSupport = true;
-			SHAutoComplete(*hwnd, SHACF_AUTOSUGGEST_FORCE_OFF);
-		}
-	}
-
-	void UpdateFilter()
-	{
-		char filterString[0x100];
-		GetWindowTextA(*hwnd, filterString, 255);
-		trim(filterString);
-		try
-		{
-			if (strcmp(lastPattern.c_str(), filterString))
-			{
-				if (IsOnlyAlphaNumeric(filterString))
-				{
-					bRegexSearch = false;
-				}
-				else
-				{
-					regex = std::make_unique<std::regex>(filterString, std::regex_constants::icase);
-					bRegexSearch = true;
-				}
-				lastPattern = filterString;
-			}
-		}
-		catch (const std::regex_error& e)
-		{
-#ifdef _DEBUG
-			Console_Print("%s  -  %s", filterString, e.what());
-#endif
-			bRegexSearch = false;
-		}
-	}
-
-	bool Contains(const char* text, const char* pattern)
-	{
-		return bRegexSearch ? std::regex_search(text, *regex) : CdeclCall<bool>(0x8A15B0, text, pattern);
-	}
-};
-
-WindowFilter objectWindowFilter = { (HWND*)0xED1108 };
-WindowFilter cellWindowFilter = { (HWND*)0xECF520 };
-
-UInt32 __fastcall OnObjectWindowFilter()
-{
-	objectWindowFilter.AddBackspaceSupport();
-	objectWindowFilter.UpdateFilter();
-	return *(UInt32*)0xECC3C8;
-}
-
-bool __cdecl ObjectWindowRegexContains(const char* text, const char* pattern)
-{
-	return objectWindowFilter.Contains(text, pattern);
-}
-
-UInt32 OnCellWindowFilter()
-{
-	cellWindowFilter.AddBackspaceSupport();
-	cellWindowFilter.UpdateFilter();
-	return *(UInt32*)0xECC3C8;
-}
-
-bool __cdecl CellWindowRegexContains(const char* text, const char* pattern)
-{
-	return cellWindowFilter.Contains(text, pattern);
 }
 
 __HOOK OnStoreDialogWindowColumnSizeHook()

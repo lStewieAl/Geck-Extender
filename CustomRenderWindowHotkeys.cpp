@@ -241,7 +241,7 @@ namespace CustomRenderWindowHotkeys
 		auto listView = GetDlgItem(hDlg, 5142);
 		for (int i = 0; i < _ARRAYSIZE(CustomHotkeys); ++i)
 		{
-			CdeclCall(0x41A020, listView, &CustomHotkeys[i], 0, -1); // ListView::InsertItem
+			TESListView::InsertItem(listView, &CustomHotkeys[i], 0, -1);
 		}
 	}
 
