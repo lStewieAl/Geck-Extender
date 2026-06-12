@@ -56,15 +56,12 @@ namespace Flycam
 			fFlyMoveSpeed->data.f *= config.fFlycamAltMovementSpeed;
 		}
 
-		/* fix flycam speed being dependent on framerate by slowing down movement if framerate is greater than 30fps (33ms/frame)*/
+		/* fix flycam speed being dependent on framerate by scaling with framerate */
 		static DWORD uiLastFlycamTime = 0;
 		DWORD uiCurrentTick = GetTickCount();
 		int iDelta = uiCurrentTick - uiLastFlycamTime;
 
-		if (iDelta < 33)
-		{
-			fFlyMoveSpeed->data.f *= (float)iDelta / 33.0f;
-		}
+		fFlyMoveSpeed->data.f *= (float)iDelta / 33.0f;
 		uiLastFlycamTime = uiCurrentTick;
 
 		return 0;
