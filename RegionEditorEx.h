@@ -1,5 +1,5 @@
 #pragma once
 namespace RegionEditorEx
 {
-	void InitHooks();
+	void Init();
 }

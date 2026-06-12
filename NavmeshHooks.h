@@ -1,5 +1,5 @@
 #pragma once
-namespace DebugCellShaders
+namespace NavmeshHooks
 {
 	void Init();
 }

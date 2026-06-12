@@ -1,6 +1,6 @@
 #pragma once
 namespace CrashHandler
 {
-	void InitHooks();
+	void Init();
 	void CreateCrashSave();
 }

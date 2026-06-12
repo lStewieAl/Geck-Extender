@@ -28,7 +28,7 @@ void __stdcall HandleThreadExit()
 	}
 }
 
-static __declspec(naked) void BackgroundLoaderThreadHook(void)
+static __HOOK BackgroundLoaderThreadHook(void)
 {
 	__asm {
 		pushad

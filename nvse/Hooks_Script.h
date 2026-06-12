@@ -41,7 +41,7 @@ namespace CompilerOverride
 		kOverride_BlockType		= 0xFFFE,		// a block type e.g. 'gamemode'
 	};
 
-	void InitHooks();
+	void Init();
 
 	// is current block being compiled with override in effect?
 	bool IsActive();

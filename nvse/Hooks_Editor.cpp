@@ -14,7 +14,7 @@ static const UInt32 kInfixToPostfixRetnAddr_1 =	0x005B1ADE;
 static const UInt32 kInfixToPostfixHookAddr_2 =	0x005B1C6C;
 static const UInt32 kInfixToPostfixRetnAddr_2 =	0x005B1C73;
 
-static __declspec(naked) void InfixToPostfixHook_1(void)
+static __HOOK InfixToPostfixHook_1(void)
 {
 	__asm {
 		lea	eax, s_InfixToPostfixBuf
@@ -23,7 +23,7 @@ static __declspec(naked) void InfixToPostfixHook_1(void)
 	}
 }
 
-static __declspec(naked) void InfixToPostfixHook_2(void)
+static __HOOK InfixToPostfixHook_2(void)
 {
 	__asm {
 		lea	edx, s_InfixToPostfixBuf
@@ -321,7 +321,7 @@ static void DoModScriptWindow(HWND wnd)
 	}
 }
 
-static __declspec(naked) void ModScriptWindow() {
+static __HOOK ModScriptWindow() {
 	__asm {
 		pushad
 		push eax

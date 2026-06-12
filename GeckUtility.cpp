@@ -203,10 +203,10 @@ void ObjectsView::SetColumnHeading(Columns column, const char* heading)
 
 HWND CellView::GetWindow() { return *(HWND*)0xECFB78; };
 
-HistoryManager* HistoryManager::GetSingleton() { return *(HistoryManager**)0xECFDF4; };
-void HistoryManager::ClearHistoryForCurrentElement() { ThisCall(0x467CC0, this); };
-void HistoryManager::Undo() { ThisCall(0x4665C0, this, 0); };
-void HistoryManager::AddAction(int aiActionType, RenderWindow::SelectedData* apSelectedForms) { ThisCall(0x465D90, this, aiActionType, apSelectedForms); };
+TESUndo* TESUndo::GetSingleton() { return *(TESUndo**)0xECFDF4; };
+void TESUndo::ClearHistoryForCurrentElement() { ThisCall(0x467CC0, this); };
+void TESUndo::Undo() { ThisCall(0x4665C0, this, 0); };
+void TESUndo::AddAction(int aiActionType, RenderWindow::SelectedData* apSelectedForms) { ThisCall(0x465D90, this, aiActionType, apSelectedForms); };
 
 RenderData* RenderData::GetSingleton() { return *(RenderData**)0xED116C; };
 

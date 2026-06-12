@@ -1,7 +1,7 @@
 #pragma once
 namespace ExtensionsMenu
 {
-	void InitHooks();
+	void Init();
 
 	enum
 	{

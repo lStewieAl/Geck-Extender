@@ -187,7 +187,7 @@ namespace ONAMFix
 		}
 	}
 
-	static void InitHooks() {
+	static void Init() {
 		WriteRelCall(0x4D9CEA, UInt32(SavePlugin));
 		WriteRelJump(0x635DBB, UInt32(CellGroupFix_Save_Asm));
 		WriteRelJump(0x635E45, UInt32(CellGroupFix_SaveEdit_Asm));

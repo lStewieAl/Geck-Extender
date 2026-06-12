@@ -44,7 +44,7 @@ namespace ExtensionsMenu
 		config.bNavmeshAllowPlaceAboveOthers = isAllowed;
 	}
 
-	_declspec(naked) void ObjectWindowListFilterUneditedHook()
+	__HOOK ObjectWindowListFilterUneditedHook()
 	{
 		static const UInt32 skipAddr = 0x439793;
 		static const UInt32 retnAddr = 0x43973F;
@@ -875,7 +875,7 @@ namespace ExtensionsMenu
 		return CallWindowProc(originalMainWindowCallback, hWnd, Message, wParam, lParam);
 	}
 
-	void InitHooks()
+	void Init()
 	{
 		originalMainWindowCallback = (WNDPROC)DetourVtable(0x44612D, UInt32(MainWindowCallback));
 	}

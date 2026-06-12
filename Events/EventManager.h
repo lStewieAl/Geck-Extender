@@ -1,5 +1,5 @@
 #pragma once
 namespace EventManager
 {
-	void InitHooks();
+	void Init();
 }

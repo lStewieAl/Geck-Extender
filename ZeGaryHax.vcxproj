@@ -147,6 +147,7 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="DebugCellShaders.cpp" />
     <ClCompile Include="Detours.cpp" />
     <ClCompile Include="EasterEggs.cpp">
       <SubType>
@@ -170,6 +171,10 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="Flycam.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="FormColoring.cpp" />
     <ClCompile Include="FormSearch.cpp">
       <SubType>
@@ -185,6 +190,10 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
       </SubType>
     </ClCompile>
     <ClCompile Include="MultiBoundsAdder.cpp" />
+    <ClCompile Include="NavmeshHooks.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="NavMeshPickPreventer.cpp" />
     <ClCompile Include="nvse\GameAPI.cpp" />
     <ClCompile Include="nvse\GameBSExtraData.cpp">
@@ -247,6 +256,10 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
       </SubType>
     </ClCompile>
     <ClCompile Include="RegionEditorEx.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="RenderHooks.cpp">
       <SubType>
       </SubType>
     </ClCompile>
@@ -315,6 +328,10 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
       </SubType>
     </ClInclude>
     <ClInclude Include="FaceGenExporter.h" />
+    <ClInclude Include="Flycam.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="FormColoring.h" />
     <ClInclude Include="FormSearch.h">
       <SubType>
@@ -332,6 +349,10 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
       </SubType>
     </ClInclude>
     <ClInclude Include="MultiBoundsAdder.h" />
+    <ClInclude Include="NavmeshHooks.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="NavMeshPickPreventer.h" />
     <ClInclude Include="nvse\CommandTable.h" />
     <ClInclude Include="nvse\GameAPI.h" />
@@ -373,6 +394,10 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
       </SubType>
     </ClInclude>
     <ClInclude Include="RegionEditorEx.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="RenderHooks.h">
       <SubType>
       </SubType>
     </ClInclude>

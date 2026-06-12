@@ -20,7 +20,7 @@ namespace CustomRenderWindowHotkeys
 				CdeclCall(0x44F470);
 				CdeclCall(0x44F260, ref); // RenderWindow::AddRef
 
-				HistoryManager::GetSingleton()->AddAction(2, RenderWindow::SelectedData::GetSelected());
+				TESUndo::GetSingleton()->AddAction(2, RenderWindow::SelectedData::GetSelected());
 
 				if (*(byte*)0xECFB74) // CellView::bLoaded
 				{

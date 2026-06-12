@@ -34,7 +34,7 @@ static void HandleMainLoopHook(void);
 #endif
 
 
-static __declspec(naked) void MainLoopHook(void)
+static __HOOK MainLoopHook(void)
 {
 	__asm
 	{
@@ -122,7 +122,7 @@ static const UInt32 kContainerMenuDanglingPointerPatchAddr = 0x00597D26;
 TESForm* g_LastEnchantedItem = 0;
 static const UInt32 kEnchantEventID = EventManager::kEventID_OnEnchant;	// workaround for use in inline asm
 
-static __declspec(naked) void EnchantItemHook(void)
+static __HOOK EnchantItemHook(void)
 {
 	__asm
 	{
@@ -150,7 +150,7 @@ static __declspec(naked) void EnchantItemHook(void)
 TESForm* g_LastCreatedSpell = 0;
 static const UInt32 kSpellEventID = EventManager::kEventID_OnCreateSpell;
 
-static __declspec(naked) void CreateSpellHook(void)
+static __HOOK CreateSpellHook(void)
 {
 	__asm
 	{
@@ -179,7 +179,7 @@ TESForm* g_LastCreatedPotion = 0;
 TESForm* g_LastUniqueCreatedPotion = 0;
 static const UInt32 kOnCreatePotionEventID = EventManager::kEventID_OnCreatePotion;
 
-static __declspec(naked) void CreatePotionHook(void)
+static __HOOK CreatePotionHook(void)
 {
 	__asm
 	{
@@ -285,7 +285,7 @@ static void HandleMainLoopHook(void)
 #if 0
 
 // workaround for inability to take address of __thiscall functions
-static __declspec(naked) void _TESSaveLoadGame_LoadCreatedObjectsHook(void)
+static __HOOK _TESSaveLoadGame_LoadCreatedObjectsHook(void)
 {
 	__asm
 	{
@@ -763,7 +763,7 @@ static void __stdcall HandleDroppedItem(void)
 		EventManager::HandleEvent(EventManager::kEventID_OnDropItem, (void*)s_lastDropperRef, (void*)s_lastDroppedItem);
 }
 
-static __declspec(naked) void DroppedItemHook(void)
+static __HOOK DroppedItemHook(void)
 {
 	__asm
 	{
@@ -842,7 +842,7 @@ void __stdcall SendQuitGameMessage(QuitGameMessage msg)
 //	handled by Dispatch_Message EventManager::HandleNVSEMessage(msgToSend, NULL);
 }
 
-//static __declspec(naked) void ExitGameFromIngameMenuHook(void)
+//static __HOOK ExitGameFromIngameMenuHook(void)
 //{
 //	__asm {
 //		pushad
@@ -857,7 +857,7 @@ void __stdcall SendQuitGameMessage(QuitGameMessage msg)
 //	}
 //}
 //
-//static __declspec(naked) void ExitGameFromMainMenuHook(void)
+//static __HOOK ExitGameFromMainMenuHook(void)
 //{
 //	__asm {
 //		pushad
@@ -872,7 +872,7 @@ void __stdcall SendQuitGameMessage(QuitGameMessage msg)
 //	}
 //}
 
-static __declspec(naked) void ExitGameFromMenuHook(void)
+static __HOOK ExitGameFromMenuHook(void)
 {
 	__asm {
 		pushad
@@ -885,7 +885,7 @@ static __declspec(naked) void ExitGameFromMenuHook(void)
 	}
 }
 
-static __declspec(naked) void ExitGameViaQQQHook(void)
+static __HOOK ExitGameViaQQQHook(void)
 {
 	__asm {
 		pushad
@@ -898,7 +898,7 @@ static __declspec(naked) void ExitGameViaQQQHook(void)
 	}
 }
 
-static __declspec(naked) void MainMenuFromIngameMenuHook(void)
+static __HOOK MainMenuFromIngameMenuHook(void)
 {
 	__asm {
 		pushad
@@ -948,7 +948,7 @@ void __stdcall DoBuySellHook(eTransactionType type, ContainerMenu* menu, TESForm
 	menu->selectedItemTile = NULL;
 }
 
-static __declspec(naked) void PlayerBuyHook(void)
+static __HOOK PlayerBuyHook(void)
 {;
 	__asm {
 		pushad
@@ -968,7 +968,7 @@ static __declspec(naked) void PlayerBuyHook(void)
 	}
 }
 
-static __declspec(naked) void PlayerSellHook(void)
+static __HOOK PlayerSellHook(void)
 {
 	__asm {
 		pushad
@@ -1019,7 +1019,7 @@ static TESForm*	s_lastUsedSigilStone = NULL;
 static TESForm*	s_lastEnchantedSigilStoneItem = NULL;
 static TESForm*	s_lastCreatedSigilStoneItem = NULL;
 
-static __declspec(naked) void SigilStoneCreateHook(void)
+static __HOOK SigilStoneCreateHook(void)
 {
 	__asm {
 		pushad
@@ -1063,7 +1063,7 @@ bool GetCellChanged()
 	return changed;
 }
 
-static __declspec(naked) void ChangeCellHook(void)
+static __HOOK ChangeCellHook(void)
 {
 	// hooks PlayerCharacter::ChangeCell()
 	// at this point we know:
@@ -1207,7 +1207,7 @@ static void __stdcall DoTESDescriptionHook(TESDescription* desc)
 	}
 }
 
-static __declspec(naked) void TESDescription_GetTextHook(void)
+static __HOOK TESDescription_GetTextHook(void)
 {
 	static TESDescription* _this = NULL;
 

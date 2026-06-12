@@ -83,7 +83,7 @@ static void __stdcall DoPreLoadGameHook(const char* saveFilePath)
 	Serialization::HandlePreLoadGame(saveFilePath);
 }
 
-static __declspec(naked) void PreLoadGameHook(void)
+static __HOOK PreLoadGameHook(void)
 {
 	__asm
 	{
@@ -105,7 +105,7 @@ static void __stdcall DispatchLoadGameEventToScripts(const char* saveFilePath)
 		EventManager::HandleNVSEMessage(NVSEMessagingInterface::kMessage_LoadGame, (void*)saveFilePath);
 }
 
-static __declspec(naked) void PostLoadGameHook(void)
+static __HOOK PostLoadGameHook(void)
 {
 	__asm {
 		pushad
@@ -131,7 +131,7 @@ static void __stdcall DoFinishLoadGame(bool bLoadedSuccessfully)
 //	handled by Dispatch_Message EventManager::HandleNVSEMessage(NVSEMessagingInterface::kMessage_PostLoadGame, (void*)bLoadedSuccessfully);
 }
 
-static __declspec(naked) void FinishLoadGameHook(void)
+static __HOOK FinishLoadGameHook(void)
 {
 	__asm {
 		pushad
@@ -154,7 +154,7 @@ static void __stdcall DoLoadGameHook(const char* saveFilePath)
 	Serialization::HandleLoadGame(saveFilePath);
 }
 
-static __declspec(naked) void LoadGameHook(void)
+static __HOOK LoadGameHook(void)
 {
 	__asm
 	{
@@ -175,7 +175,7 @@ static void __stdcall DoSaveGameHook(const char* saveFilePath)
 	Serialization::HandleSaveGame(saveFilePath);
 }
 
-static __declspec(naked) void SaveGameHook(void)
+static __HOOK SaveGameHook(void)
 {
 	__asm
 	{

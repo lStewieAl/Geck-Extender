@@ -37,7 +37,7 @@ void __fastcall sub_406C40(void* thiss, void* edx, HWND comboBox, TESForm* a3)
 	RedrawWindow(comboBox, nullptr, nullptr, RDW_ERASE | RDW_INVALIDATE | RDW_NOCHILDREN);
 }
 
-_declspec(naked) void DialogueListViewBeginUI() {
+__HOOK DialogueListViewBeginUI() {
 	static const UInt32 retnAddr = 0x592EB4;
 	static const UInt32 skipAddr = 0x592FB8;
 	_asm
@@ -53,7 +53,7 @@ _declspec(naked) void DialogueListViewBeginUI() {
 	}
 }
 
-_declspec(naked) void DialogueListViewEndUI() {
+__HOOK DialogueListViewEndUI() {
 	static const UInt32 retnAddr = 0x592FB8;
 	EndUIDefer();
 	_asm

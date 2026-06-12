@@ -114,7 +114,7 @@ static UInt32 __stdcall DoExtractString(char* scriptData, UInt32 dataLen, char* 
 	return dataLen;
 }
 
-static __declspec(naked) void ExtractStringHook(void)
+static __HOOK ExtractStringHook(void)
 {
 	// This hooks immediately before a call to memcpy().
 	// Original code copies a string literal from script data to buffer
@@ -141,7 +141,7 @@ static __declspec(naked) void ExtractStringHook(void)
 	}
 }
 
-static __declspec(naked) void ExpressionParserBufferOverflowHook_1(void)
+static __HOOK ExpressionParserBufferOverflowHook_1(void)
 {
 	__asm {
 		lea	edx, s_ExpressionParserAltBuffer		// swap buffers
@@ -151,7 +151,7 @@ static __declspec(naked) void ExpressionParserBufferOverflowHook_1(void)
 	}
 }
 
-static __declspec(naked) void ExpressionParserBufferOverflowHook_2(void)
+static __HOOK ExpressionParserBufferOverflowHook_2(void)
 {
 	__asm {
 		lea eax, s_ExpressionParserAltBuffer
@@ -210,7 +210,7 @@ static const UInt32 kExpressionParserBufferOverflowRetnAddr_1 = 0x005B1ADE;	// T
 static const UInt32 kExpressionParserBufferOverflowHookAddr_2 = 0x005B1C6C;	// Same proc, next reference to var-44	(F3:0x005B71F5)
 static const UInt32 kExpressionParserBufferOverflowRetnAddr_2 = 0x005B1C73;	// Two ops below also	(F3:0x005B71FC)
 
-static __declspec(naked) void ExpressionParserBufferOverflowHook_1(void)
+static __HOOK ExpressionParserBufferOverflowHook_1(void)
 {
 	__asm {
 		lea	eax, s_ExpressionParserAltBuffer
@@ -219,7 +219,7 @@ static __declspec(naked) void ExpressionParserBufferOverflowHook_1(void)
 	}
 }
 
-static __declspec(naked) void ExpressionParserBufferOverflowHook_2(void)
+static __HOOK ExpressionParserBufferOverflowHook_2(void)
 {
 	__asm {
 		lea	edx, s_ExpressionParserAltBuffer
@@ -313,7 +313,7 @@ namespace CompilerOverride {
 		return bResult;
 	}
 
-	static __declspec(naked) void Hook_Cmd_Default_Parse(void)
+	static __HOOK Hook_Cmd_Default_Parse(void)
 	{
 		static UInt32 numParams;
 		static ParamInfo* params;
@@ -398,7 +398,7 @@ namespace CompilerOverride {
 		return s_overridden;
 	}
 
-	static __declspec(naked) void CompareBlockName(void)
+	static __HOOK CompareBlockName(void)
 	{
 		// edx: token
 		// ecx: CommandInfo longName or altName
@@ -490,7 +490,7 @@ namespace CompilerOverride {
 	}
 
 
-	static __declspec(naked) void OnCompileSuccessHook(void)
+	static __HOOK OnCompileSuccessHook(void)
 	{
 		// esi: ScriptLineBuffer
 		// edi: ScriptBuffer
@@ -530,7 +530,7 @@ namespace CompilerOverride {
 		}
 	}
 
-	static __declspec(naked) void StoreBlockLenHook(void)
+	static __HOOK StoreBlockLenHook(void)
 	{
 		__asm {
 			// overwritten code
@@ -601,7 +601,7 @@ bool __stdcall HandleBeginCompile(ScriptBuffer* buf)
 	return bResult;
 }
 
-static __declspec(naked) void CompileScriptHook(void)
+static __HOOK CompileScriptHook(void)
 {
 	static bool precompileResult;
 
@@ -674,7 +674,7 @@ UInt32 __stdcall CopyStringArg(char* dest, const char* src, UInt32 len, ScriptLi
 }
 
 // major code differences between CS versions here so hooks differ significantly
-static __declspec(naked) void __cdecl CopyStringArgHook(void)
+static __HOOK __cdecl CopyStringArgHook(void)
 {
 // overwrite call to memcpy()
 
@@ -899,7 +899,7 @@ namespace ExtractArgsOverride {
 
 */
 
-	static __declspec(naked) void ExtractExtendedArgsHook(void)
+	static __HOOK ExtractExtendedArgsHook(void)
 	{
 		static UInt32	_ebp;
 		static UInt32	bResult;

@@ -27,7 +27,7 @@ namespace MainWindowLoadEvent
 		}
 	}
 
-	void InitHooks()
+	void Init()
 	{
 		WriteRelCall(0x446581, UInt32(TESCSMain__InitializeCSWindows));
 	}

@@ -60,7 +60,7 @@ namespace SearchAndReplaceWindow
 		return CallWindowProc(originalWindowCallback, hDlg, msg, wParam, lParam);
 	}
 
-	void InitHooks()
+	void Init()
 	{
 		originalWindowCallback = (WNDPROC)DetourVtable(0x441180, UInt32(WindowCallback));
 	}

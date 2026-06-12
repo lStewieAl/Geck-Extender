@@ -1,9 +1,9 @@
 #include "Events.h"
 namespace EventManager
 {
-	void InitHooks()
+	void Init()
 	{
-		DataLoadEvent::InitHooks();
-		MainWindowLoadEvent::InitHooks();
+		DataLoadEvent::Init();
+		MainWindowLoadEvent::Init();
 	}
 }

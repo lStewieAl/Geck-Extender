@@ -497,7 +497,7 @@ namespace MultiBoundsAdder {
 		TESCSMain__WriteToStatusBar(3, "Done.");
 	}
 
-	void InitHooks() {
+	void Init() {
 		// Register the multibound ref in the cell during its creation (don't ask...)
 		WriteRelCall(0x45BC2A, UInt32(TESDataHandler__CreateReferenceAtLocation_));
 	}

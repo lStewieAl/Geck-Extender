@@ -221,7 +221,7 @@ namespace CrashHandler
 	}
 
 
-	void InitHooks()
+	void Init()
 	{
 		SetCrashSaveHandler();
 	}

@@ -21,7 +21,7 @@ namespace UnserializedIO
 
 	// Undoes Obsidian's serialization of the I/O functions by replacing them with the original ones
 	// Technically we patched this in GECK.exe itself - this serves as a documentation
-	void InitHooks() 
+	void Init() 
 	{
 		// Remove the initializator for the serialized I/O functions
 		XUtil::PatchMemoryNop(0x8532CA, 5);

@@ -199,7 +199,7 @@ namespace FaceGenExporter {
 		return TESCSMain__WriteToStatusBar(statusBarId, msg);
 	}
 
-	static void InitHooks() {
+	static void Init() {
 		for (UInt32 addr : { 0x570C36, 0x570D54, 0x574801, 0x5749F9 })
 			WriteRelCall(addr, (UInt32)FaceGenExporter::SaveTextureImage);
 

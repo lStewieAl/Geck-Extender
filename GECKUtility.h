@@ -326,7 +326,7 @@ struct CellView
 	static HWND GetWindow();
 };
 
-struct HistoryManager
+struct TESUndo
 {
 	enum UndoType
 	{
@@ -355,14 +355,14 @@ struct HistoryManager
 		NiPoint3* primitivePlaneBoundsX;
 		UInt32 primitivePlaneBoundsY;
 		UInt32 primitivePlaneBoundsZ;
-		HistoryManager::Element* ptr06C;
+		TESUndo::Element* ptr06C;
 		UInt32 prev;
 	};
 
-	HistoryManager::Element* element;
-	HistoryManager::Element* current;
+	TESUndo::Element* element;
+	TESUndo::Element* current;
 
-	static HistoryManager* GetSingleton();
+	static TESUndo* GetSingleton();
 	void ClearHistoryForCurrentElement();
 	void AddAction(int aiActionType, RenderWindow::SelectedData* apSelectedForms);
 	void Undo();

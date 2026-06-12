@@ -58,7 +58,6 @@
     <ClCompile Include="nvse\NiTypes.cpp">
       <Filter>nvse</Filter>
     </ClCompile>
-    <ClCompile Include="CreatureMarkerSwapper.cpp" />
     <ClCompile Include="ExtensionsMenu.cpp" />
     <ClCompile Include="LogWindow.cpp" />
     <ClCompile Include="GeckUtility.cpp" />
@@ -74,8 +73,6 @@
     <ClCompile Include="Events\DataLoadEvent.cpp">
       <Filter>Events</Filter>
     </ClCompile>
-    <ClCompile Include="CustomRenderWindowHotkeys.cpp" />
-    <ClCompile Include="NavMeshPickPreventer.cpp" />
     <ClCompile Include="EditorUIDarkMode.cpp" />
     <ClCompile Include="Detours.cpp">
       <Filter>libs</Filter>
@@ -92,14 +89,41 @@
     </ClCompile>
     <ClCompile Include="MultiBoundsAdder.cpp" />
     <ClCompile Include="ObjectWindowTreeHooks.cpp" />
-    <ClCompile Include="ToggleReferenceMovement.cpp" />
     <ClCompile Include="FormColoring.cpp" />
-    <ClCompile Include="CustomReferenceBatchAction.cpp" />
-    <ClCompile Include="PreemptivelyUnloadCells.cpp" />
     <ClCompile Include="RecentlyOpenedForms.cpp" />
     <ClCompile Include="SearchAndReplaceWindow.cpp" />
     <ClCompile Include="CrashHandler.cpp" />
     <ClCompile Include="RegionEditorEx.cpp" />
+    <ClCompile Include="Flycam.cpp">
+      <Filter>RenderWindow</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderHooks.cpp">
+      <Filter>RenderWindow</Filter>
+    </ClCompile>
+    <ClCompile Include="NavmeshHooks.cpp">
+      <Filter>RenderWindow</Filter>
+    </ClCompile>
+    <ClCompile Include="CreatureMarkerSwapper.cpp">
+      <Filter>RenderWindow</Filter>
+    </ClCompile>
+    <ClCompile Include="CustomReferenceBatchAction.cpp">
+      <Filter>RenderWindow</Filter>
+    </ClCompile>
+    <ClCompile Include="CustomRenderWindowHotkeys.cpp">
+      <Filter>RenderWindow</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugCellShaders.cpp">
+      <Filter>RenderWindow</Filter>
+    </ClCompile>
+    <ClCompile Include="NavMeshPickPreventer.cpp">
+      <Filter>RenderWindow</Filter>
+    </ClCompile>
+    <ClCompile Include="ToggleReferenceMovement.cpp">
+      <Filter>RenderWindow</Filter>
+    </ClCompile>
+    <ClCompile Include="PreemptivelyUnloadCells.cpp">
+      <Filter>RenderWindow</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Main.h" />
@@ -171,12 +195,10 @@
     <ClInclude Include="Editor.h" />
     <ClInclude Include="UISpeedHooks.h" />
     <ClInclude Include="GECKUtility.h" />
-    <ClInclude Include="DebugCellShaders.h" />
     <ClInclude Include="DialogResizing.h" />
     <ClInclude Include="libs\nlohmann\json.hpp">
       <Filter>libs</Filter>
     </ClInclude>
-    <ClInclude Include="CreatureMarkerSwapper.h" />
     <ClInclude Include="ExtensionsMenu.h" />
     <ClInclude Include="EasterEggs.h" />
     <ClInclude Include="FormSearch.h" />
@@ -194,8 +216,6 @@
     <ClInclude Include="Events\DataLoadEvent.h">
       <Filter>Events</Filter>
     </ClInclude>
-    <ClInclude Include="CustomRenderWindowHotkeys.h" />
-    <ClInclude Include="NavMeshPickPreventer.h" />
     <ClInclude Include="EditorUIDarkMode.h" />
     <ClInclude Include="Detours.h">
       <Filter>libs</Filter>
@@ -220,14 +240,41 @@
       <Filter>allocator</Filter>
     </ClInclude>
     <ClInclude Include="ObjectWindowTreeHooks.h" />
-    <ClInclude Include="ToggleReferenceMovement.h" />
     <ClInclude Include="FormColoring.h" />
-    <ClInclude Include="CustomReferenceBatchAction.h" />
-    <ClInclude Include="PreemptivelyUnloadCells.h" />
     <ClInclude Include="RecentlyOpenedForms.h" />
     <ClInclude Include="SearchAndReplaceWindow.h" />
     <ClInclude Include="CrashHandler.h" />
     <ClInclude Include="RegionEditorEx.h" />
+    <ClInclude Include="Flycam.h">
+      <Filter>RenderWindow</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderHooks.h">
+      <Filter>RenderWindow</Filter>
+    </ClInclude>
+    <ClInclude Include="NavmeshHooks.h">
+      <Filter>RenderWindow</Filter>
+    </ClInclude>
+    <ClInclude Include="CreatureMarkerSwapper.h">
+      <Filter>RenderWindow</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomReferenceBatchAction.h">
+      <Filter>RenderWindow</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomRenderWindowHotkeys.h">
+      <Filter>RenderWindow</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugCellShaders.h">
+      <Filter>RenderWindow</Filter>
+    </ClInclude>
+    <ClInclude Include="NavMeshPickPreventer.h">
+      <Filter>RenderWindow</Filter>
+    </ClInclude>
+    <ClInclude Include="ToggleReferenceMovement.h">
+      <Filter>RenderWindow</Filter>
+    </ClInclude>
+    <ClInclude Include="PreemptivelyUnloadCells.h">
+      <Filter>RenderWindow</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
@@ -244,6 +291,9 @@
     </Filter>
     <Filter Include="allocator">
       <UniqueIdentifier>{cb22c53f-26c7-42db-a540-6be8f8de712d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="RenderWindow">
+      <UniqueIdentifier>{a4205938-f576-4dca-a462-9bffee0d9387}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

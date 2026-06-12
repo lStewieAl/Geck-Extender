@@ -1,6 +1,6 @@
 #pragma once
 namespace RecentlyOpenedForms
 {
-	void InitHooks();
+	void Init();
 	void ShowList();
 }

@@ -19,7 +19,7 @@ namespace SCOLConsistencyFix
 		return pStrips;
 	}
 
-	void InitHooks() 
+	void Init() 
 	{
 		WriteRelCall(0x5DA4B6, UInt32(CreateNiTriStrips));
 	}

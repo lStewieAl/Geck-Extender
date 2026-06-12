@@ -55,6 +55,9 @@
 #include "PreemptivelyUnloadCells.h"
 #include "RegionEditorEx.h"
 #include "CrashHandler.h"
+#include "Flycam.h"
+#include "RenderHooks.h"
+#include "NavmeshHooks.h"
 #include "Allocator/MemoryManager.hpp"
 #include "Allocator/BSMemory.hpp"
 
@@ -107,9 +110,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		return true;
 	}
 
-	PrintReplacer::InitHooks();
+	PrintReplacer::Init();
 
-	UnserializedIO::InitHooks();
+	UnserializedIO::Init();
 
 	CreateLogFile();
 
@@ -120,7 +123,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// Increase heap size and add memory pools for a hefty performance boost
 	ReplaceCallEx(0x853BF1, &MemoryManager::Initialize);
 
-	EventManager::InitHooks();
+	EventManager::Init();
 
 	if (config.bDisableProcessWindowsGhosting)
 	{
@@ -131,10 +134,6 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	{
 		SetProcessDPIAware();
 	}
-
-	//	stop geck crash with bUseMultibounds = 0 in exterior cells with multibounds - credit to roy
-	WriteRelCall(0x004CA48F, (UInt32)FixMultiBounds);
-	XUtil::PatchMemoryNop(0x004CA494, 0x05);
 
 	// fix various file path vtable entries to exclude the "//" in the path - credit to roy
 	SafeWrite32(0x00D39FB0, 0x004FE910);	// skills icon in actor values
@@ -196,18 +195,6 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	// remove the need to reopen the Art and Sound tab to edit the weapon Attack Multiplier after toggling the automatic flag
 	SafeWrite8(0x606318, true);
-
-	//	uncap framerate on render window - credit to shademe
-	if (config.bRenderWindowUncap)
-	{
-		SafeWrite8(0x0045911B, 0x0A);
-	}
-
-	//	uncap framerate on preview window - credit to shademe
-	if (config.bPreviewWindowUncap)
-	{
-		SafeWrite8(0x004100E5, 0x0A);
-	}
 
 	//	window handle leak fix - original credit to nukem
 	//	now uses thread local storage to fix parent issues
@@ -345,11 +332,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// Don't change search and replace dropdowns when clicking OK
 	WriteRelJump(0x47CE29, 0x47CE5E);
 
-	SearchAndReplaceWindow::InitHooks();
-
-	// Remove call to SetFocus(0) when closing Reference Batch Action dialog
-	XUtil::PatchMemoryNop(0x411CFA, 8);
-	CustomReferenceBatchAction::Init();
+	SearchAndReplaceWindow::Init();
 
 	//	Replace zlib with libinflate - credit to nukem/StewieA
 	if (config.bLibdeflate)
@@ -411,41 +394,19 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// hook Load ESP/ESM window callback
 	originalLoadEspEsmFn = (WNDPROC)DetourVtable(0x44192A, UInt32(LoadEspEsmCallback));
 
-	// make flycam mouse rotation grid smaller (1*1 instead of 2*2)
-	// the game was checking if the difference in mouse position was > 1 rather than >= 1
-	SafeWrite8(0x45D3AD, 0x7C);
-	SafeWrite8(0x45D3BD, 0x7F);
-	SafeWrite8(0x45D3D9, 0x7C);
-	SafeWrite8(0x45D3EA, 0x7F);
-
-	// ignore mouse movement after the call to SetCursorPos when reaching the edge of the window to prevent it flickering
-	WriteRelCall(0x45D387, UInt32(OnRenderWindowSetCursorPos));
-	SafeWrite8(0x45D387 + 5, 0x90);
-	WriteRelCall(0x45D49D, UInt32(RenderWindowOnMoveMouseSetTranslate));
-
-	// fix being able to look upside down by clamping the roll
-	WriteRelCall(0x45D487, UInt32(OnFlycamCalculateMatrixFromEuler));
-
-	// add shift and alt scaling flycam movement speed, and fix speed being framerate dependent
-	WriteRelCall(0x455D12, UInt32(FlycamMovementSpeedMultiplier));
-
-	if (config.bSmoothFlycamRotation) {
-		WriteRelJump(0x45D3A3, UInt32(FlycamRotationSpeedMultiplierHook));
-		WriteRelJump(0x456A9F, 0x456AE6); // skip call to SetCursorPos when changing to flycam mode
-	}
-
-	if (config.bSwapRenderCYKeys) {
-		// set C as hotkey for restricting movement to Y direction
-		SafeWrite8(0x462D8B, 0x6); // (patch a switch table offset)
-		SafeWrite8(0x462F5B, 0xF); // (patch a switch table offset)
-
-		// remove Y as hotkey for Y movement
-		SafeWrite8(0x462DA1, 0x8);
-		SafeWrite8(0x462F71, 0x17);
-
-		// allow Y as a hotkey in render window preferences
-		SafeWrite8(0x4136C1, 'Z');
-	}
+	CreatureMarkerSwapper::Init();
+	CustomRenderWindowHotkeys::Init();
+	DebugCellShaders::Init();
+	Flycam::Init();
+	NavmeshHooks::Init();
+	NavMeshPickPreventer::Init();
+	RenderHooks::Init();
+	PreemptivelyUnloadCells::Init();
+	RegionEditorEx::Init();
+	ToggleReferenceMovement::Init();
+	CustomReferenceBatchAction::Init();
+	// Remove call to SetFocus(0) when closing Reference Batch Action dialog
+	XUtil::PatchMemoryNop(0x411CFA, 8);
 
 	/* Hook the Script Editor Window */
 	SafeWrite32(0x437892, UInt32(ScriptEditCallback));
@@ -464,31 +425,6 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// Fix for crash (invalid parameter termination) when the "Unable to find variable" warning would exceed the buffer size, credits to nukem
 	XUtil::PatchMemory(0xD59DCC, (PBYTE)", Text \"%.240s\"", strlen(", Text \"%.240s\"") + 1);
 
-	if (config.bUseAltShiftMultipliers) {
-		// Scroll wheel and pan speed affected by shift/alt
-		WriteRelCall(0x48B8C5, UInt32(hk_DoRenderMousewheelScroll)); // preview window
-		WriteRelCall(0x48B74C, UInt32(hk_DoRenderMousewheelScroll)); // preview window
-		WriteRelCall(0x48B7AC, UInt32(hk_DoRenderMousewheelScroll)); // preview window pan
-		WriteRelCall(0x46040E, UInt32(hk_DoRenderMousewheelScroll)); // render window scroll
-
-		// reference movement speed affected by shift/alt
-		WriteRelJump(0x455392, UInt32(RenderWindowReferenceMovementSpeedHook));
-
-		// render window panning, doesn't apply shift multiplier as it conflicts with keybinding
-		WriteRelCall(0x45F7E5, UInt32(hk_DoRenderPan));
-		WriteRelCall(0x45F846, UInt32(hk_DoRenderPan));
-
-		// orthographic zoom 
-		WriteRelJump(0x45F661, UInt32(hk_OrthographicZoom));
-		WriteRelJump(0x4602D8, UInt32(hk_OrthographicZoom2));
-
-		// camera rotation with a selected ref
-		WriteRelJump(0x45F5FB, UInt32(hk_RefCameraRotation));
-
-		// ref rotation
-		WriteRelJump(0x4523C2, UInt32(RenderWindowHandlesRefRotationHook));
-	}
-
 	if (config.bNoVersionControlWarning) {
 		// Don't show "Version control is currently disabled. Would you like to continue without version control?" prompt
 		SafeWrite8(0x43F854, 0xEB);
@@ -497,15 +433,6 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	if (config.bAutoLoadFiles) {
 		// makes the load files prompt jump to OK if it's the first time it's opened
 		WriteRelJump(0x432CC2, UInt32(hk_LoadFilesInit));
-	}
-
-	// add Q/E keys for up/down movement in flycam mode for render window
-	// if the movment is applied Post transform, it will be relative to the world
-	if (config.bFlycamUpDownRelativeToWorld) {
-		WriteRelJump(0x455DC9, UInt32(RenderWindowFlycamPostTransformMovementHook));
-	}
-	else {
-		WriteRelJump(0x455DAB, UInt32(RenderWindowFlycamPreTransformMovementHook));
 	}
 
 	if (config.bShowTimeOfDaySlider) {
@@ -547,16 +474,6 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		SafeWrite32(0x440C43, UInt32(facialAnimationsPopupText));
 	}
 
-	// add support for dragging leveled items onto render window
-	SafeWrite8(0x463282 + kFormType_TESLevItem, 1);
-	SafeWrite8(0x463282 + kFormType_TESLevCreature, 1);
-	SafeWrite8(0x463282 + kFormType_TESLevCharacter, 1);
-	WriteRelCall(0x46193B, UInt32(OnRenderWindowDragDrop__CreateReferenceAtLocation));
-	originalRenderWindowCallback = (WNDPROC)DetourVtable(0x4411A1, UInt32(RenderWindowCallbackHook));
-
-	// fix lights not updating when dragged unless a multibound is in the cell (thanks Pr0bability)
-	SafeWrite16(0x90C136, 0x9066); // remove check that the node is the root in ShadowSceneNode::UpdateQueuedLight 
-
 	// allow toggling of "scroll" in TESObjectBOOK dialog
 	SafeWrite8(0x10CD577, 0x50);
 
@@ -565,35 +482,6 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	// workaround infinite wait if saving fails bug
 	WriteRelJump(0x4E1DB9, UInt32(SaveFailureHook));
-
-	// fix null pointer with checking edges when using landscape editor
-	WriteRelJump(0x61CA59, UInt32(EditLandCheckLandIsNull));
-
-	if (config.bAllowEditLandEdges)
-	{
-		// changes: for(int i = 1; i < uGridsToLoad - 1; ++i);
-		// to :		for(int i = 0; i < uGridsToLoad; ++i);
-
-		// north
-		SafeWrite8(0x459B93, 0x90);
-		SafeWrite8(0x45DADC, 0x90); // flattening 
-		SafeWrite8(0x45DEFB, 0); // texture painter
-
-		// east 
-		SafeWrite8(0x459B79, 0x90);
-		SafeWrite8(0x45DAB9, 0x90); // flattening 
-		SafeWrite8(0x45DF84, 0x90);	// texture painter
-
-		// south
-		SafeWrite8(0x459AF5, 0);
-		SafeWrite8(0x45DA30, 0); // flattening
-		SafeWrite8(0x45DF21, 0); // texture painter
-
-		// west
-		SafeWrite8(0x459B16, 0);
-		SafeWrite8(0x45DA56, 0); // flattening
-		SafeWrite8(0x45DFA5, 0x90); // texture painter
-	}
 
 	// fix crash when doubling clicking an empty area in a form list
 	WriteRelJump(0x501450, UInt32(FormListCheckNull));
@@ -605,13 +493,6 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// add option to continue loading if multiple master files are selected
 	WriteRelJump(0x4DD2E6, UInt32(MultipleMasterLoadHook));
 
-	if (config.bNavmeshFindCoverConfirmPrompt)
-	{
-		WriteRelJump(0x456F22, UInt32(RenderWindowNavMeshConfirmFindCover));
-		WriteRelJump(0x444511, UInt32(MainWindowNavMeshConfirmFindCover));
-		WriteRelJump(0x40AC6F, UInt32(NavMeshToolbarConfirmFindCover)); // skip 0x40AC87, retn 0x40AC7B
-	}
-
 	if (config.bShowScriptChangeTypeWarning)
 	{
 		WriteRelCall(0x5C2FC2, UInt32(SaveScriptChangedType));
@@ -620,7 +501,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SetupHavokPreviewWindow();
 
 	// attempt to save the active plugin to "CrashSave - PLUGINNAME.esp" when crashing (not compatible with NVAC)
-	CrashHandler::InitHooks();
+	CrashHandler::Init();
 
 	// hide markers where appropriate when refreshing a cell
 	WriteRelJump(0x458593, UInt32(RefreshCellHook));
@@ -652,9 +533,6 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SafeWrite32(0x441CE9, UInt32(GlobalsWindowCallback));
 	SafeWrite32(0x441B11, UInt32(GamesettingsWindowCallback));
 
-	// add modifier CAPSLOCK for placing a random object from the objects palette, or select randomly if multiple items are highlighted
-	WriteRelCall(0x45A6B8, UInt32(PlaceOPALObjectHook));
-
 	// make the preferences window use 4 decimal places for config
 	for (UInt32 patchAddr : {0x44DC03, 0x44DC1D, 0x44DC51, 0x44D483, 0x44D4D5, 0x44D573, 0x44D58D, 0x44D5C1, 0x44D5DB})
 	{
@@ -672,12 +550,6 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// fix body part debris scale to use 4 decimal places
 	WriteRelCall(0x54498B, UInt32(OnInitDebrisScaleHook));
 	SafeWrite8(0x54498B + 5, 0x90);
-
-	if (config.bSnapToGridRotationUseDoublePrecision)
-	{
-		// use double precision when calculating reference rotation to fix floating point errors
-		WriteRelJump(0x4523E2, UInt32(RenderWindowHandleRefRotationHook));
-	}
 
 	if (config.bFaceGenOnlyEdited)
 	{
@@ -700,7 +572,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		MessageBoxA(nullptr, "Failed to create console log window", "Error", MB_ICONERROR);
 	}
 
-	ExtensionsMenu::InitHooks();
+	ExtensionsMenu::Init();
 
 	PatchRememberLandscapeEditSettingsWindowPosition();
 
@@ -725,7 +597,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		FaceGenExporter::NoLogging();
 
 		if (config.bNoFacegenCompression) {
-			FaceGenExporter::InitHooks();
+			FaceGenExporter::Init();
 			config.bPreventFaceAndBodyModExports = true;
 		}
 
@@ -747,20 +619,12 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// allow Telekinesis in base effect archtype dropdown
 	SafeWrite8(0xEA8EE8, 0x0);
 
-	RestoreRenderWindowDebugShaders();
-
 	WriteRelCall(0x596581, UInt32(ExportDialogueEndPlaySound));
 
 	// allow opening meshes outside the Data\\Meshes\\ folder
 	SafeWrite8(0x410656, 0xEB);
 	SafeWrite8(0x410678, 0x56);
 	WriteRelCall(0x8A2CC8, UInt32(OnGetMeshPathModifyIfDragDrop));
-
-	// always show imposters
-	SafeWrite8(0x65688D, 0xEB);
-
-	// fix crash when clicking on 'Regions' without an esm loaded
-	WriteRelCall(0x743F8E, UInt32(OnLoadRegionsHook));
 
 	if (config.bNoRecordCompression) {
 		// Remove record compression
@@ -769,7 +633,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		XUtil::PatchMemoryNop(0x624632, 5); // TESObjectLAND
 	}
 
-	CustomFOV::InitHooks(); // credits to WallSoGB
+	CustomFOV::Init(); // credits to WallSoGB
 	CustomFOV::SetFOV(config.iRenderFOV);
 
 	WriteRelCall(0x4DD437, UInt32(OnMasterFileNotMatchedPopupSkipIfVersionControlDisabled));
@@ -833,13 +697,6 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 		SafeWrite8(0x63255F, 0xEB); // credits to ShadeMe
 	}
 
-	CreatureMarkerSwapper::Init();
-
-	// add null checks to fix the F10 ShowSceneGraph
-	WriteRelCall(0x530126, UInt32(NiTreeCtrl_CreateTreeRecursiveHook));
-	WriteRelCall(0x530508, UInt32(NiTreeCtrl_CreateTreeRecursiveHook2));
-	WriteRelCall(0x80F145, UInt32(NiAVObject_GetViewerStringsHook));
-
 	// remove a useless dialog callback as it caused the mesh selection dialog
 	// to fallback on the old windows explorer
 	SafeWrite32(0x47F287, 0);
@@ -865,9 +722,6 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	originalCellWindowCallback = *(WNDPROC*)0x441648;
 	SafeWrite32(0x441648, UInt32(CellWindowCallback));
 
-	// fix the undo menu button for NavMesh
-	WriteRelCall(0x44104A, UInt32(OnMainWindowUndo));
-
 	// fix the Text Search not updating Z position after loading a cell
 	WriteRelCall(0x48706C, UInt32(OnTextViewLoadCell));
 	WriteRelCall(0x486FE1, UInt32(OnTextViewLoadCell));
@@ -891,14 +745,6 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// refresh the list after destroying windows
 	WriteRelJump(0x4778A9, 0x4778CC); // All windows
 	WriteRelJump(0x477902, 0x4778CC); // Selected Window
-
-	SafeWrite16(0x6C07D8, 0x07EB); // fix unnecessary duplicate function call in NavMeshRender::AttachEdge
-	WriteRelCall(0x6778C2, UInt32(OnTAllocZeroMemory)); // microoptimize TAlloc::Allocate
-
-	// fix NavMeshRenderer creating a new child slot whenever attaching children
-	SafeWrite8(0x6BF799, 1); // sets bFirstAvail to true
-	SafeWrite8(0x6C06F7, 1);
-	SafeWrite8(0x6C20CF, 1);
 
 	// fix 512 byte scrapheap leak when opening the find and replace window
 	WriteRelCall(0x47D256, UInt32(OnShowSearchAndReplaceWindowHook));
@@ -931,8 +777,6 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	// fix crash when right clicking an empty list in the cell view and clicking 'Edit'
 	WriteRelJump(0x430119, UInt32(OnEditSelectedCellListItemHook));
-
-	CustomRenderWindowHotkeys::Init();
 
 	if (config.bSkipSplashScreen)
 	{
@@ -1042,43 +886,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x56CFC6, UInt32(TESIdleForm__56B5A0_Recurse));
 	WriteRelCall(0x56D006, UInt32(TESIdleForm__56B5A0_Recurse));
 
-	// fix havok preview anim timer increasing for non-anims
-	TESPreviewControl__SetTimeAddr = DetourVtable(0xD38DE0, UInt32(TESPreviewControl__SetTime));
-
-	// allow opening any form that has a model in the preview (e.g. Impact Datas)
-	SafeWrite8(0x44B243, 0xB8);
-	SafeWrite32(0x44B243 + 1, UInt32(IsBoundObjectOrHasModelPath));
-	WriteRelCall(0x44A782, UInt32(OnSelectObjectCheckIsBoundObject));
-	SafeWrite8(0x44B243 + 1 + 4, 0x90);
-	WriteRelCall(0x44BB8E, UInt32(OnHavokPreviewSetup));
-	WriteRelCall(0x44A793, UInt32(OnHavokPreviewSetup));
-
 	// fix crash when duplicating worldspaces 
 	SafeWriteBuf(0x623D96, "\x33\xF6\x56\x8B\xCD\xE8\xD0\x88\xFF\xFF", 10); // pass nullptr to TESObjectLAND::CreateLandscape to ensure the data is setup correctly...
-
-	// check if x/y/z are held while you move refs to fix the axis lock keys not working after closing a menu
-	WriteRelCall(0x45F490, UInt32(OnMoveRefCheckXYZHeld));
-
-	// prevent x/y/z keys moving the mouse when pressed during navmesh mode
-	SafeWriteBuf(0x41F3A0, "\xC2\x04\x00", 3);
-
-	// show a warning when merging vertices from different navmeshes
-	WriteRelCall(0x40AAA7, UInt32(NavMeshManager__OnMergeVertices));
-	WriteRelCall(0x457E23, UInt32(NavMeshManager__OnMergeVertices));
-	WriteRelCall(0x40A9FF, UInt32(NavMeshManager__OnCreateTriangle));
-	WriteRelCall(0x4288AC, UInt32(NavMeshManager__OnCreateTriangle));
-	WriteRelCall(0x4298CE, UInt32(NavMeshManager__OnCreateTriangle));
-	WriteRelCall(0x456FBF, UInt32(NavMeshManager__OnCreateTriangle));
-	WriteRelCall(0x4288BF, UInt32(NavMeshManager__OnCreateQuad));
-	WriteRelCall(0x40AA20, UInt32(NavMeshManager__OnCreateQuad));
-	WriteRelCall(0x456FD9, UInt32(NavMeshManager__OnCreateQuad));
-
-	// clear the 'Creating Editor NavMeshes' print when it's done
-	WriteRelJump(0x42216C, UInt32(NavMeshManager__PostRenderCellClearPrintHook));
-	WriteRelJump(0x4220E2, UInt32(NavMeshManager__PostRenderCellClearPrintHook));
-
-	// fix crash when saving with a single vertex in a cell with no navmeshes
-	WriteRelJump(0x6ED482, UInt32(NavMeshInfoMap__CheckInfosHook));
 
 	// fix refs getting marked as modified if their primitives are slightly different during a cell load
 	WriteRelCall(0x643655, UInt32(IsMultiboundPointDifferent_IgnoreIfLoadingCell));
@@ -1093,10 +902,6 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	// fix BSShaderManager::bInterior not getting cleared in TES::LeaveInterior
 	WriteRelCall(0x4CCF7E, UInt32(OnLeaveInterior));
-
-	PreemptivelyUnloadCells::Init();
-
-	NavMeshPickPreventer::Init();
 
 	// allow saving as ESM
 	const char* fileExtensions = "ESM Files (*.esm)\0*.esm\0ESP Files (*.esp)\0*.esp\0";
@@ -1132,13 +937,13 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	}
 
 	// Fix ONAM not being written when not using Version Control
-	ONAMFix::InitHooks();
+	ONAMFix::Init();
 
 	// Fix geometry data created for SCOLs always using MUTABLE consistency, which increases memory usage
-	SCOLConsistencyFix::InitHooks();
+	SCOLConsistencyFix::Init();
 
     // Fix newly created multibound not being registered in cells they were created in
-	MultiBoundsAdder::InitHooks();
+	MultiBoundsAdder::Init();
 
     InitCustomPrimitiveColors();
 
@@ -1170,7 +975,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// add Challenges to the Object Window 'All' node
 	WriteRelCall(0x439272, UInt32(ObjectWindowNodeData__OnPopulateReputationList));
 
-	ObjectWindowTreeHooks::InitHooks();
+	ObjectWindowTreeHooks::Init();
 
 	// read the 4th tag skill combobox
 	static constexpr int kTagSkillDialogIDs[] = {1035, 1036, 1037, 1038};
@@ -1179,19 +984,13 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SafeWrite32(0x560F93, UInt32(&kTagSkillDialogIDs[4]));
 	SafeWrite32(0x561163, UInt32(&kTagSkillDialogIDs[4]));
 
-	// add option for only finalizing navmeshes for cells from a specified esm
-	WriteRelCall(0x4446E1, UInt32(NavMeshManager__ShowFinalizeAllNavMeshesPopup));
-	WriteRelCall(0x426248, UInt32(OnForceFinalizeShouldProcessCell));
-	WriteRelCall(0x4262CF, UInt32(OnForceFinalizeShowMessageBox));
-
 	// fix TESChallenge 'Craft using an item' combobox only containing casino chips
 	// and 'Acquire an item' only including armors
 	SafeWrite8(0x5600FE, 0xB5);
 	SafeWrite8(0x560159, 0x65);
 	SafeWriteBuf(0x560160, "\x83\xC4\x18\xE9\x3B\xFF\xFF\xFF", 8);
 
-	ToggleReferenceMovement::InitHooks();
-	RecentlyOpenedForms::InitHooks();
+	RecentlyOpenedForms::Init();
 
 	SafeWrite32(0x55182D, UInt32(PerkEntryCallback));
 	SafeWrite32(0x5519D6, UInt32(PerkEntryCallback));
@@ -1200,8 +999,6 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x5FAA77, UInt32(OnTESObjectDOOR_InitItem));
 	WriteRelCall(0x5FA492, UInt32(OnTESObjectDOOR_CloneStart));
 	WriteRelJump(0x5FA573, UInt32(OnTESObjectDOOR_CloneEnd));
-
-	RegionEditorEx::InitHooks();
 
 	// workaround the 'Linked Reference' of Locations not being selectable for ambush locations
 	// ideally we would fix the package flags not getting set properly when loading

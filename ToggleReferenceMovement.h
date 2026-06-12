@@ -1,6 +1,6 @@
 #pragma once
 namespace ToggleReferenceMovement
 {
-	void InitHooks();
+	void Init();
 	bool Toggle();
 }

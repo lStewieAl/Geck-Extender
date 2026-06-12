@@ -204,7 +204,29 @@ namespace RegionEditorEx
 		return 1;
 	}
 
-	void InitHooks()
+	__HOOK OnLoadRegionsHook()
+	{
+		// ebp (TESWorldSpace*) should be null if it's invalid not -1
+		_asm
+		{
+			cmp dword ptr ds : [esi + 0x10], ebx
+			je nullRegion
+
+			cmp ebp, -1
+			jne done
+
+			xor ebp, ebp
+		done:
+			pop eax
+			mov eax, 0x743F9D
+			jmp eax
+
+		nullRegion:
+			ret
+		}
+	}
+
+	void Init()
 	{
 		originalRegionEditorFn = DetourRelCall(0x7488B2, UInt32(RegionEditorCallback));
 
@@ -222,5 +244,8 @@ namespace RegionEditorEx
 		// zoom into where the cursor is instead of centered
 		WriteRelCall(0x74719E, UInt32(RegionEditorData_ZoomIn));
 		WriteRelCall(0x7471CA, UInt32(RegionEditorData_ZoomOut));
+
+		// fix crash when clicking on 'Regions' without an esm loaded
+		WriteRelCall(0x743F8E, UInt32(OnLoadRegionsHook));
 	}
 }

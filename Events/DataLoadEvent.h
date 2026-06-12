@@ -3,7 +3,7 @@
 #include <vector>
 namespace DataLoadEvent
 {
-	void InitHooks();
+	void Init();
 
 	using Callback = std::function<void()>;
 	void RegisterCallback(Callback listener);

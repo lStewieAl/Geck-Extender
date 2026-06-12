@@ -72,7 +72,7 @@ bool __stdcall CreateNifFile(const char* nifPath)
 	return true;
 }
 
-static __declspec(naked) void LoadFileHook(void)
+static __HOOK LoadFileHook(void)
 {
 	static UInt32 s_path;
 
@@ -120,7 +120,7 @@ void __stdcall DeleteNifFile(const char* nifPath)
 	
 }
 
-static __declspec(naked) void FinishedWithFileHook(void)
+static __HOOK FinishedWithFileHook(void)
 {
 	__asm
 	{

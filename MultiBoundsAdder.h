@@ -2,6 +2,6 @@
 
 namespace MultiBoundsAdder
 {
-	void InitHooks();
+	void Init();
 	void TestObjects(bool abReattach);
 }

@@ -340,7 +340,7 @@ namespace ObjectWindowTreeHooks
 		return CdeclCall<ObjectsView::TreeViewItem*>(0x448E00, objectWindowTree, hTreeItem);
 	}
 
-	void InitHooks()
+	void Init()
 	{
 		// speed up the object window insertions (~20%) by caching some results and skipping unnecessary strcpys
 		WriteRelJump(0x4490E0, UInt32(ObjectWindowTreeView__SetupNodeNameRecurse));

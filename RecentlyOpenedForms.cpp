@@ -264,7 +264,7 @@ namespace RecentlyOpenedForms
 		StoreForm(apCell);
 	}
 
-	void InitHooks()
+	void Init()
 	{
 		DataLoadEvent::RegisterCallback(PostLoadPlugins);
 

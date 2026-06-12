@@ -180,19 +180,6 @@ static void FixEditorFont(void)
 	SafeWrite8(basePatchAddr + 5, 0x90);
 }
 
-static __HOOK FixMultiBounds()
-{
-	__asm
-	{
-		cmp		eax, 0x7F7FFFFF
-		je		AhhGary
-		mov		ecx, dword ptr ds : [eax + 0x0C]
-		mov		dword ptr ds : [ecx + 0x08] , 0x00000000
-	AhhGary:
-		ret
-	}
-}
-
 //	make sure geckcustom.ini is written if bFastExit is enabled - credit to jazzisparis
 bool GetINIExists()
 {
@@ -655,7 +642,7 @@ int hk_inflate(z_stream_s* Stream, int Flush)
 	return -2;
 }
 
-_declspec(naked) void hk_PreviewWindowCheckForeground() {
+__HOOK hk_PreviewWindowCheckForeground() {
 	static const UInt32 returnAddr = 0x48CACF;
 
 	_asm {
@@ -716,7 +703,7 @@ bool __stdcall OnRecompileAllShouldProcessScript(Script* script, int iValue)
 }
 
 const char* recompileAllWarning = { "Are you sure you want to recompile every script in every plugin?\nYou should never need to do this." };
-_declspec(naked) void RecompileAllWarningScriptHook() {
+__HOOK RecompileAllWarningScriptHook() {
 	static const UInt32 retnAddr = 0x5C498A;
 	_asm {
 		push 0x104 // change default button to No
@@ -726,7 +713,7 @@ _declspec(naked) void RecompileAllWarningScriptHook() {
 		jmp retnAddr
 	}
 }
-_declspec(naked) void RecompileAllWarningMainHook() {
+__HOOK RecompileAllWarningMainHook() {
 	static const UInt32 retnAddr = 0x4442D3;
 	_asm {
 		push 0x104 // change default button to No
@@ -887,7 +874,7 @@ BOOL __stdcall hk_SearchAndReplaceCallback(HWND hDlg, UINT msg, WPARAM wParam, L
 	return StdCall<LRESULT>(0x47C990, hDlg, msg, wParam, lParam);
 }
 
-_declspec(naked) void EndLoadingHook() {
+__HOOK EndLoadingHook() {
 	PlaySound("MouseClick", NULL, SND_ASYNC);
 	_asm
 	{
@@ -898,98 +885,8 @@ _declspec(naked) void EndLoadingHook() {
 	}
 }
 
-char bSkipNextRenderWindowUpdate;
-BOOL __stdcall OnRenderWindowSetCursorPos(int X, int Y)
-{
-	// When the cursor reaches the edge of the render window, it is warped back
-	// into the window with SetCursorPos(). The camera update hook executes
-	// immediately after the warp using the correct mouse delta. However,
-	// SetCursorPos() also generates a synthetic WM_MOUSEMOVE message whose
-	// delta is based on the warped cursor position, resulting in unintended
-	// camera movement. Set a flag so the immediate update proceeds normally
-	// and the synthetic follow-up update is ignored.
-	bSkipNextRenderWindowUpdate = 2;
-	return SetCursorPos(X, Y);
-}
-
-void __fastcall RenderWindowOnMoveMouseSetTranslate(NiNode* apCameraRoot, void* edx, NiMatrix33* apMatrix)
-{
-	if (!bSkipNextRenderWindowUpdate || --bSkipNextRenderWindowUpdate == 1)
-	{
-		apCameraRoot->m_localRotate = apMatrix;
-	}
-}
-
-class NiMatrix3;
-NiMatrix3* __fastcall OnFlycamCalculateMatrixFromEuler(NiMatrix3* apMatrix, void* edx, float afYaw, float afPitch, float afRoll)
-{
-	constexpr float maxPitch = 1.55334f; // ~89 degrees
-	if (afRoll > maxPitch)
-	{
-		afRoll = maxPitch;
-	}
-	else if (afRoll < -maxPitch)
-	{
-		afRoll = -maxPitch;
-	}
-
-	return ThisCall<NiMatrix3*>(0x80A8F0, apMatrix, afYaw, afPitch, afRoll);
-}
-
-// hooks before movement speed is determined for flycam mode
-int FlycamMovementSpeedMultiplier()
-{
-	Setting* fFlyMoveSpeed = (Setting*)0xED12BC;
-	fFlyMoveSpeed->data.f = config.fFlycamNormalMovementSpeed;
-
-	if (GetAsyncKeyState(VK_SHIFT) < 0)
-	{
-		fFlyMoveSpeed->data.f *= config.fFlycamShiftMovementSpeed;
-	}
-
-	if (GetAsyncKeyState(VK_MENU) < 0)
-	{
-		fFlyMoveSpeed->data.f *= config.fFlycamAltMovementSpeed;
-	}
-
-	/* fix flycam speed being dependent on framerate by slowing down movement if framerate is greater than 30fps (33ms/frame)*/
-	static DWORD uiLastFlycamTime = 0;
-	DWORD uiCurrentTick = GetTickCount();
-	int iDelta = uiCurrentTick - uiLastFlycamTime;
-
-	if (iDelta < 33)
-	{
-		fFlyMoveSpeed->data.f *= (float)iDelta / 33.0f;
-	}
-	uiLastFlycamTime = uiCurrentTick;
-
-	return 0;
-}
-
-// edi       : difference in x pos, 
-// esp+0x324 : difference in y pos
-// Hook to make flycam rotation speed based on x/y position difference rather than 1.0 for any difference
-_declspec(naked) void FlycamRotationSpeedMultiplierHook() {
-	static const UInt32 retnAddr = 0x45D3F8;
-	_asm {
-		mov dword ptr ds : [0x00ED140C] , ebx
-
-		push edi
-		fild dword ptr ss : [esp]
-		add esp, 4
-
-		fmul config.fFlycamRotationSpeed
-		fstp dword ptr ss : [esp + 0xF0]
-
-		fild dword ptr ss : [esp + 0x324]
-		fmul config.fFlycamRotationSpeed
-		fstp dword ptr ss : [esp + 0x18]
-		jmp retnAddr
-	}
-}
-
 /* ideally this would be replaced with a wrapper around the Script Edit callback function */
-_declspec(naked) void ScriptEditKeypressHook(HWND hWnd) {
+__HOOK ScriptEditKeypressHook(HWND hWnd) {
 	static const UInt32 skipAddr = 0x5C40EC;
 	static const UInt32 saveAddr = 0x5C4961;
 	static const UInt32 retnAddr = 0x5C3ED3;
@@ -1027,101 +924,8 @@ bool __fastcall ScriptEdit__Save(byte* thiss, void* dummyEDX, HWND hDlg, char a3
 	return saveSuccess;
 }
 
-float GetRefSpeedMultiplier() {
-	float multiplier = 1.0F;
-	if (GetAsyncKeyState(VK_SHIFT) < 0) {
-		multiplier *= config.fMovementShiftMultiplier;
-	}
-	if (GetAsyncKeyState(VK_MENU) < 0) {
-		multiplier *= config.fMovementAltMultiplier;
-	}
-	return multiplier;
-}
-
-char __cdecl hk_DoRenderPan(int a1, int a2, float a3) {
-	if (GetAsyncKeyState(VK_MENU) < 0) {
-		a3 *= config.fMovementAltMultiplier;
-	}
-	return CdeclCall<char>(0x464210, a1, a2, a3);
-}
-
-char __cdecl hk_DoRenderMousewheelScroll(int a1, int a2, float a3) {
-	return CdeclCall<char>(0x464210, a1, a2, a3 * GetRefSpeedMultiplier());
-}
-
-double __fastcall hk_CalculateVectorMagnitude(float* vector, void* dummyEDX) {
-	return ThisCall<float>(0x40B3D0, vector) * GetRefSpeedMultiplier();
-}
-
-/* multiply the reference movement speed dependent */
-_declspec(naked) void RenderWindowReferenceMovementSpeedHook() {
-	static const UInt32 retnAddr = 0x455398;
-	_asm {
-		pushad
-		call GetRefSpeedMultiplier
-		fmul
-		popad
-
-		//	originalCode:
-		fmul dword ptr ds : [0xECFD1C]
-		jmp retnAddr
-	}
-}
-
-float GetOrthoSpeedMultiplier() {
-	if (GetAsyncKeyState(VK_MENU) < 0) {
-		return config.fMovementAltMultiplier;
-	}
-	return 1.0F;
-}
-
-_declspec(naked) void hk_OrthographicZoom() {
-	static const UInt32 retnAddr = 0x45F667;
-	_asm {
-		pushad
-		call GetOrthoSpeedMultiplier
-		fmul
-		popad
-
-		//	originalCode
-		fmul    dword ptr ds : [0xD2E0D0]
-		jmp retnAddr
-	}
-}
-
-_declspec(naked) void hk_OrthographicZoom2() {
-	static const UInt32 retnAddr = 0x4602DE;
-	_asm {
-		fild dword ptr ss : [esp + 0x24]
-		fmul dword ptr ds : [eax]
-
-		pushad
-		call GetOrthoSpeedMultiplier
-		fmul
-		popad
-
-		jmp retnAddr
-	}
-}
-
-_declspec(naked) void hk_RefCameraRotation() {
-	static const UInt32 retnAddr = 0x45F601;
-	_asm {
-		fld dword ptr[eax]
-
-		pushad
-		call GetOrthoSpeedMultiplier
-		fmul
-		popad
-
-		push ecx
-		fstp[esp]
-		jmp retnAddr
-	}
-}
-
 bool isFirstInit = true;
-_declspec(naked) void hk_LoadFilesInit() {
+__HOOK hk_LoadFilesInit() {
 	static const UInt32 autoLoadAddr = 0x432D7D;
 	static const UInt32 noLoadAddr = 0x432E64;
 
@@ -1132,72 +936,6 @@ _declspec(naked) void hk_LoadFilesInit() {
 		jmp autoLoadAddr
 		notFirst :
 		jmp noLoadAddr
-	}
-}
-
-/* check if Q or E are held and modify the Z movement speed (stored in esp+0x2C) before it is passed to the view transform */
-_declspec(naked) void RenderWindowFlycamPreTransformMovementHook() {
-	static const UInt32 retnAddr = 0x455DB1;
-	_asm {
-		push 'Q'
-		call esi
-		movzx eax, ax
-		test eax, 0x8000
-		jz noQ
-
-		fld  dword ptr ss : [esp + 0x2C]
-		fsub dword ptr ds : [0xED12C0]
-		fstp dword ptr ss : [esp + 0x2C]
-	noQ:
-		push 'E'
-		call esi
-		movzx eax, ax
-		test eax, 0x8000
-		jz noE
-
-		fld dword ptr ss : [esp + 0x2C]
-		fadd dword ptr ds : [0xED12C0]
-		fstp dword ptr ss : [esp + 0x2C]
-	noE:
-		mov esi, dword ptr ds : [0xED116C]
-		jmp retnAddr
-	}
-}
-
-_declspec(naked) void RenderWindowFlycamPostTransformMovementHook() {
-	static const UInt32 retnAddr = 0x455DCE;
-	_asm {
-		push eax
-		push VK_LCONTROL
-		call dword ptr ds : [0xD234D8] // GetAsyncKeyState
-		movzx eax, ax
-		test eax, 0x8000
-		jz noDown
-
-		pop eax
-		fld  dword ptr ss : [eax + 8]
-		fsub dword ptr ds : [0xED12C0]
-		fstp dword ptr ss : [eax + 8]
-		push eax
-
-	noDown:
-		push VK_SPACE
-		call dword ptr ds : [0xD234D8] // GetAsyncKeyState
-		movzx eax, ax
-		test eax, 0x8000
-		jz noUp
-
-		pop eax
-		fld  dword ptr ss : [eax + 8]
-		fadd dword ptr ds : [0xED12C0]
-		fstp dword ptr ss : [eax + 8]
-		push eax
-
-	noUp:
-		pop eax
-		mov edx, dword ptr ss : [eax]
-		mov ecx, dword ptr ss : [eax + 4]
-		jmp retnAddr
 	}
 }
 
@@ -1221,7 +959,7 @@ void __stdcall UpdateTimeOfDayInputBoxHook(HWND hWnd, UINT Msg, WPARAM wParam, L
 	SetWindowTextA(g_timeOfDayTextHwnd, timeBuf);
 }
 
-_declspec(naked) void LipGenLoopHook() {
+__HOOK LipGenLoopHook() {
 	static const UInt32 retnAddr = 0x41EA83;
 	static const UInt32 skipAddr = 0x41EE65;
 	_asm {
@@ -1239,7 +977,7 @@ _declspec(naked) void LipGenLoopHook() {
 	}
 }
 
-_declspec(naked) void LipGenCountTopicsHook() {
+__HOOK LipGenCountTopicsHook() {
 	static const UInt32 retnAddr = 0x41EA35;
 	_asm {
 		mov esi, dword ptr ss : [eax]
@@ -1257,7 +995,7 @@ _declspec(naked) void LipGenCountTopicsHook() {
 	}
 }
 
-_declspec(naked) void EmbeddedRenderWindowSoundNullCheck() {
+__HOOK EmbeddedRenderWindowSoundNullCheck() {
 	static const UInt32 noSoundFileAddr = 0x89357D;
 	static const UInt32 soundFileAddr = 0x8935B5;
 	_asm {
@@ -1280,120 +1018,13 @@ void __fastcall PreferencesWindowApplyButtonHook(int* thiss, void* dummyEDX, int
 	SendMessageA(g_allowCellWindowLoadsButtonHwnd, BM_SETCHECK, GetIsRenderWindowAllowCellLoads(), NULL);
 }
 
-void HideRenderWindow(HWND hWnd)
-{
-	ShowWindow(hWnd, SW_HIDE);
-	CheckMenuItem(MainWindow::GetMenu(), 0x9D06, MF_UNCHECKED);
-	WritePrivateProfileString("Windows", "bHideRenderWindow", " 1", IniPath);
-}
-
-WNDPROC originalRenderWindowCallback;
-BOOL CALLBACK RenderWindowCallbackHook(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-	switch (msg)
-	{
-	case WM_KEYDOWN:
-		if (wParam == VK_ESCAPE || wParam == VK_LWIN) {
-			SetFlycamMode(0);
-		}
-		break;
-	case WM_RBUTTONDOWN:
-		SetFlycamMode(0);
-		break;
-	case 0x416:
-		// Disabling landscape editing
-		if (wParam == 0) {
-			RenderWindow::ResetLandscapePainting();
-		}
-		break;
-	case WM_INITDIALOG:
-	{
-		AddMinimizeAndCloseButtons(hWnd);
-		break;
-	}
-	case WM_CLOSE:
-		HideRenderWindow(hWnd);
-		return TRUE;
-	case WM_SYSCOMMAND:
-		if ((wParam & 0xFFF0) == SC_MINIMIZE)
-		{
-			HideRenderWindow(hWnd);
-			return TRUE;
-		}
-		break;
-	}
-
-	LRESULT res = CallWindowProc(originalRenderWindowCallback, hWnd, msg, wParam, lParam);
-
-	if (msg == 0x416u && wParam == 0 && config.bRenderWindowRefreshAfterLandscapeEdit) {
-		// Refresh render window after landscape editing disabled.
-		CallWindowProc(originalRenderWindowCallback, hWnd, WM_KEYDOWN, VK_F5, lParam);
-	}
-
-	return res;
-}
-
-class BGSPrimitive;
-TESObjectREFR* __fastcall OnRenderWindowDragDrop__CreateReferenceAtLocation(DataHandler* dataHandler, void* edx, TESBoundObject* form, NiPoint3* aPos, NiPoint3* aRot, float radius, BGSPrimitive* apPrimitive, int a7)
-{
-	if (form->typeID == kFormType_TESLevItem || form->typeID == kFormType_TESLevCharacter || form->typeID == kFormType_TESLevCreature)
-	{
-		auto levItem = (TESLevItem*)form;
-		TESBoundObject* newForm = nullptr;
-
-		// pick a random item from the list, this will be null if it's a nested list
-		if (auto item = levItem->list.list.GetRandomItem())
-		{
-			if (item->form)
-			{
-				if (auto boundObj = CdeclCall<TESBoundObject*>(0xC5D114, item->form, 0, 0xE8C57C, 0xE8C7D4, 0)) // DYNAMIC_CAST(TESForm, TESBoundObject))
-				{
-					newForm = boundObj;
-				}
-			}
-		}
-
-		// use calculate formlist if it's a nested list - note this can return no new form since it's chance based...
-		if (!newForm)
-		{
-			auto container = TESContainer::Create();
-
-			// try finding a random item 100 times... jank workaround for when the chance sometimes returns null
-			int attempts = 0;
-			do
-			{
-				levItem->list.CalculateCurrentFormList(100, 1, container, false);
-				if (auto data = container->formCountList.Head()->data)
-				{
-					if (data->form)
-					{
-						if (auto boundObj = CdeclCall<TESBoundObject*>(0xC5D114, data->form, 0, 0xE8C57C, 0xE8C7D4, 0)) // DYNAMIC_CAST(TESForm, TESBoundObject))
-						{
-							newForm = boundObj;
-						}
-					}
-				}
-				container->Destroy();
-			} while (!newForm && ++attempts < 100);
-			
-
-			FormHeap_Free(container);
-		}
-
-		if (newForm)
-		{
-			form = newForm;
-		}
-	}
-	return ThisCall<TESObjectREFR*>(0x4D0940, dataHandler, form, aPos, aRot, radius, apPrimitive, a7);
-}
-
 extern HWND g_MainHwnd;
 void ShowSaveFailureError()
 {
 	MessageBoxA(g_MainHwnd, "Save failed. Please close any programs with the file open.", "Save Failed", MB_ICONWARNING);
 }
 
-_declspec(naked) void SaveFailureHook()
+__HOOK SaveFailureHook()
 {
 	static const UInt32 retnAddr = 0x4E1DBF;
 	_asm {
@@ -1406,7 +1037,7 @@ _declspec(naked) void SaveFailureHook()
 	}
 }
 
-_declspec(naked) void CellViewListViewCreateFormIDColumnHook()
+__HOOK CellViewListViewCreateFormIDColumnHook()
 {
 	static const UInt32 retnAddr = 0x42EFC1;
 	_asm
@@ -1421,7 +1052,7 @@ _declspec(naked) void CellViewListViewCreateFormIDColumnHook()
 	}
 }
 
-_declspec(naked) void ObjectWindowListViewColumnSizeHook()
+__HOOK ObjectWindowListViewColumnSizeHook()
 {
 	static const UInt32 retnAddr = 0x449660;
 	_asm
@@ -1444,21 +1075,7 @@ void __cdecl InsertListViewHeaderSetSizeHook(HWND hWnd, WPARAM wParam, const cha
 	SendMessageA(hWnd, LVM_SETCOLUMNWIDTH, wParam, 65);
 }
 
-_declspec(naked) void EditLandCheckLandIsNull()
-{
-	static const UInt32 retnAddr = 0x61CA60;
-	_asm
-	{
-		mov dword ptr ss : [esp + 0x4] , ebx
-		test eax, eax
-		je done
-		cmp dword ptr ds : [eax] , 0
-	done:
-		 jmp retnAddr
-	}
-}
-
-_declspec(naked) void FormListCheckNull()
+__HOOK FormListCheckNull()
 {
 	// add check if eax is null before dereferencing it
 	static const UInt32 retnAddr = 0x501457;
@@ -1474,7 +1091,7 @@ _declspec(naked) void FormListCheckNull()
 	}
 }
 
-_declspec(naked) void FormListCheckNull2()
+__HOOK FormListCheckNull2()
 {
 	static const UInt32 retnAddr = 0x5AE0AB;
 	static const UInt32 skipAddr = 0x5AE118;//0x5AE12E; // 0x5AE37E
@@ -1493,7 +1110,7 @@ _declspec(naked) void FormListCheckNull2()
 void BadFormLoadHook();
 void SaveScriptChangedType();
 
-_declspec(naked) void MultipleMasterLoadHook()
+__HOOK MultipleMasterLoadHook()
 {
 	static const char* MultipleMastersMessage = "Multiple master files selected for load, do you wish to continue? (enable bAllowMultipleMasterLoads to remove this warning)";
 	static const UInt32 continueLoadingAddr = 0x4DD394;
@@ -1514,95 +1131,6 @@ _declspec(naked) void MultipleMasterLoadHook()
 	}
 }
 
-__HOOK RenderWindowHandlesRefRotationHook()
-{
-	static const UInt32 retnAddr = 0x4523D0;
-	_asm
-	{
-		call GetRefSpeedMultiplier // no need to push/popad at this location
-		fild dword ptr ss : [esp + 0x114]
-		fmul
-		test byte ptr ds : [0x00ECFCEC] , 0x2
-		jmp retnAddr
-	}
-}
-
-const char* NavmeshConfirmMessage = "Are you sure you want to find cover edges?";
-_declspec(naked) void RenderWindowNavMeshConfirmFindCover()
-{
-	static const UInt32 skipAddr = 0x462C7A;
-
-	_asm
-	{
-		push MB_TASKMODAL | MB_ICONWARNING | MB_YESNO
-		push 0xD2D1F4 // "Navmesh: Find Cover"
-		push NavmeshConfirmMessage
-		push 0
-		call MessageBoxA
-		cmp eax, IDNO
-		je skip
-
-		//	doNavmesh
-		push 0
-		mov ecx, 0xF073F8
-		push 0x456F2E // retnAddr
-		mov eax, 0x6F51B0 // Navmesh::FindCoverEdges
-		jmp eax
-	skip:
-		jmp skipAddr
-	}
-}
-
-_declspec(naked) void MainWindowNavMeshConfirmFindCover()
-{
-	static const UInt32 skipAddr = 0x44382F;
-
-	_asm
-	{
-		push MB_TASKMODAL | MB_ICONWARNING | MB_YESNO
-		push 0xD2D1F4 // "Navmesh: Find Cover"
-		push NavmeshConfirmMessage
-		push 0
-		call MessageBoxA
-		cmp eax, IDNO
-		je skip
-
-		//	doNavmesh
-		push 0
-		mov ecx, 0xF073F8
-		push 0x44451D // retnAddr
-		mov eax, 0x6F51B0 // Navmesh::FindCoverEdges
-		jmp eax
-	skip :
-		jmp skipAddr
-	}
-}
-
-_declspec(naked) void NavMeshToolbarConfirmFindCover()
-{
-	static const UInt32 skipAddr = 0x40AC87;
-
-	_asm
-	{
-		push MB_TASKMODAL | MB_ICONWARNING | MB_YESNO
-		push 0xD2D1F4 // "Navmesh: Find Cover"
-		push NavmeshConfirmMessage
-		push 0
-		call MessageBoxA
-		cmp eax, IDNO
-		je skip
-
-		//	doNavmesh
-		push 0
-		mov ecx, 0xF073F8
-		push 0x40AC7B // retnAddr
-		mov eax, 0x6F51B0 // Navmesh::FindCoverEdges
-		jmp eax
-	skip:
-		jmp skipAddr
-	}
-}
-
 void __fastcall InitPreviewWindowBackgroundColor(void* window, void* edx, UInt32 unusedColor)
 {
 	UInt8 r = config.iPreviewWindowRed;
@@ -1612,7 +1140,7 @@ void __fastcall InitPreviewWindowBackgroundColor(void* window, void* edx, UInt32
 	ThisCall(0x4793D0, window, color);
 }
 
-static double havokAnimationRate = 1000.0;
+double havokAnimationRate = 1000.0;
 void SetHavokAnimationSpeed(float speed)
 {
 	havokAnimationRate = 1000.0 / speed;
@@ -1799,7 +1327,7 @@ void SetupConditonsColumns(HWND hWnd)
 	InsertListViewColumn(hWnd, 5, "", 10);
 }
 
-_declspec(naked) void RefreshCellHook()
+__HOOK RefreshCellHook()
 {
 	_asm
 	{
@@ -2027,92 +1555,7 @@ BOOL CALLBACK DialogueWindowCallback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM 
 	return result;
 }
 
-UInt32 __fastcall PlaceOPALObjectHook(ObjectPalette::Object* current, void* edx, float* point1, float* point2)
-{
-	ObjectPalette::Object* toPlace = current;
-
-	UInt32 randomIndex = -1;
-	if (auto hWnd = ObjectPalette::GetWindow())
-	{
-		auto listView = GetDlgItem(hWnd, ObjectPalette::kListView);
-		int selectedCount = ListView_GetSelectedCount(listView);
-		if (selectedCount > 1)
-		{
-			randomIndex = rand() % selectedCount;
-			unsigned int index = SendMessageA(listView, LVM_GETNEXTITEM, 0xFFFFFFFF, LVNI_SELECTED);
-
-			if (randomIndex)
-			{
-				do
-				{
-					auto startIndex = index;
-					index = SendMessageA(listView, LVM_GETNEXTITEM, startIndex, LVNI_SELECTED);
-				} while (index != -1 && --randomIndex);
-			}
-
-			auto randomItem = (ObjectPalette::Object*)GetNthListItem(listView, index);
-			if (randomIndex == 0 && randomItem) // if we've successfully looped and found an item
-			{
-				toPlace = randomItem;
-			}
-		}
-	}
-
-	if (randomIndex != 0 && config.bObjectPaletteAllowRandom)
-	{
-		if ((GetAsyncKeyState(VK_CAPITAL) < 0) ^ config.bObjectPaletteRandomByDefault)
-		{
-			ObjectPalette* opal = ObjectPalette::GetSingleton();
-
-			randomIndex = rand() % opal->list.Count();
-			toPlace = opal->list.GetNthItem(randomIndex);
-		}
-	}
-
-	return ThisCall(0x40BF90, toPlace, point1, point2);
-}
-
-const double M_TAU = 6.28318530717958647692528676;
-float __fastcall CalculateRefRotation(signed int amount)
-{
-	const double pi_on_180 = *(double*)0xD2C320;;
-	float rotationSpeedMult = *(float*)0xECFD10;
-	float* currentRotation = (float*)0xED1164;
-	int iSnapToAngle = *(int*)0xECFD04;
-
-	double snapRadians = iSnapToAngle * pi_on_180;
-	double addend = (amount * rotationSpeedMult / 10.0);
-	*currentRotation += addend;
-
-	// computes how many "SnapRadians" the rotation should be scaled to
-	int truncatedSnapRadians = *currentRotation / snapRadians;
-
-	double rotation = snapRadians * truncatedSnapRadians;
-	if (rotation == 0.0)
-	{
-		return 0;
-	}
-
-	*currentRotation = 0;
-	while (rotation >= M_TAU) rotation -= M_TAU;
-	while (rotation < 0) rotation += M_TAU;
-
-	return rotation;
-}
-
-_declspec(naked) void RenderWindowHandleRefRotationHook()
-{
-	static const UInt32 retnAddr = 0x4524A2;
-	_asm
-	{
-		mov ecx, [esp + 0x114] // rotation amount
-		call CalculateRefRotation
-		fstp[esp + 0x14]
-		jmp retnAddr
-	}
-}
-
-_declspec(naked) void ExportFaceGenCheckIsFormEdited()
+__HOOK ExportFaceGenCheckIsFormEdited()
 {
 	static const UInt32 retnAddr = 0x442055;
 	static const UInt32 skipAddr = 0x44207A;
@@ -2239,12 +1682,12 @@ void ClearLandscapeUndosIfNearlyOutOfMemory()
 	constexpr size_t MAX_MEMORY = 2560u * (1024u * 1024u); // 2.5gb
 	if (GetCurrentMemoryUsage() > MAX_MEMORY)
 	{
-		HistoryManager::GetSingleton()->ClearHistoryForCurrentElement();
+		TESUndo::GetSingleton()->ClearHistoryForCurrentElement();
 		Console_Print("2.5gb memory usage exceeded, clearing land edit history.");
 	}
 }
 
-_declspec(naked) void LandscapePaintHook1()
+__HOOK LandscapePaintHook1()
 {
 	static const UInt32 retnAddr = 0x45CA17;
 	_asm
@@ -2255,7 +1698,7 @@ _declspec(naked) void LandscapePaintHook1()
 	}
 }
 
-_declspec(naked) void LandscapePaintHook2()
+__HOOK LandscapePaintHook2()
 {
 	static const UInt32 retnAddr = 0x45E107;
 	_asm
@@ -2505,26 +1948,6 @@ errno_t __cdecl OnGetMeshPathModifyIfDragDrop(char* Dst, rsize_t SizeInBytes, co
 	return CdeclCall<errno_t>(0xC5BEEA, Dst, SizeInBytes, Src); // strcat_s
 }
 
-__HOOK OnLoadRegionsHook()
-{
-	// ebp (TESWorldSpace*) should be null if it's invalid not -1
-	_asm
-	{
-		cmp dword ptr ds : [esi + 0x10], ebx
-		je nullRegion
-		cmp ebp, -1
-		jne done
-		xor ebp, ebp
-	done:
-		pop eax
-		mov eax, 0x743F9D
-		jmp eax
-
-	nullRegion:
-		ret
-	}
-}
-
 namespace CustomFOV
 {
 	class NiCamera : public NiAVObject
@@ -2575,7 +1998,7 @@ namespace CustomFOV
 		fFOVTan = tan(fScaledFOV);
 	}
 
-	void InitHooks()
+	void Init()
 	{
 		SafeWrite32(0xD2F100, UInt32(NiWindow__UpdateCamera));
 	}
@@ -2905,7 +2328,7 @@ void __stdcall BadFormPrintID(TESForm* form)
 	Console_Print("FORMS: Bad form %08X could not be removed from the file.", form->refID);
 }
 
-_declspec(naked) void BadFormLoadHook()
+__HOOK BadFormLoadHook()
 {
 	static const UInt32 retnAddr = 0x4D957C;
 	_asm
@@ -2932,7 +2355,7 @@ void __cdecl PrintScriptTypeChangedMessage(UInt32 script, UInt8 newType)
 	MessageBoxA(nullptr, errorMsg, "Warning", MB_ICONWARNING);
 }
 
-_declspec(naked) void SaveScriptChangedType()
+__HOOK SaveScriptChangedType()
 {
 	_asm
 	{
@@ -3001,58 +2424,6 @@ BOOL __stdcall OnScriptSetWindowText_SaveAndRestoreZoom(HWND hRichEdit, LPCSTR l
 	}
 
 	return bResult;
-}
-
-__HOOK NiTreeCtrl_CreateTreeRecursiveHook()
-{
-	_asm
-	{
-	loopIter:
-		mov ecx, [eax + 8]
-		test ecx, ecx
-		je skip
-		ret
-	skip:
-		mov eax, [eax]
-		test eax, eax
-		jne loopIter
-
-		pop eax
-		mov eax, 0x53013E
-		jmp eax
-	}
-}
-
-__HOOK NiTreeCtrl_CreateTreeRecursiveHook2()
-{
-	_asm
-	{
-		test edi, edi
-		je skip
-		mov eax, [edi]
-		ret
-	skip:
-		pop eax
-		mov ebp, [ebp]
-		mov eax, 0x5304FD
-		jmp eax
-	}
-}
-
-__HOOK NiAVObject_GetViewerStringsHook()
-{
-	_asm
-	{
-		test edi, edi
-		je skip
-		mov eax, [edi]
-		ret
-	skip:
-		pop eax
-		mov ebp, [ebp]
-		mov eax, 0x80F13A
-		jmp eax
-	}
 }
 
 bool bInSetupDetailsText;
@@ -3510,18 +2881,6 @@ LRESULT CALLBACK CellWindowCallback(HWND hWnd, UINT Message, WPARAM wParam, LPAR
 	return CallWindowProc(originalCellWindowCallback, hWnd, Message, wParam, lParam);
 }
 
-void __fastcall OnMainWindowUndo(HistoryManager* historyMgr, void* edx, int formal)
-{
-	if (NavMeshManager::IsActive())
-	{
-		NavMeshManager::GetSingleton()->Undo();
-	}
-	else
-	{
-		historyMgr->Undo();
-	}
-}
-
 void __cdecl OnTextViewLoadCell(NiPoint3* pos, TESObjectCELL* cell)
 {
 	CdeclCall(0x465490, pos, cell);
@@ -3581,11 +2940,6 @@ __HOOK OnDestroyAllWindowsHook()
 		push 0x477780
 		jmp DestroyWindowOrDialog
 	}
-}
-
-void __stdcall OnTAllocZeroMemory(int* pMemory, int size, int numAllocs, void* initFn, void* destroyFn)
-{
-	memset(pMemory, 0, 4 * numAllocs);
 }
 
 void PlayMouseClickSound()
@@ -4179,7 +3533,7 @@ void __fastcall OnWeapCreateTempPlayer_MarkAsTemporary(Actor* pPlayer, void* edx
 
 // the animShotsPerSec field is computed lossily so instead of checking if the bytes are different
 // load it as a float and compare it against some minimum difference
-_declspec(naked) void OnWeapCheckIsDifferentHook()
+__HOOK OnWeapCheckIsDifferentHook()
 {
 	// using static consts instead of the usual mov eax, jmp eax
 	// as all registers are in use already
@@ -4285,29 +3639,6 @@ void __fastcall TESIdleForm__56B5A0_Recurse(TESIdleForm* idleForm, void* edx, tL
 	}
 }
 
-class TESRenderControl;
-UInt32 TESPreviewControl__SetTimeAddr;
-void __fastcall TESPreviewControl__SetTime(TESRenderControl* renderControl, void* edx, float afTime, char abIsPaused)
-{
-	if (renderControl == *(TESRenderControl**)0xECECE4) // if this is the havok preview window
-	{
-		if (auto pRef = *(TESObjectREFR**)0xECECE0)
-		{
-			if (auto pNode = pRef->Get3D())
-			{
-				if (CdeclCall<bool>(0x40F8A0, 0xF2CD84, pNode)) // NiIsKindOf(BSMasterParticleSystem::ms_RTTI, pNode)
-				{
-					// For most object types, afTime represents the animation timeline offset (i.e. an absolute position).
-					// For BSMasterParticleSystem however, it is treated as a delta time (time elapsed since the last frame).
-					// Since the render window runs at a fixed 60fps, use a constant 16.67ms delta instead.
-					afTime = (1000.0F / 60) / havokAnimationRate;
-				}
-			}
-		}
-	}
-	ThisCall(TESPreviewControl__SetTimeAddr, renderControl, afTime, abIsPaused);
-}
-
 __HOOK OnWaterTypeCheckExtraSubWindowHook()
 {
 	_asm
@@ -4319,150 +3650,6 @@ __HOOK OnWaterTypeCheckExtraSubWindowHook()
 		add esp, 0x8
 		mov ecx, 0x65F8F5
 		jmp ecx
-	}
-}
-
-void __cdecl OnHavokPreviewSetup(TESForm* form)
-{
-	if (form)
-	{
-		if (form->IsBoundObject())
-		{
-			// open the havok preview directly on the TESBoundObject
-			CdeclCall(0x4102F0, form);
-		}
-		else
-		{
-			const char* modelPath = CdeclCall<const char*>(0x501B20, form);
-			if (modelPath && *modelPath)
-			{
-				// call a method that creates a TESObjectSTAT and sets the mesh path
-				CdeclCall(0x4105C0, modelPath);
-			}
-		}
-	}
-}
-
-bool __fastcall IsBoundObjectOrHasModelPath(TESForm* form)
-{
-	if (form->IsBoundObject())
-	{
-		return true;
-	}
-
-	const char* modelPath = CdeclCall<const char*>(0x501B20, form);
-	return modelPath && *modelPath;
-}
-
-TESForm* __cdecl OnSelectObjectCheckIsBoundObject(TESForm* form)
-{
-	if (IsBoundObjectOrHasModelPath(form))
-	{
-		return form;
-	}
-	return nullptr;
-}
-
-bool OnMoveRefCheckXYZHeld()
-{
-	bool* isXHeld = (bool*)0xED1413;
-	bool* isYHeld = (bool*)0xED1411;
-	bool* isZHeld = (bool*)0xED1410;
-	if (GetAsyncKeyState(VK_CONTROL) >= 0)
-	{
-		if (!*isXHeld)
-		{
-			if (*isXHeld = GetAsyncKeyState('X') < 0)
-			{
-				*(float*)0xED1164 = 0;
-			}
-		}
-		if (!*isYHeld)
-		{
-			if (*isYHeld = GetAsyncKeyState(config.bSwapRenderCYKeys ? 'C' : 'Y') < 0)
-			{
-				*(float*)0xED1164 = 0;
-			}
-		}
-		if (!*isZHeld)
-		{
-			if (*isZHeld = GetAsyncKeyState('Z') < 0)
-			{
-				*(float*)0xED1164 = 0;
-			}
-		}
-	}
-	return *isXHeld;
-}
-
-void __fastcall NavMeshManager__OnMergeVertices(NavMeshManager* navMeshManager)
-{
-	if (navMeshManager->HasMultipleNavmeshesSelected())
-	{
-		if (MessageBoxA(g_MainHwnd, "You are about to merge Navmesh records which will cause one to be deleted, do you wish to proceed?", "Geck Extender", MB_YESNOCANCEL) != IDYES)
-		{
-			return;
-		}
-	}
-
-	ThisCall(0x4267B0, navMeshManager);
-}
-
-void __fastcall NavMeshManager__OnCreateTriangle(NavMeshManager* navMeshManager)
-{
-	if (navMeshManager->HasMultipleNavmeshesSelected())
-	{
-		if (MessageBoxA(g_MainHwnd, "You are about to merge Navmesh records which will cause one to be deleted, do you wish to proceed?", "Geck Extender", MB_YESNOCANCEL) != IDYES)
-		{
-			return;
-		}
-	}
-
-	ThisCall(0x427650, navMeshManager);
-}
-
-void __fastcall NavMeshManager__OnCreateQuad(NavMeshManager* navMeshManager, void* edx, char a2)
-{
-	if (navMeshManager->HasMultipleNavmeshesSelected())
-	{
-		if (MessageBoxA(g_MainHwnd, "You are about to merge Navmesh records which will cause one to be deleted, do you wish to proceed?", "Geck Extender", MB_YESNOCANCEL) != IDYES)
-		{
-			return;
-		}
-	}
-
-	ThisCall(0x427770, navMeshManager, a2);
-}
-
-__HOOK NavMeshManager__PostRenderCellClearPrintHook()
-{
-	static const char* EmptyString = "";
-	_asm
-	{
-		push EmptyString
-		push 0x3
-		mov eax, 0x4657A0 // TESCSMain::WriteToStatusBar
-		call eax
-		add esp, 0x14
-		ret 0xC
-	}
-}
-
-__HOOK NavMeshInfoMap__CheckInfosHook()
-{
-	_asm
-	{
-		test edx, edx
-		je skip
-
-		cmp byte ptr ds : [edx + 0x04] , bl
-		jne skip
-		
-		inc esi
-
-	skip:
-		mov edx, 0x6ED488
-		jmp edx
 	}
 }
 
@@ -4696,48 +3883,6 @@ __HOOK ObjectWindowListView_OnPopulateColumnExHook()
 		mov eax, 0x439E67
 		jmp eax
 	}
-}
-
-UInt32 forceFinalizeNavMeshModIndex = -1;
-void __fastcall NavMeshManager__ShowFinalizeAllNavMeshesPopup(NavMeshManager* navMeshManager)
-{
-	if (*config.sForceFinalizeNavMeshModName)
-	{
-		auto mod = DataHandler::GetSingleton()->LookupModByName(config.sForceFinalizeNavMeshModName);
-		if (mod)
-		{
-			forceFinalizeNavMeshModIndex = mod->modIndex;
-		}
-		else
-		{
-			Console_Print("Force Finalize NavMesh: Unable to find mod %s", config.sForceFinalizeNavMeshModName);
-		}
-	}
-
-	ThisCall(0x426160, navMeshManager);
-
-	forceFinalizeNavMeshModIndex = -1;
-}
-
-void* __fastcall OnForceFinalizeShouldProcessCell(TESObjectCELL* cell)
-{
-	if (forceFinalizeNavMeshModIndex != -1)
-	{
-		if (cell->modIndex != forceFinalizeNavMeshModIndex)
-		{
-			return nullptr;
-		}
-	}
-	return cell->navMeshArray;
-}
-
-int __cdecl OnForceFinalizeShowMessageBox(char* DstBuf, size_t SizeInBytes, char* Format, UInt32 numCellsToFinalize)
-{
-	if (forceFinalizeNavMeshModIndex != -1)
-	{
-		return CdeclCall<int>(0x401190, DstBuf, SizeInBytes, "About to finalize %d cells with navmeshes for file %s. Finalizing and saving the entire worldspace could take a larger amount of time. Continue?", numCellsToFinalize, config.sForceFinalizeNavMeshModName);
-	}
-	return CdeclCall<int>(0x401190, DstBuf, SizeInBytes, Format, numCellsToFinalize);
 }
 
 void __fastcall ObjectWindowNodeData__OnPopulateReputationList(ObjectWindowNodeData* apNodeData, void* edx, tList<TESForm>* apReputationList, char abClear, int formal)

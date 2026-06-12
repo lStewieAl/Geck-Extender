@@ -20,7 +20,7 @@ namespace ToggleReferenceMovement
 		}
 	}
 
-	void InitHooks()
+	void Init()
 	{
 		WriteRelCall(0x459FDF, UInt32(OnCheckReferenceMovementHook));
 		SafeWrite16(0x459FDF + 5, 0x9066);

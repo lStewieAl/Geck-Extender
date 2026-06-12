@@ -1,5 +1,5 @@
 #pragma once
-namespace DebugCellShaders
+namespace RenderHooks
 {
 	void Init();
 }

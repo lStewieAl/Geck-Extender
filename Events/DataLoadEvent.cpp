@@ -28,7 +28,7 @@ namespace DataLoadEvent
 		}
 	}
 
-	void InitHooks()
+	void Init()
 	{
 		WriteRelCall(0x464D2D, UInt32(OnEndLoading));
 	}

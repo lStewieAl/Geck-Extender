@@ -7,5 +7,5 @@ namespace MainWindowLoadEvent
 	using Callback = std::function<void()>;
 	void RegisterCallback(Callback listener);
 	void RemoveCallback(Callback listener);
-	void InitHooks();
+	void Init();
 }

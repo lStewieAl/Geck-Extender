@@ -257,7 +257,7 @@ static TESForm* s_lastOnHitAttacker = NULL;
 // Hooks
 /////////////////////////////////
 
-static __declspec(naked) void MarkEventHook(void)
+static __HOOK MarkEventHook(void)
 {
 	// volatile: ecx, edx, eax
 
@@ -294,7 +294,7 @@ void InstallHook()
 	WriteRelJump(kMarkEvent_HookAddr, (UInt32)&MarkEventHook);
 }
 
-static __declspec(naked) void DestroyCIOSHook(void)
+static __HOOK DestroyCIOSHook(void)
 {
 	__asm {
 		pushad
@@ -316,7 +316,7 @@ static void InstallDestroyCIOSHook()
 	WriteRelCall(kDestroyCIOS_HookAddr, (UInt32)&DestroyCIOSHook);
 }
 
-static __declspec(naked) void OnActorEquipHook(void)
+static __HOOK OnActorEquipHook(void)
 {
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 	static const UInt32 s_callAddr = 0x004BF0E0;
@@ -370,7 +370,7 @@ static void InstallOnActorEquipHook()
 	WriteRelCall(kOnActorEquipHookAddr, (UInt32)&OnActorEquipHook);
 }
 
-static __declspec(naked) void TESObjectREFR_ActivateHook(void)
+static __HOOK TESObjectREFR_ActivateHook(void)
 {
 	__asm {
 		pushad
@@ -418,7 +418,7 @@ void InstallOnVampireFeedHook()
 #endif
 }
 
-static __declspec(naked) void OnSkillUpHook(void)
+static __HOOK OnSkillUpHook(void)
 {
 	// on entry: edi = TESSkill*
 	// retn addr determined by zero flag (we're overwriting a jnz rel32 instruction)
@@ -459,7 +459,7 @@ void InstallOnSkillUpHook()
 	WriteRelJump(hookAddr, (UInt32)&OnSkillUpHook);
 }
 
-static __declspec(naked) void ModPCSHook(void)
+static __HOOK ModPCSHook(void)
 {
 	// on entry: esi = TESSkill*, [esp+0x21C-0x20C] = amount. amount may be zero or negative.
 	// hook overwrites a jz instruction following a comparison of amount to zero
@@ -509,7 +509,7 @@ void InstallModPCSHook()
 	WriteRelJump(hookAddr, (UInt32)&ModPCSHook);
 }
 
-static __declspec(naked) void OnMapMarkerAddHook(void)
+static __HOOK OnMapMarkerAddHook(void)
 {
 	// on entry, we know the marker is being set as visible
 	// ecx: ExtraMapMarker::Data* mapMarkerData
@@ -578,7 +578,7 @@ static void DoSpellCastHook(MagicCaster* caster)
 	}
 }
 
-static __declspec(naked) void OnSpellCastHook(void)
+static __HOOK OnSpellCastHook(void)
 {
 	// on entry, we know the spell is valid to cast
 	// edi: MagicCaster
@@ -607,7 +607,7 @@ static void InstallOnSpellCastHook()
 	WriteRelJnz(s_patchAddr, (UInt32)&OnSpellCastHook);
 }
 
-static __declspec(naked) void OnFallImpactHook(void)
+static __HOOK OnFallImpactHook(void)
 {
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 	static const UInt32 s_retnAddr = 0x005EFD57;
@@ -641,7 +641,7 @@ static void InstallOnFallImpactHook()
 	WriteRelJump(s_patchAddr, (UInt32)&OnFallImpactHook);
 }
 
-static __declspec(naked) void OnDrinkPotionHook(void)
+static __HOOK OnDrinkPotionHook(void)
 {
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 	static const UInt32 s_arg2StackOffset = 0x18;
@@ -700,7 +700,7 @@ static void InstallOnDrinkPotionHook()
 	WriteRelJump(s_hookAddr, (UInt32)&OnDrinkPotionHook);
 }
 
-static __declspec(naked) void OnEatIngredientHook(void)
+static __HOOK OnEatIngredientHook(void)
 {
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 	static const UInt32 arg2StackOffset = 0x00000024;
@@ -746,7 +746,7 @@ static void InstallOnEatIngredientHook()
 	WriteRelCall(s_hookAddr, (UInt32)&OnEatIngredientHook);
 }
 
-static __declspec(naked) void OnHealthDamageHook(void)
+static __HOOK OnHealthDamageHook(void)
 {
 	// hooks Actor::OnHealthDamage virtual fn
 	// only runs if actor is not already dead. Runs *before* damage has a chance to kill actor, so possible to prevent death
@@ -800,7 +800,7 @@ static void InstallOnHealthDamageHook()
 // bitfield, set bit (1 << HighProcess::kAction_XXX) for actions which have event handlers registered
 static UInt32 s_registeredActions = 0;
 
-static __declspec(naked) void OnActionChangeHook(void)
+static __HOOK OnActionChangeHook(void)
 {
 	// overwrites call to HighProcess::SetCurrentAction(UInt16 action, BSAnimGroupSequence*)
 	//	esi: Actor*
@@ -951,7 +951,7 @@ static void __stdcall SetLastFilledSoulgem (ExtraContainerChanges::EntryData* en
 	s_lastFilledSoulgem = iref->GetRef ();
 }
 	
-static __declspec(naked) void CreateExtraSoulHook1 (void)
+static __HOOK CreateExtraSoulHook1 (void)
 {
 	__asm {
 		pushad
@@ -964,7 +964,7 @@ static __declspec(naked) void CreateExtraSoulHook1 (void)
 	}
 }
 
-static __declspec(naked) void CreateExtraSoulHook2 (void)
+static __HOOK CreateExtraSoulHook2 (void)
 {
 	__asm {
 		push esi
@@ -981,7 +981,7 @@ static __declspec(naked) void CreateExtraSoulHook2 (void)
 	}
 }
 		
-static __declspec(naked) void OnSoulTrapHook(void)
+static __HOOK OnSoulTrapHook(void)
 {
 	__asm {
 		pushad
@@ -1145,7 +1145,7 @@ static bool __stdcall DoOnMagicCastHook(MagicCaster* caster, MagicItem* magicIte
 	return PerformMagicCasterTargetHook(kEventID_OnMagicCast, caster, magicItem, target, noHitVFX, NULL);
 }
 
-static __declspec(naked) void OnMagicCastHook(void)
+static __HOOK OnMagicCastHook(void)
 {
 	__asm {
 		push [esp + 0xC]
@@ -1170,7 +1170,7 @@ static bool __stdcall DoOnMagicApplyHook(MagicTarget* target, MagicCaster* caste
 	return PerformMagicCasterTargetHook(kEventID_OnMagicApply, caster, magicItem, target, 0, av);
 }
 
-static __declspec(naked) void OnMagicApplyHook(void)
+static __HOOK OnMagicApplyHook(void)
 {
 	__asm {
 		push [esp + 0xC]
@@ -1201,7 +1201,7 @@ static const UInt32 kActorSwimBreath_CalcMax2_RetnAddr	= 0x005E01C9;
 #else
 #error unsupported Oblivion version
 #endif
-static __declspec(naked) void Hook_ActorSwimBreath_CalcMax1()
+static __HOOK Hook_ActorSwimBreath_CalcMax1()
 {
 	__asm
 	{
@@ -1212,7 +1212,7 @@ static __declspec(naked) void Hook_ActorSwimBreath_CalcMax1()
 		jmp		[kActorSwimBreath_CalcMax1_RetnAddr]
 	}
 }
-static __declspec(naked) void Hook_ActorSwimBreath_CalcMax2()
+static __HOOK Hook_ActorSwimBreath_CalcMax2()
 {
 	__asm
 	{
@@ -1377,7 +1377,7 @@ UInt32 __stdcall HandleActorSwimBreath(Actor* actor, HighProcess* process, bool 
 
 	return retnAddr;
 }
-static __declspec(naked) void Hook_ActorSwimBreath_Override()
+static __HOOK Hook_ActorSwimBreath_Override()
 {
 	//TESObjectREFR::IsUnderWater(Vector3& pos, TESObjectCELL* cell, float thresholdFactor); =0x005E06C0
 	static UInt32 retnAddr;
