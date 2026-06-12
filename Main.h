@@ -907,21 +907,60 @@ __HOOK ScriptEditKeypressHook(HWND hWnd) {
 	}
 }
 
-bool __fastcall ScriptEdit__Save(byte* thiss, void* dummyEDX, HWND hDlg, char a3, char a4) {
-	bool saveSuccess = ThisCall<bool>(0x5C2F40, thiss, hDlg, a3, a4);
-	if (saveSuccess) {
-		SendDlgItemMessageA(hDlg, 1166, EM_SETMODIFY, 0, 0);
+void __fastcall OnSetupScriptWindowStatusBarHook(int* ecx, HWND hStatusWindow, int auiNumArgs, int* apLen)
+{
+	int kParts[] = { 150, -1 };
+	SendMessageA(hStatusWindow, SB_SETPARTS, 2, (LPARAM)kParts);
+}
+
+struct ScriptEditUserData
+{
+	RECT kRect;
+	struct Script* pScript;
+	UInt8 bSavedScript;
+	HMENU hMenu;
+	HWND hStatusWindow;
+	HWND hToolbar;
+	HWND hwnd24;
+	UInt32 unk28;
+	UInt32 unk2C;
+	UInt8 bDeferredSetSel_HACK;
+};
+
+HWND hScriptEditStatusWindow;
+bool __fastcall ScriptEdit__Save(byte* thiss, void* dummyEDX, HWND hWnd, char a3, char a4)
+{
+	ScriptEditUserData* pUserData = (ScriptEditUserData*)GetWindowLongA(hWnd, GWL_USERDATA);
+	hScriptEditStatusWindow = pUserData ? pUserData->hStatusWindow : 0;
+
+	bool saveSuccess = ThisCall<bool>(0x5C2F40, thiss, hWnd, a3, a4);
+	if (saveSuccess)
+	{
+		SendDlgItemMessageA(hWnd, 1166, EM_SETMODIFY, 0, 0);
 
 		// remove the '*' from the end of the window name
 		char windowName[MAX_PATH];
-		int len = GetWindowTextA(hDlg, windowName, MAX_PATH) - 1;
+		int len = GetWindowTextA(hWnd, windowName, MAX_PATH) - 1;
 
-		if (len > 2 && windowName[len] == '*') {
+		if (len > 2 && windowName[len] == '*')
+		{
 			windowName[len - 1] = '\0'; // strip the '* '
-			SetWindowTextA(hDlg, windowName);
+			SetWindowTextA(hWnd, windowName);
 		}
+
+		SendMessageA(hScriptEditStatusWindow, SB_SETTEXTA, 1, (LPARAM)"");
 	}
 	return saveSuccess;
+}
+
+void __cdecl OnScriptEditError(String* apStr, const char* apFormat, const char* apScriptName, UInt32 auiLineNumber, const char* apErrorString)
+{
+	CdeclCall(0x407120, apStr, apFormat, apScriptName, auiLineNumber, apErrorString);
+
+	char kBuf[MAX_PATH];
+	snprintf(kBuf, sizeof(kBuf), "Line %d: %s", auiLineNumber, apErrorString);
+
+	SendMessageA(hScriptEditStatusWindow, SB_SETTEXTA, 1, (LPARAM)kBuf);
 }
 
 bool isFirstInit = true;

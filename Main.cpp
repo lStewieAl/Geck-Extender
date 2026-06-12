@@ -423,6 +423,11 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	/* fix vanilla bug where modified flag was not reset upon successful saving */
 	WriteRelCall(0x5C4974, UInt32(ScriptEdit__Save));
 
+	// add more parts to the script window status bar for showing errors
+	WriteRelCall(0x5C459B, UInt32(OnSetupScriptWindowStatusBarHook));
+	XUtil::PatchMemoryNop(0x5C459B + 5, 3);
+	WriteRelCall(0x5C57BD, UInt32(OnScriptEditError));
+
 	// Fix for crash (invalid parameter termination) when the "Unable to find variable" warning would exceed the buffer size, credits to nukem
 	XUtil::PatchMemory(0xD59DCC, (PBYTE)", Text \"%.240s\"", strlen(", Text \"%.240s\"") + 1);
 
