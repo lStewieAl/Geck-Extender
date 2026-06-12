@@ -144,6 +144,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SafeWrite32(0x00D58330, 0x004FE910);	// skills (not sure where this is viewable)
 	SafeWrite32(0x00D5DFD8, 0x004FE910);	// loading screen
 	SafeWrite32(0x00D7BED8, 0x004FE910);	// worldspace map
+	SafeWrite32(0x00D73D60, 0x004FE910);	// TESTexture1024 (weather cloud textures)
 
 	SafeWrite32(0x00D73EE0, UInt32(SpeedTreeGetTexturePath));	// destructable tree (not sure where this is viewable)
 	SafeWrite32(0x00D73F68, UInt32(SpeedTreeGetTexturePath));	// tree
