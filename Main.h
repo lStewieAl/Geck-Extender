@@ -2437,6 +2437,128 @@ void RestoreZoom(HWND hRichEdit, RichEditZoom& zoom)
 	SendMessage(hRichEdit, EM_SETZOOM, zoom.num, zoom.den);
 }
 
+std::string UrlEncode(const char* str)
+{
+	std::string out;
+
+	while (*str)
+	{
+		unsigned char c = (unsigned char)*str;
+
+		if ((c >= 'A' && c <= 'Z') ||
+			(c >= 'a' && c <= 'z') ||
+			(c >= '0' && c <= '9') ||
+			c == '-' || c == '_' || c == '.' || c == '~')
+		{
+			out += c;
+		}
+		else if (c == ' ')
+		{
+			out += '+';
+		}
+		else
+		{
+			char buf[4];
+			snprintf(buf, sizeof(buf), "%%%02X", c);
+			out += buf;
+		}
+
+		++str;
+	}
+
+	return out;
+}
+
+static void Trim(std::string& s)
+{
+	auto start = std::find_if_not(s.begin(), s.end(),
+		[](unsigned char ch) { return std::isspace(ch); });
+
+	auto end = std::find_if_not(s.rbegin(), s.rend(),
+		[](unsigned char ch) { return std::isspace(ch); }).base();
+
+	s = (start < end) ? std::string(start, end) : "";
+}
+
+LRESULT CALLBACK RichEditSubclassProc(
+	HWND hWnd,
+	UINT msg,
+	WPARAM wParam,
+	LPARAM lParam,
+	UINT_PTR uIdSubclass,
+	DWORD_PTR dwRefData)
+{
+	enum { ID_SEARCH_GECKWIKI = 5000001, ID_OPEN_GECKWIKI };
+	switch (msg)
+	{
+	case WM_CONTEXTMENU:
+	{
+		CHARRANGE cr = {};
+		SendMessage(hWnd, EM_EXGETSEL, 0, (LPARAM)&cr);
+
+		HMENU hMenu = CreatePopupMenu();
+		if (cr.cpMin == cr.cpMax)
+		{
+			AppendMenuA(hMenu, MF_STRING, ID_OPEN_GECKWIKI, "Open Geck Wiki");
+		}
+		else
+		{
+			AppendMenuA(hMenu, MF_STRING, ID_SEARCH_GECKWIKI, "Search Geck Wiki");
+		}
+
+		POINT pt;
+		if (lParam == (LPARAM)-1) 
+		{
+			// Triggered via Keyboard (Shift+F10 / Menu Key)
+			lParam = GetMessagePos();
+		}
+		pt.x = (SHORT)LOWORD(lParam);
+		pt.y = (SHORT)HIWORD(lParam);
+		
+		int cmd = TrackPopupMenu(
+			hMenu,
+			TPM_RETURNCMD | TPM_RIGHTBUTTON,
+			pt.x, pt.y, 0, hWnd, NULL);
+
+		DestroyMenu(hMenu);
+
+		if (cmd == ID_SEARCH_GECKWIKI)
+		{
+			if (cr.cpMax > cr.cpMin)
+			{
+				int len = cr.cpMax - cr.cpMin;
+
+				std::string text(len + 1, '\0');
+				SendMessageA(hWnd, EM_GETSELTEXT, 0, (LPARAM)text.data());
+
+				text.resize(strlen(text.c_str()));
+				Trim(text); // your trim function
+
+				if (!text.empty())
+				{
+					std::string url = "https://geckwiki.com/index.php?search=" + UrlEncode(text.c_str());
+
+					ShellExecuteA(NULL, "open", url.c_str(), NULL, NULL, SW_SHOWNORMAL);
+				}
+			}
+			return 0;
+		}
+		else if (cmd == ID_OPEN_GECKWIKI)
+		{
+			ShellExecuteA(NULL, "open", "https://geckwiki.com/index.php?title=Category:Functions_(All)", NULL, NULL, SW_SHOWNORMAL);
+			return 0;
+		}
+		break;
+	}
+
+	case WM_NCDESTROY:
+		RemoveWindowSubclass(hWnd, RichEditSubclassProc, uIdSubclass);
+		break;
+	}
+
+	return DefSubclassProc(hWnd, msg, wParam, lParam);
+}
+
 BOOL __stdcall ScriptEditCallback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	BOOL bResult = CallWindowProc((WNDPROC)0x5C3D40, hWnd, msg, wParam, lParam);
@@ -2448,7 +2570,10 @@ BOOL __stdcall ScriptEditCallback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
 			bFirstOpen = false;
 			SendMessageA(hWnd, WM_COMMAND, 0x9CDB, NULL);
 		}
-		RestoreZoom(GetDlgItem(hWnd, 1166), s_RichEditZoom);
+
+		HWND hRich = GetDlgItem(hWnd, 1166);
+		SetWindowSubclass(hRich, RichEditSubclassProc, 1, 0);
+		RestoreZoom(hRich, s_RichEditZoom);
 	}
 	else if (msg == WM_DESTROY)
 	{
