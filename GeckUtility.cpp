@@ -365,3 +365,24 @@ void AddMinimizeAndCloseButtons(HWND hWnd)
 		SWP_NOZORDER | SWP_FRAMECHANGED
 	);
 }
+
+namespace BSTestObjects
+{
+	NiLines* MakeCoordinateJack(float afScale)
+	{
+		return CdeclCall<NiLines*>(0x9F81D0, afScale);
+	}
+}
+
+namespace BSShaderUtil
+{
+	void AccumulateScene(const NiCamera* apCamera, NiAVObject* apNode, BSCullingProcess* apCullingProcess)
+	{
+		CdeclCall(0x90A570, apCamera, apNode, apCullingProcess);
+	}
+
+	void RenderScene(NiCamera* apCamera, BSShaderAccumulator* apAccumulator)
+	{
+		CdeclCall(0x90A760, apCamera, apAccumulator);
+	}
+}

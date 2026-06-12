@@ -72,26 +72,6 @@ static struct NiUpdateData
 	UInt8 gap09[3];
 } DefaultNodeUpdateParams;
 
-class NiFrustumPlanes {
-public:
-	NiFrustumPlanes() {
-		m_uiActivePlanes = 63;
-	}
-
-	enum ActivePlanes {
-		NEAR_PLANE		= 0,
-		FAR_PLANE		= 1,
-		LEFT_PLANE		= 2,
-		RIGHT_PLANE		= 3,
-		TOP_PLANE		= 4,
-		BOTTOM_PLANE	= 5,
-		MAX_PLANES		= 6
-	};
-
-	NiPlane	m_akCullingPlanes[MAX_PLANES];
-	UInt32	m_uiActivePlanes;
-};
-
 class NiProperty : public NiObjectNET {
 public:
 	NiProperty();
@@ -775,9 +755,22 @@ public:
 	{
 		return ThisCall<bool>(0x817480, this, x, y, origin, direction, width);
 	}
-};
 
-#if 0
+	bool LookAtWorldPoint(const NiPoint3* kWorldPt, const NiPoint3* kWorldUp)
+	{
+		return ThisCall<bool>(0x816B00, this, kWorldPt, kWorldUp);
+	}
+
+	static NiCamera* CreateObject()
+	{
+		return CdeclCall<NiCamera*>(0x817830);
+	}
+
+	void SetViewFrustum(NiFrustum* apFrustum)
+	{
+		ThisCall(0x816790, this, apFrustum);
+	}
+};
 
 // 150
 class BSCubeMapCamera : public NiCamera
@@ -818,33 +811,7 @@ public:
 	NiTArray <NiScreenTexture *>	textures;	// 134
 };
 
-// C0
-class NiGeometry : public NiAVObject
-{
-public:
-	NiGeometry();
-	~NiGeometry();
-
-	virtual void	Render(NiRenderer * arg);
-	virtual void	Unk_22(NiRenderer * arg);
-	virtual void	SetGeomData(NiObject * obj);
-	virtual void	Unk_24(void);		// geomData->Unk_15()
-	virtual void	Unk_25(NiRenderer * arg);
-
-	NiPropertyState			* unk0AC;	// 0AC
-	NiDynamicEffectState	* unk0B0;	// 0B0
-	NiGeometryData			* geomData;	// 0B4
-	NiObject				* skinData;	// 0B8
-	NiObject				* shader;	// 0BC
-};
-
-// C0
-class NiLines : public NiGeometry
-{
-public:
-	NiLines();
-	~NiLines();
-};
+#if 0
 
 // C0
 class NiTriBasedGeom : public NiGeometry
@@ -1162,4 +1129,12 @@ public:
 	NiGeometryData*		m_spModelData;
 	NiSkinInstance*		m_spSkinInstance;
 	BSShader*			m_pShader;
+};
+
+// C4
+class NiLines : public NiGeometry
+{
+public:
+	NiLines();
+	~NiLines();
 };

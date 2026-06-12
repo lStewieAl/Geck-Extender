@@ -912,3 +912,14 @@ struct RegionEditor
 		return *(HWND*)0xF0FF90;
 	}
 };
+
+namespace BSTestObjects
+{
+	NiLines* MakeCoordinateJack(float afScale = 6.f);
+}
+
+namespace BSShaderUtil
+{
+	void AccumulateScene(const NiCamera* apCamera, NiAVObject* apNode, BSCullingProcess* apCullingProcess);
+	void RenderScene(NiCamera* apCamera, BSShaderAccumulator* apAccumulator);
+}

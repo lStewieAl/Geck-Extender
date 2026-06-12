@@ -898,6 +898,28 @@ _declspec(naked) void EndLoadingHook() {
 	}
 }
 
+char bSkipNextRenderWindowUpdate;
+BOOL __stdcall OnRenderWindowSetCursorPos(int X, int Y)
+{
+	// When the cursor reaches the edge of the render window, it is warped back
+	// into the window with SetCursorPos(). The camera update hook executes
+	// immediately after the warp using the correct mouse delta. However,
+	// SetCursorPos() also generates a synthetic WM_MOUSEMOVE message whose
+	// delta is based on the warped cursor position, resulting in unintended
+	// camera movement. Set a flag so the immediate update proceeds normally
+	// and the synthetic follow-up update is ignored.
+	bSkipNextRenderWindowUpdate = 2;
+	return SetCursorPos(X, Y);
+}
+
+void __fastcall RenderWindowOnMoveMouseSetTranslate(NiNode* apCameraRoot, void* edx, NiMatrix33* apMatrix)
+{
+	if (!bSkipNextRenderWindowUpdate || --bSkipNextRenderWindowUpdate == 1)
+	{
+		apCameraRoot->m_localRotate = apMatrix;
+	}
+}
+
 class NiMatrix3;
 NiMatrix3* __fastcall OnFlycamCalculateMatrixFromEuler(NiMatrix3* apMatrix, void* edx, float afYaw, float afPitch, float afRoll)
 {
@@ -2532,13 +2554,12 @@ namespace CustomFOV
 		NiFrustum kNewFrustum = {};
 		float fAspectRatio = static_cast<float>(auiHeight) / auiWidth;
 
-		kNewFrustum.l = -fFOVTan * 0.5;
-		kNewFrustum.r = fFOVTan * 0.5;
-		kNewFrustum.b = -fFOVTan * fAspectRatio * 0.5;
-		kNewFrustum.t = fFOVTan * fAspectRatio * 0.5;
-
-		kNewFrustum.n = 10.0;
-		kNewFrustum.f = afEndClipDist;
+		kNewFrustum.m_fLeft = -fFOVTan * 0.5;
+		kNewFrustum.m_fRight = fFOVTan * 0.5;
+		kNewFrustum.m_fTop = fFOVTan * fAspectRatio * 0.5;
+		kNewFrustum.m_fBottom = -fFOVTan * fAspectRatio * 0.5;
+		kNewFrustum.m_fNear = 10.0;
+		kNewFrustum.m_fFar = afEndClipDist;
 		apCamera->m_kViewFrustum = kNewFrustum;
 		apCamera->m_kPort.l = 0.f;
 		apCamera->m_kPort.r = 1.f;

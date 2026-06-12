@@ -1469,6 +1469,7 @@ public:
 	UInt32		m_bufGrowSize;	// 0C
 };
 
+class NiVisibleArray;
 // 90
 class NiCullingProcess
 {
@@ -1481,10 +1482,31 @@ public:
 	virtual void	Cull(NiCamera * camera, NiAVObject * scene, NiCulledGeoList * culledGeo);
 	virtual void	AddGeo(NiGeometry * arg);
 
-//	void			** m_vtbl;		// 00
-	UInt8			m_useAddGeoFn;	// 04 - call AddGeo when true, else just add to the list
-	UInt8			pad05[3];		// 05
-	NiCulledGeoList	* m_culledGeo;	// 08
+	bool m_bUseVirtualAppend;
+	NiVisibleArray* m_pkVisibleSet;
+	NiCamera* m_pkCamera;
+	NiFrustum m_kFrustum;
+	NiFrustumPlanes m_kPlanes;
+};
+
+class BSCompoundFrustum;
+class BSShaderAccumulator;
+class BSCullingProcess : public NiCullingProcess
+{
+	enum BSCPCullingType : __int32
+	{
+		BSCP_CULL_NORMAL = 0x0,
+		BSCP_CULL_ALLPASS = 0x1,
+		BSCP_CULL_ALLFAIL = 0x2,
+		BSCP_CULL_IGNOREMULTIBOUNDS = 0x3,
+		BSCP_CULL_FORCEMULTIBOUNDSNOUPDATE = 0x4,
+	};
+
+	BSCullingProcess::BSCPCullingType eCullMode;
+	BSCullingProcess::BSCPCullingType eTypeStack[10];
+	unsigned int uiStackIndex;
+	BSCompoundFrustum* pCompoundFrustum;
+	BSShaderAccumulator* spAccumulator;
 };
 
 /**** BSTempEffects ****/

@@ -136,6 +136,19 @@ struct NiMatrix33
 		return data[uiRow][uiCol];
 	}
 
+	NiMatrix33& operator= (const NiMatrix33* mat) {
+		this->data[0][0] = mat->data[0][0];
+		this->data[0][1] = mat->data[0][1];
+		this->data[0][2] = mat->data[0][2];
+		this->data[1][0] = mat->data[1][0];
+		this->data[1][1] = mat->data[1][1];
+		this->data[1][2] = mat->data[1][2];
+		this->data[2][0] = mat->data[2][0];
+		this->data[2][1] = mat->data[2][1];
+		this->data[2][2] = mat->data[2][2];
+		return *this;
+	};
+
 	NiPoint3 operator*(const NiPoint3& pt) const {
 		return NiPoint3(
 			data[0][0] * pt.x + data[0][1] * pt.y + data[0][2] * pt.z,
@@ -260,14 +273,40 @@ struct NiSphere
 // 1C
 struct NiFrustum
 {
-	float	l;			// 00
-	float	r;			// 04
-	float	t;			// 08
-	float	b;			// 0C
-	float	n;			// 10
-	float	f;			// 14
-	UInt8	o;			// 18
-	UInt8	pad19[3];	// 19
+	float	m_fLeft;
+	float	m_fRight;
+	float	m_fTop;
+	float	m_fBottom;
+	float	m_fNear;
+	float	m_fFar;
+	bool	m_bOrtho;
+};
+
+// 10
+struct NiPlane
+{
+	NiVector3	nrm;
+	float		offset;
+};
+
+class NiFrustumPlanes {
+public:
+	NiFrustumPlanes() {
+		m_uiActivePlanes = 63;
+	}
+
+	enum ActivePlanes {
+		NEAR_PLANE = 0,
+		FAR_PLANE = 1,
+		LEFT_PLANE = 2,
+		RIGHT_PLANE = 3,
+		TOP_PLANE = 4,
+		BOTTOM_PLANE = 5,
+		MAX_PLANES = 6
+	};
+
+	NiPlane	m_akCullingPlanes[MAX_PLANES];
+	UInt32	m_uiActivePlanes;
 };
 
 // 10
@@ -303,13 +342,6 @@ struct NiColorAlpha
 		b *= fScale;
 		a *= fScale;
 	};
-};
-
-// 10
-struct NiPlane
-{
-	NiVector3	nrm;
-	float		offset;
 };
 
 // 10

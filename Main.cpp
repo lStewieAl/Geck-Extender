@@ -418,6 +418,11 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SafeWrite8(0x45D3D9, 0x7C);
 	SafeWrite8(0x45D3EA, 0x7F);
 
+	// ignore mouse movement after the call to SetCursorPos when reaching the edge of the window to prevent it flickering
+	WriteRelCall(0x45D387, UInt32(OnRenderWindowSetCursorPos));
+	SafeWrite8(0x45D387 + 5, 0x90);
+	WriteRelCall(0x45D49D, UInt32(RenderWindowOnMoveMouseSetTranslate));
+
 	// fix being able to look upside down by clamping the roll
 	WriteRelCall(0x45D487, UInt32(OnFlycamCalculateMatrixFromEuler));
 
