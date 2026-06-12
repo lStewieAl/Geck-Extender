@@ -488,6 +488,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelJump(0x501450, UInt32(FormListCheckNull));
 	WriteRelJump(0x5AE0A5, UInt32(FormListCheckNull2));
 
+	// fix crash when opening two weather windows and closing one of them
+	WriteRelJump(0x48E704, UInt32(OnCloseWeatherFormHook));
+
 	// give more informative error when "Bad forms are encountered by printing the bad form's formID"
 	WriteRelJump(0x4D9577, UInt32(BadFormLoadHook));
 
@@ -775,6 +778,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	SafeWrite8(0x4CE7DA, 0xEB); // Skip calling InvalidateRect on the RenderWindow in TESDataHandler::CloseAllTES (ShadeMe)
 	SafeWrite8(0x46252B, 0); // RenderWindowCallback - pass bUpdateSelection = 0 when copying (ShadeMe)
+
+	// fixes a bug that causes large parts of the desktop screen to 'blackout' when dialogs didn't handle their TESColorControl messages correctly (original credits to ShadeMe)
+	WriteRelJump(0x4790F8, UInt32(ColorControlDataOnPaintHook));
 
 	// fix crash when right clicking an empty list in the cell view and clicking 'Edit'
 	WriteRelJump(0x430119, UInt32(OnEditSelectedCellListItemHook));

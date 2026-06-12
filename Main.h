@@ -3900,6 +3900,25 @@ void __fastcall OnLeaveInterior(bhkWorld* apWorld, void* edx, bool abEnable)
 	BSShaderManager::SetInterior(false);
 }
 
+__HOOK ColorControlDataOnPaintHook()
+{
+	// skip painting the dialog box if GetDlgItem returns NULL
+	// the subsequent was call GetDC(DlgItem) => GetDC(NULL)
+	// which returns a DC for the *entire screen* causing the painting
+	// to invalidate the whole screen, causing black artifacts
+	_asm
+	{
+		call dword ptr ds : [0xD23548] // GetDlgItem
+		test eax, eax
+		je skip
+		mov ecx, 0x4790FE
+		jmp ecx
+	skip:
+		mov ecx, 0x47914A
+		jmp ecx
+	}
+}
+
 __HOOK OnEditSelectedCellListItemHook()
 {
 	_asm
@@ -4028,4 +4047,20 @@ TESPackage::LocationData* __fastcall OnOpenAmbushPackageLocation(TESPackage* apP
 	auto location = ThisCall<TESPackage::LocationData*>(0x493BA0, apPackage);
 	location->ucEnabledPicks |= TESPackage::LocationData::ALLOW_LINKED_REFERENCE;
 	return location;
+}
+
+__HOOK OnCloseWeatherFormHook()
+{
+	_asm
+	{
+		test ecx, ecx
+		je skip
+
+		mov edi, dword ptr ds : [0xD23550]
+		mov eax, 0x48E70A
+		jmp eax
+	skip:
+		mov eax, 0x48E750
+		jmp eax
+	}
 }
