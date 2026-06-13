@@ -4458,3 +4458,26 @@ __HOOK OnCloseWeatherFormHook()
 		jmp eax
 	}
 }
+
+UInt32 originalQuestDialogueTreeDialogFn;
+bool __fastcall TESQuestDialogueTreeCallback(BGSDialogueTree* apTree, void* edx, HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam, int* aiOut)
+{
+	static bool bClosing;
+	auto result = ThisCall<bool>(originalQuestDialogueTreeDialogFn, apTree, hWnd, Message, wParam, lParam, aiOut);
+	if (!bClosing)
+	{
+		if (Message == WM_CLOSE)
+		{
+			bClosing = true;
+			result = DestroyWindow(hWnd);
+			bClosing = false;
+		}
+		else if (Message == WM_COMMAND && LOWORD(wParam) == IDOK)
+		{
+			bClosing = true;
+			result = hk_SendMessageA(hWnd, WM_COMMAND, wParam, 0);
+			bClosing = false;
+		}
+	}
+	return result;
+}
