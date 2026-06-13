@@ -68,6 +68,7 @@ struct Settings
 	bool bPreemptivelyUnloadCells;
 	bool bCustomReferenceBatchActions;
 	bool bShowSessionTime;
+	bool bTrackSessionTime;
 
 	int bUseAltShiftMultipliers;
 	float fMovementAltMultiplier;

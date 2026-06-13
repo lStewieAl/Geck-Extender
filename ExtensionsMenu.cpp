@@ -873,7 +873,7 @@ namespace ExtensionsMenu
 			prevY = newY;
 		}
 
-		if (config.bShowSessionTime && Message == WM_CLOSE)
+		if (config.bTrackSessionTime && Message == WM_CLOSE)
 		{
 			StatTracker::Callback(hWnd, Message, wParam, lParam);
 		}
@@ -888,7 +888,7 @@ namespace ExtensionsMenu
 		*
 		*/
 
-		if (config.bShowSessionTime)
+		if (config.bTrackSessionTime)
 		{
 			StatTracker::Callback(hWnd, Message, wParam, lParam);
 		}
