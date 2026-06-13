@@ -1,5 +1,5 @@
 #pragma once
-namespace TimeTracker
+namespace StatTracker
 {
 	void Callback(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 }

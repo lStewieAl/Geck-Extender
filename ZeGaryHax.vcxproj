@@ -271,7 +271,7 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="TimeTracker.cpp">
+    <ClCompile Include="StatTracker.cpp">
       <SubType>
       </SubType>
     </ClCompile>
@@ -415,7 +415,7 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="TimeTracker.h">
+    <ClInclude Include="StatTracker.h">
       <SubType>
       </SubType>
     </ClInclude>

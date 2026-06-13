@@ -12,7 +12,7 @@
 #include "MultiBoundsAdder.h"
 #include "ToggleReferenceMovement.h"
 #include "RecentlyOpenedForms.h"
-#include "TimeTracker.h"
+#include "StatTracker.h"
 
 HWND g_MainHwnd;
 extern HWND g_ConsoleHwnd;
@@ -872,6 +872,12 @@ namespace ExtensionsMenu
 			prevX = newX;
 			prevY = newY;
 		}
+
+		if (config.bShowSessionTime && Message == WM_CLOSE)
+		{
+			StatTracker::Callback(hWnd, Message, wParam, lParam);
+		}
+
 		/*
 		*
 		*
@@ -884,7 +890,7 @@ namespace ExtensionsMenu
 
 		if (config.bShowSessionTime)
 		{
-			TimeTracker::Callback(hWnd, Message, wParam, lParam);
+			StatTracker::Callback(hWnd, Message, wParam, lParam);
 		}
 
 		return result;
