@@ -425,6 +425,7 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
     </ClInclude>
     <ClInclude Include="UISpeedHooks.h" />
     <ClInclude Include="UnserializedIO.h" />
+    <ClInclude Include="Version.h" />
     <ClInclude Include="xutil.h" />
     <ClInclude Include="DialogResizing.h" />
     <ClInclude Include="Main.h" />

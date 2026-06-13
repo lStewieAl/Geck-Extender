@@ -808,7 +808,7 @@ namespace ExtensionsMenu
 		{
 			//	Continue normal execution but with a custom string
 			char customTitle[256];
-			stbsp_snprintf(customTitle, sizeof(customTitle), "%s -= Extender Rev. 0.51 =-", (const char*)lParam);
+			stbsp_snprintf(customTitle, sizeof(customTitle), "%s -= Extender Rev. " GH_VERSION_STRING " =-", (const char*)lParam);
 
 			return CallWindowProc(originalMainWindowCallback, hWnd, Message, wParam, (LPARAM)customTitle);
 		}

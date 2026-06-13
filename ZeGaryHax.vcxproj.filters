@@ -277,6 +277,7 @@
       <Filter>RenderWindow</Filter>
     </ClInclude>
     <ClInclude Include="StatTracker.h" />
+    <ClInclude Include="Version.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
