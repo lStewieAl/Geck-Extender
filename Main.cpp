@@ -747,14 +747,14 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x42DEAE, UInt32(CellObjectsRegexContains));
 	WriteRelCall(0x42DF67, UInt32(CellObjectsRegexContains));
 
-	// add filtering to the cells list
+	// add filtering to the cells list (thanks ShadeMe)
 	WriteRelCall(0x42D407, UInt32(OnPopulateCellsList));
 	WriteRelCall(0x47A6B6, UInt32(TESListView_InsertCellIfNotFiltered)); // Interiors
 	WriteRelCall(0x666CC0, UInt32(TESListView_InsertCellIfNotFiltered)); // Worldspaces
-	SafeWrite8(0x42D3CE, 0x45);
-	WriteRelJump(0x42D414, UInt32(ShouldUpdateCellsListHook));
+	SafeWrite16(0x42D3C7, 0x06EB);
+	WriteRelJump(0x42D3CF, UInt32(ShouldUpdateCellsListHook));
+	WriteRelCall(0x42E431, UInt32(CellViewSetCurrentCellUpdateCellListHook));
 	WriteRelJump(0x42E441, UInt32(OnLoadCell_SortCellListHook)); // fix a call to sort the cell list that didn't pass a comparator...
-	WriteRelCall(0x42E431, UInt32(CellViewSetCurrentCellUpdateCellListHook)); // the selected item changes when clicking on a cell if you have a filter... bethcoded
 
 	// remove superfluous call to invalidate the cell view window's cell list (ShadeMe)
 	SafeWrite16(0x4309D4, 0x2AEB);

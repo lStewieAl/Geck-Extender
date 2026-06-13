@@ -3141,14 +3141,95 @@ void __cdecl OnPopulateCellsList(TESWorldSpace* wrldSpc, HWND hWnd, int abClearE
 	bFilterCells = false;
 }
 
+// credits to ShadeMe
+bool __stdcall CellListNeedsUpdate(Vector3* TargetCoords)
+{
+	auto ItemCount = ListView_GetItemCount(CellView::GetCellsList());
+	if (ItemCount == 0)
+	{
+		// always update if empty
+		return true;
+	}
+
+	auto CellViewWorldspace = CellView::GetWorldSpace();
+	auto SampleCellListCell = reinterpret_cast<TESObjectCELL*>(TESListView::GetItemData(CellView::GetCellsList(), 0));
+	bool CellListHasInteriors = (SampleCellListCell && SampleCellListCell->IsInterior()) || (CellViewWorldspace == nullptr && SampleCellListCell == nullptr);
+
+	if (CellViewWorldspace && CellListHasInteriors)
+	{
+		// exterior worldspace selected but list has interiors
+		return true;
+	}
+	else if (CellViewWorldspace == nullptr && !CellListHasInteriors)
+	{
+		// interiors selected but list has exteriors
+		return true;
+	}
+	else if (TargetCoords && TES::GetSingleton()->pInteriorCell == nullptr)
+	{
+		auto TargetCell = CellViewWorldspace ? DataHandler::GetSingleton()->GetCellFromCellCoord(TargetCoords->x, TargetCoords->y, CellViewWorldspace) : nullptr;
+		if (TargetCell == nullptr && TES::GetSingleton()->pWorldSpace)
+			TargetCell = DataHandler::GetSingleton()->GetCellFromCellCoord(TargetCoords->x, TargetCoords->y, TES::GetSingleton()->pWorldSpace);
+
+		if (TargetCell == nullptr)
+		{
+			// the target cell doesn't exist and needs to be created
+			return true;
+		}
+		else if (CellViewWorldspace != TES::GetSingleton()->pWorldSpace)
+		{
+			[[unlikely]]
+			return true;
+		}
+	}
+
+	return false;
+}
+
 bool bForceCellListViewRefresh;
+bool __stdcall NoFilterOrCellListNeedsUpdate(Vector3* TargetCoords)
+{
+	if (bForceCellListViewRefresh)
+	{
+		return true;
+	}
+	return CellListNeedsUpdate(TargetCoords);
+}
+
+__HOOK CellViewSetCurrentCellUpdateCellListHook()
+{
+	_asm
+	{
+		push dword ptr ds : [esp + 0x1C]
+		call NoFilterOrCellListNeedsUpdate
+		test al, al
+		jne refresh
+
+	skip:
+		pop eax
+		pop eax
+		mov eax, 0x42E46A
+		jmp eax
+
+	refresh:
+		mov eax, 0x42D370
+		jmp eax
+	}
+}
+
 __HOOK ShouldUpdateCellsListHook()
 {
 	_asm
 	{
-		cmp bForceCellListViewRefresh, 0
-		je skip
-		mov eax, 0x42D3CF
+		push 0
+		call NoFilterOrCellListNeedsUpdate
+		test al, al
+		jz skip
+
+		push 0
+		push 0
+		push LVM_DELETEALLITEMS
+		mov eax, 0x42D3D8
 		jmp eax
 
 	skip:
@@ -3165,24 +3246,6 @@ __HOOK OnLoadCell_SortCellListHook()
 		push 0x628BA0
 		mov edx, 0x42E446
 		jmp edx
-	}
-}
-
-__HOOK CellViewSetCurrentCellUpdateCellListHook()
-{
-	_asm
-	{
-		call HasCellFilter
-		test al, al
-		jne skip
-		mov eax, 0x42D370
-		jmp eax
-
-	skip:
-		pop eax
-		pop eax
-		mov eax, 0x42E46A
-		jmp eax
 	}
 }
 
@@ -3223,8 +3286,8 @@ LRESULT CALLBACK CellWindowCallback(HWND hWnd, UINT Message, WPARAM wParam, LPAR
 	case WM_COMMAND:
 	{
 		HWND pChildWindowFromPoint = *(HWND*)0xECF504;
-		bool isObjects = pChildWindowFromPoint == *(HWND*)0xECF548;
-		bool isCells = pChildWindowFromPoint == *(HWND*)0xECF57C;
+		bool isObjects = pChildWindowFromPoint == CellView::GetObjectsList();
+		bool isCells = pChildWindowFromPoint == CellView::GetCellsList();
 		if (isObjects || isCells)
 		{
 			int listId = isObjects ? 1156 : 1155;

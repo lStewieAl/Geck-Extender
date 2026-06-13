@@ -384,7 +384,7 @@ public:
 	ModInfo* GetNthFile(int n);
 	TESObjectREFR* CreateReferenceAtLocation(TESBoundObject* object, const NiPoint3* aPos, const NiPoint3* aRot, float radius);
 
-	TESObjectCELL* GetCellFromCellCoord(SInt32 aiX, SInt32 aiY, TESWorldSpace* apWorldSpace, bool abUnk);
+	TESObjectCELL* GetCellFromCellCoord(SInt32 aiX, SInt32 aiY, TESWorldSpace* apWorldSpace, bool abCreate = false);
 	void UnloadCell(TESObjectCELL* apCell);
 
 	MEMBER_FN_PREFIX(DataHandler);

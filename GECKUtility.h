@@ -324,6 +324,9 @@ struct ObjectWindowNodeData
 struct CellView
 {
 	static HWND GetWindow();
+	static HWND GetCellsList();
+	static HWND GetObjectsList();
+	static TESWorldSpace* GetWorldSpace();
 };
 
 struct TESUndo
@@ -831,6 +834,11 @@ struct TESListView
 	static LRESULT __cdecl InsertItem(HWND hListView, void* apItem, bool abIncludeImage, int aiIndex)
 	{
 		return CdeclCall<LRESULT>(0x41A020, hListView, apItem, abIncludeImage, aiIndex);
+	}
+
+	static LPARAM __cdecl GetItemData(HWND hWnd, int index)
+	{
+		return CdeclCall<LPARAM>(0x41A140, hWnd, index);
 	}
 };
 

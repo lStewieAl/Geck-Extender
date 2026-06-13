@@ -90,8 +90,8 @@ TESObjectREFR* DataHandler::CreateReferenceAtLocation(TESBoundObject* object, co
 }
 
 // 0x4CF1D0
-TESObjectCELL* DataHandler::GetCellFromCellCoord(SInt32 aiX, SInt32 aiY, TESWorldSpace* apWorldSpace, bool abUnk) {
-	return ThisCall<TESObjectCELL*>(0x4CF1D0, this, aiX, aiY, apWorldSpace, abUnk);
+TESObjectCELL* DataHandler::GetCellFromCellCoord(SInt32 aiX, SInt32 aiY, TESWorldSpace* apWorldSpace, bool abCreate) {
+	return ThisCall<TESObjectCELL*>(0x4CF1D0, this, aiX, aiY, apWorldSpace, abCreate);
 }
 
 void DataHandler::UnloadCell(TESObjectCELL* apCell) {

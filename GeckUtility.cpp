@@ -202,6 +202,9 @@ void ObjectsView::SetColumnHeading(Columns column, const char* heading)
 }
 
 HWND CellView::GetWindow() { return *(HWND*)0xECFB78; };
+HWND CellView::GetCellsList() { return *(HWND*)0xECF57C; };
+HWND CellView::GetObjectsList() { return *(HWND*)0xECF548; };
+TESWorldSpace* CellView::GetWorldSpace() { return CdeclCall<TESWorldSpace*>(0x42D2A0); };
 
 TESUndo* TESUndo::GetSingleton() { return *(TESUndo**)0xECFDF4; };
 void TESUndo::ClearHistoryForCurrentElement() { ThisCall(0x467CC0, this); };
