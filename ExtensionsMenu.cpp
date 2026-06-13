@@ -12,6 +12,7 @@
 #include "MultiBoundsAdder.h"
 #include "ToggleReferenceMovement.h"
 #include "RecentlyOpenedForms.h"
+#include "TimeTracker.h"
 
 HWND g_MainHwnd;
 extern HWND g_ConsoleHwnd;
@@ -871,8 +872,22 @@ namespace ExtensionsMenu
 			prevX = newX;
 			prevY = newY;
 		}
+		/*
+		*
+		*
+		*/
+		auto result = CallWindowProc(originalMainWindowCallback, hWnd, Message, wParam, lParam);
+		/*
+		*
+		*
+		*/
 
-		return CallWindowProc(originalMainWindowCallback, hWnd, Message, wParam, lParam);
+		if (config.bShowSessionTime)
+		{
+			TimeTracker::Callback(hWnd, Message, wParam, lParam);
+		}
+
+		return result;
 	}
 
 	void Init()

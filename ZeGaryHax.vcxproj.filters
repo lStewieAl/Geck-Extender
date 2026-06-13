@@ -124,6 +124,7 @@
     <ClCompile Include="PreemptivelyUnloadCells.cpp">
       <Filter>RenderWindow</Filter>
     </ClCompile>
+    <ClCompile Include="TimeTracker.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Main.h" />
@@ -275,6 +276,7 @@
     <ClInclude Include="PreemptivelyUnloadCells.h">
       <Filter>RenderWindow</Filter>
     </ClInclude>
+    <ClInclude Include="TimeTracker.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

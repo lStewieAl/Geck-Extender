@@ -271,6 +271,10 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="TimeTracker.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="ToggleReferenceMovement.cpp">
       <SubType>
       </SubType>
@@ -408,6 +412,10 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
       </SubType>
     </ClInclude>
     <ClInclude Include="Settings.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="TimeTracker.h">
       <SubType>
       </SubType>
     </ClInclude>

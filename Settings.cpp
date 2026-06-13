@@ -48,6 +48,7 @@ void ReadAllSettings()
 	config.bAddFilterCtrlBackspace = GetOrCreateINIValue("General", "bAddFilterCtrlBackspace", 1, IniPath);
 	config.bPreemptivelyUnloadCells = GetOrCreateINIValue("General", "bPreemptivelyUnloadCells", 0, IniPath);
 	config.bCustomReferenceBatchActions = GetOrCreateINIValue("General", "bCustomReferenceBatchActions", 1, IniPath);
+	config.bShowSessionTime = GetOrCreateINIValue("General", "bShowSessionTime", 1, IniPath);
 
 	config.bNoDirtyCellWhenNonPersistentRefsDeleted = GetOrCreateINIValue("Experimental", "bNoDirtyCellWhenNonPersistentRefsDeleted", 0, IniPath);
 

@@ -853,6 +853,11 @@ struct MainWindow
 	{
 		return *(HWND*)0xECFB38;
 	}
+
+	static HWND GetStatusBar()
+	{
+		return *(HWND*)0xECFC18;
+	}
 };
 
 void AddMinimizeAndCloseButtons(HWND hWnd);
