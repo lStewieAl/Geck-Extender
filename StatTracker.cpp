@@ -2,18 +2,17 @@ namespace StatTracker
 {
     static ULONGLONG uStartTick = 0;
     static ULONGLONG uLastSavedTick = 0;
-    constexpr UInt32 uiKey = 0x5A17C3E9;
     constexpr UInt32 OUR_TIMER = 0x1041;
 
     int ReadTime()
     {
-        return GetPrivateProfileIntA("Stats", "uTime", 0, IniPath) ^ uiKey;
+        return GetPrivateProfileIntA("Stats", "uTime", 0, IniPath);
     }
 
     void WriteTime(UInt32 uiTimeSeconds)
     {
         char value[32];
-        snprintf(value, sizeof(value), "%d", uiTimeSeconds ^ uiKey);
+        snprintf(value, sizeof(value), "%d", uiTimeSeconds);
         WritePrivateProfileStringA("Stats", "uTime", value, IniPath);
     }
 
