@@ -49,7 +49,7 @@ void ReadAllSettings()
 	config.bPreemptivelyUnloadCells = GetOrCreateINIValue("General", "bPreemptivelyUnloadCells", 0, IniPath);
 	config.bCustomReferenceBatchActions = GetOrCreateINIValue("General", "bCustomReferenceBatchActions", 1, IniPath);
 	config.bTrackSessionTime = GetOrCreateINIValue("General", "bTrackSessionTime", 1, IniPath);
-	config.bShowSessionTime = GetOrCreateINIValue("General", "bShowSessionTime", 1, IniPath);
+	config.iSessionTimeMode = GetOrCreateINIValue("General", "iSessionTimeMode", 1, IniPath);
 
 	config.bNoDirtyCellWhenNonPersistentRefsDeleted = GetOrCreateINIValue("Experimental", "bNoDirtyCellWhenNonPersistentRefsDeleted", 0, IniPath);
 

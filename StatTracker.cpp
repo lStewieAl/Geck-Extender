@@ -40,11 +40,18 @@ namespace StatTracker
     static bool bShowTotalTime = false;
     void UpdateStatusBarText(HWND hStatusBar)
     {
+        if (!config.iSessionTimeMode)
+        {
+            return;
+        }
+
+        bool bSessionTimeByDefault = config.iSessionTimeMode == 1;
+
         ULONGLONG now = GetTickCount64();
         ULONGLONG sessionTime = (now - uStartTick) / 1000;
         ULONGLONG totalTime = uSavedTotalSeconds + sessionTime;
 
-        ULONGLONG displayTime = (bShowTotalTime ^ config.bShowSessionTime) ? sessionTime : totalTime;
+        ULONGLONG displayTime = (bShowTotalTime ^ bSessionTimeByDefault) ? sessionTime : totalTime;
 
         char buf[0x10];
         snprintf(buf, sizeof(buf), "%02llu:%02llu:%02llu",
@@ -100,6 +107,11 @@ namespace StatTracker
 
     void SetupStatusBar(HWND hStatusBar)
     {
+        if (!config.iSessionTimeMode)
+        {
+            return;
+        }
+
         RECT rc;
         GetClientRect(hStatusBar, &rc);
         int kParts[] = { 150, 225, 500, rc.right - 100, -1 };

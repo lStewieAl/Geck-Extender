@@ -67,7 +67,7 @@ struct Settings
 	bool bRenderWindowRefreshAfterLandscapeEdit;
 	bool bPreemptivelyUnloadCells;
 	bool bCustomReferenceBatchActions;
-	bool bShowSessionTime;
+	int iSessionTimeMode;
 	bool bTrackSessionTime;
 
 	int bUseAltShiftMultipliers;
