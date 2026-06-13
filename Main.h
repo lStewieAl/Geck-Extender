@@ -72,10 +72,11 @@ const char* nvseMSG[20] =
 	"RenameNewGameName",
 };
 
-constexpr const char* geckwikiurl = "https://geckwiki.com/index.php/";
-constexpr const char* geckwikiscriptingurl = "https://geckwiki.com/index.php/Category:Scripting";
-constexpr const char* geckwikicommandsurl = "https://geckwiki.com/index.php/Category:Commands";
-constexpr const char* geckwikifunctionsurl = "https://geckwiki.com/index.php/Category:Functions";
+constexpr const char* GeckWikiURL = "https://geckwiki.com/index.php/";
+constexpr const char* GeckWikiScriptingURL = "https://geckwiki.com/index.php/Category:Scripting";
+constexpr const char* GeckWikiCommandsURL = "https://geckwiki.com/index.php/Category:Commands";
+constexpr const char* GeckWikiFunctionsURL = "https://geckwiki.com/index.php/Category:Functions";
+constexpr const char* GeckWikiSearchURL = "https://geckwiki.com/index.php?search=";
 
 #define ID_CMB_IDLE_SPEAKER 2170
 #define ID_CMB_IDLE_LISTENER 2173
@@ -2520,7 +2521,7 @@ LRESULT CALLBACK RichEditSubclassProc(
 
 				if (!text.empty())
 				{
-					std::string url = "https://geckwiki.com/index.php?search=" + UrlEncode(text.c_str());
+					std::string url = GeckWikiSearchURL + UrlEncode(text.c_str());
 
 					ShellExecuteA(NULL, "open", url.c_str(), NULL, NULL, SW_SHOWNORMAL);
 				}
@@ -2529,7 +2530,7 @@ LRESULT CALLBACK RichEditSubclassProc(
 		}
 		else if (cmd == ID_OPEN_GECKWIKI)
 		{
-			ShellExecuteA(NULL, "open", "https://geckwiki.com/index.php?title=Category:Functions_(All)", NULL, NULL, SW_SHOWNORMAL);
+			ShellExecuteA(NULL, "open", GeckWikiFunctionsURL, NULL, NULL, SW_SHOWNORMAL);
 			return 0;
 		}
 		break;

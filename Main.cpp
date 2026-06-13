@@ -167,10 +167,10 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	SafeWrite8(0x448AA3, 0x10);
 
 	//	change help urls to our wiki - credit to roy
-	SafeWrite32(0x00441952, (UInt32)geckwikiurl);
-	SafeWrite32(0x005C4B0F, (UInt32)geckwikiscriptingurl);
-	SafeWrite32(0x005C4B29, (UInt32)geckwikicommandsurl);
-	SafeWrite32(0x005C4B43, (UInt32)geckwikifunctionsurl);
+	SafeWrite32(0x00441952, (UInt32)GeckWikiURL);
+	SafeWrite32(0x005C4B0F, (UInt32)GeckWikiScriptingURL);
+	SafeWrite32(0x005C4B29, (UInt32)GeckWikiCommandsURL);
+	SafeWrite32(0x005C4B43, (UInt32)GeckWikiFunctionsURL);
 
 	//	force patch script editor font - credit to nvse team
 	if (config.bPatchScriptEditorFont)
