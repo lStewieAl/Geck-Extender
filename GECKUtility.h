@@ -941,3 +941,48 @@ namespace BSShaderUtil
 	void AccumulateScene(const NiCamera* apCamera, NiAVObject* apNode, BSCullingProcess* apCullingProcess);
 	void RenderScene(NiCamera* apCamera, BSShaderAccumulator* apAccumulator);
 }
+
+class BGSDialogueTree
+{
+public:
+	virtual void Destroy(bool abFree);
+
+	enum
+	{
+		IDC_COMBO_BOX = 2556
+	};
+
+	HWND hWnd;
+	HWND hTreeView;
+	TESQuest* apQuest;
+	tList<void> kList10;
+	UInt32 unk18;
+	UInt32 unk1C;
+	UInt32 unk20;
+	UInt32 unk24;
+	UInt32 unk28;
+	UInt32 unk2C;
+	UInt32 unk30;
+	UInt32 unk34;
+	UInt32 unk38;
+	UInt32 unk3C;
+	UInt32 unk40;
+	UInt32 unk44;
+	UInt32 unk48;
+	UInt8 byte4C;
+	UInt8 byte4D;
+	UInt32 unk50;
+	UInt32 unk54;
+	UInt32 pThis;
+	UInt32 pFormMap;
+
+	HWND GetComboBox()
+	{
+		return GetDlgItem(hWnd, IDC_COMBO_BOX);
+	}
+
+	void PopulateTopics()
+	{
+		ThisCall(0x408340, this);
+	}
+};

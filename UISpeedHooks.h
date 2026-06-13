@@ -37,6 +37,13 @@ void __fastcall sub_406C40(void* thiss, void* edx, HWND comboBox, TESForm* a3)
 	RedrawWindow(comboBox, nullptr, nullptr, RDW_ERASE | RDW_INVALIDATE | RDW_NOCHILDREN);
 }
 
+void __fastcall BGSDialogueTree_PopulateTopics(BGSDialogueTree* apTree)
+{
+	BeginUIDefer();
+	apTree->PopulateTopics();
+	EndUIDefer();
+}
+
 __HOOK DialogueListViewBeginUI() {
 	static const UInt32 retnAddr = 0x592EB4;
 	static const UInt32 skipAddr = 0x592FB8;
@@ -302,4 +309,12 @@ void WriteUIHooks() {
 	// dialogue tree
 	WriteRelCall(0x408A25, UInt32(sub_406C40));
 	WriteRelCall(0x408A3C, UInt32(sub_406C40));
+
+	for (auto patchAddr : { 0x40887C, 0x40888A, 0x4088BC, 0x4088CA, 0x408D14,
+							0x4092CB, 0x409E2B, 0x409EB1, 0x409EEA, 0x40A14E,
+							0x40A172, 0x40A1DF, 0x40A203, 0x40A24A, 0x40A26E,
+							0x40A304, 0x40A3D7 })
+	{
+		WriteRelCall(patchAddr, UInt32(BGSDialogueTree_PopulateTopics));
+	}
 }
