@@ -492,6 +492,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// fix crash when doubling clicking an empty area in a form list
 	WriteRelJump(0x501450, UInt32(FormListCheckNull));
 	WriteRelJump(0x5AE0A5, UInt32(FormListCheckNull2));
+	SafeWrite8(0x5CF811, 0x61); // Debris form
 
 	// fix crash when opening two weather windows and closing one of them
 	WriteRelJump(0x48E704, UInt32(OnCloseWeatherFormHook));
