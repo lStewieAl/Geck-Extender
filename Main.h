@@ -1430,6 +1430,7 @@ bool CopySelectedListViewItemData(HWND listView, std::function<void(std::string&
 enum CustomDialogContextActions
 {
 	COPY_RESPONSE_FILENAME = 0x10001,
+	COPY_RESPONSE_SEPARATOR,
 };
 
 enum { kQuestResponsesListView = 1454, kListView = 1448, kQuestListView = 2064 };
@@ -1456,9 +1457,10 @@ void __stdcall OnSetupResponseRightClickMenu(UInt32 menuID, HMENU menu, LPPOINT 
 		return;
 	}
 
-	InsertMenuA(menu, 0xFFFFFFFF, MF_BYPOSITION | MF_SEPARATOR, 0, nullptr);
+	InsertMenuA(menu, 0xFFFFFFFF, MF_BYPOSITION | MF_SEPARATOR, COPY_RESPONSE_SEPARATOR, nullptr);
 	InsertMenuA(menu, 0xFFFFFFFF, MF_BYPOSITION, COPY_RESPONSE_FILENAME, uiSelectedItems == 1 ? "Copy Filename" : "Copy Filenames");
 	Window_SetupPopupMenu(menu, cursorPos, hWnd, listView);
+	DeleteMenu(menu, COPY_RESPONSE_SEPARATOR, MF_BYCOMMAND);
 	DeleteMenu(menu, COPY_RESPONSE_FILENAME, MF_BYCOMMAND);
 }
 
