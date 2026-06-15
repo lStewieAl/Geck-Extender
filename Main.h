@@ -2272,6 +2272,40 @@ void __stdcall OnUpdateColor_Repaint(HWND hWnd, UINT Msg, WPARAM colorRectangleI
 	PostMessageA(hWnd, WM_PAINT, colorRectangleId, NULL);
 }
 
+
+struct ColorControlData
+{
+	struct Controls
+	{
+		UInt32 redControlId;
+		UInt32 greenControlId;
+		UInt32 blueControlId;
+		UInt32 redArrowsId;
+		UInt32 blueArrowsId;
+		UInt32 greenArrowsId;
+		UInt32 selectButtonId;
+		UInt32 colorRectangleId;
+	};
+
+	HWND hDlg;
+	Controls kControls;
+	UInt8 bSkipUpdates;
+};
+
+void __stdcall OnPostLoadLightDialog(HWND hDlg, bool abEnableWindows)
+{
+	enum { TESOBJECTLIGH_RED_CONTROL_ID = 1109 };
+
+	StdCall(0x5ECAD0, hDlg, abEnableWindows);
+	if (auto colorControl = CdeclCall<ColorControlData*>(0x47ABF0, hDlg, TESOBJECTLIGH_RED_CONTROL_ID))
+	{
+		if (ThisCall<bool>(0x479350, colorControl))
+		{
+			PostMessageA(colorControl->hDlg, WM_PAINT, colorControl->kControls.colorRectangleId, NULL);
+		}
+	}
+}
+
 void PreserveTESFileTimeStamp(ModInfo* apFile, bool State)
 {
 	// credits to ShadeMe
@@ -2336,17 +2370,19 @@ void SaveWindowPositions() {
 	char buffer[0x10];
 
 	WINDOWPLACEMENT pos;
-	GetWindowPlacement(g_ConsoleHwnd, &pos);
+	pos.length = sizeof(WINDOWPLACEMENT);
+	if (GetWindowPlacement(g_ConsoleHwnd, &pos))
+	{
+		LONG x = pos.rcNormalPosition.left;
+		LONG y = pos.rcNormalPosition.top;
+		LONG dx = pos.rcNormalPosition.right - x;
+		LONG dy = pos.rcNormalPosition.bottom - y;
 
-	LONG x = pos.rcNormalPosition.left;
-	LONG y = pos.rcNormalPosition.top;
-	LONG dx = pos.rcNormalPosition.right - x;
-	LONG dy = pos.rcNormalPosition.bottom - y;
-
-	WritePrivateProfileString("Log", "iWindowPosX", _itoa(x, buffer, 10), IniPath);
-	WritePrivateProfileString("Log", "iWindowPosY", _itoa(y, buffer, 10), IniPath);
-	WritePrivateProfileString("Log", "iWindowPosDX", _itoa(dx, buffer, 10), IniPath);
-	WritePrivateProfileString("Log", "iWindowPosDY", _itoa(dy, buffer, 10), IniPath);
+		WritePrivateProfileString("Log", "iWindowPosX", _itoa(x, buffer, 10), IniPath);
+		WritePrivateProfileString("Log", "iWindowPosY", _itoa(y, buffer, 10), IniPath);
+		WritePrivateProfileString("Log", "iWindowPosDX", _itoa(dx, buffer, 10), IniPath);
+		WritePrivateProfileString("Log", "iWindowPosDY", _itoa(dy, buffer, 10), IniPath);
+	}
 }
 
 void __fastcall FastExitHook(volatile LONG** thiss)

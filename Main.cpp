@@ -694,6 +694,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	WriteRelCall(0x479449, UInt32(OnUpdateColor_Repaint));
 	SafeWrite8(0x479449 + 5, 0x90);
 
+	// fix TESObjectLIGH form not updating the color preview rectangle
+	WriteRelCall(0x5ECFB4, UInt32(OnPostLoadLightDialog));
+
 	if (config.bPreserveTimestamps)
 	{
 		// preserve file times when saving (ShadeMe)
