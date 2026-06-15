@@ -4418,7 +4418,7 @@ void ReplacePerkEntryLabel(HWND hDlg, HWND hOldEdit)
 
 	DestroyWindow(hOldEdit);
 
-	CreateWindowExA(
+	HWND hNewEdit = CreateWindowExA(
 		exStyle,
 		"EDIT",
 		text,
@@ -4431,6 +4431,8 @@ void ReplacePerkEntryLabel(HWND hDlg, HWND hOldEdit)
 		(HMENU)2458,
 		GetModuleHandle(NULL),
 		NULL);
+
+	SendMessage(hNewEdit, WM_SETFONT, (WPARAM)hFont, NULL);
 }
 
 BOOL __stdcall PerkEntryCallback(HWND hDlg, UINT Message, WPARAM wParam, LPARAM lParam)
@@ -4442,10 +4444,7 @@ BOOL __stdcall PerkEntryCallback(HWND hDlg, UINT Message, WPARAM wParam, LPARAM 
 		// workaround the perk entry activate label being unicode for some reason... which caused widechars showing
 		// recreate the label
 		HWND hOldEdit = GetDlgItem(hDlg, 2458);
-		if (IsWindowUnicode(hOldEdit))
-		{
-			ReplacePerkEntryLabel(hDlg, hOldEdit);
-		}
+		ReplacePerkEntryLabel(hDlg, hOldEdit);
 	}
 
 	return result;
