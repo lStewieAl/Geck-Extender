@@ -684,6 +684,12 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// open the 'Globals' window when clicking 'New' in the objects window
 	SafeWrite32(0x47A094 + 4 * (kFormType_TESGlobal), UInt32(RetnGlobalDialogIDHook));
 
+	// add double clicking a row in the TESSpellList to open it
+	for (auto addr : { 0xD47C74, 0xD53034, 0xD535B4, 0xD55024, 0xD56AB4 })
+	{
+		SafeWrite32(addr, UInt32(TESSpellList_DialogCallback));
+	}
+
 	// fix freeze when clicking on 'Record Audio' twice in the dialogue editor
 	WriteRelCall(0x58F495, UInt32(StopSound_ResetRecordAudioPopupIfInvalid));
 

@@ -2194,6 +2194,25 @@ __HOOK RetnGlobalDialogIDHook()
 	}
 }
 
+char __fastcall TESSpellList_DialogCallback(struct TESSpellList* apSpellList, void* edx, HWND hDlg, unsigned int Msg, __int16 wParam, HWND lParam, DWORD* aiOut)
+{
+	if (Msg == WM_NOTIFY)
+	{
+		LPNMHDR pnmh = (LPNMHDR)lParam;
+		if (pnmh->idFrom == 1485 && pnmh->code == NM_DBLCLK)
+		{
+			NMLVKEYDOWN nm = {};
+			nm.hdr.hwndFrom = pnmh->hwndFrom;
+			nm.hdr.idFrom = pnmh->idFrom;
+			nm.hdr.code = LVN_KEYDOWN;
+			nm.wVKey = VK_F7;
+
+			SendMessage(hDlg, WM_NOTIFY, (WPARAM)nm.hdr.idFrom, (LPARAM)&nm);
+		}
+	}
+	return ThisCall(0x50BA40, apSpellList, hDlg, Msg, wParam, lParam, aiOut);
+}
+
 struct EditResponseData
 {
 	struct RecordingPopup
