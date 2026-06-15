@@ -2194,7 +2194,7 @@ __HOOK RetnGlobalDialogIDHook()
 	}
 }
 
-char __fastcall TESSpellList_DialogCallback(struct TESSpellList* apSpellList, void* edx, HWND hDlg, unsigned int Msg, __int16 wParam, HWND lParam, DWORD* aiOut)
+char __fastcall TESSpellList_DialogCallback(TESSpellList* apSpellList, void* edx, HWND hDlg, unsigned int Msg, __int16 wParam, HWND lParam, DWORD* aiOut)
 {
 	if (Msg == WM_NOTIFY)
 	{
@@ -3067,6 +3067,8 @@ struct WindowFilter
 		{
 #ifdef _DEBUG
 			Console_Print("%s  -  %s", filterString, e.what());
+#else
+			(void)e;
 #endif
 			bRegexSearch = false;
 		}
@@ -3262,7 +3264,6 @@ __HOOK CellViewSetCurrentCellUpdateCellListHook()
 		test al, al
 		jne refresh
 
-	skip:
 		pop eax
 		pop eax
 		mov eax, 0x42E46A
@@ -4343,8 +4344,7 @@ void __fastcall ObjectWindowNodeData__OnPopulateReputationList(ObjectWindowNodeD
 	ThisCall(0x438C70, apNodeData, challengesList, abClear, formal);
 }
 
-class bhkWorld;
-void __fastcall OnLeaveInterior(bhkWorld* apWorld, void* edx, bool abEnable)
+void __fastcall OnLeaveInterior(struct bhkWorld* apWorld, void* edx, bool abEnable)
 {
 	ThisCall(0xA1AC10, apWorld, abEnable);
 	BSShaderManager::SetInterior(false);
