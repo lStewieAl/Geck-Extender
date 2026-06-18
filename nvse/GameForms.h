@@ -2163,6 +2163,12 @@ public:
 	{
 		soundFlags = bMod ? (soundFlags | pFlag) : (soundFlags & ~pFlag);
 	}
+
+	void Play()
+	{
+		const char* pSoundPath = *(const char**)(((UInt32)this) + 0x58); // this->strPath
+		CdeclCall(0x5CB380, pSoundPath, 0, this); // BSAudioManager::PlaySound
+	}
 };
 STATIC_ASSERT(sizeof(TESSound) == 0x68);
 

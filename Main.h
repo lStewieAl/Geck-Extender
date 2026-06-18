@@ -2994,24 +2994,39 @@ LRESULT CALLBACK ObjectWindowCallback(HWND hWnd, UINT Message, WPARAM wParam, LP
 		break;
 	case WM_COMMAND:
 	{
-		if (LOWORD(wParam) == ObjectsViewEx::IDC_FILTER_STAR)
-		{
-			SendMessageA(g_MainHwnd, WM_COMMAND, ExtensionsMenu::UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED, 0);
-			return true;
-		}
-
-		if (LOWORD(wParam) == ObjectsViewEx::SET_FILTER_STAR)
-		{
-			auto hCheck = GetDlgItem(hWnd, ObjectsViewEx::IDC_FILTER_STAR);
-			SendMessageA(hCheck, BM_SETCHECK, lParam ? BST_CHECKED : BST_UNCHECKED, 0);
-		}
-
 		HWND listView = GetDlgItem(hWnd, ObjectsView::IDC_LIST_VIEW);
 		if (HandlePopupMenuCommand(listView, wParam))
 		{
 			return true;
 		}
 
+		switch (LOWORD(wParam))
+		{
+		case ObjectsViewEx::IDC_FILTER_STAR:
+			SendMessageA(g_MainHwnd, WM_COMMAND, ExtensionsMenu::UI_EXTMENU_OBJECTWINDOW_TOGGLESHOWUNEDITED, 0);
+			return true;
+		case ObjectsViewEx::SET_FILTER_STAR:
+			SendMessageA(GetDlgItem(hWnd, ObjectsViewEx::IDC_FILTER_STAR), BM_SETCHECK, lParam ? BST_CHECKED : BST_UNCHECKED, 0);
+			return true;
+		case ObjectsView::CTX_MENU_PREVIEW:
+			// for TESSound, replace Havok preview with playing the sound file
+			LVITEM kItem {};
+			kItem.iItem = SendMessageA(listView, LVM_GETNEXTITEM, -1, LVIS_SELECTED);
+			kItem.mask = LVIF_PARAM;
+
+			SendMessageA(listView, LVM_GETITEMA, 0, (LPARAM)&kItem);
+
+			if (auto pForm = (TESForm*)kItem.lParam)
+			{
+				if (pForm->typeID == kFormType_TESSound)
+				{
+					TESSound* pSound = (TESSound*)pForm;
+					pSound->Play();
+					return true;
+				}
+			}
+			break;
+		}
 		break;
 	}
 	case WM_NOTIFY:

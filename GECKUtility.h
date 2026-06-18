@@ -245,10 +245,15 @@ struct ObjectsView
 		kColEx_DT
 	};
 
-	enum
+	enum Controls
 	{
 		IDC_LIST_VIEW = 1041,
 		IDC_FILTER_EDIT = 2557,
+	};
+
+	enum ContextMenus
+	{
+		CTX_MENU_PREVIEW = 0x9EDC
 	};
 
 	static void SetColumnWidth(Columns column, short width);
