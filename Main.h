@@ -2196,10 +2196,12 @@ __HOOK RetnGlobalDialogIDHook()
 
 char __fastcall TESSpellList_DialogCallback(TESSpellList* apSpellList, void* edx, HWND hDlg, unsigned int Msg, __int16 wParam, HWND lParam, DWORD* aiOut)
 {
+	enum { kCtrlListBox = 1485, kMenuDelete = 0xFB };
 	if (Msg == WM_NOTIFY)
 	{
+		// add double clicking a row to edit it
 		LPNMHDR pnmh = (LPNMHDR)lParam;
-		if (pnmh->idFrom == 1485 && pnmh->code == NM_DBLCLK)
+		if (pnmh->idFrom == kCtrlListBox && pnmh->code == NM_DBLCLK)
 		{
 			NMLVKEYDOWN nm = {};
 			nm.hdr.hwndFrom = pnmh->hwndFrom;
@@ -2209,6 +2211,17 @@ char __fastcall TESSpellList_DialogCallback(TESSpellList* apSpellList, void* edx
 
 			SendMessage(hDlg, WM_NOTIFY, (WPARAM)nm.hdr.idFrom, (LPARAM)&nm);
 		}
+	}
+	else if (Msg == WM_COMMAND && wParam == kMenuDelete)
+	{
+		// fix the Delete menu item to delete instead of edit
+		NMLVKEYDOWN nm = {};
+		nm.hdr.hwndFrom = GetDlgItem(hDlg, kCtrlListBox);
+		nm.hdr.idFrom = kCtrlListBox;
+		nm.hdr.code = LVN_KEYDOWN;
+		nm.wVKey = VK_DELETE;
+
+		return SendMessage(hDlg, WM_NOTIFY, (WPARAM)nm.hdr.idFrom, (LPARAM)&nm);
 	}
 	return ThisCall(0x50BA40, apSpellList, hDlg, Msg, wParam, lParam, aiOut);
 }
