@@ -1529,35 +1529,20 @@ bool CopySelectedDialogFileNames(HWND hWnd)
 
 BOOL CALLBACK DialogueWindowTopicsCallback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	if (msg == WM_NOTIFY)
+	switch (msg)
 	{
-		// allow selecting multiple responses for copying filenames (ideally this would be WM_INITDIALOG, but that doesn't get called here)
+	case WM_NOTIFY:
+	{
+		// allow selecting multiple responses for copying filenames
+		// (ideally this would be WM_INITDIALOG, but that doesn't get called here)
 		HWND hResponseList = GetDlgItem(hWnd, kQuestResponsesListView);
 		LONG_PTR style = GetWindowLongPtr(hResponseList, GWL_STYLE);
-		style &= ~LVS_SINGLESEL;
-		SetWindowLongPtr(hResponseList, GWL_STYLE, style);
-	}
-	if (msg == WM_COMMAND)
-	{
-		if (HandleDialoguePopupMenuCommand(GetDlgItem(hWnd, kListView), wParam) ||
-			HandleDialoguePopupMenuCommand(GetDlgItem(hWnd, kQuestListView), wParam))
+		if (style & LVS_SINGLESEL)
 		{
-			return true;
+			style &= ~LVS_SINGLESEL;
+			SetWindowLongPtr(hResponseList, GWL_STYLE, style);
 		}
-		if (wParam == COPY_RESPONSE_FILENAME)
-		{
-			if (CopySelectedDialogFileNames(hWnd))
-			{
-				return true;
-			}
-			else
-			{
-				PlaySound("MouseClick", NULL, SND_ASYNC);
-			}
-		}
-	}
-	if (msg == WM_NOTIFY)
-	{
+
 		LPNMHDR hdr = (LPNMHDR)lParam;
 		if (hdr->idFrom == kListView || hdr->idFrom == kQuestListView)
 		{
@@ -1573,7 +1558,32 @@ BOOL CALLBACK DialogueWindowTopicsCallback(HWND hWnd, UINT msg, WPARAM wParam, L
 				return TRUE;
 			}
 		}
+
+		break;
 	}
+	case WM_COMMAND:
+		if (HandleDialoguePopupMenuCommand(GetDlgItem(hWnd, kListView), wParam) ||
+			HandleDialoguePopupMenuCommand(GetDlgItem(hWnd, kQuestListView), wParam))
+		{
+			return TRUE;
+		}
+
+		switch (wParam)
+		{
+		case COPY_RESPONSE_FILENAME:
+			if (CopySelectedDialogFileNames(hWnd))
+			{
+				return TRUE;
+			}
+			else
+			{
+				PlaySound("MouseClick", NULL, SND_ASYNC);
+			}
+			break;
+		}
+		break;
+	}
+
 	return CallWindowProc((WNDPROC)0x598440, hWnd, msg, wParam, lParam);
 }
 
