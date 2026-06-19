@@ -75,6 +75,7 @@ void ReadAllSettings()
 	config.iRenderFOV = GetOrCreateINIValue("Render Window", "iFOV", 90, IniPath);
 	config.bRenderWindowPreventRefMovementByDefault = GetOrCreateINIValue("Render Window", "bPreventRefMovement", 0, IniPath);
 	config.bRenderWindowRefreshAfterLandscapeEdit = GetOrCreateINIValue("Render Window", "bRefreshAfterLandscapeEdit", 1, IniPath);
+	config.bCoplanarRefDrops = GetOrCreateINIValue("Render Window", "bCoplanarRefDrops", 0, IniPath);
 
 	config.bSmoothFlycamRotation = GetOrCreateINIValue("Flycam", "bSmoothRotation", 1, IniPath);
 	config.bFlycamUpDownRelativeToWorld = GetOrCreateINIValue("Flycam", "bFlycamUpDownRelativeToWorld", 1, IniPath);

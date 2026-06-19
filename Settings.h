@@ -65,6 +65,7 @@ struct Settings
 	bool bAddFilterCtrlBackspace;
 	bool bRenderWindowPreventRefMovementByDefault;
 	bool bRenderWindowRefreshAfterLandscapeEdit;
+	bool bCoplanarRefDrops;
 	bool bPreemptivelyUnloadCells;
 	bool bCustomReferenceBatchActions;
 	int iSessionTimeMode;

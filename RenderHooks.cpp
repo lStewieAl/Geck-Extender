@@ -232,11 +232,12 @@ namespace RenderHooks
 		return res;
 	}
 
-	TESObjectREFR* __fastcall OnRenderWindowDragDrop__CreateReferenceAtLocation(DataHandler* dataHandler, void* edx, TESBoundObject* form, NiPoint3* aPos, NiPoint3* aRot, float radius, struct BGSPrimitive* apPrimitive, int a7)
+	UInt32 originalCreateReferenceAtLocationFn_leveled;
+	TESObjectREFR* __fastcall OnRenderWindowDragDropSupportLeveled(DataHandler* apDataHandler, void* edx, TESBoundObject* apObject, NiPoint3* arLocation, NiPoint3* arDirection, BOOL abCalcLocation, struct BGSPrimitive* apAddPrimitive, void* apAdditionalData)
 	{
-		if (form->typeID == kFormType_TESLevItem || form->typeID == kFormType_TESLevCharacter || form->typeID == kFormType_TESLevCreature)
+		if (apObject->typeID == kFormType_TESLevItem || apObject->typeID == kFormType_TESLevCharacter || apObject->typeID == kFormType_TESLevCreature)
 		{
-			auto levItem = (TESLevItem*)form;
+			auto levItem = (TESLevItem*)apObject;
 			TESBoundObject* newForm = nullptr;
 
 			// pick a random item from the list, this will be null if it's a nested list
@@ -280,10 +281,45 @@ namespace RenderHooks
 
 			if (newForm)
 			{
-				form = newForm;
+				apObject = newForm;
 			}
 		}
-		return ThisCall<TESObjectREFR*>(0x4D0940, dataHandler, form, aPos, aRot, radius, apPrimitive, a7);
+		return ThisCall<TESObjectREFR*>(originalCreateReferenceAtLocationFn_leveled, apDataHandler, apObject, arLocation, arDirection, abCalcLocation, apAddPrimitive, apAdditionalData);
+	}
+
+	UInt32 originalCreateReferenceAtLocationFn_coplanar;
+	TESObjectREFR* __fastcall OnRenderWindowDragDropSupportCoplanar(DataHandler* apDataHandler, void* edx, TESBoundObject* apObject, NiPoint3& arLocation, NiPoint3& arDirection, BOOL abCalcLocation, struct BGSPrimitive* apAddPrimitive, void* apAdditionalData)
+	{
+		if (config.bCoplanarRefDrops)
+		{
+			auto pTES = TES::GetSingleton();
+			auto pPick = RenderWindow::GetPick();
+			pPick->SetTarget(pTES->sceneGraphObjectRoot);
+			if (pPick->PickObjects(arLocation, arDirection))
+			{
+				if (pPick->m_pickResults.numObjs > 0)
+				{
+					abCalcLocation = false;
+					const auto& pIntersectionPoint = pPick->m_pickResults.data[0]->m_intersect;
+					if (pTES->pInteriorCell == nullptr)
+					{
+						TESWorldSpace* pWorldSpace = pTES->pWorldSpace;
+						if (pWorldSpace == nullptr || DataHandler::GetSingleton()->GetCellFromCellCoord(arLocation.x, arLocation.y, pWorldSpace) == nullptr)
+						{
+							// invalid cell coords, use the original position
+							abCalcLocation = true;
+						}
+					}
+
+					if (!abCalcLocation)
+					{
+						arLocation = pIntersectionPoint;
+						arDirection *= 0.f;
+					}
+				}
+			}
+		}
+		return ThisCall<TESObjectREFR*>(originalCreateReferenceAtLocationFn_coplanar, apDataHandler, apObject, &arLocation, &arDirection, abCalcLocation, apAddPrimitive, apAdditionalData);
 	}
 
 	bool OnMoveRefCheckXYZHeld()
@@ -568,8 +604,11 @@ namespace RenderHooks
 		SafeWrite8(0x463282 + kFormType_TESLevItem, 1);
 		SafeWrite8(0x463282 + kFormType_TESLevCreature, 1);
 		SafeWrite8(0x463282 + kFormType_TESLevCharacter, 1);
-		WriteRelCall(0x46193B, UInt32(OnRenderWindowDragDrop__CreateReferenceAtLocation));
+		originalCreateReferenceAtLocationFn_leveled = DetourRelCall(0x46193B, UInt32(OnRenderWindowDragDropSupportLeveled));
 		originalRenderWindowCallback = (WNDPROC)DetourVtable(0x4411A1, UInt32(RenderWindowCallbackHook));
+
+		// add coplanar support
+		originalCreateReferenceAtLocationFn_coplanar = DetourRelCall(0x46193B, UInt32(OnRenderWindowDragDropSupportCoplanar));
 
 		// check if x/y/z are held while you move refs to fix the axis lock keys not working after closing a menu
 		WriteRelCall(0x45F490, UInt32(OnMoveRefCheckXYZHeld));

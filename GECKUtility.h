@@ -1,6 +1,7 @@
 #pragma once
 #include "NiObjects.h"
 #include "Editor.h"
+#include "Gamebryo/NiPick.hpp"
 
 extern void(__cdecl* SaveWindowPositionToINI)(HWND, const char*);
 
@@ -118,6 +119,7 @@ struct RenderWindow
 	static bool InLandscapeEditingMode();
 	static bool IsLandscapePainting();
 	static void ResetLandscapePainting();
+	static NiPick* GetPick() { return (NiPick*)0xED145C; };
 };
 
 struct ObjectsView

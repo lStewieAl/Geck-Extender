@@ -493,7 +493,7 @@ public:
 
 	UInt32				unk04;				// 04
 	GridCellArray		*gridCellArray;		// 08
-	NiNode				*niNode0C;			// 0C
+	NiNode				*sceneGraphObjectRoot;// 0C
 	NiNode				*niNode10;			// 10
 	NiNode				*niNode14;			// 14
 	BSTempNodeManager	*tempNodeMgr;		// 18

@@ -41,12 +41,6 @@
     <ClCompile Include="nvse\GameTypes.cpp">
       <Filter>nvse</Filter>
     </ClCompile>
-    <ClCompile Include="nvse\NiNodes.cpp">
-      <Filter>nvse</Filter>
-    </ClCompile>
-    <ClCompile Include="nvse\NiObjects.cpp">
-      <Filter>nvse</Filter>
-    </ClCompile>
     <ClCompile Include="nvse\SafeWrite.cpp">
       <Filter>nvse</Filter>
     </ClCompile>
@@ -55,9 +49,6 @@
     </ClCompile>
     <ClCompile Include="Editor.cpp" />
     <ClCompile Include="xutil.cpp" />
-    <ClCompile Include="nvse\NiTypes.cpp">
-      <Filter>nvse</Filter>
-    </ClCompile>
     <ClCompile Include="ExtensionsMenu.cpp" />
     <ClCompile Include="LogWindow.cpp" />
     <ClCompile Include="GeckUtility.cpp" />
@@ -125,6 +116,18 @@
       <Filter>RenderWindow</Filter>
     </ClCompile>
     <ClCompile Include="StatTracker.cpp" />
+    <ClCompile Include="nvse\NiObjects.cpp">
+      <Filter>Gamebryo</Filter>
+    </ClCompile>
+    <ClCompile Include="nvse\NiNodes.cpp">
+      <Filter>Gamebryo</Filter>
+    </ClCompile>
+    <ClCompile Include="nvse\NiTypes.cpp">
+      <Filter>Gamebryo</Filter>
+    </ClCompile>
+    <ClCompile Include="GameBryo\NiPick.cpp">
+      <Filter>Gamebryo</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Main.h" />
@@ -171,15 +174,6 @@
       <Filter>nvse</Filter>
     </ClInclude>
     <ClInclude Include="nvse\GameTypes.h">
-      <Filter>nvse</Filter>
-    </ClInclude>
-    <ClInclude Include="nvse\NiNodes.h">
-      <Filter>nvse</Filter>
-    </ClInclude>
-    <ClInclude Include="nvse\NiObjects.h">
-      <Filter>nvse</Filter>
-    </ClInclude>
-    <ClInclude Include="nvse\NiTypes.h">
       <Filter>nvse</Filter>
     </ClInclude>
     <ClInclude Include="nvse\SafeWrite.h">
@@ -278,6 +272,36 @@
     </ClInclude>
     <ClInclude Include="StatTracker.h" />
     <ClInclude Include="Version.h" />
+    <ClInclude Include="Gamebryo\NiPick.hpp">
+      <Filter>Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="nvse\NiObjects.h">
+      <Filter>Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="nvse\NiNodes.h">
+      <Filter>Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="nvse\NiTypes.h">
+      <Filter>Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="Gamebryo\NiMemObject.hpp">
+      <Filter>Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="Gamebryo\NiMemory.hpp">
+      <Filter>Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="Gamebryo\NiTemplateRequirements.hpp">
+      <Filter>Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="GameBryo\NiColor.hpp">
+      <Filter>Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="GameBryo\NiTMallocInterface.hpp">
+      <Filter>Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="Gamebryo\NiColorA.hpp">
+      <Filter>Gamebryo</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
@@ -297,6 +321,9 @@
     </Filter>
     <Filter Include="RenderWindow">
       <UniqueIdentifier>{a4205938-f576-4dca-a462-9bffee0d9387}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Gamebryo">
+      <UniqueIdentifier>{e3cb5d17-dda1-48a4-871b-d78fab03390b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

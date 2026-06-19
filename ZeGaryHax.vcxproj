@@ -180,6 +180,7 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="GameBryo\NiPick.cpp" />
     <ClCompile Include="GeckUtility.cpp" />
     <ClCompile Include="LaunchGame.cpp">
       <SubType>
@@ -341,6 +342,13 @@ copy "$(TargetDir)$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\$(Targe
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="GameBryo\NiColor.hpp" />
+    <ClInclude Include="Gamebryo\NiColorA.hpp" />
+    <ClInclude Include="Gamebryo\NiMemObject.hpp" />
+    <ClInclude Include="Gamebryo\NiMemory.hpp" />
+    <ClInclude Include="Gamebryo\NiPick.hpp" />
+    <ClInclude Include="Gamebryo\NiTemplateRequirements.hpp" />
+    <ClInclude Include="GameBryo\NiTMallocInterface.hpp" />
     <ClInclude Include="GECKUtility.h" />
     <ClInclude Include="LaunchGame.h">
       <SubType>

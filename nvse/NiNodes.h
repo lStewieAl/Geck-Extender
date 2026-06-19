@@ -489,9 +489,7 @@ public:
 };
 
 
-struct NiMemObject
-{
-};
+#include "GameBryo/NiMemObject.hpp"
 
 // 008
 class NiRefObject : public NiMemObject
