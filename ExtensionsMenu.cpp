@@ -277,7 +277,11 @@ namespace ExtensionsMenu
 
 				editorUIInit = true;
 				g_MainHwnd = hWnd;
-				SetWindowLongPtr(LogWindow::GetWindow(), GWLP_HWNDPARENT, (LONG_PTR)hWnd);
+
+				if (!config.bSeparateLogWindow)
+				{
+					SetWindowLongPtr(LogWindow::GetWindow(), GWLP_HWNDPARENT, (LONG_PTR)hWnd);
+				}
 
 				InjectOpenSettingsMenuItem(createInfo->hMenu);
 

@@ -276,13 +276,22 @@ bool EditorUI_CreateLogWindow()
 	int width = GetPrivateProfileIntA("Log", "iWindowPosDX", 1024, IniPath);
 	int height = GetPrivateProfileIntA("Log", "iWindowPosDY", 768, IniPath);
 
-	g_ConsoleHwnd = g_ConsoleHwnd = CreateWindowExA(
-		WS_EX_TOOLWINDOW,
+	DWORD dwLogWindowFlags = WS_EX_TOOLWINDOW;
+	HWND hLogWindowParent = g_MainHwnd;
+
+	if (config.bSeparateLogWindow)
+	{
+		dwLogWindowFlags = 0;
+		hLogWindowParent = NULL;
+	}
+
+	g_ConsoleHwnd = CreateWindowExA(
+		dwLogWindowFlags,
 		"RTEDITLOG",
 		"Message Log",
 		WS_OVERLAPPEDWINDOW,
 		posX, posY, width, height,
-		g_MainHwnd,
+		hLogWindowParent,
 		nullptr,
 		instance,
 		nullptr

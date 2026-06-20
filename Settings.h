@@ -56,6 +56,7 @@ struct Settings
 	bool bHideObjectWindow;
 	bool bHideCellViewWindow;
 	bool bHideLogWindow;
+	bool bSeparateLogWindow;
 	bool bDarkMode;
 	bool bNumericEditorIdWarning;
 	bool bSkipSplashScreen;
