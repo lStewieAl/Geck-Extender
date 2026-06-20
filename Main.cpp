@@ -1042,6 +1042,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// but instead just set them when the dialog is opened
 	WriteRelCall(0x49A3B1, UInt32(OnOpenAmbushPackageLocation));
 
+	// fix crash when sorting sounds for a weather
+	SafeWrite32(0x663598, UInt32(TESWeather_SoundColumnSortFn));
+
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
 	{

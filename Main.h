@@ -4574,3 +4574,35 @@ bool __fastcall TESQuestDialogueTreeCallback(BGSDialogueTree* apTree, void* edx,
 	}
 	return result;
 }
+
+int __stdcall TESWeather_SoundColumnSortFn(UInt32& aSoundIdA, UInt32& aSoundIdB, int aiColumn)
+{
+	// the original code didn't resolve the IDs and assumed it was passed TESSounds...
+	auto pSoundA = (TESSound*)LookupFormByID(aSoundIdA);
+	auto pSoundB = (TESSound*)LookupFormByID(aSoundIdB);
+
+	int iResult = 0;
+	const char iSoundColumnSortDir = *(char*)0xEA8B40;
+	const int iSortMultiplier = (iSoundColumnSortDir >= 0) ? 1 : -1;
+
+	switch (aiColumn)
+	{
+	case 0:
+		iResult = _stricmp(pSoundA->GetEditorID(), pSoundB->GetEditorID());
+		break;
+
+	case 1:
+		iResult = pSoundA->refID - pSoundB->refID;
+		break;
+
+	case 2:
+		iResult = _stricmp(pSoundA->soundFile.path.CStr(), pSoundB->soundFile.path.CStr());
+		break;
+
+	default:
+		iResult = 0;
+		break;
+	}
+
+	return iSortMultiplier * iResult;
+}
