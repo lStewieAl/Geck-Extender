@@ -4622,3 +4622,25 @@ __HOOK CopyRegionHook()
 		jmp ecx
 	}
 }
+
+void __cdecl TESListView_SetSelectedItem(HWND hListView, int itemIndex)
+{
+	if (!hListView || itemIndex < 0 || itemIndex >= ListView_GetItemCount(hListView))
+	{
+		return;
+	}
+
+	ListView_EnsureVisible(hListView, itemIndex, FALSE);
+	SetFocus(hListView);
+
+	ListView_SetItemState(
+		hListView,
+		itemIndex,
+		LVIS_FOCUSED | LVIS_SELECTED,
+		LVIS_FOCUSED | LVIS_SELECTED);
+}
+
+void __cdecl OnCopyListViewItemSetSelected(HWND hListView, LRESULT itemIndex)
+{
+	TESListView_SetSelectedItem(hListView, itemIndex + 1);
+}

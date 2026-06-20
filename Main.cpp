@@ -1045,8 +1045,14 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// fix crash when sorting sounds for a weather
 	SafeWrite32(0x663598, UInt32(TESWeather_SoundColumnSortFn));
 
-	// fix crash when copying an empty region (thanks ShadeMe)
+	// fix crash when copying an empty region (ShadeMe)
 	WriteRelCall(0x53BABC, UInt32(CopyRegionHook));
+
+	// fixes a bug that prevents the correct selection of newly created list view items (ShadeMe)
+	WriteRelJump(0x41A260, UInt32(TESListView_SetSelectedItem));
+
+	// increments the item index returned by TESDialog::LookupListViewItemByData when duplicating forms from the popup menu (ShadeMe)
+	WriteRelCall(0x4816D4, UInt32(OnCopyListViewItemSetSelected));
 
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
