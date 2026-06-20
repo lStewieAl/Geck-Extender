@@ -1054,6 +1054,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// increments the item index returned by TESDialog::LookupListViewItemByData when duplicating forms from the popup menu (ShadeMe)
 	WriteRelCall(0x4816D4, UInt32(OnCopyListViewItemSetSelected));
 
+	// make sure the 'Preview' of NPC inventories is read-only (preventing a crash if you use the popup menu and select 'New')
+	originalPreviewTotalValueCallbackFn = (WNDPROC)DetourVtable(0x4F5A25, UInt32(PreviewTotalValueCallback));
+
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
 	{

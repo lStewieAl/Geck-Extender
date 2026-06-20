@@ -4644,3 +4644,36 @@ void __cdecl OnCopyListViewItemSetSelected(HWND hListView, LRESULT itemIndex)
 {
 	TESListView_SetSelectedItem(hListView, itemIndex + 1);
 }
+
+WNDPROC originalPreviewTotalValueCallbackFn;
+BOOL __stdcall PreviewTotalValueCallback(HWND hDlg, UINT Message, WPARAM wParam, LPARAM lParam)
+{
+	switch (Message)
+	{
+	case WM_NOTIFY:
+	{
+		// prevent interacting with the read-only listview
+		LPNMLVKEYDOWN pKey = (LPNMLVKEYDOWN)lParam;
+
+		if (pKey->hdr.code == LVN_KEYDOWN)
+		{
+			if (pKey->wVKey == VK_INSERT ||
+				pKey->wVKey == VK_DELETE)
+			{
+				return TRUE;
+			}
+		}
+
+		LPNMHDR hdr = (LPNMHDR)lParam;
+		if (hdr->idFrom == 2035)
+		{
+			if (hdr->code == NM_RCLICK)
+			{
+				return TRUE;
+			}
+		}
+		break;
+	}
+	}
+	return CallWindowProc(originalPreviewTotalValueCallbackFn, hDlg, Message, wParam, lParam);
+}
