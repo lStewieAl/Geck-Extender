@@ -4606,3 +4606,19 @@ int __stdcall TESWeather_SoundColumnSortFn(UInt32& aSoundIdA, UInt32& aSoundIdB,
 
 	return iSortMultiplier * iResult;
 }
+
+__HOOK CopyRegionHook()
+{
+	_asm
+	{
+		test ecx, ecx
+		je skip
+		mov edx, dword ptr ds : [ecx]
+		mov eax, dword ptr ds : [edx + 0x20]
+		ret
+	skip:
+		pop ecx
+		mov ecx, 0x53BB07
+		jmp ecx
+	}
+}

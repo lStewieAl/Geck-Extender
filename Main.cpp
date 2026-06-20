@@ -1045,6 +1045,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// fix crash when sorting sounds for a weather
 	SafeWrite32(0x663598, UInt32(TESWeather_SoundColumnSortFn));
 
+	// fix crash when copying an empty region (thanks ShadeMe)
+	WriteRelCall(0x53BABC, UInt32(CopyRegionHook));
+
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
 	{
