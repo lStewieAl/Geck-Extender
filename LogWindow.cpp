@@ -95,6 +95,7 @@ void AddLogText(LPARAM lParam, HWND richEditHwnd, bool doFree)
 LRESULT CALLBACK EditorUI_LogWndProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	static HWND richEditHwnd;
+	enum ContextMenuActions { IDM_CLEAR_LOG = 1001, IDM_TOGGLE_AUTOSCROLL = 1002, IDM_COPY = 1003 };
 
 	switch (Message)
 	{
@@ -157,18 +158,65 @@ LRESULT CALLBACK EditorUI_LogWndProc(HWND hWnd, UINT Message, WPARAM wParam, LPA
 		WritePrivateProfileString("Windows", "bHideLogWindow", " 1", IniPath);
 		return 0;
 
+	case WM_COMMAND:
+	{
+		int wmId = LOWORD(wParam);
+
+		if (wmId == IDM_COPY)
+		{
+			SendMessageA(richEditHwnd, WM_COPY, 0, 0);
+		}
+		else if (wmId == IDM_CLEAR_LOG)
+		{
+			SendMessageA(hWnd, UI_CMD_CLEARLOGTEXT, 0, 0);
+		}
+		else if (wmId == IDM_TOGGLE_AUTOSCROLL)
+		{
+			SendMessageA(hWnd, UI_CMD_AUTOSCROLL, !config.bAutoScroll, 0);
+		}
+	}
+	break;
+
 	case WM_NOTIFY:
 	{
 		static uint64_t lastDoubleClickTime;
 		LPNMHDR notification = (LPNMHDR)lParam;
 
-		if (notification->code == EN_MSGFILTER) {
+		if (notification->code == EN_MSGFILTER)
+		{
 			auto msgFilter = (MSGFILTER*)notification;
 
 			if (msgFilter->msg == WM_LBUTTONDBLCLK)
+			{
 				lastDoubleClickTime = GetTickCount();
+			}
+			else if (msgFilter->msg == WM_RBUTTONUP)
+			{
+				HMENU hMenu = CreatePopupMenu();
+
+				DWORD selStart = 0, selEnd = 0;
+				SendMessageA(richEditHwnd, EM_GETSEL, (WPARAM)&selStart, (LPARAM)&selEnd);
+
+				// Grey out "Copy" if no text is selected
+				UINT copyState = (selStart != selEnd) ? MF_ENABLED : MF_GRAYED;
+				AppendMenuA(hMenu, MF_STRING | copyState, IDM_COPY, "Copy");
+
+				AppendMenuA(hMenu, MF_SEPARATOR, 0, nullptr);
+
+				UINT autoScrollState = config.bAutoScroll ? MF_CHECKED : MF_UNCHECKED;
+				AppendMenuA(hMenu, MF_STRING | autoScrollState, IDM_TOGGLE_AUTOSCROLL, "Autoscroll");
+				AppendMenuA(hMenu, MF_STRING, IDM_CLEAR_LOG, "Clear log");
+
+				POINT pt;
+				GetCursorPos(&pt);
+
+				TrackPopupMenu(hMenu, TPM_RIGHTBUTTON, pt.x, pt.y, 0, hWnd, nullptr);
+
+				DestroyMenu(hMenu);
+			}
 		}
-		else if (notification->code == EN_SELCHANGE) {
+		else if (notification->code == EN_SELCHANGE)
+		{
 			auto selChange = (SELCHANGE*)lParam;
 			auto selLen = abs(selChange->chrg.cpMax - selChange->chrg.cpMin);
 
@@ -232,9 +280,7 @@ LRESULT CALLBACK EditorUI_LogWndProc(HWND hWnd, UINT Message, WPARAM wParam, LPA
 
 	case UI_CMD_CLEARLOGTEXT:
 	{
-		char emptyString[1] = { '\0' };
-
-		SendMessageA(richEditHwnd, WM_SETTEXT, 0, (LPARAM)&emptyString);
+		SendMessageA(richEditHwnd, WM_SETTEXT, 0, (LPARAM)&"");
 	}
 	return 0;
 
