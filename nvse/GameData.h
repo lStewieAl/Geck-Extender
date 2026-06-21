@@ -269,7 +269,7 @@ STATIC_ASSERT(sizeof(WIN32_FIND_DATA) == 0x140);
 STATIC_ASSERT(offsetof(ModInfo, name) == 0x20);
 STATIC_ASSERT(offsetof(ModInfo, subRecordHeader) == 0x258);
 STATIC_ASSERT(offsetof(ModInfo, unk260) == 0x260);
-STATIC_ASSERT(sizeof(ModInfo) == 0x42C);
+STATIC_ASSERT(sizeof(ModInfo) == 0x438);
 
 
 

@@ -253,7 +253,7 @@ namespace ObjectWindowTreeHooks
 				strncpy(item->nodeName, tail, sizeof(item->nodeName));
 				goto LABEL_14;
 			}
-			if (nodeId >= 87)
+			if (nodeId >= kObjWndNode_COUNT)
 			{
 				strcpy(item->nodeName, "*All");
 			LABEL_14:
