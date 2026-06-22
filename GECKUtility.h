@@ -847,6 +847,28 @@ struct TESListView
 	{
 		return CdeclCall<LPARAM>(0x41A140, hWnd, index);
 	}
+
+	static void __cdecl SetSelectedItem(HWND hListView, int itemIndex)
+	{
+		if (!hListView || itemIndex < 0 || itemIndex >= ListView_GetItemCount(hListView))
+		{
+			return;
+		}
+
+		ListView_EnsureVisible(hListView, itemIndex, FALSE);
+		SetFocus(hListView);
+
+		ListView_SetItemState(
+			hListView,
+			itemIndex,
+			LVIS_FOCUSED | LVIS_SELECTED,
+			LVIS_FOCUSED | LVIS_SELECTED);
+	}
+
+	static LRESULT __cdecl GetItemByData(HWND hWnd, void* pData)
+	{
+		return CdeclCall<LRESULT>(0x41A0F0, hWnd, pData);
+	}
 };
 
 struct MainWindow

@@ -2100,10 +2100,10 @@ TESForm* __cdecl OnMediaLocationControllerSelectForm(HWND hWndParent, TESForm* f
 	{
 		if (auto form = iter->data)
 		{
-			if (CdeclCall<int>(0x41A0F0, listView, form) < 0)
+			if (TESListView::GetItemByData(listView, form) < 0)
 			{
 				TESListView::InsertItem(listView, form, 0, -1);
-				int index = CdeclCall<int>(0x41A0F0, listView, form);
+				int index = TESListView::GetItemByData(listView, form);
 				CdeclCall(0x41A260, listView, index);
 			}
 		}
@@ -4000,7 +4000,7 @@ char __fastcall BGSBodyPartData__DialogCallback(BGSBodyPartData* bodyPart, void*
 					ThisCall(0x4D1B80, (UInt32*)(((UInt32)bodyPart) + 0x54), &newBodyPart);// bodyPart->bodyParts.Append(newBodyPart);
 
 					ThisCall(0x5465C0, bodyPart, listView); // BGSBodyPartData::PopulateListView
-					auto index = CdeclCall<UInt32>(0x41A0F0, listView, bodyPart); // TESListView::GetItemByData
+					auto index = TESListView::GetItemByData(listView, bodyPart); // TESListView::GetItemByData
 					CdeclCall(0x41A260, listView, index); // TESListView::SetSelectedItem
 
 					*a6 = 0;
@@ -4768,4 +4768,54 @@ BOOL CALLBACK UseReportCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 	}
 
 	return CallWindowProc((WNDPROC)0x468860, hDlg, msg, wParam, lParam);
+}
+
+TESForm* pObjectToLocate;
+LRESULT __cdecl OnEnsureObjectWindowFormVisible_SaveEnsuredVisible(HWND hListView, TESForm* apForm)
+{
+	pObjectToLocate = apForm;
+
+	auto iIndex = TESListView::GetItemByData(hListView, apForm);
+	TESListView::SetSelectedItem(hListView, iIndex);
+	return iIndex;
+}
+
+LRESULT __stdcall PostObjectWindowFilterChange_RestoreEnsuredFormVisible(HWND hDlg, int nIDDlgItem, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+	LRESULT result = SendDlgItemMessageA(hDlg, nIDDlgItem, Msg, wParam, lParam);
+
+	if (pObjectToLocate)
+	{
+		HWND hListView = GetDlgItem(hDlg, nIDDlgItem);
+		auto iIndex = TESListView::GetItemByData(hListView, pObjectToLocate);
+		TESListView::SetSelectedItem(hListView, iIndex);
+		pObjectToLocate = nullptr;
+	}
+
+	return result;
+}
+
+bool bInEnsureVisibleInObjectWindow;
+void __cdecl OnEnsureVisibleInObjectWindow(TESForm* apForm)
+{
+	bInEnsureVisibleInObjectWindow = true;
+	CdeclCall(0x449A30, apForm);
+	bInEnsureVisibleInObjectWindow = false;
+}
+
+__HOOK OnFilterChangeGetDebounceHook()
+{
+	// if we are in the 'Locate form in Object Tree', skip the 500ms post-filter debounce
+	_asm
+	{
+		pop eax
+		mov ecx, 500
+		cmp bInEnsureVisibleInObjectWindow, 0
+		je noSkipDebounce
+		xor ecx, ecx
+
+	noSkipDebounce:
+		push ecx
+		jmp eax
+	}
 }
