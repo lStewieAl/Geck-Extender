@@ -215,28 +215,6 @@ void ResizeUseReportWindow(HWND hWnd, WORD newWidth, WORD newHeight)
 	InvalidateRect(hWnd, &clientRect, true);
 }
 
-// Use Report window (220)
-BOOL CALLBACK UseReportCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	if (msg == WM_INITDIALOG)
-	{
-		if (auto pForm = (TESForm*)lParam)
-		{
-			char buf[0x80];
-			snprintf(buf, sizeof(buf), "Use Report: %s", pForm->GetEditorID());
-			SetWindowTextA(hDlg, buf);
-		}
-	}
-
-	if (msg == WM_SIZE)
-	{
-		WORD width = LOWORD(lParam);
-		WORD height = HIWORD(lParam);
-		ResizeUseReportWindow(hDlg, width, height);
-	}
-	return CallWindowProc((WNDPROC)0x468860, hDlg, msg, wParam, lParam);
-}
-
 UInt32 originalBGSListFormDialogFn;
 char __fastcall BGSListForm__DialogCallback(BGSListForm* listForm, void* edx, HWND hDlg, int msg, unsigned int wParam, int lParam, UInt32* a6)
 {

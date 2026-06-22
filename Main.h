@@ -4677,3 +4677,95 @@ BOOL __stdcall PreviewTotalValueCallback(HWND hDlg, UINT Message, WPARAM wParam,
 	}
 	return CallWindowProc(originalPreviewTotalValueCallbackFn, hDlg, Message, wParam, lParam);
 }
+
+// Use Report window (220)
+BOOL CALLBACK UseReportCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	enum { ID_USE_REPORT_EDIT = 50001 };
+
+	switch (msg)
+	{
+	case WM_CONTEXTMENU:
+	{
+		HWND hWnd = (HWND)wParam;
+
+		if (GetDlgCtrlID(hWnd) == 1638)
+		{
+			HMENU hMenu = CreatePopupMenu();
+
+			AppendMenuA(hMenu, MF_STRING, ID_USE_REPORT_EDIT, "Edit");
+
+			POINT pt;
+			if (lParam == (LPARAM)-1)
+			{
+				// Triggered via Keyboard (Shift+F10 / Menu Key)
+				lParam = GetMessagePos();
+			}
+			pt.x = (SHORT)LOWORD(lParam);
+			pt.y = (SHORT)HIWORD(lParam);
+
+			TrackPopupMenu(hMenu, TPM_RIGHTBUTTON, pt.x, pt.y, 0, hDlg, nullptr);
+
+			DestroyMenu(hMenu);
+			return TRUE;
+		}
+		break;
+	}
+
+	case WM_COMMAND:
+	{
+		switch (LOWORD(wParam))
+		{
+		case ID_USE_REPORT_EDIT:
+		{
+			HWND hList = GetDlgItem(hDlg, 1638);
+
+			int selected = ListView_GetNextItem(hList, -1, LVNI_SELECTED);
+			if (selected != -1)
+			{
+				auto ppCell = (TESObjectCELL**)TESListView::GetItemData(hList, selected);
+				TESForm* pBaseForm = CdeclCall<TESForm*>(0x468200, hDlg);
+				if (ppCell && *ppCell && pBaseForm)
+				{
+					TESObjectREFR* pRef = ThisCall<TESObjectREFR*>(0x627790, *ppCell, pBaseForm, false);
+					if (pRef)
+					{
+						OpenForm(pRef);
+					}
+				}
+			}
+
+			return TRUE;
+		}
+		}
+		break;
+	}
+	}
+
+	if (msg == WM_INITDIALOG)
+	{
+		if (auto pForm = (TESForm*)lParam)
+		{
+			char buf[0x80];
+			if (pForm->IsBoundObject())
+			{
+				snprintf(buf, sizeof(buf), "Use Report: %s", pForm->GetEditorID());
+			}
+			else
+			{
+				auto pRef = (TESObjectREFR*)lParam;
+				snprintf(buf, sizeof(buf), "Use Report: %s (%08X) in %s", pRef->GetEditorID(), pRef->refID, pRef->parentCell ? pRef->parentCell->GetEditorID() : "[NO CELL]");
+			}
+			SetWindowTextA(hDlg, buf);
+		}
+	}
+
+	if (msg == WM_SIZE)
+	{
+		WORD width = LOWORD(lParam);
+		WORD height = HIWORD(lParam);
+		ResizeUseReportWindow(hDlg, width, height);
+	}
+
+	return CallWindowProc((WNDPROC)0x468860, hDlg, msg, wParam, lParam);
+}
