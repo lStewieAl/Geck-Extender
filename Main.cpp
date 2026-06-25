@@ -1064,6 +1064,8 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	// make sure the 'Preview' of NPC inventories is read-only (preventing a crash if you use the popup menu and select 'New')
 	originalPreviewTotalValueCallbackFn = (WNDPROC)DetourVtable(0x4F5A25, UInt32(PreviewTotalValueCallback));
 
+	originalTESObjectBookLoadDialogFn = DetourVtable(0xD72434, UInt32(TESObjectBookOnLoadDialog));
+
 #ifdef _DEBUG
 	while(!IsDebuggerPresent())
 	{

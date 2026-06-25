@@ -4819,3 +4819,13 @@ __HOOK OnFilterChangeGetDebounceHook()
 		jmp eax
 	}
 }
+
+UInt32 originalTESObjectBookLoadDialogFn;
+void __fastcall TESObjectBookOnLoadDialog(struct TESObjectBOOK* apBook, void* edx, HWND hDlg)
+{
+	enum { IDC_SCROLL = 1685 };
+	
+	ShowWindow(GetDlgItem(hDlg, IDC_SCROLL), SW_SHOW);
+
+	ThisCall(originalTESObjectBookLoadDialogFn, apBook, hDlg);
+}
