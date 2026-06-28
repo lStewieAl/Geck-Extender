@@ -4746,15 +4746,15 @@ BOOL CALLBACK UseReportCallback(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
 	{
 		if (auto pForm = (TESForm*)lParam)
 		{
-			char buf[0x80];
-			if (pForm->IsBoundObject())
-			{
-				snprintf(buf, sizeof(buf), "Use Report: %s", pForm->GetEditorID());
-			}
-			else
+			char buf[256];
+			if (pForm->IsReference())
 			{
 				auto pRef = (TESObjectREFR*)lParam;
 				snprintf(buf, sizeof(buf), "Use Report: %s (%08X) in %s", pRef->GetEditorID(), pRef->refID, pRef->parentCell ? pRef->parentCell->GetEditorID() : "[NO CELL]");
+			}
+			else
+			{
+				snprintf(buf, sizeof(buf), "Use Report: %s", pForm->GetEditorID());
 			}
 			SetWindowTextA(hDlg, buf);
 		}
