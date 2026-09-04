@@ -131,18 +131,30 @@ namespace ONAMFix
 		return ThisCall<UInt32>(0x4E1450, apThis);
 	}
 
-	bool __fastcall CellNeedsGroup(TESObjectCELL* apCell, ModInfo* apFile) {
+	bool __fastcall CellNeedsGroup(const TESObjectCELL* apCell, const ModInfo* apFile) {
+		// Based on 0x630FAB (TESObjectCELL::SaveReferences)
+
+		const bool persistentCell = apCell->IsPersistent();
+		const bool interiorCell = apCell->IsInterior();
 		auto iter = apCell->objectList.Head();
 		while (iter && !iter->IsEmpty()) {
-			TESObjectREFR* ref = iter->Data();
+			const TESObjectREFR* ref = iter->Data();
 			iter = iter->Next();
 
-			if (ref && !ref->IsTemporary() && !ref->IsDeleted()) {
-				ModInfo* file = ref->mods.GetLastItem();
-				if (file == apFile || ref->IsAltered()) {
-					return true;
-				}
+			if (ref->IsTemporary())
+				continue;
+
+			if (!ref->IsAltered() && apFile != ref->GetFile(-1))
+				continue;
+
+			if (ref->IsDeleted()) {
+				ModInfo* sourceFile = ref->GetFile(0);
+				if (sourceFile && !sourceFile->IsMaster())
+					continue;
 			}
+
+			if (interiorCell || !ref->IsPersistent() || persistentCell)
+				return true;
 		}
 
 		return false;

@@ -238,7 +238,7 @@ public:
 	virtual void		InitItem();
 	virtual void		Unk_1B();
 	virtual void		GetDebugString(char* dst);
-	virtual bool		IsPersistent() const;
+	virtual bool		GetQuestObject() const;
 	virtual void		Unk_1E();
 	virtual void		Unk_1F();
 	virtual void		Unk_20();
@@ -353,6 +353,9 @@ public:
 	void SetDisabled(bool abDisabled);
 	void SetInitialized(bool abInitialized);
 	bool IsAltered() const { return flags & kFormFlags_Modified; };
+	bool IsPersistent() const { return (flags & kFormFlags_QuestItem) != 0; }
+	bool IsTemporary() const { return (flags & kFormFlags_Temporary) ? true : false; }
+	bool IsDeleted() const { return (flags & kFormFlags_Deleted) ? true : false; }
 
 	bool IsWeapon() { return typeID == kFormType_TESObjectWEAP; }
 	bool IsArmor() { return typeID == kFormType_TESObjectARMO; }
@@ -362,6 +365,8 @@ public:
 	void SetTemporary() { ThisCall(0x4FBA50, this); }
 	void AddToUsageMap(TESForm* apForm) { ThisCall(0x4FB210, this, apForm); };
 	void RemoveFromUsageMap(TESForm* apForm) { ThisCall(0x4FB250, this, apForm); };
+
+	ModInfo* GetFile(int32_t index) const { return ThisCall<ModInfo*>(0x4F9960, this, index); }
 
 	MEMBER_FN_PREFIX(TESForm);
 };
@@ -3822,7 +3827,7 @@ public:
 
 	SInt32 GetPosX() { return ThisCall<SInt32>(0x625A70, this); };
 	SInt32 GetPosY() { return ThisCall<SInt32>(0x625A90, this); };
-	bool IsInterior() { return cellFlags & 1; };
+	bool IsInterior() const { return cellFlags & 1; };
 	bool GetLandHeight(NiPoint3* pos, float* heightOut)
 	{
 		auto land = ThisCall<TESObjectLAND*>(0x627140, this);
